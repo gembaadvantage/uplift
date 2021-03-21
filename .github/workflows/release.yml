@@ -18,13 +18,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-name: Release Go
+name: release
 on:
   push:
     tags:
       - v*.*.*
-    branches:
-      - master
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
