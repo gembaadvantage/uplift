@@ -35,6 +35,6 @@ func newRootCmd(out io.Writer, args []string) (*cobra.Command, error) {
 		SilenceUsage: true,
 	}
 
-	cmd.AddCommand(newVersionCmd(out))
+	cmd.AddCommand(newVersionCmd(out), newBumpCmd(out))
 	return cmd, nil
 }

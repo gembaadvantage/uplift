@@ -20,46 +20,41 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package git
 
 import (
-	"fmt"
-	"io"
-
-	"github.com/gembaadvantage/uplift/internal/version"
-	"github.com/spf13/cobra"
+	"errors"
+	"os/exec"
+	"strings"
 )
 
-type versionOptions struct {
-	short bool
-}
-
-func newVersionCmd(out io.Writer) *cobra.Command {
-	opts := versionOptions{}
-
-	cmd := &cobra.Command{
-		Use:   "version",
-		Short: "Prints the build time version information",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.run(out)
-		},
+// Run runs a git command and returns its output or errors
+func Run(args ...string) (string, error) {
+	var cmd = exec.Command("git", args...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", errors.New(string(out))
 	}
-
-	f := cmd.Flags()
-	f.BoolVar(&opts.short, "short", false, "only print the semantic version number")
-
-	return cmd
+	return string(out), nil
 }
 
-func (o versionOptions) run(out io.Writer) error {
-	fmt.Fprintln(out, formatVersion(o.short))
-	return nil
+// LatestTag retrieves the latest tag
+func LatestTag() (string, error) {
+	return Clean(Run("describe", "--tags", "--abbrev=0"))
 }
 
-func formatVersion(short bool) string {
-	if short {
-		return version.Short()
+// TODO: changelog to grab latest commit message
+
+// Tag the repository
+func Tag(tag string) (string, error) {
+	return "", nil
+}
+
+// Clean the output
+func Clean(output string, err error) (string, error) {
+	output = strings.Replace(strings.Split(output, "\n")[0], "'", "", -1)
+	if err != nil {
+		err = errors.New(strings.TrimSuffix(err.Error(), "\n"))
 	}
-
-	return fmt.Sprintf("%#v", version.Long())
+	return output, err
 }

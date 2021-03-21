@@ -20,46 +20,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package version
 
-import (
-	"fmt"
-	"io"
+import "runtime"
 
-	"github.com/gembaadvantage/uplift/internal/version"
-	"github.com/spf13/cobra"
+var (
+	// The current built version
+	version = ""
+	// The git branch associated with the current built version
+	gitBranch = ""
+	// The git SHA1 of the commit
+	gitCommit = ""
 )
 
-type versionOptions struct {
-	short bool
+// BuildInfo contains build time information about the application
+type BuildInfo struct {
+	Version   string `json:"version,omitempty"`
+	GitBranch string `json:"gitBranch,omitempty"`
+	GitCommit string `json:"gitCommit,omitempty"`
+	GoVersion string `json:"goVersion,omitempty"`
 }
 
-func newVersionCmd(out io.Writer) *cobra.Command {
-	opts := versionOptions{}
+// Short returns the semantic version of the application
+func Short() string {
+	return version
+}
 
-	cmd := &cobra.Command{
-		Use:   "version",
-		Short: "Prints the build time version information",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.run(out)
-		},
+// Long returns the build time version information of the application
+func Long() BuildInfo {
+	return BuildInfo{
+		Version:   version,
+		GitBranch: gitBranch,
+		GitCommit: gitCommit,
+		GoVersion: runtime.Version(),
 	}
-
-	f := cmd.Flags()
-	f.BoolVar(&opts.short, "short", false, "only print the semantic version number")
-
-	return cmd
-}
-
-func (o versionOptions) run(out io.Writer) error {
-	fmt.Fprintln(out, formatVersion(o.short))
-	return nil
-}
-
-func formatVersion(short bool) string {
-	if short {
-		return version.Short()
-	}
-
-	return fmt.Sprintf("%#v", version.Long())
 }

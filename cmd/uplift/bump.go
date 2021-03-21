@@ -23,43 +23,38 @@ SOFTWARE.
 package main
 
 import (
-	"fmt"
 	"io"
 
-	"github.com/gembaadvantage/uplift/internal/version"
 	"github.com/spf13/cobra"
 )
 
-type versionOptions struct {
-	short bool
+const (
+	firstVersion = "v0.1.0"
+)
+
+type bumpOptions struct {
+	first  string
+	dryRun bool
 }
 
-func newVersionCmd(out io.Writer) *cobra.Command {
-	opts := versionOptions{}
+func newBumpCmd(out io.Writer) *cobra.Command {
+	opts := bumpOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "version",
-		Short: "Prints the build time version information",
+		Use:   "bump",
+		Short: "Bump the version of your application",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.run(out)
+			return opts.Run(out)
 		},
 	}
 
 	f := cmd.Flags()
-	f.BoolVar(&opts.short, "short", false, "only print the semantic version number")
+	f.StringVar(&opts.first, "first", firstVersion, "sets the first version of the initial bump")
+	f.BoolVar(&opts.dryRun, "dry-run", false, "take a practice bump")
 
 	return cmd
 }
 
-func (o versionOptions) run(out io.Writer) error {
-	fmt.Fprintln(out, formatVersion(o.short))
+func (o bumpOptions) Run(out io.Writer) error {
 	return nil
-}
-
-func formatVersion(short bool) string {
-	if short {
-		return version.Short()
-	}
-
-	return fmt.Sprintf("%#v", version.Long())
 }
