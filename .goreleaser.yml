@@ -20,7 +20,7 @@
 
 builds:
   - id: uplift
-    main: cmd/uplift/main.go
+    main: cmd/uplift
     binary: uplift
     env:
       - CGO_ENABLED=0
