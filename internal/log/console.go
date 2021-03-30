@@ -20,44 +20,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package log
 
 import (
+	"fmt"
 	"io"
-
-	"github.com/spf13/cobra"
 )
 
 const (
-	firstVersion = "v0.1.0"
+	Rocket    = "\U0001f680"
+	GreenTick = "\u2705"
+	ThumpsUp  = "\U0001f44d"
+	RedCross  = ""
+	Warning   = "\u26a0\ufe0f"
 )
 
-type bumpOptions struct {
-	first   string
-	dryRun  bool
-	verbose bool
+type ConsoleLogger struct {
+	w     io.Writer
+	debug bool
 }
 
-func newBumpCmd(out io.Writer) *cobra.Command {
-	opts := bumpOptions{}
+type LoggerOptions struct {
+	Debug bool
+}
 
-	cmd := &cobra.Command{
-		Use:   "bump",
-		Short: "Bump the version of your application",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.Run(out)
-		},
+func NewLogger(out io.Writer, opts LoggerOptions) ConsoleLogger {
+	return ConsoleLogger{
+		w:     out,
+		debug: opts.Debug,
 	}
-
-	f := cmd.Flags()
-	f.StringVar(&opts.first, "first", firstVersion, "sets the first version of the initial bump")
-	f.BoolVar(&opts.dryRun, "dry-run", false, "take a practice bump")
-	f.BoolVar(&opts.verbose, "verbose", false, "print everything that happens")
-
-	return cmd
 }
 
-func (o bumpOptions) Run(out io.Writer) error {
-	// semver.Bump({})
-	return nil
+func (l ConsoleLogger) Out(s string, args ...interface{}) {
+	fmt.Fprintf(l.w, s, args...)
+}
+
+func (l ConsoleLogger) Debug(s string, args ...interface{}) {
+	if l.debug {
+		fmt.Fprintf(l.w, s, args...)
+	}
 }

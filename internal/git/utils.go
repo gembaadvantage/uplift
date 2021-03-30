@@ -28,7 +28,12 @@ import (
 	"strings"
 )
 
-// Run runs a git command and returns its output or errors
+var (
+	// ErrNotTag is thrown if a repository does not contain any tags
+	ErrNoTag = errors.New("no tag exists in repository")
+)
+
+// Run executes a git command and returns its output or errors
 func Run(args ...string) (string, error) {
 	var cmd = exec.Command("git", args...)
 	out, err := cmd.CombinedOutput()
@@ -38,16 +43,26 @@ func Run(args ...string) (string, error) {
 	return string(out), nil
 }
 
-// LatestTag retrieves the latest tag
+// LatestTag retrieves the latest tag within the repository
 func LatestTag() (string, error) {
-	return Clean(Run("describe", "--tags", "--abbrev=0"))
+	out, err := Clean(Run("describe", "--tags", "--abbrev=0"))
+	if err != nil {
+		if strings.Contains(err.Error(), "No names found, cannot describe anything") {
+			return out, ErrNoTag
+		}
+	}
+
+	return out, err
 }
 
-// TODO: changelog to grab latest commit message
+// LatestCommitMessage retrieves the latest commit message within the repository
+func LatestCommitMessage() (string, error) {
+	return Clean(Run("log", "-1", "--pretty=format:%B"))
+}
 
 // Tag the repository
 func Tag(tag string) (string, error) {
-	return "", nil
+	return Clean(Run("tag", tag))
 }
 
 // Clean the output

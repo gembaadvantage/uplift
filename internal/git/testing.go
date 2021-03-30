@@ -20,44 +20,42 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package git
 
 import (
-	"io"
+	"os"
+	"testing"
 
-	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/require"
 )
 
-const (
-	firstVersion = "v0.1.0"
-)
+// InitRepo creates an empty git repository within a temporary directory. Once created
+// the current testing context will operate from within that directory until the calling
+// test has completed
+func InitRepo(t *testing.T) {
+	t.Helper()
 
-type bumpOptions struct {
-	first   string
-	dryRun  bool
-	verbose bool
+	dir := t.TempDir()
+	current, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(dir))
+
+	// Initialise the git repo
+	out, err := Run("init")
+	require.NoError(t, err)
+	require.Contains(t, out, "Initialized empty Git repository")
+	EmptyCommit(t, "initialise repo")
+
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(current))
+	})
 }
 
-func newBumpCmd(out io.Writer) *cobra.Command {
-	opts := bumpOptions{}
+// EmptyCommit will create an empty commit without the need for modifying any existing files
+func EmptyCommit(t *testing.T, msg string) {
+	t.Helper()
 
-	cmd := &cobra.Command{
-		Use:   "bump",
-		Short: "Bump the version of your application",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.Run(out)
-		},
-	}
-
-	f := cmd.Flags()
-	f.StringVar(&opts.first, "first", firstVersion, "sets the first version of the initial bump")
-	f.BoolVar(&opts.dryRun, "dry-run", false, "take a practice bump")
-	f.BoolVar(&opts.verbose, "verbose", false, "print everything that happens")
-
-	return cmd
-}
-
-func (o bumpOptions) Run(out io.Writer) error {
-	// semver.Bump({})
-	return nil
+	out, err := Run("commit", "--allow-empty", "-m", msg)
+	require.NoError(t, err)
+	require.Contains(t, out, msg)
 }

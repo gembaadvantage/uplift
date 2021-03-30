@@ -20,44 +20,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package semver
 
-import (
-	"io"
+import "regexp"
 
-	"github.com/spf13/cobra"
-)
+type increment string
 
 const (
-	firstVersion = "v0.1.0"
+	noIncrement    increment = "None"
+	patchIncrement increment = "Patch"
+	minorIncrement increment = "Minor"
+	majorIncrement increment = "Major"
 )
 
-type bumpOptions struct {
-	first   string
-	dryRun  bool
-	verbose bool
-}
+var (
+	breakingBang = regexp.MustCompile(`^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\(.*\))?!:.*`)
+	breaking     = regexp.MustCompile("(?m)BREAKING CHANGE:.*")
+	feature      = regexp.MustCompile(`^feat(\(.*\))?:.*`)
+	fix          = regexp.MustCompile(`^fix(\(.*\))?:.*`)
+)
 
-func newBumpCmd(out io.Writer) *cobra.Command {
-	opts := bumpOptions{}
-
-	cmd := &cobra.Command{
-		Use:   "bump",
-		Short: "Bump the version of your application",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.Run(out)
-		},
+func checkIncrement(commit string) increment {
+	if breakingBang.MatchString(commit) || breaking.MatchString(commit) {
+		return majorIncrement
 	}
 
-	f := cmd.Flags()
-	f.StringVar(&opts.first, "first", firstVersion, "sets the first version of the initial bump")
-	f.BoolVar(&opts.dryRun, "dry-run", false, "take a practice bump")
-	f.BoolVar(&opts.verbose, "verbose", false, "print everything that happens")
+	if feature.MatchString(commit) {
+		return minorIncrement
+	}
 
-	return cmd
-}
+	if fix.MatchString(commit) {
+		return patchIncrement
+	}
 
-func (o bumpOptions) Run(out io.Writer) error {
-	// semver.Bump({})
-	return nil
+	return noIncrement
 }
