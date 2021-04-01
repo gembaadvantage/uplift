@@ -24,11 +24,9 @@ package semver
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestMatchesMajorIncrementForType(t *testing.T) {
+func TestParseCommit(t *testing.T) {
 	tests := []struct {
 		name   string
 		commit string
@@ -89,35 +87,80 @@ func TestMatchesMajorIncrementForType(t *testing.T) {
 			commit: "test!: Lorem ipsum dolor sit amet",
 			inc:    majorIncrement,
 		},
+		{
+			name: "BreakingChangeFooter",
+			commit: `feat: Lorem ipsum dolor sit amet
+			
+BREAKING CHANGE: Lorem ipsum dolor sit amet`,
+			inc: majorIncrement,
+		},
+		{
+			name:   "Feat",
+			commit: "feat(scope): Lorem ipsum dolor sit amet",
+			inc:    minorIncrement,
+		},
+		{
+			name:   "Fix",
+			commit: "fix(scope): Lorem ipsum dolor sit amet",
+			inc:    patchIncrement,
+		},
+		{
+			name:   "Build",
+			commit: "build(scope): Lorem ipsum dolor sit amet",
+			inc:    noIncrement,
+		},
+		{
+			name:   "Chore",
+			commit: "chore(scope): Lorem ipsum dolor sit amet",
+			inc:    noIncrement,
+		},
+		{
+			name:   "CI",
+			commit: "ci(scope): Lorem ipsum dolor sit amet",
+			inc:    noIncrement,
+		},
+		{
+			name:   "Docs",
+			commit: "docs(scope): Lorem ipsum dolor sit amet",
+			inc:    noIncrement,
+		},
+		{
+			name:   "Perf",
+			commit: "perf(scope): Lorem ipsum dolor sit amet",
+			inc:    noIncrement,
+		},
+		{
+			name:   "Refactor",
+			commit: "refactor(scope): Lorem ipsum dolor sit amet",
+			inc:    noIncrement,
+		},
+		{
+			name:   "Revert",
+			commit: "revert(scope): Lorem ipsum dolor sit amet",
+			inc:    noIncrement,
+		},
+		{
+			name:   "Style",
+			commit: "style(scope): Lorem ipsum dolor sit amet",
+			inc:    noIncrement,
+		},
+		{
+			name:   "Test",
+			commit: "test(scope): Lorem ipsum dolor sit amet",
+			inc:    noIncrement,
+		},
+		{
+			name:   "Unrecognised",
+			commit: "Lorem ipsum dolor sit amet",
+			inc:    noIncrement,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			inc := checkIncrement(tt.commit)
+			inc := ParseCommit(tt.commit)
 			if inc != tt.inc {
 				t.Errorf("Expected %s but received %s", tt.inc, inc)
 			}
 		})
 	}
-}
-
-func TestMatchesMinorIncrement(t *testing.T) {
-	inc := checkIncrement("feat: Lorem ipsum dolor sit amet")
-	assert.Equal(t, minorIncrement, inc)
-}
-
-func TestMatchesPatchIncrement(t *testing.T) {
-	inc := checkIncrement("fix: Lorem ipsum dolor sit amet")
-	assert.Equal(t, patchIncrement, inc)
-}
-
-func TestMatchesMajorIncrementForBreakingChangeFooter(t *testing.T) {
-	inc := checkIncrement(`fix: Lorem ipsum dolor sit amet
-
-BREAKING CHANGE: Lorem ipsum dolor sit amet`)
-	assert.Equal(t, majorIncrement, inc)
-}
-
-func TestDoesNotMatchUnrecognisedType(t *testing.T) {
-	inc := checkIncrement("feet: Lorem ipsum dolor sit amet")
-	assert.Equal(t, noIncrement, inc)
 }

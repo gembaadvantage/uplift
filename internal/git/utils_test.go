@@ -31,16 +31,14 @@ import (
 
 // TODO: Use test suite and automatically run this before every test
 
-func TestLatestTagSingleTag(t *testing.T) {
+func TestIsRepo(t *testing.T) {
 	InitRepo(t)
+	assert.True(t, IsRepo())
+}
 
-	v := "v1.2.3"
-	Run("tag", v)
-
-	tag, err := LatestTag()
-	require.NoError(t, err)
-
-	assert.Equal(t, v, tag)
+func TestIsRepoDetectsNonGitRepo(t *testing.T) {
+	MkTmpDir(t)
+	assert.False(t, IsRepo())
 }
 
 func TestLatestTag(t *testing.T) {
@@ -49,20 +47,17 @@ func TestLatestTag(t *testing.T) {
 	v1 := "v1.0.0"
 	Run("tag", v1)
 	v2 := "v2.0.0"
-	EmptyCommit(t, "more work")
-	Run("tag", v2)
+	EmptyCommitAndTag(t, v2, "more work")
 
-	tag, err := LatestTag()
-	require.NoError(t, err)
-
+	tag := LatestTag()
 	assert.Equal(t, v2, tag)
 }
 
 func TestLatestTagNoTagsExist(t *testing.T) {
-	InitRepo(t)
+	MkTmpDir(t)
 
-	_, err := LatestTag()
-	require.ErrorIs(t, err, ErrNoTag)
+	tag := LatestTag()
+	assert.Equal(t, "", tag)
 }
 
 func TestLatestCommitMessage(t *testing.T) {
@@ -80,10 +75,8 @@ func TestLatestCommitMessage(t *testing.T) {
 func TestLatestCommitMessageMultipleCommits(t *testing.T) {
 	InitRepo(t)
 
-	EmptyCommit(t, "first commit")
-	EmptyCommit(t, "second commit")
 	m := "third commit"
-	EmptyCommit(t, m)
+	EmptyCommits(t, "first commit", "second commit", m)
 
 	msg, err := LatestCommitMessage()
 	require.NoError(t, err)

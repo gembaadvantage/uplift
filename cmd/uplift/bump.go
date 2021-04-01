@@ -25,6 +25,7 @@ package main
 import (
 	"io"
 
+	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/spf13/cobra"
 )
 
@@ -45,7 +46,7 @@ func newBumpCmd(out io.Writer) *cobra.Command {
 		Use:   "bump",
 		Short: "Bump the version of your application",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.Run(out)
+			return opts.Run(out, opts)
 		},
 	}
 
@@ -57,7 +58,12 @@ func newBumpCmd(out io.Writer) *cobra.Command {
 	return cmd
 }
 
-func (o bumpOptions) Run(out io.Writer) error {
-	// semver.Bump({})
-	return nil
+func (o bumpOptions) Run(out io.Writer, opts bumpOptions) error {
+	b := semver.NewBumper(out, semver.BumpOptions{
+		FirstVersion: opts.first,
+		DryRun:       opts.dryRun,
+		Verbose:      opts.verbose,
+	})
+
+	return b.Bump()
 }

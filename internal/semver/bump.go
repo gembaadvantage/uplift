@@ -23,7 +23,6 @@ SOFTWARE.
 package semver
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
@@ -32,21 +31,23 @@ import (
 	"github.com/gembaadvantage/uplift/internal/log"
 )
 
-// BumpOptions ...
+// BumpOptions configures the behaviour when bumping a semantic version
 type BumpOptions struct {
 	FirstVersion string
 	DryRun       bool
 	Verbose      bool
 }
 
-// Bumper ...
+// Bumper is capable of bumping a semantic version associated with a git
+// repository based on the conventional commits standard:
+// @see https://www.conventionalcommits.org/en/v1.0.0/
 type Bumper struct {
 	logger       log.ConsoleLogger
 	firstVersion string
 	dryRun       bool
 }
 
-// NewBumper ...
+// NewBumper initialises a new semantic version bumper
 func NewBumper(out io.Writer, opts BumpOptions) Bumper {
 	return Bumper{
 		logger:       log.NewLogger(out, log.LoggerOptions{Debug: opts.Verbose}),
@@ -55,26 +56,33 @@ func NewBumper(out io.Writer, opts BumpOptions) Bumper {
 	}
 }
 
-// Bump ...
+// Bump a semantic version based on the latest git log message within the associated
+// git repository. Versions are incremented using the conventional commits standard.
+// Once a version has been bumped, it will be tagged against the latest commit
 func (b Bumper) Bump() error {
+	if !git.IsRepo() {
+		// TODO: log
+		return nil
+	}
+
 	commit, err := git.LatestCommitMessage()
 	if err != nil {
 		return err
 	}
 
-	inc := checkIncrement(commit)
+	inc := ParseCommit(commit)
 	if inc == noIncrement {
+		// TODO: no version was bumped, skip
 		return nil
 	}
 
-	ver, err := b.identifyVersion()
-	if err != nil {
-		return err
-	}
-
-	newVer, err := b.bumpVersion(ver, inc)
-	if err != nil {
-		return err
+	ver := git.LatestTag()
+	if ver == "" {
+		ver = b.firstVersion
+	} else {
+		if ver, err = b.bumpVersion(ver, inc); err != nil {
+			return err
+		}
 	}
 
 	if b.dryRun {
@@ -82,20 +90,8 @@ func (b Bumper) Bump() error {
 		return nil
 	}
 
-	_, err = git.Tag(newVer)
+	_, err = git.Tag(ver)
 	return err
-}
-
-func (b Bumper) identifyVersion() (string, error) {
-	tag, err := git.LatestTag()
-	if err != nil {
-		if errors.Is(err, git.ErrNoTag) {
-			return b.firstVersion, nil
-		}
-		return "", err
-	}
-
-	return tag, nil
 }
 
 func (b Bumper) bumpVersion(v string, inc increment) (string, error) {

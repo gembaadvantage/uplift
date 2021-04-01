@@ -31,87 +31,116 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestIdentifyVersion(t *testing.T) {
-	git.InitRepo(t)
-
-	_, err := git.Tag("1.2.3")
-	require.NoError(t, err)
-
-	b := NewBumper(io.Discard, BumpOptions{FirstVersion: "0.1.0"})
-	v, err := b.identifyVersion()
-
-	require.NoError(t, err)
-	assert.Equal(t, "1.2.3", v)
-}
-
-func TestIdentifyVersionFirstVersion(t *testing.T) {
-	git.InitRepo(t)
-
-	b := NewBumper(io.Discard, BumpOptions{FirstVersion: "0.1.0"})
-	v, err := b.identifyVersion()
-
-	require.NoError(t, err)
-	assert.Equal(t, "0.1.0", v)
-}
-
-func TestBumpVersion(t *testing.T) {
+func TestBump(t *testing.T) {
 	tests := []struct {
-		name     string
-		version  string
-		inc      increment
-		expected string
+		name       string
+		version    string
+		commit     string
+		newVersion string
 	}{
 		{
-			name:     "MajorIncrement",
-			version:  "1.2.3",
-			inc:      majorIncrement,
-			expected: "2.0.0",
+			name:       "MajorIncrement",
+			version:    "1.2.3",
+			commit:     "refactor!: Lorem ipsum dolor sit amet",
+			newVersion: "2.0.0",
 		},
 		{
-			name:     "MinorIncrement",
-			version:  "1.2.3",
-			inc:      minorIncrement,
-			expected: "1.3.0",
+			name:    "MajorIncrementBreakingChangeFooter",
+			version: "1.2.3",
+			commit: `refactor: Lorem ipsum dolor sit amet
+
+BREAKING CHANGE: Lorem ipsum dolor sit amet`,
+			newVersion: "2.0.0",
 		},
 		{
-			name:     "PatchIncrement",
-			version:  "1.2.3",
-			inc:      patchIncrement,
-			expected: "1.2.4",
+			name:       "MinorIncrement",
+			version:    "1.2.3",
+			commit:     "feat: Lorem ipsum dolor sit amet",
+			newVersion: "1.3.0",
 		},
 		{
-			name:     "NoChange",
-			version:  "1.2.3",
-			inc:      noIncrement,
-			expected: "1.2.3",
+			name:       "PatchIncrement",
+			version:    "1.2.3",
+			commit:     "fix(db): Lorem ipsum dolor sit amet",
+			newVersion: "1.2.4",
+		},
+		{
+			name:       "NoChange",
+			version:    "1.2.3",
+			commit:     "chore: Lorem ipsum dolor sit amet",
+			newVersion: "1.2.3",
+		},
+		{
+			name:       "KeepsVersionPrefix",
+			version:    "v1.1.1",
+			commit:     "fix: Lorem ipsum dolor sit amet",
+			newVersion: "v1.1.2",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := NewBumper(io.Discard, BumpOptions{})
-			v, err := b.bumpVersion(tt.version, tt.inc)
-			if err != nil {
-				t.Errorf("Unexpected error: %s", err)
-			}
+			git.InitRepo(t)
+			_, err := git.Tag(tt.version)
+			require.NoError(t, err)
 
-			if v != tt.expected {
-				t.Errorf("Expected %s but received %s", tt.expected, v)
+			git.EmptyCommit(t, tt.commit)
+
+			b := NewBumper(io.Discard, BumpOptions{})
+			err = b.Bump()
+			require.NoError(t, err)
+
+			v := git.LatestTag()
+
+			if v != tt.newVersion {
+				t.Errorf("Expected %s but received %s", tt.newVersion, v)
 			}
 		})
 	}
 }
 
-func TestBumpVersionKeepsVPrefix(t *testing.T) {
-	b := NewBumper(io.Discard, BumpOptions{})
-	v, err := b.bumpVersion("v1.0.0", majorIncrement)
+func TestBumpInvalidVersion(t *testing.T) {
+	git.InitRepo(t)
+	git.Tag("1.0.B")
+	git.EmptyCommit(t, "feat: Lorem ipsum dolor sit amet")
 
-	require.NoError(t, err)
-	assert.Equal(t, "v2.0.0", v)
-}
-
-func TestBumpVersionInvalidVersion(t *testing.T) {
 	b := NewBumper(io.Discard, BumpOptions{})
-	_, err := b.bumpVersion("1.0.B", minorIncrement)
+	err := b.Bump()
 
 	require.Error(t, err)
+}
+
+func TestBumpFirstVersion(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommit(t, "feat: Lorem ipsum dolor sit amet")
+
+	b := NewBumper(io.Discard, BumpOptions{FirstVersion: "0.1.0"})
+	err := b.Bump()
+	require.NoError(t, err)
+
+	v := git.LatestTag()
+	assert.Equal(t, "0.1.0", v)
+}
+
+func TestBumpEmptyRepo(t *testing.T) {
+	git.InitRepo(t)
+
+	b := NewBumper(io.Discard, BumpOptions{})
+	err := b.Bump()
+
+	require.NoError(t, err)
+
+	// TODO: test message that is returned
+}
+
+func TestBumpNotGitRepo(t *testing.T) {
+	b := NewBumper(io.Discard, BumpOptions{})
+	err := b.Bump()
+
+	require.NoError(t, err)
+
+	// TODO: test message that is returned
+}
+
+func TestBumpAlwaysUseLatestCommit(t *testing.T) {
+	// Multiple commits
 }

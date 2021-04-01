@@ -28,11 +28,6 @@ import (
 	"strings"
 )
 
-var (
-	// ErrNotTag is thrown if a repository does not contain any tags
-	ErrNoTag = errors.New("no tag exists in repository")
-)
-
 // Run executes a git command and returns its output or errors
 func Run(args ...string) (string, error) {
 	var cmd = exec.Command("git", args...)
@@ -43,16 +38,21 @@ func Run(args ...string) (string, error) {
 	return string(out), nil
 }
 
+// IsRepo identifies whether the current working directory is a recognised
+// git repository
+func IsRepo() bool {
+	out, err := Run("rev-parse", "--is-inside-work-tree")
+	return err == nil && strings.TrimSpace(out) == "true"
+}
+
 // LatestTag retrieves the latest tag within the repository
-func LatestTag() (string, error) {
-	out, err := Clean(Run("describe", "--tags", "--abbrev=0"))
+func LatestTag() string {
+	tag, err := Clean(Run("describe", "--tags", "--abbrev=0"))
 	if err != nil {
-		if strings.Contains(err.Error(), "No names found, cannot describe anything") {
-			return out, ErrNoTag
-		}
+		return ""
 	}
 
-	return out, err
+	return tag
 }
 
 // LatestCommitMessage retrieves the latest commit message within the repository
@@ -67,7 +67,8 @@ func Tag(tag string) (string, error) {
 
 // Clean the output
 func Clean(output string, err error) (string, error) {
-	output = strings.Replace(strings.Split(output, "\n")[0], "'", "", -1)
+	// Preserve multi-line output, but trim the trailing newline
+	output = strings.TrimSuffix(strings.Replace(output, "'", "", -1), "\n")
 	if err != nil {
 		err = errors.New(strings.TrimSuffix(err.Error(), "\n"))
 	}

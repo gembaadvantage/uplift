@@ -33,6 +33,19 @@ import (
 // the current testing context will operate from within that directory until the calling
 // test has completed
 func InitRepo(t *testing.T) {
+	MkTmpDir(t)
+
+	// Initialise the git repo
+	_, err := Run("init")
+	require.NoError(t, err)
+
+	EmptyCommit(t, "initialise repo")
+}
+
+// MkTmpDir creates an empty directory that is not a git repository. Once created the
+// current testing context will operate from within that directory until the calling
+// test has completed
+func MkTmpDir(t *testing.T) {
 	t.Helper()
 
 	dir := t.TempDir()
@@ -40,22 +53,46 @@ func InitRepo(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, os.Chdir(dir))
 
-	// Initialise the git repo
-	out, err := Run("init")
-	require.NoError(t, err)
-	require.Contains(t, out, "Initialized empty Git repository")
-	EmptyCommit(t, "initialise repo")
-
 	t.Cleanup(func() {
 		require.NoError(t, os.Chdir(current))
 	})
 }
 
 // EmptyCommit will create an empty commit without the need for modifying any existing files
+// within the repository
 func EmptyCommit(t *testing.T, msg string) {
 	t.Helper()
 
-	out, err := Run("commit", "--allow-empty", "-m", msg)
+	_, err := Run("commit", "--allow-empty", "-m", msg)
 	require.NoError(t, err)
-	require.Contains(t, out, msg)
+}
+
+// EmptyCommits will create any number of empty commits without the need for modifying any
+// existing files within the repository
+func EmptyCommits(t *testing.T, msgs ...string) {
+	t.Helper()
+
+	for _, msg := range msgs {
+		EmptyCommit(t, msg)
+	}
+}
+
+// EmptyCommitAndTag will create an empty commit with an associated tag. No existing files
+// will be modified within the repository
+func EmptyCommitAndTag(t *testing.T, tag, msg string) {
+	t.Helper()
+
+	EmptyCommit(t, msg)
+	_, err := Tag(tag)
+	require.NoError(t, err)
+}
+
+// EmptyCommitsAndTag will create any number of empty commits and associate them with a tag.
+// No existing files will be modified within the repository
+func EmptyCommitsAndTag(t *testing.T, tag string, msgs ...string) {
+	t.Helper()
+
+	EmptyCommits(t, msgs...)
+	_, err := Tag(tag)
+	require.NoError(t, err)
 }

@@ -34,13 +34,21 @@ const (
 )
 
 var (
-	breakingBang = regexp.MustCompile(`^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\(.*\))?!:.*`)
+	convCommit   = regexp.MustCompile(`^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)`)
+	breakingBang = regexp.MustCompile(`^.*(\(.*\))?!:.*`)
 	breaking     = regexp.MustCompile("(?m)BREAKING CHANGE:.*")
 	feature      = regexp.MustCompile(`^feat(\(.*\))?:.*`)
 	fix          = regexp.MustCompile(`^fix(\(.*\))?:.*`)
 )
 
-func checkIncrement(commit string) increment {
+// ParseCommit will identify the type of increment to perform by parsing the commit
+// message against the conventional commit standards defined, @see:
+// https://www.conventionalcommits.org/en/v1.0.0/
+func ParseCommit(commit string) increment {
+	if !convCommit.MatchString(commit) {
+		return noIncrement
+	}
+
 	if breakingBang.MatchString(commit) || breaking.MatchString(commit) {
 		return majorIncrement
 	}
