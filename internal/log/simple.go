@@ -22,17 +22,38 @@ SOFTWARE.
 
 package log
 
-const (
-	GreenTick   = "\u2705"
-	RedCross    = "\u274C"
-	Warning     = "\u26a0\ufe0f"
-	Information = "\u2139\ufe0f"
+import (
+	"fmt"
+	"io"
 )
 
-// ConsoleLogger defines an interface for logging to the console
-type ConsoleLogger interface {
-	Out(s string, args ...interface{})
-	Success(s string, args ...interface{})
-	Info(s string, args ...interface{})
-	Warn(s string, args ...interface{})
+// SimpleLogger defines a logger that logs without any text decoration
+// and only supports logging using standard output. Logging with any of the
+// provided logging levels will simply be ignored
+type SimpleLogger struct {
+	w io.Writer
+}
+
+// NewSimpleLogger creates a new simple logger
+func NewSimpleLogger(out io.Writer) ConsoleLogger {
+	return SimpleLogger{
+		w: out,
+	}
+}
+
+// Out will log without any text decoration
+func (l SimpleLogger) Out(s string, args ...interface{}) {
+	fmt.Fprintf(l.w, s, args...)
+}
+
+// Success will not log anything
+func (l SimpleLogger) Success(s string, args ...interface{}) {
+}
+
+// Info will not log anything
+func (l SimpleLogger) Info(s string, args ...interface{}) {
+}
+
+// Warn will  not log anything
+func (l SimpleLogger) Warn(s string, args ...interface{}) {
 }

@@ -23,6 +23,7 @@ SOFTWARE.
 package semver
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
@@ -49,8 +50,13 @@ type Bumper struct {
 
 // NewBumper initialises a new semantic version bumper
 func NewBumper(out io.Writer, opts BumpOptions) Bumper {
+	l := log.NewSimpleLogger(out)
+	if opts.Verbose {
+		l = log.NewVerboseLogger(out)
+	}
+
 	return Bumper{
-		logger:       log.NewLogger(out, log.LoggerOptions{Debug: opts.Verbose}),
+		logger:       l,
 		firstVersion: opts.FirstVersion,
 		dryRun:       opts.DryRun,
 	}
@@ -61,32 +67,40 @@ func NewBumper(out io.Writer, opts BumpOptions) Bumper {
 // Once a version has been bumped, it will be tagged against the latest commit
 func (b Bumper) Bump() error {
 	if !git.IsRepo() {
-		// TODO: log
-		return nil
+		b.logger.Warn("no git repo found")
+		return errors.New("current directory must be a git repo")
 	}
+
+	b.logger.Success("git repo found")
 
 	commit, err := git.LatestCommitMessage()
 	if err != nil {
+		b.logger.Warn("no commits found in repository")
 		return err
 	}
+	b.logger.Success("retrieved latest commit:\n'%s'", commit)
 
 	inc := ParseCommit(commit)
 	if inc == noIncrement {
-		// TODO: no version was bumped, skip
+		b.logger.Warn("commit doesn't contain a bump prefix, skipping!")
 		return nil
 	}
+	b.logger.Success("commit contains a bump prefix, increment identified as '%s'", inc)
 
 	ver := git.LatestTag()
 	if ver == "" {
 		ver = b.firstVersion
+		b.logger.Success("no previous tags exist, using first version: %s\n", ver)
 	} else {
 		if ver, err = b.bumpVersion(ver, inc); err != nil {
 			return err
 		}
 	}
 
+	b.logger.Out(ver)
+
 	if b.dryRun {
-		b.logger.Out("No changes will be committed to git repository")
+		// Commit nothing on a dry run
 		return nil
 	}
 
@@ -98,6 +112,8 @@ func (b Bumper) bumpVersion(v string, inc increment) (string, error) {
 	if inc == noIncrement {
 		return v, nil
 	}
+
+	b.logger.Info("existing version found: %s", v)
 
 	ver, err := semv.NewVersion(v)
 	if err != nil {
@@ -121,5 +137,8 @@ func (b Bumper) bumpVersion(v string, inc increment) (string, error) {
 		newVer = ver.IncPatch()
 	}
 
-	return fmt.Sprintf("%s%s", vp, newVer.String()), nil
+	bv := fmt.Sprintf("%s%s", vp, newVer.String())
+	b.logger.Success("bumped version to: %s\n", bv)
+
+	return bv, nil
 }
