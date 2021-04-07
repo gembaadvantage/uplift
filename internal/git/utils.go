@@ -25,7 +25,6 @@ package git
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -81,14 +80,8 @@ func LatestCommit() (Commit, error) {
 }
 
 // Tag the repository
-func Tag(tag, author, email string) (string, error) {
-	return Clean(Run(
-		"-c",
-		fmt.Sprintf("user.name='%s'", author),
-		"-c",
-		fmt.Sprintf("user.email='%s'", email),
-		"tag",
-		tag))
+func Tag(tag string) (string, error) {
+	return Clean(Run("tag", tag))
 }
 
 // Clean the output

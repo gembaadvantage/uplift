@@ -88,7 +88,7 @@ func TestTag(t *testing.T) {
 	InitRepo(t)
 
 	v := "v1.0.0"
-	_, err := Tag(v, "john.doe", "john.doe@test.com")
+	_, err := Tag(v)
 	require.NoError(t, err)
 
 	_, err = Run("rev-parse", v)

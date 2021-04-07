@@ -100,7 +100,7 @@ BREAKING CHANGE: Lorem ipsum dolor sit amet`,
 func tag(t *testing.T, tag string) {
 	t.Helper()
 
-	_, err := git.Tag(tag, "john.doe", "john.doe@test.com")
+	_, err := git.Tag(tag)
 	require.NoError(t, err)
 }
 

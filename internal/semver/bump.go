@@ -104,7 +104,7 @@ func (b Bumper) Bump() error {
 		return nil
 	}
 
-	_, err = git.Tag(ver, commit.Author, commit.Email)
+	_, err = git.Tag(ver)
 	return err
 }
 
