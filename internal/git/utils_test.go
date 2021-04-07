@@ -60,35 +60,37 @@ func TestLatestTagNoTagsExist(t *testing.T) {
 	assert.Equal(t, "", tag)
 }
 
-func TestLatestCommitMessage(t *testing.T) {
+func TestLatestCommit(t *testing.T) {
 	InitRepo(t)
 
 	m := "first commit"
 	EmptyCommit(t, m)
 
-	msg, err := LatestCommitMessage()
+	c, err := LatestCommit()
 	require.NoError(t, err)
 
-	assert.Equal(t, m, msg)
+	assert.Equal(t, c.Author, "uplift")
+	assert.Equal(t, c.Email, "uplift@test.com")
+	assert.Equal(t, c.Message, m)
 }
 
-func TestLatestCommitMessageMultipleCommits(t *testing.T) {
+func TestLatestCommitMultipleCommits(t *testing.T) {
 	InitRepo(t)
 
 	m := "third commit"
 	EmptyCommits(t, "first commit", "second commit", m)
 
-	msg, err := LatestCommitMessage()
+	c, err := LatestCommit()
 	require.NoError(t, err)
 
-	assert.Equal(t, m, msg)
+	assert.Equal(t, c.Message, m)
 }
 
 func TestTag(t *testing.T) {
 	InitRepo(t)
 
 	v := "v1.0.0"
-	_, err := Tag(v)
+	_, err := Tag(v, "john.doe", "john.doe@test.com")
 	require.NoError(t, err)
 
 	_, err = Run("rev-parse", v)

@@ -73,14 +73,14 @@ func (b Bumper) Bump() error {
 
 	b.logger.Success("git repo found")
 
-	commit, err := git.LatestCommitMessage()
+	commit, err := git.LatestCommit()
 	if err != nil {
 		b.logger.Warn("no commits found in repository")
 		return err
 	}
-	b.logger.Success("retrieved latest commit:\n'%s'", commit)
+	b.logger.Success("retrieved latest commit:\n'%s'", commit.Message)
 
-	inc := ParseCommit(commit)
+	inc := ParseCommit(commit.Message)
 	if inc == noIncrement {
 		b.logger.Warn("commit doesn't contain a bump prefix, skipping!")
 		return nil
@@ -104,7 +104,7 @@ func (b Bumper) Bump() error {
 		return nil
 	}
 
-	_, err = git.Tag(ver)
+	_, err = git.Tag(ver, commit.Author, commit.Email)
 	return err
 }
 

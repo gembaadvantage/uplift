@@ -80,13 +80,12 @@ BREAKING CHANGE: Lorem ipsum dolor sit amet`,
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			git.InitRepo(t)
-			_, err := git.Tag(tt.version)
-			require.NoError(t, err)
+			tag(t, tt.version)
 
 			git.EmptyCommit(t, tt.commit)
 
 			b := NewBumper(io.Discard, BumpOptions{})
-			err = b.Bump()
+			err := b.Bump()
 			require.NoError(t, err)
 
 			v := git.LatestTag()
@@ -98,9 +97,16 @@ BREAKING CHANGE: Lorem ipsum dolor sit amet`,
 	}
 }
 
+func tag(t *testing.T, tag string) {
+	t.Helper()
+
+	_, err := git.Tag(tag, "john.doe", "john.doe@test.com")
+	require.NoError(t, err)
+}
+
 func TestBumpInvalidVersion(t *testing.T) {
 	git.InitRepo(t)
-	git.Tag("1.0.B")
+	tag(t, "1.0.B")
 	git.EmptyCommit(t, "feat: Lorem ipsum dolor sit amet")
 
 	b := NewBumper(io.Discard, BumpOptions{})
@@ -128,19 +134,28 @@ func TestBumpEmptyRepo(t *testing.T) {
 	err := b.Bump()
 
 	require.NoError(t, err)
-
-	// TODO: test message that is returned
 }
 
 func TestBumpNotGitRepo(t *testing.T) {
+	git.MkTmpDir(t)
+
+	b := NewBumper(io.Discard, BumpOptions{})
+	err := b.Bump()
+
+	require.Error(t, err)
+	assert.Error(t, err, "current directory must be a git repo")
+}
+
+func TestBumpAlwaysUseLatestCommit(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommits(t,
+		"feat: Lorem ipsum dolor sit amet",
+		"fix: Lorem ipsum dolor sit amet",
+		"docs: Lorem ipsum dolor sit amet")
+
 	b := NewBumper(io.Discard, BumpOptions{})
 	err := b.Bump()
 
 	require.NoError(t, err)
-
-	// TODO: test message that is returned
-}
-
-func TestBumpAlwaysUseLatestCommit(t *testing.T) {
-	// Multiple commits
+	assert.Equal(t, "", git.LatestTag())
 }

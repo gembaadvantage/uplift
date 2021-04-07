@@ -23,10 +23,19 @@ SOFTWARE.
 package git
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os/exec"
 	"strings"
 )
+
+// Commit contains metadata about a specific git commit
+type Commit struct {
+	Message string `json:"message"`
+	Author  string `json:"author"`
+	Email   string `json:"email"`
+}
 
 // Run executes a git command and returns its output or errors
 func Run(args ...string) (string, error) {
@@ -55,14 +64,31 @@ func LatestTag() string {
 	return tag
 }
 
-// LatestCommitMessage retrieves the latest commit message within the repository
-func LatestCommitMessage() (string, error) {
-	return Clean(Run("log", "-1", "--pretty=format:%B"))
+// LatestCommit retrieves the latest commit within the repository
+func LatestCommit() (Commit, error) {
+	out, err := Clean(Run("log", "-1", `--pretty=format:'{"author": "%an", "email": "%ae", "message": "%B"}'`))
+	if err != nil {
+		return Commit{}, err
+	}
+
+	// Strip the final newline from the message and sanitise before unmarshalling
+	out = strings.Replace(out, "\n\"}", "\"}", 1)
+	out = strings.ReplaceAll(out, "\n", "\\n")
+
+	var c Commit
+	err = json.Unmarshal([]byte(out), &c)
+	return c, err
 }
 
 // Tag the repository
-func Tag(tag string) (string, error) {
-	return Clean(Run("tag", tag))
+func Tag(tag, author, email string) (string, error) {
+	return Clean(Run(
+		"-c",
+		fmt.Sprintf("user.name='%s'", author),
+		"-c",
+		fmt.Sprintf("user.email='%s'", email),
+		"tag",
+		tag))
 }
 
 // Clean the output

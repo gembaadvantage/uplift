@@ -63,7 +63,18 @@ func MkTmpDir(t *testing.T) {
 func EmptyCommit(t *testing.T, msg string) {
 	t.Helper()
 
-	_, err := Run("commit", "--allow-empty", "-m", msg)
+	args := []string{
+		"-c",
+		"user.name='uplift'",
+		"-c",
+		"user.email='uplift@test.com'",
+		"commit",
+		"--allow-empty",
+		"-m",
+		msg,
+	}
+
+	_, err := Run(args...)
 	require.NoError(t, err)
 }
 
@@ -83,7 +94,7 @@ func EmptyCommitAndTag(t *testing.T, tag, msg string) {
 	t.Helper()
 
 	EmptyCommit(t, msg)
-	_, err := Tag(tag)
+	_, err := Tag(tag, "uplift", "uplift@test.com")
 	require.NoError(t, err)
 }
 
@@ -93,6 +104,6 @@ func EmptyCommitsAndTag(t *testing.T, tag string, msgs ...string) {
 	t.Helper()
 
 	EmptyCommits(t, msgs...)
-	_, err := Tag(tag)
+	_, err := Tag(tag, "uplift", "uplift@test.com")
 	require.NoError(t, err)
 }
