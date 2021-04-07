@@ -29,8 +29,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: Use test suite and automatically run this before every test
-
 func TestIsRepo(t *testing.T) {
 	InitRepo(t)
 	assert.True(t, IsRepo())
