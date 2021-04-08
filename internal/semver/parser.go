@@ -24,13 +24,19 @@ package semver
 
 import "regexp"
 
-type increment string
+// Increment defines the different types of increment that can be performed
+// against a semantic version
+type Increment string
 
 const (
-	noIncrement    increment = "None"
-	patchIncrement increment = "Patch"
-	minorIncrement increment = "Minor"
-	majorIncrement increment = "Major"
+	// NoIncrement represents no increment change to a semantic version
+	NoIncrement Increment = "None"
+	// PatchIncrement represents a patch increment (1.0.x) to a semantic version
+	PatchIncrement Increment = "Patch"
+	// MinorIncrement represents a minor increment (1.x.0) to a semantic version
+	MinorIncrement Increment = "Minor"
+	// MajorIncrement represents a major increment (x.0.0) to a semantic version
+	MajorIncrement Increment = "Major"
 )
 
 var (
@@ -44,22 +50,22 @@ var (
 // ParseCommit will identify the type of increment to perform by parsing the commit
 // message against the conventional commit standards defined, @see:
 // https://www.conventionalcommits.org/en/v1.0.0/
-func ParseCommit(commit string) increment {
+func ParseCommit(commit string) Increment {
 	if !convCommit.MatchString(commit) {
-		return noIncrement
+		return NoIncrement
 	}
 
 	if breakingBang.MatchString(commit) || breaking.MatchString(commit) {
-		return majorIncrement
+		return MajorIncrement
 	}
 
 	if feature.MatchString(commit) {
-		return minorIncrement
+		return MinorIncrement
 	}
 
 	if fix.MatchString(commit) {
-		return patchIncrement
+		return PatchIncrement
 	}
 
-	return noIncrement
+	return NoIncrement
 }

@@ -34,6 +34,10 @@ build: $(BINDIR)/$(BINNAME)
 $(BINDIR)/$(BINNAME): $(SRC)
 	GO111MODULE=on go build -ldflags '$(LDFLAGS)' -o '$(BINDIR)/$(BINNAME)' ./cmd/uplift
 
+.PHONY: lint
+lint:
+	golangci-lint run --timeout 5m0s
+
 .PHONY: clean
 clean:
 	@rm -rf '$(BINDIR)'

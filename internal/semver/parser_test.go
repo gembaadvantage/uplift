@@ -30,129 +30,129 @@ func TestParseCommit(t *testing.T) {
 	tests := []struct {
 		name   string
 		commit string
-		inc    increment
+		inc    Increment
 	}{
 		{
 			name:   "BuildBang",
 			commit: "build!: Lorem ipsum dolor sit amet",
-			inc:    majorIncrement,
+			inc:    MajorIncrement,
 		},
 		{
 			name:   "ChoreBang",
 			commit: "chore!: Lorem ipsum dolor sit amet",
-			inc:    majorIncrement,
+			inc:    MajorIncrement,
 		},
 		{
 			name:   "CIBang",
 			commit: "ci!: Lorem ipsum dolor sit amet",
-			inc:    majorIncrement,
+			inc:    MajorIncrement,
 		},
 		{
 			name:   "DocsBangPrefix",
 			commit: "docs!: Lorem ipsum dolor sit amet",
-			inc:    majorIncrement,
+			inc:    MajorIncrement,
 		},
 		{
 			name:   "FeatBang",
 			commit: "feat!: Lorem ipsum dolor sit amet",
-			inc:    majorIncrement,
+			inc:    MajorIncrement,
 		},
 		{
 			name:   "FixBang",
 			commit: "fix!: Lorem ipsum dolor sit amet",
-			inc:    majorIncrement,
+			inc:    MajorIncrement,
 		},
 		{
 			name:   "PerfBang",
 			commit: "perf!: Lorem ipsum dolor sit amet",
-			inc:    majorIncrement,
+			inc:    MajorIncrement,
 		},
 		{
 			name:   "RefactorBang",
 			commit: "refactor!: Lorem ipsum dolor sit amet",
-			inc:    majorIncrement,
+			inc:    MajorIncrement,
 		},
 		{
 			name:   "RevertBang",
 			commit: "revert!: Lorem ipsum dolor sit amet",
-			inc:    majorIncrement,
+			inc:    MajorIncrement,
 		},
 		{
 			name:   "StyleBang",
 			commit: "style!: Lorem ipsum dolor sit amet",
-			inc:    majorIncrement,
+			inc:    MajorIncrement,
 		},
 		{
 			name:   "TestBang",
 			commit: "test!: Lorem ipsum dolor sit amet",
-			inc:    majorIncrement,
+			inc:    MajorIncrement,
 		},
 		{
 			name: "BreakingChangeFooter",
 			commit: `feat: Lorem ipsum dolor sit amet
 			
 BREAKING CHANGE: Lorem ipsum dolor sit amet`,
-			inc: majorIncrement,
+			inc: MajorIncrement,
 		},
 		{
 			name:   "Feat",
 			commit: "feat(scope): Lorem ipsum dolor sit amet",
-			inc:    minorIncrement,
+			inc:    MinorIncrement,
 		},
 		{
 			name:   "Fix",
 			commit: "fix(scope): Lorem ipsum dolor sit amet",
-			inc:    patchIncrement,
+			inc:    PatchIncrement,
 		},
 		{
 			name:   "Build",
 			commit: "build(scope): Lorem ipsum dolor sit amet",
-			inc:    noIncrement,
+			inc:    NoIncrement,
 		},
 		{
 			name:   "Chore",
 			commit: "chore(scope): Lorem ipsum dolor sit amet",
-			inc:    noIncrement,
+			inc:    NoIncrement,
 		},
 		{
 			name:   "CI",
 			commit: "ci(scope): Lorem ipsum dolor sit amet",
-			inc:    noIncrement,
+			inc:    NoIncrement,
 		},
 		{
 			name:   "Docs",
 			commit: "docs(scope): Lorem ipsum dolor sit amet",
-			inc:    noIncrement,
+			inc:    NoIncrement,
 		},
 		{
 			name:   "Perf",
 			commit: "perf(scope): Lorem ipsum dolor sit amet",
-			inc:    noIncrement,
+			inc:    NoIncrement,
 		},
 		{
 			name:   "Refactor",
 			commit: "refactor(scope): Lorem ipsum dolor sit amet",
-			inc:    noIncrement,
+			inc:    NoIncrement,
 		},
 		{
 			name:   "Revert",
 			commit: "revert(scope): Lorem ipsum dolor sit amet",
-			inc:    noIncrement,
+			inc:    NoIncrement,
 		},
 		{
 			name:   "Style",
 			commit: "style(scope): Lorem ipsum dolor sit amet",
-			inc:    noIncrement,
+			inc:    NoIncrement,
 		},
 		{
 			name:   "Test",
 			commit: "test(scope): Lorem ipsum dolor sit amet",
-			inc:    noIncrement,
+			inc:    NoIncrement,
 		},
 		{
 			name:   "Unrecognised",
 			commit: "Lorem ipsum dolor sit amet",
-			inc:    noIncrement,
+			inc:    NoIncrement,
 		},
 	}
 	for _, tt := range tests {

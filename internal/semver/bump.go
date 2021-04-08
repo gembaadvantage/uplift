@@ -81,7 +81,7 @@ func (b Bumper) Bump() error {
 	b.logger.Success("retrieved latest commit:\n'%s'", commit.Message)
 
 	inc := ParseCommit(commit.Message)
-	if inc == noIncrement {
+	if inc == NoIncrement {
 		b.logger.Warn("commit doesn't contain a bump prefix, skipping!")
 		return nil
 	}
@@ -108,8 +108,8 @@ func (b Bumper) Bump() error {
 	return err
 }
 
-func (b Bumper) bumpVersion(v string, inc increment) (string, error) {
-	if inc == noIncrement {
+func (b Bumper) bumpVersion(v string, inc Increment) (string, error) {
+	if inc == NoIncrement {
 		return v, nil
 	}
 
@@ -129,11 +129,11 @@ func (b Bumper) bumpVersion(v string, inc increment) (string, error) {
 	var newVer semv.Version
 
 	switch inc {
-	case majorIncrement:
+	case MajorIncrement:
 		newVer = ver.IncMajor()
-	case minorIncrement:
+	case MinorIncrement:
 		newVer = ver.IncMinor()
-	case patchIncrement:
+	case PatchIncrement:
 		newVer = ver.IncPatch()
 	}
 
