@@ -60,5 +60,5 @@ func (l VerboseLogger) Info(s string, args ...interface{}) {
 
 // Warn will log with warning text decoration and line ending
 func (l VerboseLogger) Warn(s string, args ...interface{}) {
-	fmt.Fprintf(l.w, "%s %s\n", Warning, fmt.Sprintf(s, args...))
+	fmt.Fprintf(l.w, "%s  %s\n", Warning, fmt.Sprintf(s, args...))
 }

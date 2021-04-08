@@ -23,7 +23,6 @@ SOFTWARE.
 package git
 
 import (
-	"encoding/json"
 	"errors"
 	"os/exec"
 	"strings"
@@ -31,9 +30,9 @@ import (
 
 // Commit contains metadata about a specific git commit
 type Commit struct {
-	Message string `json:"message"`
-	Author  string `json:"author"`
-	Email   string `json:"email"`
+	Message string
+	Author  string
+	Email   string
 }
 
 // Run executes a git command and returns its output or errors
@@ -65,18 +64,25 @@ func LatestTag() string {
 
 // LatestCommit retrieves the latest commit within the repository
 func LatestCommit() (Commit, error) {
-	out, err := Clean(Run("log", "-1", `--pretty=format:'{"author": "%an", "email": "%ae", "message": "%B"}'`))
+	out, err := Clean(Run("log", "-1", `--pretty=format:'"%an","%ae","%B"'`))
 	if err != nil {
 		return Commit{}, err
 	}
 
-	// Strip the final newline from the message and sanitise before unmarshalling
-	out = strings.Replace(out, "\n\"}", "\"}", 1)
-	out = strings.ReplaceAll(out, "\n", "\\n")
+	// Split the formatted string into its component parts
+	p := strings.Split(out, ",")
 
-	var c Commit
-	err = json.Unmarshal([]byte(out), &c)
-	return c, err
+	// Strip quotes from around each part
+	author := p[0][1 : len(p[0])-1]
+	email := p[1][1 : len(p[1])-1]
+	msg := p[2][1 : len(p[2])-1]
+
+	return Commit{
+		Author: author,
+		Email:  email,
+		// Strip trailing newline
+		Message: strings.TrimRight(msg, "\n"),
+	}, nil
 }
 
 // Tag the repository
