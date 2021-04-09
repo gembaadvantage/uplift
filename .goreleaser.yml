@@ -56,8 +56,9 @@ brews:
   - name: uplift
     tap:
       owner: gembaadvantage
-      name: homebrew-uplift
+      name: homebrew-tap
+    folder: Formula
     homepage: "https://github.com/gembaadvantage/uplift"
     description: "Semantic versioning the easy way"
     test: |
-      system "#{bin}/program version --short"
+      system "#{bin}/uplift version --short"
