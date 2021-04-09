@@ -31,6 +31,8 @@ var (
 	gitBranch = ""
 	// The git SHA1 of the commit
 	gitCommit = ""
+	// The date associated with the current built version
+	buildDate = ""
 )
 
 // BuildInfo contains build time information about the application
@@ -38,6 +40,7 @@ type BuildInfo struct {
 	Version   string `json:"version,omitempty"`
 	GitBranch string `json:"gitBranch,omitempty"`
 	GitCommit string `json:"gitCommit,omitempty"`
+	BuildDate string `json:"buildDate,omitempty"`
 	GoVersion string `json:"goVersion,omitempty"`
 }
 
@@ -52,6 +55,7 @@ func Long() BuildInfo {
 		Version:   version,
 		GitBranch: gitBranch,
 		GitCommit: gitCommit,
+		BuildDate: buildDate,
 		GoVersion: runtime.Version(),
 	}
 }
