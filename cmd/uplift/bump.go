@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	firstVersion = "v0.1.0"
+	firstVersion = "0.1.0"
 )
 
 type bumpOptions struct {

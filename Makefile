@@ -32,7 +32,11 @@ all: build
 build: $(BINDIR)/$(BINNAME)
 
 $(BINDIR)/$(BINNAME): $(SRC)
-	GO111MODULE=on go build -ldflags '$(LDFLAGS)' -o '$(BINDIR)/$(BINNAME)' ./cmd/uplift
+	go build -ldflags '$(LDFLAGS)' -o '$(BINDIR)/$(BINNAME)' ./cmd/uplift
+
+.PHONY: test
+test:
+	go test -race -vet=off -p 1 ./...
 
 .PHONY: lint
 lint:
