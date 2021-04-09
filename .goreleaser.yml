@@ -20,9 +20,10 @@
 
 builds:
   - id: uplift
-    main: cmd/uplift
+    main: ./cmd/uplift
     binary: uplift
     env:
+      - GO111MODULE=on
       - CGO_ENABLED=0
     goos:
       - linux
