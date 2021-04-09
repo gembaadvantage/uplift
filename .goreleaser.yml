@@ -22,8 +22,13 @@ builds:
   - id: uplift
     main: ./cmd/uplift
     binary: uplift
+    ldflags:
+      - -s -w
+      - -X github.com/gembaadvantage/uplift/internal/version.version={{.Version}}
+      - -X github.com/gembaadvantage/uplift/internal/version.gitCommit={{.Commit}}
+      - -X github.com/gembaadvantage/uplift/internal/version.gitBranch=master
+      - -X github.com/gembaadvantage/uplift/internal/version.buildDate={{.Date}}
     env:
-      - GO111MODULE=on
       - CGO_ENABLED=0
     goos:
       - linux
