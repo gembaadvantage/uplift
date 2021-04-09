@@ -16,7 +16,7 @@ GIT_TAG    = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
 
 BINVERSION = ${GIT_TAG}
 
-ifneq ($(GIT_BRANCH),'master')
+ifneq ($(GIT_BRANCH),'main')
 	BINVERSION := $(BINVERSION)-${GIT_SHA}
 endif
 
