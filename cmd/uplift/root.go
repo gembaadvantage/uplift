@@ -31,7 +31,7 @@ import (
 func newRootCmd(out io.Writer, args []string) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:          "uplift",
-		Short:        "\U0001f680 Semantic versioning the easy way",
+		Short:        "Semantic versioning the easy way",
 		SilenceUsage: true,
 	}
 
