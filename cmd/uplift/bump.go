@@ -25,16 +25,45 @@ package main
 import (
 	"io"
 
+	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/spf13/cobra"
 )
 
-func newRootCmd(out io.Writer, args []string) (*cobra.Command, error) {
+const (
+	firstVersion = "0.1.0"
+)
+
+type bumpOptions struct {
+	first   string
+	dryRun  bool
+	verbose bool
+}
+
+func newBumpCmd(out io.Writer) *cobra.Command {
+	opts := bumpOptions{}
+
 	cmd := &cobra.Command{
-		Use:          "uplift",
-		Short:        "\U0001f680 Semantic versioning the easy way",
-		SilenceUsage: true,
+		Use:   "bump",
+		Short: "Bump the version of your application",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return opts.Run(out, opts)
+		},
 	}
 
-	cmd.AddCommand(newVersionCmd(out), newBumpCmd(out))
-	return cmd, nil
+	f := cmd.Flags()
+	f.StringVar(&opts.first, "first", firstVersion, "sets the first version of the initial bump")
+	f.BoolVar(&opts.dryRun, "dry-run", false, "take a practice bump")
+	f.BoolVar(&opts.verbose, "verbose", false, "print everything that happens")
+
+	return cmd
+}
+
+func (o bumpOptions) Run(out io.Writer, opts bumpOptions) error {
+	b := semver.NewBumper(out, semver.BumpOptions{
+		FirstVersion: opts.first,
+		DryRun:       opts.dryRun,
+		Verbose:      opts.verbose,
+	})
+
+	return b.Bump()
 }

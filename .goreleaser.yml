@@ -63,4 +63,4 @@ brews:
     homepage: "https://github.com/gembaadvantage/uplift"
     description: "Semantic versioning the easy way"
     test: |
-      system "#{bin}/program --version"
+      system "#{bin}/program version --short"

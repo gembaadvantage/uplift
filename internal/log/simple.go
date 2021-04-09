@@ -20,21 +20,40 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package log
 
 import (
+	"fmt"
 	"io"
-
-	"github.com/spf13/cobra"
 )
 
-func newRootCmd(out io.Writer, args []string) (*cobra.Command, error) {
-	cmd := &cobra.Command{
-		Use:          "uplift",
-		Short:        "\U0001f680 Semantic versioning the easy way",
-		SilenceUsage: true,
-	}
+// SimpleLogger defines a logger that logs without any text decoration
+// and only supports logging using standard output. Logging with any of the
+// provided logging levels will simply be ignored
+type SimpleLogger struct {
+	w io.Writer
+}
 
-	cmd.AddCommand(newVersionCmd(out), newBumpCmd(out))
-	return cmd, nil
+// NewSimpleLogger creates a new simple logger
+func NewSimpleLogger(out io.Writer) ConsoleLogger {
+	return SimpleLogger{
+		w: out,
+	}
+}
+
+// Out will log without any text decoration
+func (l SimpleLogger) Out(s string, args ...interface{}) {
+	fmt.Fprintf(l.w, s, args...)
+}
+
+// Success will not log anything
+func (l SimpleLogger) Success(s string, args ...interface{}) {
+}
+
+// Info will not log anything
+func (l SimpleLogger) Info(s string, args ...interface{}) {
+}
+
+// Warn will  not log anything
+func (l SimpleLogger) Warn(s string, args ...interface{}) {
 }

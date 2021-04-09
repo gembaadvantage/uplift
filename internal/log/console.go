@@ -20,21 +20,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package log
 
-import (
-	"io"
-
-	"github.com/spf13/cobra"
+const (
+	GreenTick   = "\u2705"
+	RedCross    = "\u274C"
+	Warning     = "\u26a0\ufe0f"
+	Information = "\u2139\ufe0f"
 )
 
-func newRootCmd(out io.Writer, args []string) (*cobra.Command, error) {
-	cmd := &cobra.Command{
-		Use:          "uplift",
-		Short:        "\U0001f680 Semantic versioning the easy way",
-		SilenceUsage: true,
-	}
-
-	cmd.AddCommand(newVersionCmd(out), newBumpCmd(out))
-	return cmd, nil
+// ConsoleLogger defines an interface for logging to the console
+type ConsoleLogger interface {
+	Out(s string, args ...interface{})
+	Success(s string, args ...interface{})
+	Info(s string, args ...interface{})
+	Warn(s string, args ...interface{})
 }
