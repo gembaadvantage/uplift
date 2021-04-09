@@ -1,7 +1,9 @@
 # uplift
 
 [![Build status](https://img.shields.io/github/workflow/status/gembaadvantage/uplift/ci?style=flat-square&logo=go)](https://github.com/gembaadvantage/uplift/actions?workflow=ci)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)][/license]
+[![License MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gembaadvantage/uplift?style=flat-square)](https://goreportcard.com/report/github.com/gembaadvantage/uplift)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/gembaadvantage/uplift.svg?style=flat-square)](go.mod)
 
 Semantic versioning the easy way. Automatic tagging of your respositories based on your commit messages. Powered by [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Easy to include in your CI.
 
