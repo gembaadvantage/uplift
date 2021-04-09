@@ -36,7 +36,7 @@ $(BINDIR)/$(BINNAME): $(SRC)
 
 .PHONY: test
 test:
-	go test -race -vet=off -p 1 ./...
+	go test -race -vet=off -p 1 -covermode=atomic -coverprofile=coverage.out ./...
 
 .PHONY: lint
 lint:
