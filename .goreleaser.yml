@@ -26,7 +26,7 @@ builds:
       - -s -w
       - -X github.com/gembaadvantage/uplift/internal/version.version={{.Version}}
       - -X github.com/gembaadvantage/uplift/internal/version.gitCommit={{.Commit}}
-      - -X github.com/gembaadvantage/uplift/internal/version.gitBranch=master
+      - -X github.com/gembaadvantage/uplift/internal/version.gitBranch=main
       - -X github.com/gembaadvantage/uplift/internal/version.buildDate={{.Date}}
     env:
       - CGO_ENABLED=0
