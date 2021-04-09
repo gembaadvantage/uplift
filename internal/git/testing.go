@@ -94,7 +94,7 @@ func EmptyCommitAndTag(t *testing.T, tag, msg string) {
 	t.Helper()
 
 	EmptyCommit(t, msg)
-	_, err := Tag(tag)
+	err := Tag(tag)
 	require.NoError(t, err)
 }
 
@@ -104,6 +104,6 @@ func EmptyCommitsAndTag(t *testing.T, tag string, msgs ...string) {
 	t.Helper()
 
 	EmptyCommits(t, msgs...)
-	_, err := Tag(tag)
+	err := Tag(tag)
 	require.NoError(t, err)
 }

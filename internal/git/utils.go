@@ -85,9 +85,22 @@ func LatestCommit() (Commit, error) {
 	}, nil
 }
 
-// Tag the repository
-func Tag(tag string) (string, error) {
-	return Clean(Run("tag", tag))
+// Tag the repository and push it to the origin
+func Tag(tag string) error {
+	if _, err := Clean(Run("tag", tag)); err != nil {
+		return err
+	}
+
+	// Inspect the repo for an origin. If no origin exists, then skip the push
+	if _, err := Clean(Run("remote", "show", "origin")); err != nil {
+		return nil
+	}
+
+	if _, err := Clean(Run("push", "origin", tag)); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Clean the output

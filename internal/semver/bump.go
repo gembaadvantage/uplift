@@ -97,15 +97,18 @@ func (b Bumper) Bump() error {
 		}
 	}
 
-	b.logger.Out(ver)
-
 	if b.dryRun {
 		// Commit nothing on a dry run
+		b.logger.Out(ver)
 		return nil
 	}
 
-	_, err = git.Tag(ver)
-	return err
+	if err := git.Tag(ver); err != nil {
+		return err
+	}
+
+	b.logger.Out(ver)
+	return nil
 }
 
 func (b Bumper) bumpVersion(v string, inc Increment) (string, error) {
