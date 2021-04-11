@@ -17,7 +17,8 @@ Binary downloads of Uplft can be found on the [Releases](https://github.com/gemb
 To use [Homebrew](https://brew.sh/):
 
 ```sh
-brew install gembaadvantage/tap/uplift
+brew tap gembaadvantage/tap
+brew install uplift
 ```
 
 ## Quick Start
