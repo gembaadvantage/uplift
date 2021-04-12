@@ -20,45 +20,42 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package config
 
 import (
-	"io"
+	"io/ioutil"
+	"os"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/semver"
-	"github.com/spf13/cobra"
+	"github.com/go-yaml/yaml"
 )
 
-type bumpOptions struct {
-	dryRun  bool
-	verbose bool
+// Uplift ...
+type Uplift struct {
+	FirstVersion string     `yaml:"firstVersion"`
+	Bumps        []FileBump `yaml:"bumps"`
 }
 
-func newBumpCmd(out io.Writer, cfg config.Uplift) *cobra.Command {
-	opts := bumpOptions{}
+// FileBump ...
+type FileBump struct {
+	File  string `yaml:"file"`
+	Regex string `yaml:"regex"`
+}
 
-	cmd := &cobra.Command{
-		Use:   "bump",
-		Short: "Bump the version of your application",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.Run(out, cfg, opts)
-		},
+// Load ...
+func Load(f string) (Uplift, error) {
+	fh, err := os.Open(f)
+	if err != nil {
+		return Uplift{}, err
+	}
+	defer fh.Close()
+
+	// Read the contents of the file in one go
+	data, err := ioutil.ReadAll(fh)
+	if err != nil {
+		return Uplift{}, err
 	}
 
-	f := cmd.Flags()
-	f.BoolVar(&opts.dryRun, "dry-run", false, "take a practice bump")
-	f.BoolVar(&opts.verbose, "verbose", false, "show me everything that happens")
-
-	return cmd
-}
-
-func (o bumpOptions) Run(out io.Writer, cfg config.Uplift, opts bumpOptions) error {
-	b := semver.NewBumper(out, semver.BumpOptions{
-		Config:  cfg,
-		DryRun:  opts.dryRun,
-		Verbose: opts.verbose,
-	})
-
-	return b.Bump()
+	var cfg Uplift
+	err = yaml.UnmarshalStrict(data, &cfg)
+	return cfg, err
 }

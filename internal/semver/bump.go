@@ -28,24 +28,29 @@ import (
 	"io"
 
 	semv "github.com/Masterminds/semver"
+	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/log"
 )
 
+const (
+	firstVersion = "0.1.0"
+)
+
 // BumpOptions configures the behaviour when bumping a semantic version
 type BumpOptions struct {
-	FirstVersion string
-	DryRun       bool
-	Verbose      bool
+	Config  config.Uplift
+	DryRun  bool
+	Verbose bool
 }
 
 // Bumper is capable of bumping a semantic version associated with a git
 // repository based on the conventional commits standard:
 // @see https://www.conventionalcommits.org/en/v1.0.0/
 type Bumper struct {
-	logger       log.ConsoleLogger
-	firstVersion string
-	dryRun       bool
+	logger log.ConsoleLogger
+	config config.Uplift
+	dryRun bool
 }
 
 // NewBumper initialises a new semantic version bumper
@@ -55,10 +60,15 @@ func NewBumper(out io.Writer, opts BumpOptions) Bumper {
 		l = log.NewVerboseLogger(out)
 	}
 
+	// Override the first version if one hasn't been provided
+	if opts.Config.FirstVersion == "" {
+		opts.Config.FirstVersion = firstVersion
+	}
+
 	return Bumper{
-		logger:       l,
-		firstVersion: opts.FirstVersion,
-		dryRun:       opts.DryRun,
+		logger: l,
+		config: opts.Config,
+		dryRun: opts.DryRun,
 	}
 }
 
@@ -89,7 +99,7 @@ func (b Bumper) Bump() error {
 
 	ver := git.LatestTag()
 	if ver == "" {
-		ver = b.firstVersion
+		ver = firstVersion
 		b.logger.Success("no previous tags exist, using first version: %s\n", ver)
 	} else {
 		if ver, err = b.bumpVersion(ver, inc); err != nil {

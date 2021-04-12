@@ -26,6 +26,7 @@ import (
 	"io"
 	"testing"
 
+	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -119,7 +120,7 @@ func TestBumpFirstVersion(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommit(t, "feat: Lorem ipsum dolor sit amet")
 
-	b := NewBumper(io.Discard, BumpOptions{FirstVersion: "0.1.0"})
+	b := NewBumper(io.Discard, BumpOptions{Config: config.Uplift{FirstVersion: "0.1.0"}})
 	err := b.Bump()
 	require.NoError(t, err)
 

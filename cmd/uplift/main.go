@@ -22,10 +22,17 @@ SOFTWARE.
 
 package main
 
-import "os"
+import (
+	"os"
+)
 
 func main() {
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:])
+	cfg, err := loadConfig()
+	if err != nil {
+		os.Exit(1)
+	}
+
+	cmd, err := newRootCmd(os.Stdout, os.Args[1:], cfg)
 	if err != nil {
 		os.Exit(1)
 	}
