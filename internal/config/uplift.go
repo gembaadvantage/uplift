@@ -29,19 +29,20 @@ import (
 	"github.com/go-yaml/yaml"
 )
 
-// Uplift ...
+// Uplift defines the root configuration of the application
 type Uplift struct {
 	FirstVersion string     `yaml:"firstVersion"`
 	Bumps        []FileBump `yaml:"bumps"`
 }
 
-// FileBump ...
+// FileBump defines configuration for bumping indvidual files based
+// on the new calculated semantic version number
 type FileBump struct {
 	File  string `yaml:"file"`
 	Regex string `yaml:"regex"`
 }
 
-// Load ...
+// Load the YAML config file
 func Load(f string) (Uplift, error) {
 	fh, err := os.Open(f)
 	if err != nil {
