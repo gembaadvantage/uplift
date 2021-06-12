@@ -60,7 +60,7 @@ func MkTmpDir(t *testing.T) {
 
 // EmptyCommit will create an empty commit without the need for modifying any existing files
 // within the repository
-func EmptyCommit(t *testing.T, msg string) {
+func EmptyCommit(t *testing.T, commit string) {
 	t.Helper()
 
 	args := []string{
@@ -71,7 +71,7 @@ func EmptyCommit(t *testing.T, msg string) {
 		"commit",
 		"--allow-empty",
 		"-m",
-		msg,
+		commit,
 	}
 
 	_, err := Run(args...)
@@ -80,10 +80,10 @@ func EmptyCommit(t *testing.T, msg string) {
 
 // EmptyCommits will create any number of empty commits without the need for modifying any
 // existing files within the repository
-func EmptyCommits(t *testing.T, msgs ...string) {
+func EmptyCommits(t *testing.T, commits ...string) {
 	t.Helper()
 
-	for _, msg := range msgs {
+	for _, msg := range commits {
 		EmptyCommit(t, msg)
 	}
 }

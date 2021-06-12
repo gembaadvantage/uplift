@@ -26,6 +26,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"regexp"
+	"strings"
 
 	semv "github.com/Masterminds/semver"
 	"github.com/gembaadvantage/uplift/internal/config"
@@ -52,6 +55,19 @@ type Bumper struct {
 	config config.Uplift
 	dryRun bool
 }
+
+// FileBump defines how a version within a file will be matched through a regex
+// and bumped using the provided version
+type FileBump struct {
+	Regex   string
+	Version string
+	Count   int
+}
+
+var (
+	version    = `v?\d+\.\d+\.\d+`
+	versionRgx = regexp.MustCompile(version)
+)
 
 // NewBumper initialises a new semantic version bumper
 func NewBumper(out io.Writer, opts BumpOptions) Bumper {
@@ -107,6 +123,10 @@ func (b Bumper) Bump() error {
 		}
 	}
 
+	if err := b.bumpFiles(ver); err != nil {
+		return err
+	}
+
 	if b.dryRun {
 		// Commit nothing on a dry run
 		b.logger.Out(ver)
@@ -151,7 +171,77 @@ func (b Bumper) bumpVersion(v string, inc Increment) (string, error) {
 	}
 
 	bv := fmt.Sprintf("%s%s", vp, newVer.String())
-	b.logger.Success("bumped version to: %s\n", bv)
+	b.logger.Success("bumped version to: %s", bv)
 
 	return bv, nil
+}
+
+func (b Bumper) bumpFiles(v string) error {
+	if len(b.config.Bumps) == 0 {
+		b.logger.Info("no files to bump, skipping!")
+		return nil
+	}
+
+	b.logger.Info("bumping files...")
+
+	for _, bump := range b.config.Bumps {
+		fb := FileBump{
+			Regex:   bump.Regex,
+			Version: v,
+			Count:   bump.Count,
+		}
+
+		if err := b.bumpFile(bump.File, fb); err != nil {
+			return err
+		}
+
+		b.logger.Success("bumped %s to version %s", bump.File, v)
+	}
+
+	// Don't commit anything
+	if b.dryRun {
+		return nil
+	}
+
+	// TODO: generate a commit before we tag
+	return nil
+}
+
+func (b Bumper) bumpFile(path string, bump FileBump) error {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		b.logger.Warn("failed to open %s", path)
+		return err
+	}
+
+	// Ensure the supplied regex is valid, replacing the $VERSION token
+	verRgx := strings.Replace(bump.Regex, "$VERSION", version, 1)
+
+	rgx, err := regexp.Compile(verRgx)
+	if err != nil {
+		return err
+	}
+
+	m := rgx.Find(data)
+	if m == nil {
+		b.logger.Warn("version regex hasn't matched")
+		return errors.New("no version matched in file")
+	}
+
+	// Use strings replace to ensure the replacement count is honoured
+	n := -1
+	if bump.Count > 0 {
+		n = bump.Count
+	}
+
+	mstr := string(m)
+	verRpl := versionRgx.ReplaceAllString(mstr, bump.Version)
+	str := strings.Replace(string(data), mstr, verRpl, n)
+
+	// Don't make any file changes if part of a dry-run
+	if b.dryRun {
+		return nil
+	}
+
+	return ioutil.WriteFile(path, []byte(str), 0644)
 }

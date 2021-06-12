@@ -31,15 +31,16 @@ import (
 
 // Uplift defines the root configuration of the application
 type Uplift struct {
-	FirstVersion string     `yaml:"firstVersion"`
-	Bumps        []FileBump `yaml:"bumps"`
+	FirstVersion string `yaml:"firstVersion"`
+	Bumps        []Bump `yaml:"bumps"`
 }
 
-// FileBump defines configuration for bumping indvidual files based
+// Bump defines configuration for bumping indvidual files based
 // on the new calculated semantic version number
-type FileBump struct {
+type Bump struct {
 	File  string `yaml:"file"`
 	Regex string `yaml:"regex"`
+	Count int    `yaml:"count"`
 }
 
 // Load the YAML config file
