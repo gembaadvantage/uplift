@@ -99,14 +99,14 @@ func (b Bumper) Bump() error {
 
 	b.logger.Success("git repo found")
 
-	commit, err := git.LatestCommit()
+	meta, err := git.LatestCommit()
 	if err != nil {
 		b.logger.Warn("no commits found in repository")
 		return err
 	}
-	b.logger.Success("retrieved latest commit:\n'%s'", commit.Message)
+	b.logger.Success("retrieved latest commit:\n'%s'", meta.Message)
 
-	inc := ParseCommit(commit.Message)
+	inc := ParseCommit(meta.Message)
 	if inc == NoIncrement {
 		b.logger.Warn("commit doesn't contain a bump prefix, skipping!")
 		return nil
@@ -123,7 +123,7 @@ func (b Bumper) Bump() error {
 		}
 	}
 
-	if err := b.bumpFiles(ver); err != nil {
+	if err := b.bumpFiles(ver, meta); err != nil {
 		return err
 	}
 
@@ -176,7 +176,7 @@ func (b Bumper) bumpVersion(v string, inc Increment) (string, error) {
 	return bv, nil
 }
 
-func (b Bumper) bumpFiles(v string) error {
+func (b Bumper) bumpFiles(v string, meta git.CommitMetadata) error {
 	if len(b.config.Bumps) == 0 {
 		b.logger.Info("no files to bump, skipping!")
 		return nil
@@ -195,6 +195,10 @@ func (b Bumper) bumpFiles(v string) error {
 			return err
 		}
 
+		if err := git.Stage(bump.File); err != nil {
+			return err
+		}
+
 		b.logger.Success("bumped %s to version %s", bump.File, v)
 	}
 
@@ -203,8 +207,8 @@ func (b Bumper) bumpFiles(v string) error {
 		return nil
 	}
 
-	// TODO: generate a commit before we tag
-	return nil
+	// Commit all staged bumped files
+	return git.Commit(meta.Author, meta.Email, "chore(release): release managed by uplift")
 }
 
 func (b Bumper) bumpFile(path string, bump FileBump) error {
