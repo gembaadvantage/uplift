@@ -24,12 +24,13 @@ package git
 
 import (
 	"errors"
+	"fmt"
 	"os/exec"
 	"strings"
 )
 
-// Commit contains metadata about a specific git commit
-type Commit struct {
+// CommitMetadata contains metadata about a specific git commit
+type CommitMetadata struct {
 	Message string
 	Author  string
 	Email   string
@@ -63,10 +64,10 @@ func LatestTag() string {
 }
 
 // LatestCommit retrieves the latest commit within the repository
-func LatestCommit() (Commit, error) {
+func LatestCommit() (CommitMetadata, error) {
 	out, err := Clean(Run("log", "-1", `--pretty=format:'"%an","%ae","%B"'`))
 	if err != nil {
-		return Commit{}, err
+		return CommitMetadata{}, err
 	}
 
 	// Split the formatted string into its component parts
@@ -77,7 +78,7 @@ func LatestCommit() (Commit, error) {
 	email := p[1][1 : len(p[1])-1]
 	msg := p[2][1 : len(p[2])-1]
 
-	return Commit{
+	return CommitMetadata{
 		Author: author,
 		Email:  email,
 		// Strip trailing newline
@@ -97,6 +98,35 @@ func Tag(tag string) error {
 	}
 
 	if _, err := Clean(Run("push", "origin", tag)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Commit will generate a commit against the repository and push it to the origin.
+// The commit will be associated with the provided author and email address
+func Commit(author, email, commit string) error {
+	args := []string{
+		"-c",
+		fmt.Sprintf("user.name='%s'", author),
+		"-c",
+		fmt.Sprintf("user.email='%s'", email),
+		"commit",
+		"-m",
+		commit,
+	}
+
+	if _, err := Clean(Run(args...)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Stage will ensure the specified file is staged for the next commit
+func Stage(path string) error {
+	if _, err := Clean(Run("add", path)); err != nil {
 		return err
 	}
 

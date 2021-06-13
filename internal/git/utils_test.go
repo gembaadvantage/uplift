@@ -23,6 +23,8 @@ SOFTWARE.
 package git
 
 import (
+	"fmt"
+	"io/ioutil"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -93,4 +95,52 @@ func TestTag(t *testing.T) {
 
 	_, err = Run("rev-parse", v)
 	require.NoError(t, err)
+}
+
+func TestStage(t *testing.T) {
+	InitRepo(t)
+	file := UnstagedFile(t)
+
+	err := Stage(file)
+	require.NoError(t, err)
+
+	out, err := Clean(Run("status", "--porcelain", "-uno"))
+	require.NoError(t, err)
+	assert.Equal(t, fmt.Sprintf("A  %s", file), out)
+}
+
+func TestCommit(t *testing.T) {
+	InitRepo(t)
+	StagedFile(t)
+
+	err := Commit("john.doe", "john.doe@gmail.com", "first commit")
+	require.NoError(t, err)
+
+	out, err := Clean(Run("log", "-1", `--pretty=format:'%an:%ae:%B'`))
+	require.NoError(t, err)
+	assert.Equal(t, "john.doe:john.doe@gmail.com:first commit", out)
+}
+
+func UnstagedFile(t *testing.T) string {
+	t.Helper()
+
+	err := ioutil.WriteFile("dummy.txt", []byte("hello, world!"), 0644)
+	require.NoError(t, err)
+
+	out, err := Clean(Run("status", "--porcelain"))
+	require.NoError(t, err)
+	require.Equal(t, "?? dummy.txt", out)
+
+	return "dummy.txt"
+}
+
+func StagedFile(t *testing.T) string {
+	t.Helper()
+
+	file := UnstagedFile(t)
+
+	_, err := Run("add", file)
+	require.NoError(t, err)
+
+	return file
 }
