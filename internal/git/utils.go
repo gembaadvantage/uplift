@@ -133,6 +133,25 @@ func Stage(path string) error {
 	return nil
 }
 
+// Push all committed changes to the configured origin
+func Push() error {
+	// Inspect the repo for an origin. If no origin exists, then skip the push
+	if _, err := Clean(Run("remote", "show", "origin")); err != nil {
+		return nil
+	}
+
+	branch, err := Clean(Run("rev-parse", "--abbrev-ref", "HEAD"))
+	if err != nil {
+		return err
+	}
+
+	if _, err := Clean(Run("push", "origin", branch)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Clean the output
 func Clean(output string, err error) (string, error) {
 	// Preserve multi-line output, but trim the trailing newline

@@ -116,7 +116,7 @@ func (b Bumper) Bump() error {
 	ver := git.LatestTag()
 	if ver == "" {
 		ver = firstVersion
-		b.logger.Success("no previous tags exist, using first version: %s\n", ver)
+		b.logger.Success("no previous tags exist, using first version: %s", ver)
 	} else {
 		if ver, err = b.bumpVersion(ver, inc); err != nil {
 			return err
@@ -183,6 +183,7 @@ func (b Bumper) bumpFiles(v string, meta git.CommitMetadata) error {
 	}
 
 	b.logger.Info("bumping files...")
+	n := 0
 
 	for _, bump := range b.config.Bumps {
 		fb := FileBump{
@@ -191,15 +192,17 @@ func (b Bumper) bumpFiles(v string, meta git.CommitMetadata) error {
 			Count:   bump.Count,
 		}
 
-		if err := b.bumpFile(bump.File, fb); err != nil {
+		bumped, err := b.bumpFile(bump.File, fb)
+		if err != nil {
 			return err
 		}
 
-		if err := git.Stage(bump.File); err != nil {
-			return err
+		if bumped {
+			if err := git.Stage(bump.File); err != nil {
+				return err
+			}
+			n++
 		}
-
-		b.logger.Success("bumped %s to version %s", bump.File, v)
 	}
 
 	// Don't commit anything
@@ -207,15 +210,23 @@ func (b Bumper) bumpFiles(v string, meta git.CommitMetadata) error {
 		return nil
 	}
 
-	// Commit all staged bumped files
-	return git.Commit(meta.Author, meta.Email, "chore(release): release managed by uplift")
+	if n == 0 {
+		b.logger.Info("no files changed. nothing to commit...")
+		return nil
+	}
+
+	if err := git.Commit(meta.Author, meta.Email, "chore(release): release managed by uplift"); err != nil {
+		return err
+	}
+
+	return git.Push()
 }
 
-func (b Bumper) bumpFile(path string, bump FileBump) error {
+func (b Bumper) bumpFile(path string, bump FileBump) (bool, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		b.logger.Warn("failed to open %s", path)
-		return err
+		return false, err
 	}
 
 	// Ensure the supplied regex is valid, replacing the $VERSION token
@@ -223,13 +234,19 @@ func (b Bumper) bumpFile(path string, bump FileBump) error {
 
 	rgx, err := regexp.Compile(verRgx)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	m := rgx.Find(data)
 	if m == nil {
 		b.logger.Warn("version regex hasn't matched")
-		return errors.New("no version matched in file")
+		return false, errors.New("no version matched in file")
+	}
+	mstr := string(m)
+
+	if strings.Contains(mstr, bump.Version) {
+		b.logger.Info("skipped bumping %s as version already at %s", path, bump.Version)
+		return false, nil
 	}
 
 	// Use strings replace to ensure the replacement count is honoured
@@ -238,14 +255,15 @@ func (b Bumper) bumpFile(path string, bump FileBump) error {
 		n = bump.Count
 	}
 
-	mstr := string(m)
 	verRpl := versionRgx.ReplaceAllString(mstr, bump.Version)
 	str := strings.Replace(string(data), mstr, verRpl, n)
 
+	b.logger.Success("bumped %s to version %s", path, bump.Version)
+
 	// Don't make any file changes if part of a dry-run
 	if b.dryRun {
-		return nil
+		return false, nil
 	}
 
-	return ioutil.WriteFile(path, []byte(str), 0644)
+	return true, ioutil.WriteFile(path, []byte(str), 0644)
 }
