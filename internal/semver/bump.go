@@ -62,6 +62,7 @@ type FileBump struct {
 	Regex   string
 	Version string
 	Count   int
+	SemVer  bool
 }
 
 var (
@@ -190,6 +191,7 @@ func (b Bumper) bumpFiles(v string, meta git.CommitMetadata) error {
 			Regex:   bump.Regex,
 			Version: v,
 			Count:   bump.Count,
+			SemVer:  bump.SemVer,
 		}
 
 		bumped, err := b.bumpFile(bump.File, fb)
@@ -255,7 +257,13 @@ func (b Bumper) bumpFile(path string, bump FileBump) (bool, error) {
 		n = bump.Count
 	}
 
-	verRpl := versionRgx.ReplaceAllString(mstr, bump.Version)
+	// Strip any 'v' prefix if this must be a semantic version
+	v := bump.Version
+	if bump.SemVer && v[0] == 'v' {
+		v = v[1:]
+	}
+
+	verRpl := versionRgx.ReplaceAllString(mstr, v)
 	str := strings.Replace(string(data), mstr, verRpl, n)
 
 	b.logger.Success("bumped %s to version %s", path, bump.Version)

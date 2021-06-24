@@ -61,6 +61,7 @@ firstVersion: v1.0.0
 bumps:
   - file: ./chart/my-chart/Chart.yaml
     regex: "version: $VERSION"
+    semver: true
     count: 1
 ```
 
@@ -70,8 +71,9 @@ bumps:
 | bumps        | No       | []              | A list of files whose version numbers should be bumped and kept in sync with the latest repository tag |
 | bumps.file   | Yes      | -               | The path of the file, relative to the root of the repository                                           |
 | bumps.regex  | Yes      | -               | A regex used to identify a version within the file that should be bumped                               |
+| bumps.semver | No       | false           | The version in the file must be a semantic version, ensuring any `v` prefix is removed                 |
 | bumps.count  | No       | 0 (All Matches) | The number of times the matching version should be bumped within the file                              |
 
-### Version Placeholders
+### $VERSION
 
-**`$VERSION`** will match any semantic version, including a version with an optional `v` prefix, within the file, and replace it with the new version to be tagged against the repository.
+**`$VERSION`** is a placeholder and will match any semantic version, including a version with an optional `v` prefix.

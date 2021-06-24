@@ -38,9 +38,10 @@ type Uplift struct {
 // Bump defines configuration for bumping indvidual files based
 // on the new calculated semantic version number
 type Bump struct {
-	File  string `yaml:"file"`
-	Regex string `yaml:"regex"`
-	Count int    `yaml:"count"`
+	File   string `yaml:"file"`
+	Regex  string `yaml:"regex"`
+	Count  int    `yaml:"count"`
+	SemVer bool   `yaml:"semver"`
 }
 
 // Load the YAML config file

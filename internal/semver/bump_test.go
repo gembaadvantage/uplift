@@ -304,6 +304,32 @@ BREAKING CHANGE: Lorem ipsum dolor sit amet`,
 	}
 }
 
+func TestBumpFileSemanticVersionOnly(t *testing.T) {
+	MkRepo(t, "v0.1.0", "feat: Lorem ipsum dolor sit amet")
+
+	file := "version: 0.1.0"
+	path := WriteFile(t, file)
+
+	opts := BumpOptions{
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File:   path,
+					Regex:  "version: $VERSION",
+					SemVer: true,
+				},
+			},
+		},
+	}
+
+	b := NewBumper(io.Discard, opts)
+	err := b.Bump()
+	require.NoError(t, err)
+
+	actual := ReadFile(t, path)
+	assert.Equal(t, "version: 0.2.0", actual)
+}
+
 func TestBumpFileDryRun(t *testing.T) {
 	MkRepo(t, "0.1.0", "fix: Lorem ipsum dolor sit amet")
 
