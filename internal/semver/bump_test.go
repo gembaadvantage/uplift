@@ -98,6 +98,19 @@ BREAKING CHANGE: Lorem ipsum dolor sit amet`,
 	}
 }
 
+func TestBumpDryRun(t *testing.T) {
+	v := "1.0.0"
+	MkRepo(t, v, "feat: Lorem ipsum dolor sit amet")
+
+	b := NewBumper(io.Discard, BumpOptions{DryRun: true})
+
+	err := b.Bump()
+	require.NoError(t, err)
+
+	tag := git.LatestTag()
+	assert.Equal(t, v, tag)
+}
+
 func TestBumpInvalidVersion(t *testing.T) {
 	MkRepo(t, "1.0.B", "feat: Lorem ipsum dolor sit amet")
 
@@ -289,6 +302,163 @@ BREAKING CHANGE: Lorem ipsum dolor sit amet`,
 			}
 		})
 	}
+}
+
+func TestBumpFileDryRun(t *testing.T) {
+	MkRepo(t, "0.1.0", "fix: Lorem ipsum dolor sit amet")
+
+	file := "version: 0.1.0"
+	path := WriteFile(t, file)
+
+	opts := BumpOptions{
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File:  path,
+					Regex: "version: $VERSION",
+				},
+			},
+		},
+		DryRun: true,
+	}
+
+	b := NewBumper(io.Discard, opts)
+	err := b.Bump()
+	require.NoError(t, err)
+
+	actual := ReadFile(t, path)
+	assert.Equal(t, file, actual)
+}
+
+func TestBumpFileDefaultCommitMessage(t *testing.T) {
+	MkRepo(t, "0.1.0", "fix: Lorem ipsum dolor sit amet")
+
+	file := "version: 0.1.0"
+	path := WriteFile(t, file)
+
+	opts := BumpOptions{
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File:  path,
+					Regex: "version: $VERSION",
+				},
+			},
+		},
+	}
+
+	b := NewBumper(io.Discard, opts)
+	err := b.Bump()
+	require.NoError(t, err)
+
+	commit, err := git.LatestCommit()
+	require.NoError(t, err)
+
+	assert.Equal(t, "uplift", commit.Author)
+	assert.Equal(t, "uplift@test.com", commit.Email)
+	assert.Equal(t, "chore(release): release managed by uplift", commit.Message)
+}
+
+func TestBumpFileFirstTagMatchesVersionInFile(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommit(t, "feat: Lorem ipsum dolor sit amet")
+
+	file := "version: 0.1.0"
+	path := WriteFile(t, file)
+
+	opts := BumpOptions{
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File:  path,
+					Regex: "version: $VERSION",
+				},
+			},
+		},
+	}
+
+	b := NewBumper(io.Discard, opts)
+	err := b.Bump()
+	require.NoError(t, err)
+
+	commit, err := git.LatestCommit()
+	require.NoError(t, err)
+
+	assert.Equal(t, "feat: Lorem ipsum dolor sit amet", commit.Message)
+}
+
+func TestBumpFileOnMissingFile(t *testing.T) {
+	MkRepo(t, "0.1.0", "fix: Lorem ipsum dolor sit amet")
+
+	opts := BumpOptions{
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File:  "file.txt",
+					Regex: "version: $VERSION",
+				},
+			},
+		},
+	}
+
+	b := NewBumper(io.Discard, opts)
+	err := b.Bump()
+	require.Error(t, err, "open file.txt: no such file or directory")
+}
+
+func TestBumpMultipleFiles(t *testing.T) {
+	MkRepo(t, "0.1.0", "fix: Lorem ipsum dolor sit amet")
+
+	contents := "version: 0.1.0"
+	file1 := WriteFile(t, contents)
+	file2 := WriteFile(t, contents)
+
+	opts := BumpOptions{
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File:  file1,
+					Regex: "version: $VERSION",
+				},
+				{
+					File:  file2,
+					Regex: "version: $VERSION",
+				},
+			},
+		},
+	}
+
+	b := NewBumper(io.Discard, opts)
+	err := b.Bump()
+	require.NoError(t, err)
+
+	expected := "version: 0.1.1"
+	actual1 := ReadFile(t, file1)
+	assert.Equal(t, expected, actual1)
+
+	actual2 := ReadFile(t, file2)
+	assert.Equal(t, expected, actual2)
+}
+
+func TestBumpFileNonMatchingRegex(t *testing.T) {
+	MkRepo(t, "0.1.0", "fix: Lorem ipsum dolor sit amet")
+
+	path := WriteFile(t, "version: 0.1.0")
+
+	opts := BumpOptions{
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File:  path,
+					Regex: "noMatch: $VERSION",
+				},
+			},
+		},
+	}
+
+	b := NewBumper(io.Discard, opts)
+	err := b.Bump()
+	require.Error(t, err, "no version matched in file")
 }
 
 func MkRepo(t *testing.T, tag, commit string) {
