@@ -25,16 +25,17 @@ package main
 import (
 	"io"
 
+	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/spf13/cobra"
 )
 
-func newRootCmd(out io.Writer, args []string) (*cobra.Command, error) {
+func newRootCmd(out io.Writer, args []string, cfg config.Uplift) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:          "uplift",
 		Short:        "Semantic versioning the easy way",
 		SilenceUsage: true,
 	}
 
-	cmd.AddCommand(newVersionCmd(out), newBumpCmd(out))
+	cmd.AddCommand(newVersionCmd(out), newBumpCmd(out, cfg))
 	return cmd, nil
 }
