@@ -217,12 +217,12 @@ BREAKING CHANGE: Lorem ipsum dolor sit amet`,
 			tag:    "1.0.0",
 			commit: "fix!: Lorem ipsum dolor sit amet",
 			regex:  "version $VERSION",
-			content: `this is a test to check all occurences of the version are replaced.
+			content: `this is a test to check all occurrences of the version are replaced.
 		From here: version 1.0.0
 		And here: version 1.0.0
 		And also here: version 1.0.0 version 1.0.0
 		version 1.0.0`,
-			expected: `this is a test to check all occurences of the version are replaced.
+			expected: `this is a test to check all occurrences of the version are replaced.
 		From here: version 2.0.0
 		And here: version 2.0.0
 		And also here: version 2.0.0 version 2.0.0
