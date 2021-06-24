@@ -23,42 +23,26 @@ SOFTWARE.
 package main
 
 import (
-	"io"
+	"os"
 
 	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/semver"
-	"github.com/spf13/cobra"
 )
 
-type bumpOptions struct {
-	dryRun  bool
-	verbose bool
-}
+var (
+	files = [4]string{".uplift.yml", ".uplift.yaml", "uplift.yml", "uplift.yaml"}
+)
 
-func newBumpCmd(out io.Writer, cfg config.Uplift) *cobra.Command {
-	opts := bumpOptions{}
+func loadConfig() (config.Uplift, error) {
+	for _, file := range files {
+		cfg, err := config.Load(file)
 
-	cmd := &cobra.Command{
-		Use:   "bump",
-		Short: "Bump the version of your application",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.Run(out, cfg, opts)
-		},
+		// If the file doesn't exist, try another, until the array is exhausted
+		if err != nil && os.IsNotExist(err) {
+			continue
+		}
+
+		return cfg, err
 	}
 
-	f := cmd.Flags()
-	f.BoolVar(&opts.dryRun, "dry-run", false, "take a practice bump")
-	f.BoolVar(&opts.verbose, "verbose", false, "show me everything that happens")
-
-	return cmd
-}
-
-func (o bumpOptions) Run(out io.Writer, cfg config.Uplift, opts bumpOptions) error {
-	b := semver.NewBumper(out, semver.BumpOptions{
-		Config:  cfg,
-		DryRun:  opts.dryRun,
-		Verbose: opts.verbose,
-	})
-
-	return b.Bump()
+	return config.Uplift{}, nil
 }
