@@ -26,27 +26,49 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"regexp"
+	"strings"
 
 	semv "github.com/Masterminds/semver"
+	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/log"
 )
 
+const (
+	firstVersion = "0.1.0"
+)
+
 // BumpOptions configures the behaviour when bumping a semantic version
 type BumpOptions struct {
-	FirstVersion string
-	DryRun       bool
-	Verbose      bool
+	Config  config.Uplift
+	DryRun  bool
+	Verbose bool
 }
 
 // Bumper is capable of bumping a semantic version associated with a git
 // repository based on the conventional commits standard:
 // @see https://www.conventionalcommits.org/en/v1.0.0/
 type Bumper struct {
-	logger       log.ConsoleLogger
-	firstVersion string
-	dryRun       bool
+	logger log.ConsoleLogger
+	config config.Uplift
+	dryRun bool
 }
+
+// FileBump defines how a version within a file will be matched through a regex
+// and bumped using the provided version
+type FileBump struct {
+	Regex   string
+	Version string
+	Count   int
+	SemVer  bool
+}
+
+var (
+	version    = `v?\d+\.\d+\.\d+`
+	versionRgx = regexp.MustCompile(version)
+)
 
 // NewBumper initialises a new semantic version bumper
 func NewBumper(out io.Writer, opts BumpOptions) Bumper {
@@ -55,10 +77,15 @@ func NewBumper(out io.Writer, opts BumpOptions) Bumper {
 		l = log.NewVerboseLogger(out)
 	}
 
+	// Override the first version if one hasn't been provided
+	if opts.Config.FirstVersion == "" {
+		opts.Config.FirstVersion = firstVersion
+	}
+
 	return Bumper{
-		logger:       l,
-		firstVersion: opts.FirstVersion,
-		dryRun:       opts.DryRun,
+		logger: l,
+		config: opts.Config,
+		dryRun: opts.DryRun,
 	}
 }
 
@@ -73,14 +100,14 @@ func (b Bumper) Bump() error {
 
 	b.logger.Success("git repo found")
 
-	commit, err := git.LatestCommit()
+	meta, err := git.LatestCommit()
 	if err != nil {
 		b.logger.Warn("no commits found in repository")
 		return err
 	}
-	b.logger.Success("retrieved latest commit:\n'%s'", commit.Message)
+	b.logger.Success("retrieved latest commit:\n'%s'", meta.Message)
 
-	inc := ParseCommit(commit.Message)
+	inc := ParseCommit(meta.Message)
 	if inc == NoIncrement {
 		b.logger.Warn("commit doesn't contain a bump prefix, skipping!")
 		return nil
@@ -89,12 +116,16 @@ func (b Bumper) Bump() error {
 
 	ver := git.LatestTag()
 	if ver == "" {
-		ver = b.firstVersion
-		b.logger.Success("no previous tags exist, using first version: %s\n", ver)
+		ver = firstVersion
+		b.logger.Success("no previous tags exist, using first version: %s", ver)
 	} else {
 		if ver, err = b.bumpVersion(ver, inc); err != nil {
 			return err
 		}
+	}
+
+	if err := b.bumpFiles(ver, meta); err != nil {
+		return err
 	}
 
 	if b.dryRun {
@@ -141,7 +172,106 @@ func (b Bumper) bumpVersion(v string, inc Increment) (string, error) {
 	}
 
 	bv := fmt.Sprintf("%s%s", vp, newVer.String())
-	b.logger.Success("bumped version to: %s\n", bv)
+	b.logger.Success("bumped version to: %s", bv)
 
 	return bv, nil
+}
+
+func (b Bumper) bumpFiles(v string, meta git.CommitMetadata) error {
+	if len(b.config.Bumps) == 0 {
+		b.logger.Info("no files to bump, skipping!")
+		return nil
+	}
+
+	b.logger.Info("bumping files...")
+	n := 0
+
+	for _, bump := range b.config.Bumps {
+		fb := FileBump{
+			Regex:   bump.Regex,
+			Version: v,
+			Count:   bump.Count,
+			SemVer:  bump.SemVer,
+		}
+
+		bumped, err := b.bumpFile(bump.File, fb)
+		if err != nil {
+			return err
+		}
+
+		if bumped {
+			if err := git.Stage(bump.File); err != nil {
+				return err
+			}
+			n++
+		}
+	}
+
+	// Don't commit anything
+	if b.dryRun {
+		return nil
+	}
+
+	if n == 0 {
+		b.logger.Info("no files changed. nothing to commit...")
+		return nil
+	}
+
+	if err := git.Commit(meta.Author, meta.Email, "chore(release): release managed by uplift"); err != nil {
+		return err
+	}
+
+	return git.Push()
+}
+
+func (b Bumper) bumpFile(path string, bump FileBump) (bool, error) {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		b.logger.Warn("failed to open %s", path)
+		return false, err
+	}
+
+	// Ensure the supplied regex is valid, replacing the $VERSION token
+	verRgx := strings.Replace(bump.Regex, "$VERSION", version, 1)
+
+	rgx, err := regexp.Compile(verRgx)
+	if err != nil {
+		return false, err
+	}
+
+	m := rgx.Find(data)
+	if m == nil {
+		b.logger.Warn("version regex hasn't matched")
+		return false, errors.New("no version matched in file")
+	}
+	mstr := string(m)
+
+	if strings.Contains(mstr, bump.Version) {
+		b.logger.Info("skipped bumping %s as version already at %s", path, bump.Version)
+		return false, nil
+	}
+
+	// Use strings replace to ensure the replacement count is honoured
+	n := -1
+	if bump.Count > 0 {
+		n = bump.Count
+	}
+
+	// Strip any 'v' prefix if this must be a semantic version
+	v := bump.Version
+	if bump.SemVer && v[0] == 'v' {
+		v = v[1:]
+	}
+
+	verRpl := versionRgx.ReplaceAllString(mstr, v)
+	str := strings.Replace(string(data), mstr, verRpl, n)
+
+	b.logger.Success("bumped %s to version %s", path, bump.Version)
+
+	// Don't make any file changes if part of a dry-run
+	if b.dryRun {
+		return false, nil
+	}
+
+	return true, ioutil.WriteFile(path, []byte(str), 0644)
 }
