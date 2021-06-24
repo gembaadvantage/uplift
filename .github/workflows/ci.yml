@@ -45,9 +45,9 @@ jobs:
       - name: Build
         run: make build
       - name: Tag
-        if: github.ref == 'refs/heads/main'
         uses: gembaadvantage/uplift-action@v1
         with:
           version: latest
+          args: "--dry-run --verbose"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
