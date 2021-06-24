@@ -46,7 +46,7 @@ jobs:
         run: make build
       - name: Tag
         if: github.ref == 'refs/heads/main'
-        uses: gembaadvantage/uplift-action
+        uses: gembaadvantage/uplift-action@v1.0.0
         with:
           version: latest
         env:
