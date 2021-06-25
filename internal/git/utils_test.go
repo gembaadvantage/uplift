@@ -60,6 +60,18 @@ func TestLatestTagNoTagsExist(t *testing.T) {
 	assert.Equal(t, "", tag)
 }
 
+func TestLatestTagNoSemanticTags(t *testing.T) {
+	InitRepo(t)
+
+	v1 := "v1"
+	Run("tag", v1)
+	v2 := "latest"
+	EmptyCommitAndTag(t, v2, "more work")
+
+	tag := LatestTag()
+	assert.Equal(t, "", tag)
+}
+
 func TestLatestCommit(t *testing.T) {
 	InitRepo(t)
 

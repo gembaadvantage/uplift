@@ -55,12 +55,18 @@ func IsRepo() bool {
 
 // LatestTag retrieves the latest tag within the repository
 func LatestTag() string {
-	tag, err := Clean(Run("describe", "--tags", "--abbrev=0"))
+	// Filter out all tags that are non in the supported formats
+	tags, err := Clean(Run("tag", "-l", "--sort=-v:refname", "v*.*.*", "*.*.*"))
 	if err != nil {
 		return ""
 	}
 
-	return tag
+	// If no tags are found, then just return an empty string
+	if tags == "" {
+		return ""
+	}
+
+	return strings.Split(tags, "\n")[0]
 }
 
 // LatestCommit retrieves the latest commit within the repository
