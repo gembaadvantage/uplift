@@ -77,3 +77,7 @@ bumps:
 ### $VERSION
 
 **`$VERSION`** is a placeholder and will match any semantic version, including a version with an optional `v` prefix.
+
+## Transient Tags
+
+Uplift automatically ignores any transient tag when identifying the latest version. This allows multiple tagging conventions to be safely used on your repository. A transient tag, is any tag that is not in the `1.0.0` or `v1.0.0` version format.
