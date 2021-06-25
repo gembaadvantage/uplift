@@ -33,6 +33,7 @@ builds:
     goos:
       - linux
       - darwin
+      - windows
     goarch:
       - amd64
       - 386
@@ -54,6 +55,9 @@ archives:
     replacements:
       386: i386
       amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
     files:
       - README.md
       - LICENSE
@@ -65,5 +69,13 @@ brews:
     folder: Formula
     homepage: "https://github.com/gembaadvantage/uplift"
     description: "Semantic versioning the easy way"
+    license: MIT
     test: |
       system "#{bin}/uplift version --short"
+scoop:
+  bucket:
+    owner: gembaadvantage
+    name: scoops
+  homepage: "https://github.com/gembaadvantage/uplift"
+  description: "Semantic versioning the easy way"
+  license: MIT
