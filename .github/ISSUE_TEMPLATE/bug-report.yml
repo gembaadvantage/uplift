@@ -1,0 +1,69 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug]: "
+labels: [bug, triage]
+assignees:
+  - ga-paul-t
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report. Please be as descriptive and concise as possible. We value all input from the community.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear and concise description of what happened.
+      placeholder: Tell us what happened?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce it
+      description: Please list all of the steps taken to reproduce this bug.
+      value: |
+        1.
+        2.
+        3.
+        ...
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Your uplift configuration
+      description: If it is an issue related to your configuration file, please paste it here.
+      placeholder: Your uplift configuration
+      render: yaml
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: Which version?
+      description: Which version of uplift are you using? `uplift version --short`
+      placeholder: Uplift version
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Which operating system(s) are you using?
+      multiple: true
+      options:
+        - Linux
+        - Mac
+        - Windows
+        - All
+    validations:
+      required: true
+  - type: textarea
+    id: debug
+    attributes:
+      label: Optional debug output
+      description: Please provide optional debug output if you think it will help. `uplift bump --verbose`
+      render: shell
+    validations:
+      required: false

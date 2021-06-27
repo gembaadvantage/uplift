@@ -1,0 +1,35 @@
+name: New Feature
+description: Suggest a new feature
+title: "[Feature]: "
+labels: [enhancement, triage]
+assignees:
+  - ga-paul-t
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this new feature request. Please be as descriptive and concise as possible. We value all input from the community.
+  - type: textarea
+    id: describe-feature
+    attributes:
+      label: Describe your feature
+      description: A clear and concise description of the feature you are requesting.
+      placeholder: Your feature?
+    validations:
+      required: true
+  - type: textarea
+    id: potential-solution
+    attributes:
+      label: Your potential solution
+      description: A clear and concise description of your potential solution.
+      placeholder: Your potential solution?
+    validations:
+      required: true
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Any additional information?
+      description: Please provide any additional information about your feature request here
+      placeholder: Any additional information?
+    validations:
+      required: false
