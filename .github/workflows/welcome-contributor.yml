@@ -36,7 +36,7 @@ jobs:
               creator,
               state: 'all'
             })
-            const {status, data: issues} = await github.paginate(opts)
+            const issues = await github.paginate(opts)
 
             if (issues.length !== 0) {
               return
