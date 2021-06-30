@@ -31,8 +31,10 @@ import (
 
 // Uplift defines the root configuration of the application
 type Uplift struct {
-	FirstVersion string `yaml:"firstVersion"`
-	Bumps        []Bump `yaml:"bumps"`
+	FirstVersion  string       `yaml:"firstVersion"`
+	Bumps         []Bump       `yaml:"bumps"`
+	CommitMessage string       `yaml:"commitMessage"`
+	CommitAuthor  CommitAuthor `yaml:"commitAuthor"`
 }
 
 // Bump defines configuration for bumping indvidual files based
@@ -42,6 +44,12 @@ type Bump struct {
 	Regex  string `yaml:"regex"`
 	Count  int    `yaml:"count"`
 	SemVer bool   `yaml:"semver"`
+}
+
+// CommitAuthor defines configuration about the author of a git commit
+type CommitAuthor struct {
+	Name  string `yaml:"name"`
+	Email string `yaml:"email"`
 }
 
 // Load the YAML config file
@@ -62,3 +70,5 @@ func Load(f string) (Uplift, error) {
 	err = yaml.UnmarshalStrict(data, &cfg)
 	return cfg, err
 }
+
+// TODO: how to test this? check if valid YAML is expected??

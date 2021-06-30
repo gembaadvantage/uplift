@@ -382,7 +382,41 @@ func TestBumpFileDefaultCommitMessage(t *testing.T) {
 
 	assert.Equal(t, "uplift", commit.Author)
 	assert.Equal(t, "uplift@test.com", commit.Email)
-	assert.Equal(t, "chore(release): release managed by uplift", commit.Message)
+	assert.Equal(t, "ci(bump): files bumped by uplift", commit.Message)
+}
+
+func TestBumpFileWithCustomisedCommit(t *testing.T) {
+	MkRepo(t, "0.1.0", "fix: Lorem ipsum dolor sit amet")
+
+	file := "version: 0.1.0"
+	path := WriteFile(t, file)
+
+	opts := BumpOptions{
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File:  path,
+					Regex: "version: $VERSION",
+				},
+			},
+			CommitMessage: "chore: Lorem ipsum dolor sit amet",
+			CommitAuthor: config.CommitAuthor{
+				Name:  "joe.bloggs",
+				Email: "joe.bloggs@gmail.com",
+			},
+		},
+	}
+
+	b := NewBumper(io.Discard, opts)
+	err := b.Bump()
+	require.NoError(t, err)
+
+	commit, err := git.LatestCommit()
+	require.NoError(t, err)
+
+	assert.Equal(t, "joe.bloggs", commit.Author)
+	assert.Equal(t, "joe.bloggs@gmail.com", commit.Email)
+	assert.Equal(t, "chore: Lorem ipsum dolor sit amet", commit.Message)
 }
 
 func TestBumpFileFirstTagMatchesVersionInFile(t *testing.T) {

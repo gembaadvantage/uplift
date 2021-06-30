@@ -100,14 +100,14 @@ func (b Bumper) Bump() error {
 
 	b.logger.Success("git repo found")
 
-	meta, err := git.LatestCommit()
+	cmt, err := git.LatestCommit()
 	if err != nil {
 		b.logger.Warn("no commits found in repository")
 		return err
 	}
-	b.logger.Success("retrieved latest commit:\n'%s'", meta.Message)
+	b.logger.Success("retrieved latest commit:\n'%s'", cmt.Message)
 
-	inc := ParseCommit(meta.Message)
+	inc := ParseCommit(cmt.Message)
 	if inc == NoIncrement {
 		b.logger.Warn("commit doesn't contain a bump prefix, skipping!")
 		return nil
@@ -124,7 +124,7 @@ func (b Bumper) Bump() error {
 		}
 	}
 
-	if err := b.bumpFiles(ver, meta); err != nil {
+	if err := b.bumpFiles(ver, cmt); err != nil {
 		return err
 	}
 
@@ -217,11 +217,35 @@ func (b Bumper) bumpFiles(v string, meta git.CommitMetadata) error {
 		return nil
 	}
 
-	if err := git.Commit(meta.Author, meta.Email, "chore(release): release managed by uplift"); err != nil {
+	// TODO: refactor
+	cmt := b.buildCommit(meta)
+	if err := git.Commit(cmt.Author, cmt.Email, cmt.Message); err != nil {
 		return err
 	}
 
 	return git.Push()
+}
+
+func (b Bumper) buildCommit(meta git.CommitMetadata) git.CommitMetadata {
+	c := git.CommitMetadata{
+		Author:  meta.Author,
+		Email:   meta.Email,
+		Message: "ci(bump): files bumped by uplift",
+	}
+
+	if b.config.CommitMessage != "" {
+		c.Message = b.config.CommitMessage
+	}
+
+	if b.config.CommitAuthor.Name != "" {
+		c.Author = b.config.CommitAuthor.Name
+	}
+
+	if b.config.CommitAuthor.Email != "" {
+		c.Email = b.config.CommitAuthor.Email
+	}
+
+	return c
 }
 
 func (b Bumper) bumpFile(path string, bump FileBump) (bool, error) {

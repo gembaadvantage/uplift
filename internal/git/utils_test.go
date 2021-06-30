@@ -125,12 +125,18 @@ func TestCommit(t *testing.T) {
 	InitRepo(t)
 	StagedFile(t)
 
-	err := Commit("john.doe", "john.doe@gmail.com", "first commit")
+	cmt := CommitDetails{
+		Author:  "joe.bloggs",
+		Email:   "joe.bloggs@gmail.com",
+		Message: "first commit",
+	}
+
+	err := Commit(cmt)
 	require.NoError(t, err)
 
 	out, err := Clean(Run("log", "-1", `--pretty=format:'%an:%ae:%B'`))
 	require.NoError(t, err)
-	assert.Equal(t, "john.doe:john.doe@gmail.com:first commit", out)
+	assert.Equal(t, "joe.bloggs:joe.bloggs@gmail.com:first commit", out)
 }
 
 func UnstagedFile(t *testing.T) string {
