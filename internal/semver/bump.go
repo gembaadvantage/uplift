@@ -100,14 +100,14 @@ func (b Bumper) Bump() error {
 
 	b.logger.Success("git repo found")
 
-	cmt, err := git.LatestCommit()
+	commit, err := git.LatestCommit()
 	if err != nil {
 		b.logger.Warn("no commits found in repository")
 		return err
 	}
-	b.logger.Success("retrieved latest commit:\n'%s'", cmt.Message)
+	b.logger.Success("retrieved latest commit:\n'%s'", commit.Message)
 
-	inc := ParseCommit(cmt.Message)
+	inc := ParseCommit(commit.Message)
 	if inc == NoIncrement {
 		b.logger.Warn("commit doesn't contain a bump prefix, skipping!")
 		return nil
@@ -124,7 +124,10 @@ func (b Bumper) Bump() error {
 		}
 	}
 
-	if err := b.bumpFiles(ver, cmt); err != nil {
+	// Ensure any files that are bumped are associated with the expected commit
+	commit = b.buildCommit(commit)
+
+	if err := b.bumpFiles(ver, commit); err != nil {
 		return err
 	}
 
@@ -177,7 +180,7 @@ func (b Bumper) bumpVersion(v string, inc Increment) (string, error) {
 	return bv, nil
 }
 
-func (b Bumper) bumpFiles(v string, meta git.CommitMetadata) error {
+func (b Bumper) bumpFiles(v string, commit git.CommitDetails) error {
 	if len(b.config.Bumps) == 0 {
 		b.logger.Info("no files to bump, skipping!")
 		return nil
@@ -217,24 +220,18 @@ func (b Bumper) bumpFiles(v string, meta git.CommitMetadata) error {
 		return nil
 	}
 
-	// TODO: refactor
-	cmt := b.buildCommit(meta)
-	if err := git.Commit(cmt.Author, cmt.Email, cmt.Message); err != nil {
+	if err := git.Commit(commit); err != nil {
 		return err
 	}
 
 	return git.Push()
 }
 
-func (b Bumper) buildCommit(meta git.CommitMetadata) git.CommitMetadata {
-	c := git.CommitMetadata{
-		Author:  meta.Author,
-		Email:   meta.Email,
+func (b Bumper) buildCommit(commit git.CommitDetails) git.CommitDetails {
+	c := git.CommitDetails{
+		Author:  commit.Author,
+		Email:   commit.Email,
 		Message: "ci(bump): files bumped by uplift",
-	}
-
-	if b.config.CommitMessage != "" {
-		c.Message = b.config.CommitMessage
 	}
 
 	if b.config.CommitAuthor.Name != "" {
@@ -243,6 +240,10 @@ func (b Bumper) buildCommit(meta git.CommitMetadata) git.CommitMetadata {
 
 	if b.config.CommitAuthor.Email != "" {
 		c.Email = b.config.CommitAuthor.Email
+	}
+
+	if b.config.CommitMessage != "" {
+		c.Message = b.config.CommitMessage
 	}
 
 	return c
