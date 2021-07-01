@@ -57,22 +57,44 @@ $ uplift bump --dry-run --verbose
 Uplift can be configured through the existance of an optional `.uplift.yml` configuration file in the root of your repository. Other supported variations are: `.uplift.yaml`, `uplift.yml` and `uplift.yaml`.
 
 ```yaml
+# An initial version that will be used for the first tag in your repository.
+# Tags with a 'v' prefix are supported. You cannot change format after the first tag
+# Defaults to 0.1.0
 firstVersion: v1.0.0
+
+# Changes the commit message when bumping files
+# Defaults to chore(release): release managed by uplift
+commitMessage: "chore: a custom commit message"
+
+# Changes the commit author when bumping files
+commitAuthor:
+  # Name of the author
+  # Defaults to the author name within the last commit
+  name: "joe.bloggs"
+
+  # Email of the author
+  # Defaults to the author email within the last commit
+  email: "joe.bloggs@gmail.com"
+
+# A list of files whose version numbers should be bumped and kept in sync with the
+# latest calculated repository tag.
+# Defaults to an empty list
 bumps:
-  - file: ./chart/my-chart/Chart.yaml
+  - # The path of the file relative to where uplift is executed
+    file: ./chart/my-chart/Chart.yaml
+
+    # A regex for matching a version within the file
     regex: "version: $VERSION"
+
+    # If the matched version in the file should be replaced with a semantic version.
+    # This will strip any 'v' prefix if needed
+    # Defaults to false
     semver: true
+
+    # The number of times any matched version should be replaced
+    # Defaults to 0, which replaces all matches
     count: 1
 ```
-
-| Option       | Required | Default         | Description                                                                                            |
-| ------------ | -------- | --------------- | ------------------------------------------------------------------------------------------------------ |
-| firstVersion | No       | 0.1.0           | An initial version for the first tag against the repository                                            |
-| bumps        | No       | []              | A list of files whose version numbers should be bumped and kept in sync with the latest repository tag |
-| bumps.file   | Yes      | -               | The path of the file, relative to the root of the repository                                           |
-| bumps.regex  | Yes      | -               | A regex used to identify a version within the file that should be bumped                               |
-| bumps.semver | No       | false           | The version in the file must be a semantic version, ensuring any `v` prefix is removed                 |
-| bumps.count  | No       | 0 (All Matches) | The number of times the matching version should be bumped within the file                              |
 
 ### $VERSION
 

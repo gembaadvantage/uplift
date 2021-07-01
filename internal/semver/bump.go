@@ -231,7 +231,7 @@ func (b Bumper) buildCommit(commit git.CommitDetails) git.CommitDetails {
 	c := git.CommitDetails{
 		Author:  commit.Author,
 		Email:   commit.Email,
-		Message: "ci(bump): files bumped by uplift",
+		Message: "chore(release): release managed by uplift",
 	}
 
 	if b.config.CommitAuthor.Name != "" {
