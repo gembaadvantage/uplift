@@ -25,48 +25,48 @@ package config
 import (
 	"io/ioutil"
 	"os"
+	"testing"
 
-	"github.com/go-yaml/yaml"
+	"github.com/stretchr/testify/require"
 )
 
-// Uplift defines the root configuration of the application
-type Uplift struct {
-	FirstVersion  string       `yaml:"firstVersion"`
-	Bumps         []Bump       `yaml:"bumps"`
-	CommitMessage string       `yaml:"commitMessage"`
-	CommitAuthor  CommitAuthor `yaml:"commitAuthor"`
+func TestLoadMissingFile(t *testing.T) {
+	_, err := Load("missing_file.yml")
+	require.Error(t, err)
 }
 
-// Bump defines configuration for bumping indvidual files based
-// on the new calculated semantic version number
-type Bump struct {
-	File   string `yaml:"file"`
-	Regex  string `yaml:"regex"`
-	Count  int    `yaml:"count"`
-	SemVer bool   `yaml:"semver"`
+func TestLoadUnsupportedYaml(t *testing.T) {
+	path := WriteFile(t, `
+unrecognised_field: ""`)
+
+	_, err := Load(path)
+	require.Error(t, err)
 }
 
-// CommitAuthor defines configuration about the author of a git commit
-type CommitAuthor struct {
-	Name  string `yaml:"name"`
-	Email string `yaml:"email"`
+func TestLoadInvalidYaml(t *testing.T) {
+	path := WriteFile(t, `
+doc: [`)
+
+	_, err := Load(path)
+	require.Error(t, err)
 }
 
-// Load the YAML config file
-func Load(f string) (Uplift, error) {
-	fh, err := os.Open(f)
-	if err != nil {
-		return Uplift{}, err
-	}
-	defer fh.Close()
+func WriteFile(t *testing.T, s string) string {
+	t.Helper()
 
-	// Read the contents of the file in one go
-	data, err := ioutil.ReadAll(fh)
-	if err != nil {
-		return Uplift{}, err
-	}
+	current, err := os.Getwd()
+	require.NoError(t, err)
 
-	var cfg Uplift
-	err = yaml.UnmarshalStrict(data, &cfg)
-	return cfg, err
+	file, err := ioutil.TempFile(current, "*")
+	require.NoError(t, err)
+
+	_, err = file.WriteString(s)
+	require.NoError(t, err)
+	require.NoError(t, file.Close())
+
+	t.Cleanup(func() {
+		require.NoError(t, os.Remove(file.Name()))
+	})
+
+	return file.Name()
 }

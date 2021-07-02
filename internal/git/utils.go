@@ -29,11 +29,16 @@ import (
 	"strings"
 )
 
-// CommitMetadata contains metadata about a specific git commit
-type CommitMetadata struct {
+// CommitDetails contains mandatory details about a specific git commit
+type CommitDetails struct {
 	Message string
 	Author  string
 	Email   string
+}
+
+// String prints out a user friendly string representation
+func (c CommitDetails) String() string {
+	return fmt.Sprintf("%s <%s>\n%s", c.Author, c.Email, c.Message)
 }
 
 // Run executes a git command and returns its output or errors
@@ -70,10 +75,10 @@ func LatestTag() string {
 }
 
 // LatestCommit retrieves the latest commit within the repository
-func LatestCommit() (CommitMetadata, error) {
+func LatestCommit() (CommitDetails, error) {
 	out, err := Clean(Run("log", "-1", `--pretty=format:'"%an","%ae","%B"'`))
 	if err != nil {
-		return CommitMetadata{}, err
+		return CommitDetails{}, err
 	}
 
 	// Split the formatted string into its component parts
@@ -84,7 +89,7 @@ func LatestCommit() (CommitMetadata, error) {
 	email := p[1][1 : len(p[1])-1]
 	msg := p[2][1 : len(p[2])-1]
 
-	return CommitMetadata{
+	return CommitDetails{
 		Author: author,
 		Email:  email,
 		// Strip trailing newline
@@ -112,15 +117,15 @@ func Tag(tag string) error {
 
 // Commit will generate a commit against the repository and push it to the origin.
 // The commit will be associated with the provided author and email address
-func Commit(author, email, commit string) error {
+func Commit(cd CommitDetails) error {
 	args := []string{
 		"-c",
-		fmt.Sprintf("user.name='%s'", author),
+		fmt.Sprintf("user.name='%s'", cd.Author),
 		"-c",
-		fmt.Sprintf("user.email='%s'", email),
+		fmt.Sprintf("user.email='%s'", cd.Email),
 		"commit",
 		"-m",
-		commit,
+		cd.Message,
 	}
 
 	if _, err := Clean(Run(args...)); err != nil {
