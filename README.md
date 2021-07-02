@@ -48,6 +48,9 @@ $ uplift bump --dry-run --verbose
 ✅ commit contains a bump prefix, increment identified as 'Minor'
 ℹ️ existing version found: 0.1.0
 ✅ bumped version to: 0.2.0
+ℹ️  Any commits will use:
+joe.bloggs <joe.bloggs@gmail.com>
+chore(release): a custom message
 ℹ️ no files to bump, skipping!
 0.2.0
 ```

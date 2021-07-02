@@ -246,6 +246,7 @@ func (b Bumper) buildCommit(commit git.CommitDetails) git.CommitDetails {
 		c.Message = b.config.CommitMessage
 	}
 
+	b.logger.Info("Any commits will use:\n%s", c)
 	return c
 }
 

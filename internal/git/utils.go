@@ -36,6 +36,11 @@ type CommitDetails struct {
 	Email   string
 }
 
+// String prints out a user friendly string representation
+func (c CommitDetails) String() string {
+	return fmt.Sprintf("%s <%s>\n%s", c.Author, c.Email, c.Message)
+}
+
 // Run executes a git command and returns its output or errors
 func Run(args ...string) (string, error) {
 	var cmd = exec.Command("git", args...)
