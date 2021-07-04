@@ -29,49 +29,40 @@ import (
 )
 
 const (
-	bashDesc = `
-Generate uplift completion script for the bash shell.
+	bashDesc = `Generate an uplift completion script for the bash shell. 
+To use bash completions ensure you have them installed and enabled
 
 To load completions in your current shell session:
-
-	source <(uplift completion bash)
+  $ source <(uplift completion bash)
 
 To load completions for every new session, execute once:
+## Linux:
+  $ uplift completion bash > /etc/bash_completion.d/uplift
 
-- Linux:
-	uplift completion bash > /etc/bash_completion.d/uplift
+## MacOS:
+  $ uplift completion bash > /usr/local/etc/bash_completion.d/uplift`
 
-- MacOS:
-	uplift completion bash > /usr/local/etc/bash_completion.d/uplift
-`
-
-	zshDesc = `
-Generate uplift completion script for the zsh shell.
+	zshDesc = `Generate an uplift completion script for the zsh shell.
 
 To load completions in your current shell session:
-
-    source <(uplift completion zsh)
+  $ source <(uplift completion zsh)
 
 To load completions for every new session, execute once:
+  $ uplift completion zsh > "${fpath[1]}/_uplift"
 
-    uplift completion zsh > "${fpath[1]}/_uplift"
-`
+Alternatively install the uplift plugin with oh-my-zsh`
 
-	fishDesc = `
-Generate uplift completion script for the fish shell.
+	fishDesc = `Generate uplift completion script for the fish shell.
 
 To load completions in your current shell session:
-
-    uplift completion fish | source
+  $ uplift completion fish | source
 
 To load completions for every new session, execute once:
+  $ uplift completion fish > ~/.config/fish/completions/uplift.fish
 
-    uplift completion fish > ~/.config/fish/completions/uplift.fish
+** You will need to start a new shell for this setup to take effect. **`
 
-** You will need to start a new shell for this setup to take effect. **
-`
-
-	noDescFlag     = "no-desc"
+	noDescFlag     = "no-descriptions"
 	noDescFlagText = "disable completion descriptions"
 )
 
@@ -85,14 +76,15 @@ func newCompletionCmd(out io.Writer) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "completion",
-		Short: "Generate completion scripts for your target shell",
-		Long:  "generate uplift completion scripts for either the bash, zsh or fish shells",
+		Short: "Generate completion script for your target shell",
+		Long:  "Generate an uplift completion script for either the bash, zsh or fish shells",
 	}
 
 	bash := &cobra.Command{
 		Use:                   "bash",
 		Short:                 "generate a bash shell completion script",
 		Long:                  bashDesc,
+		Args:                  cobra.NoArgs,
 		DisableFlagsInUseLine: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts.shell = "bash"
@@ -104,6 +96,7 @@ func newCompletionCmd(out io.Writer) *cobra.Command {
 		Use:   "zsh",
 		Short: "generate a zsh shell completion script",
 		Long:  zshDesc,
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts.shell = "zsh"
 			return opts.Run(out, cmd)
@@ -115,6 +108,7 @@ func newCompletionCmd(out io.Writer) *cobra.Command {
 		Use:   "fish",
 		Short: "generate a fish shell completion script",
 		Long:  fishDesc,
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts.shell = "fish"
 			return opts.Run(out, cmd)
