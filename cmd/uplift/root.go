@@ -36,6 +36,6 @@ func newRootCmd(out io.Writer, args []string, cfg config.Uplift) (*cobra.Command
 		SilenceUsage: true,
 	}
 
-	cmd.AddCommand(newVersionCmd(out), newBumpCmd(out, cfg))
+	cmd.AddCommand(newVersionCmd(out), newBumpCmd(out, cfg), newCompletionCmd(out))
 	return cmd, nil
 }

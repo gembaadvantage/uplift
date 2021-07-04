@@ -72,8 +72,24 @@ brews:
     homepage: "https://github.com/gembaadvantage/uplift"
     description: "Semantic versioning the easy way"
     license: MIT
+    install: |
+      bin.install "uplift"
+
+      bash_output = Utils.safe_popen_read(bin/"uplift", "completion", "bash")
+      (bash_completion/"uplift").write bash_output
+
+      zsh_output = Utils.safe_popen_read(bin/"uplift", "completion", "zsh")
+      (zsh_completion/"_uplift").write zsh_output
+
+      fish_output = Utils.safe_popen_read(bin/"uplift", "completion", "fish")
+      (fish_completion/"uplift.fish").write fish_output
     test: |
-      system "#{bin}/uplift version --short"
+      installed_version = shell_output("#{bin}/uplift version --short 2>&1")
+      assert_match "v#{version}", installed_version
+    dependencies:
+      - name: go
+        type: optional
+      - name: git
 scoop:
   bucket:
     owner: gembaadvantage

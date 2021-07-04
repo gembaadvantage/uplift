@@ -30,6 +30,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	bumpDesc = `Bumps the semantic version within your git repository. The version bump 
+is based on the conventional commit message from the last commit. Uplift
+can also bump individual files in your repository to keep them in sync`
+)
+
+// bumps the version within a git repository tag, and bumps files
+
 type bumpOptions struct {
 	dryRun  bool
 	verbose bool
@@ -40,7 +48,9 @@ func newBumpCmd(out io.Writer, cfg config.Uplift) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "bump",
-		Short: "Bump the version of your application",
+		Short: "Bump the semantic version",
+		Long:  bumpDesc,
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Run(out, cfg, opts)
 		},
