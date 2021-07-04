@@ -86,6 +86,10 @@ brews:
     test: |
       installed_version = shell_output("#{bin}/uplift version --short 2>&1")
       assert_match "v#{version}", installed_version
+    dependencies:
+      - name: go
+        type: optional
+      - name: git
 scoop:
   bucket:
     owner: gembaadvantage
