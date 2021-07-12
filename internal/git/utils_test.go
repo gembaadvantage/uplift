@@ -109,6 +109,25 @@ func TestTag(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestAnnotatedTag(t *testing.T) {
+	InitRepo(t)
+
+	v := "v1.0.0"
+	cd := CommitDetails{
+		Author:  "joe.bloggs",
+		Email:   "joe.bloggs@gmail.com",
+		Message: "a tag commit message",
+	}
+
+	err := AnnotatedTag(v, cd)
+	require.NoError(t, err)
+
+	out, _ := Clean(Run("for-each-ref", fmt.Sprintf("refs/tags/%s", v),
+		"--format='%(taggername):%(taggeremail):%(contents)'"))
+
+	require.Contains(t, out, fmt.Sprintf("%s:<%s>:%s", cd.Author, cd.Email, cd.Message))
+}
+
 func TestStage(t *testing.T) {
 	InitRepo(t)
 	file := UnstagedFile(t)

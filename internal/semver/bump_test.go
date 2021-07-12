@@ -382,7 +382,7 @@ func TestBumpFileDefaultCommitMessage(t *testing.T) {
 
 	assert.Equal(t, "uplift", commit.Author)
 	assert.Equal(t, "uplift@test.com", commit.Email)
-	assert.Equal(t, "chore(release): release managed by uplift", commit.Message)
+	assert.Equal(t, "ci(bump): bumped version to 0.1.1", commit.Message)
 }
 
 func TestBumpFileWithCustomisedCommit(t *testing.T) {
