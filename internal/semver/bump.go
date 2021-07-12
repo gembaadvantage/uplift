@@ -125,7 +125,7 @@ func (b Bumper) Bump() error {
 	}
 
 	// Ensure any files that are bumped are associated with the expected commit
-	commit = b.buildCommit(commit)
+	commit = b.buildCommit(ver, commit)
 
 	if err := b.bumpFiles(ver, commit); err != nil {
 		return err
@@ -137,8 +137,14 @@ func (b Bumper) Bump() error {
 		return nil
 	}
 
-	if err := git.Tag(ver); err != nil {
-		return err
+	if b.config.AnnotatedTags {
+		if err := git.AnnotatedTag(ver, commit); err != nil {
+			return err
+		}
+	} else {
+		if err := git.Tag(ver); err != nil {
+			return err
+		}
 	}
 
 	b.logger.Out(ver)
@@ -227,11 +233,11 @@ func (b Bumper) bumpFiles(v string, commit git.CommitDetails) error {
 	return git.Push()
 }
 
-func (b Bumper) buildCommit(commit git.CommitDetails) git.CommitDetails {
+func (b Bumper) buildCommit(ver string, commit git.CommitDetails) git.CommitDetails {
 	c := git.CommitDetails{
 		Author:  commit.Author,
 		Email:   commit.Email,
-		Message: "chore(release): release managed by uplift",
+		Message: fmt.Sprintf("ci(bump): bumped version to %s", ver),
 	}
 
 	if b.config.CommitAuthor.Name != "" {

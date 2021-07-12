@@ -97,9 +97,39 @@ func LatestCommit() (CommitDetails, error) {
 	}, nil
 }
 
-// Tag the repository and push it to the origin
+// Tag will create a lightweight tag against the repository and push it to the origin
 func Tag(tag string) error {
 	if _, err := Clean(Run("tag", tag)); err != nil {
+		return err
+	}
+
+	// Inspect the repo for an origin. If no origin exists, then skip the push
+	if _, err := Clean(Run("remote", "show", "origin")); err != nil {
+		return nil
+	}
+
+	if _, err := Clean(Run("push", "origin", tag)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// AnnotatedTag will create an annotated tag against the repository and push it to the origin
+func AnnotatedTag(tag string, cd CommitDetails) error {
+	args := []string{
+		"-c",
+		fmt.Sprintf("user.name='%s'", cd.Author),
+		"-c",
+		fmt.Sprintf("user.email='%s'", cd.Email),
+		"tag",
+		"-a",
+		tag,
+		"-m",
+		cd.Message,
+	}
+
+	if _, err := Clean(Run(args...)); err != nil {
 		return err
 	}
 

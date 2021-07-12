@@ -35,6 +35,7 @@ type Uplift struct {
 	Bumps         []Bump       `yaml:"bumps"`
 	CommitMessage string       `yaml:"commitMessage"`
 	CommitAuthor  CommitAuthor `yaml:"commitAuthor"`
+	AnnotatedTags bool         `yaml:"annotatedTags"`
 }
 
 // Bump defines configuration for bumping indvidual files based

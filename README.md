@@ -65,8 +65,14 @@ Uplift can be configured through the existance of an optional `.uplift.yml` conf
 # Defaults to 0.1.0
 firstVersion: v1.0.0
 
+# Use annotated tags instead of lightweight tags when tagging a version bump. An
+# annotated tag is treated like a regular commit and contains both author details
+# and a commit message. Uses the same commit message and author details provided
+# Defaults to false
+annotatedTags: true
+
 # Changes the commit message when bumping files
-# Defaults to chore(release): release managed by uplift
+# Defaults to ci(bump): bumped version to $VERSION
 commitMessage: "chore: a custom commit message"
 
 # Changes the commit author when bumping files
