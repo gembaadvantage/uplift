@@ -137,8 +137,14 @@ func (b Bumper) Bump() error {
 		return nil
 	}
 
-	if err := git.Tag(ver); err != nil {
-		return err
+	if b.config.AnnotatedTags {
+		if err := git.AnnotatedTag(ver, commit); err != nil {
+			return err
+		}
+	} else {
+		if err := git.Tag(ver); err != nil {
+			return err
+		}
 	}
 
 	b.logger.Out(ver)

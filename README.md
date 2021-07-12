@@ -72,7 +72,7 @@ firstVersion: v1.0.0
 annotatedTags: true
 
 # Changes the commit message when bumping files
-# Defaults to ci(bump): files bumped to version $VERSION
+# Defaults to ci(bump): bumped version to $VERSION
 commitMessage: "chore: a custom commit message"
 
 # Changes the commit author when bumping files

@@ -165,6 +165,27 @@ func TestBumpAlwaysUseLatestCommit(t *testing.T) {
 	assert.Equal(t, "", git.LatestTag())
 }
 
+func TestBumpWithAnnotatedTag(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommitAndTag(t, "0.1.0", "feat: Lorem ipsum dolor sit amet")
+
+	b := NewBumper(io.Discard, BumpOptions{
+		Config: config.Uplift{
+			AnnotatedTags: true,
+			CommitMessage: "this is an annotated tag",
+		},
+	})
+	err := b.Bump()
+
+	require.NoError(t, err)
+	assert.Equal(t, "0.2.0", git.LatestTag())
+
+	out, _ := git.Clean(git.Run("for-each-ref", "refs/tags/0.2.0",
+		"--format='%(contents)'"))
+
+	assert.Contains(t, out, "this is an annotated tag")
+}
+
 func TestBumpFile(t *testing.T) {
 	tests := []struct {
 		name     string
