@@ -44,7 +44,7 @@ jobs:
       - name: Test
         run: make test
       - name: Code Coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2.0.1
       - name: Build
         run: make build
       - name: Tag
