@@ -124,12 +124,12 @@ func TestBumpFirstVersion(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommit(t, "feat: Lorem ipsum dolor sit amet")
 
-	b := NewBumper(io.Discard, BumpOptions{Config: config.Uplift{FirstVersion: "0.1.0"}})
+	b := NewBumper(io.Discard, BumpOptions{Config: config.Uplift{FirstVersion: "v0.1.0"}})
 	err := b.Bump()
 	require.NoError(t, err)
 
 	v := git.LatestTag()
-	assert.Equal(t, "0.1.0", v)
+	assert.Equal(t, "v0.1.0", v)
 }
 
 func TestBumpEmptyRepo(t *testing.T) {
