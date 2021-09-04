@@ -116,7 +116,7 @@ func (b Bumper) Bump() error {
 
 	ver := git.LatestTag()
 	if ver == "" {
-		ver = firstVersion
+		ver = b.config.FirstVersion
 		b.logger.Success("no previous tags exist, using first version: %s", ver)
 	} else {
 		if ver, err = b.bumpVersion(ver, inc); err != nil {
