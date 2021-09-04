@@ -10,7 +10,7 @@ Semantic versioning the easy way. Automatic tagging and version bumping of files
 
 ## Install
 
-Binary downloads of Uplft can be found on the [Releases](https://github.com/gembaadvantage/uplift/releases) page. Unpack the `uplift` binary and add it to your PATH.
+Binary downloads of `uplift` can be found on the [Releases](https://github.com/gembaadvantage/uplift/releases) page. Unpack the `uplift` binary and add it to your PATH.
 
 ### Homebrew
 
@@ -19,6 +19,22 @@ To use [Homebrew](https://brew.sh/):
 ```sh
 brew tap gembaadvantage/tap
 brew install uplift
+```
+
+### GoFish
+
+To use [Fish](https://gofi.sh/):
+
+```sh
+gofish install uplift
+```
+
+### Scoop
+
+To use [Scoop](https://scoop.sh/):
+
+```sh
+scoop install uplift
 ```
 
 ## Quick Start
