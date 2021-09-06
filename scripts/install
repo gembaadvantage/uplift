@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2021 Gemba Advantage
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# in the Software without restriction, including without limitation the rights
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# Install script is heavily based on: https://github.com/Masterminds/glide.sh/blob/master/get
+
+HAS_CURL="$(type "curl" &> /dev/null && echo true || echo false)"
+HAS_WGET="$(type "wget" &> /dev/null && echo true || echo false)"
+
+initArch() {
+  ARCH=$(uname -m)
+  case $ARCH in
+    armv5*) ARCH="arm";; # IGNORE?
+    armv6*) ARCH="arm";; # IGNORE?
+    armv7*) ARCH="arm";;
+    aarch64) ARCH="arm64";;
+    x86) ARCH="i386";;
+    x86_64) ARCH="x86_64";;
+    i686) ARCH="i386";;
+    i386) ARCH="i386";;
+    ppc64le) ARCH="ppc64le";;
+  esac
+}
+
+initOS() {
+  OS=$(echo `uname`|tr '[:upper:]' '[:lower:]')
+
+  case "$OS" in
+    # Minimalist GNU for Windows
+    mingw*) OS='windows';;
+	  msys*) OS='windows';;
+  esac
+}
+
+canDownload() {
+    local supported="darwin-amd64\ndarwin-x86_64\nlinux-arm\nlinux-arm64\nlinux-arm386\nlinux-i386\nlinux-ppc64le\nlinx-x86_64\nwindows-arm\nwindows-i386\nwindows-x86_64"
+    if ! echo "${supported}" | grep -q "${OS}-${ARCH}"; then
+      echo "No prebuilt binary currently exists for ${OS}-${ARCH}."
+      exit 1
+    fi
+
+    if [ "${HAS_CURL}" != "true" ] && [ "${HAS_WGET}" != "true" ]; then
+      echo "Either curl or wget is required to download binary. Please install and try again"
+      exit 1
+    fi
+}
+
+download() {
+  if [ "${HAS_CURL}" == "true" ]; then
+    VERSION="$(curl -s https://api.github.com/repos/gembaadvantage/uplift/releases/latest | grep "tag_name" | cut -d'v' -f2 | cut -d'"' -f1)"
+  elif [ "${HAS_WGET}" == "true" ]; then
+    VERSION="$(wget -q https://api.github.com/repos/gembaadvantage/uplift/releases/latest -O - 2>&1 | grep "tag_name" | cut -d'v' -f2 | cut -d'"' -f1)"
+  fi
+
+  echo "Attempting to download uplift v${VERSION}..."
+
+  PACKAGE_TYPE="tar.gz"
+  if [ "${OS}" == "windows" ]; then
+    PACKAGE_TYPE="zip"
+  fi
+
+  local archive="uplift_${VERSION}_${OS}-${ARCH}.${PACKAGE_TYPE}"
+
+  DOWNLOAD_URL="https://github.com/gembaadvantage/uplift/releases/download/v${VERSION}/${archive}"
+  DOWNLOAD_DIR="$(mktemp -dt uplift-install)"
+  UPLIFT_FILE="${DOWNLOAD_DIR}/${archive}"
+
+  if [ "${HAS_CURL}" == "true" ]; then
+    curl -SsL "$DOWNLOAD_URL" -o "$UPLIFT_FILE"
+  elif [ "${HAS_WGET}" == "true" ]; then
+    wget -q -O "$UPLIFT_FILE" "$DOWNLOAD_URL"
+  fi
+}
+
+install() {
+  echo "Installing uplift..."
+
+  local extract_dir="$DOWNLOAD_DIR/uplift-$VERSION"
+  mkdir -p $extract_dir
+  tar xf "$UPLIFT_FILE" -C "${extract_dir}"
+  sudo cp "${extract_dir}/uplift" "/usr/local/bin/uplift"
+
+  echo "Installed uplift to /usr/local/bin"
+}
+
+tidy() {
+  if [[ -d "${DOWNLOAD_DIR:-}" ]]; then
+    rm -rf "$DOWNLOAD_DIR"
+  fi
+}
+
+verify() {
+  set +e
+  UPLIFT="$(command -v uplift)"
+  if [ "$?" = "1" ]; then
+    echo "Uplift not found. Is $UPLIFT_INSTALL_DIR on your "'$PATH?'
+    exit 1
+  fi
+
+  # Test version
+  INSTALLED_VERSION="$(uplift version --short)"
+  if [ "${INSTALLED_VERSION}" != "v${VERSION}" ]; then
+    echo "Found version $INSTALLED_VERSION of uplift and not expected installed version of $VERSION"
+    exit 1
+  fi
+  set -e
+}
+
+bye() {
+  local result=$?
+	if [ "$result" != "0" ]; then
+		echo "Failed to install uplift"
+	fi
+  tidy
+	exit $result
+}
+
+trap "bye" EXIT
+set -e
+
+initArch
+initOS
+canDownload
+download
+install
+verify
+tidy
