@@ -28,8 +28,8 @@ HAS_WGET="$(type "wget" &> /dev/null && echo true || echo false)"
 initArch() {
   ARCH=$(uname -m)
   case $ARCH in
-    armv5*) ARCH="arm";; # IGNORE?
-    armv6*) ARCH="arm";; # IGNORE?
+    armv5*) ARCH="arm";;
+    armv6*) ARCH="arm";;
     armv7*) ARCH="arm";;
     aarch64) ARCH="arm64";;
     x86) ARCH="i386";;
