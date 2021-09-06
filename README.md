@@ -37,6 +37,16 @@ To use [Scoop](https://scoop.sh/):
 scoop install uplift
 ```
 
+### Script
+
+To install using a shell script:
+
+```sh
+curl https://raw.githubusercontent.com/gembaadvantage/uplift/master/scripts/get-uplift > get-uplift
+chmod 700 get-uplift
+./get-uplift
+```
+
 ## Quick Start
 
 Based on the latest commit, the repository will be tagged with the next calculated version.
