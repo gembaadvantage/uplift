@@ -20,29 +20,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package tasks
 
 import (
-	"os"
-
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
-func main() {
-	cfg, err := loadConfig()
-	if err != nil {
-		os.Exit(1)
+// CurrentVersion ...
+type CurrentVersion struct{}
+
+// String ...
+func (v CurrentVersion) String() string {
+	return ""
+}
+
+// Run ...
+func (v CurrentVersion) Run(ctx *context.Context) error {
+	tag := git.LatestTag()
+	if tag == "" {
+		return nil
 	}
 
-	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
-
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+	var err error
+	ctx.CurrentVersion, err = semver.Parse(tag)
+	return err
 }

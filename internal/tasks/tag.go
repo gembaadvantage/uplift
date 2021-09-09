@@ -20,29 +20,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package tasks
 
-import (
-	"os"
+import "github.com/gembaadvantage/uplift/internal/context"
 
-	"github.com/gembaadvantage/uplift/internal/context"
-)
+// Tag a Git repository with the next calculated version
+type Tag struct{}
 
-func main() {
-	cfg, err := loadConfig()
-	if err != nil {
-		os.Exit(1)
-	}
-
-	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
-
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+// String generates a string representation of the task
+func (t Tag) String() string {
+	return ""
 }
+
+// Run ...
+func (t Tag) Run(ctx *context.Context) error {
+	return nil
+}
+
+// tag.go
+// bump.go
+// changelog.go
+// nextversion.go
+// currentversion.go

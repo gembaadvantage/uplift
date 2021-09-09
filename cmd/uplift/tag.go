@@ -23,26 +23,26 @@ SOFTWARE.
 package main
 
 import (
-	"os"
+	"io"
 
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	cfg, err := loadConfig()
-	if err != nil {
-		os.Exit(1)
+func newTagCmd(out io.Writer, ctx *context.Context) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "tag",
+		Short: "",
+		Long:  "",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return tag(out, ctx)
+		},
 	}
 
-	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
+	return cmd
+}
 
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+func tag(out io.Writer, ctx *context.Context) error {
+	return nil
 }

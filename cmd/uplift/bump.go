@@ -25,8 +25,7 @@ package main
 import (
 	"io"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/spf13/cobra"
 )
 
@@ -36,39 +35,28 @@ is based on the conventional commit message from the last commit. Uplift
 can also bump individual files in your repository to keep them in sync`
 )
 
-// bumps the version within a git repository tag, and bumps files
-
-type bumpOptions struct {
-	dryRun  bool
-	verbose bool
-}
-
-func newBumpCmd(out io.Writer, cfg config.Uplift) *cobra.Command {
-	opts := bumpOptions{}
-
+func newBumpCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bump",
 		Short: "Bump the semantic version",
 		Long:  bumpDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.Run(out, cfg, opts)
+			return bump(out, ctx)
 		},
 	}
-
-	f := cmd.Flags()
-	f.BoolVar(&opts.dryRun, "dry-run", false, "take a practice bump")
-	f.BoolVar(&opts.verbose, "verbose", false, "show me everything that happens")
 
 	return cmd
 }
 
-func (o bumpOptions) Run(out io.Writer, cfg config.Uplift, opts bumpOptions) error {
-	b := semver.NewBumper(out, semver.BumpOptions{
-		Config:  cfg,
-		DryRun:  opts.dryRun,
-		Verbose: opts.verbose,
-	})
+func bump(out io.Writer, ctx *context.Context) error {
+	// b := semver.NewBumper(out, semver.BumpOptions{
+	// 	Config:  cfg,
+	// 	DryRun:  opts.dryRun,
+	// 	Verbose: opts.verbose,
+	// })
 
-	return b.Bump()
+	// return b.Bump()
+
+	return nil
 }
