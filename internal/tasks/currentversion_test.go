@@ -23,32 +23,50 @@ SOFTWARE.
 package tasks
 
 import (
-	"fmt"
+	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-// Tag a Git repository with the next calculated version
-type Tag struct{}
-
-// String generates a string representation of the task
-func (t Tag) String() string {
-	return ""
-}
-
-// Run ...
-func (t Tag) Run(ctx *context.Context) error {
-	if ctx.CurrentVersion.Raw == ctx.NextVersion.Raw {
-		// Log: nothing to do
-		return nil
+func TestRun(t *testing.T) {
+	tests := []struct {
+		name     string
+		repoTag  string
+		expected string
+	}{
+		{
+			name:     "RepositoryTag",
+			repoTag:  "1.1.1",
+			expected: "1.1.1",
+		},
+		{
+			name:     "PrefixedRepositoryTag",
+			repoTag:  "v0.2.1",
+			expected: "v0.2.1",
+		},
+		{
+			name:     "RepositoryNoTag",
+			repoTag:  "",
+			expected: "",
+		},
 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			git.InitRepo(t)
+			if tt.repoTag != "" {
+				git.EmptyCommitAndTag(t, tt.repoTag, "testing")
+			}
 
-	if ctx.DryRun {
-		// Write to StdOut the tag, allows tools to capture it
-		fmt.Println(ctx.NextVersion.Raw)
-		return nil
+			ctx := &context.Context{}
+			err := CurrentVersion{}.Run(ctx)
+			if err != nil {
+				t.Errorf("unexpected error: %s", err)
+			}
+
+			if ctx.CurrentVersion.Raw != tt.expected {
+				t.Errorf("expected tag %s but received tag %s", tt.expected, ctx.CurrentVersion.Raw)
+			}
+		})
 	}
-
-	return git.Tag(ctx.NextVersion.Raw)
 }

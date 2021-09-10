@@ -26,13 +26,14 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/tasks"
 	"github.com/spf13/cobra"
 )
 
 func newTagCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tag",
-		Short: "",
+		Short: "Tag a Git repository with the next semantic version",
 		Long:  "",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -44,5 +45,17 @@ func newTagCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 }
 
 func tag(out io.Writer, ctx *context.Context) error {
+	tsks := []tasks.Runner{
+		tasks.CurrentVersion{},
+		tasks.NextVersion{},
+		tasks.Tag{},
+	}
+
+	for _, tsk := range tsks {
+		if err := tsk.Run(ctx); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

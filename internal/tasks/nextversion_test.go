@@ -21,34 +21,3 @@ SOFTWARE.
 */
 
 package tasks
-
-import (
-	"fmt"
-
-	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
-)
-
-// Tag a Git repository with the next calculated version
-type Tag struct{}
-
-// String generates a string representation of the task
-func (t Tag) String() string {
-	return ""
-}
-
-// Run ...
-func (t Tag) Run(ctx *context.Context) error {
-	if ctx.CurrentVersion.Raw == ctx.NextVersion.Raw {
-		// Log: nothing to do
-		return nil
-	}
-
-	if ctx.DryRun {
-		// Write to StdOut the tag, allows tools to capture it
-		fmt.Println(ctx.NextVersion.Raw)
-		return nil
-	}
-
-	return git.Tag(ctx.NextVersion.Raw)
-}
