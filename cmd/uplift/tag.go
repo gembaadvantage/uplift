@@ -26,7 +26,10 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/tasks"
+	"github.com/gembaadvantage/uplift/internal/task"
+	"github.com/gembaadvantage/uplift/internal/task/currentversion"
+	"github.com/gembaadvantage/uplift/internal/task/nextversion"
+	"github.com/gembaadvantage/uplift/internal/task/tag"
 	"github.com/spf13/cobra"
 )
 
@@ -37,18 +40,18 @@ func newTagCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 		Long:  "",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return tag(out, ctx)
+			return tagRepo(out, ctx)
 		},
 	}
 
 	return cmd
 }
 
-func tag(out io.Writer, ctx *context.Context) error {
-	tsks := []tasks.Runner{
-		tasks.CurrentVersion{},
-		tasks.NextVersion{},
-		tasks.Tag{},
+func tagRepo(out io.Writer, ctx *context.Context) error {
+	tsks := []task.Runner{
+		currentversion.Task{},
+		nextversion.Task{},
+		tag.Task{},
 	}
 
 	for _, tsk := range tsks {

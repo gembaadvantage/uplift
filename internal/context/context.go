@@ -24,6 +24,7 @@ package context
 
 import (
 	ctx "context"
+	"io"
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/semver"
@@ -33,6 +34,7 @@ import (
 type Context struct {
 	ctx.Context
 	Config         config.Uplift
+	Out            io.Writer
 	DryRun         bool
 	Verbose        bool
 	CurrentVersion semver.Version
@@ -41,7 +43,7 @@ type Context struct {
 
 // New constructs a context that captures both runtime configuration and
 // user defined runtime options
-func New(cfg config.Uplift) *Context {
+func New(cfg config.Uplift, out io.Writer) *Context {
 	return &Context{
 		Context: ctx.Background(),
 		Config:  cfg,

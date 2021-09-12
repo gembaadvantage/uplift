@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package tasks
+package nextversion
 
 import (
 	semv "github.com/Masterminds/semver"
@@ -30,16 +30,20 @@ import (
 	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
-// NextVersion ...
-type NextVersion struct{}
+const (
+	defaultVersion = "0.1.0"
+)
+
+// Task ...
+type Task struct{}
 
 // String ...
-func (v NextVersion) String() string {
-	return ""
+func (t Task) String() string {
+	return "next-version"
 }
 
 // Run ...
-func (v NextVersion) Run(ctx *context.Context) error {
+func (t Task) Run(ctx *context.Context) error {
 	commit, err := git.LatestCommit()
 	if err != nil {
 		return err
@@ -51,20 +55,23 @@ func (v NextVersion) Run(ctx *context.Context) error {
 		return nil
 	}
 
-	pv, err := semv.NewVersion(ctx.CurrentVersion.Raw)
-	if err != nil {
-		return err
+	// If this is the first tag, use the required default
+	if ctx.CurrentVersion.Raw == "" {
+		ctx.NextVersion, _ = semver.Parse(firstVersion(ctx))
+		return nil
 	}
+
+	pver, _ := semv.NewVersion(ctx.CurrentVersion.Raw)
 
 	// Bump the semantic version based on the increment
 	var nxt semv.Version
 	switch inc {
 	case semver.MajorIncrement:
-		nxt = pv.IncMajor()
+		nxt = pver.IncMajor()
 	case semver.MinorIncrement:
-		nxt = pv.IncMinor()
+		nxt = pver.IncMinor()
 	case semver.PatchIncrement:
-		nxt = pv.IncPatch()
+		nxt = pver.IncPatch()
 	}
 
 	ctx.NextVersion = semver.Version{
@@ -75,4 +82,11 @@ func (v NextVersion) Run(ctx *context.Context) error {
 		Raw:    nxt.Original(),
 	}
 	return nil
+}
+
+func firstVersion(ctx *context.Context) string {
+	if ctx.Config.FirstVersion == "" {
+		return defaultVersion
+	}
+	return ctx.Config.FirstVersion
 }

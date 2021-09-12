@@ -20,4 +20,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package tasks
+package task
+
+import (
+	"fmt"
+
+	"github.com/gembaadvantage/uplift/internal/context"
+)
+
+// Runner defines a way of running a task. A task can either be run as a
+// standalone operation or chained into a series of consecutive operations
+type Runner interface {
+	fmt.Stringer
+
+	// Run the task. A context is provided allowing state between tasks to
+	// be shared. Useful if multiple tasks are executed in order
+	Run(ctx *context.Context) error
+}

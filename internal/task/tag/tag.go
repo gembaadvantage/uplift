@@ -20,53 +20,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package tasks
+package tag
 
 import (
-	"testing"
+	"fmt"
 
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-func TestRun(t *testing.T) {
-	tests := []struct {
-		name     string
-		repoTag  string
-		expected string
-	}{
-		{
-			name:     "RepositoryTag",
-			repoTag:  "1.1.1",
-			expected: "1.1.1",
-		},
-		{
-			name:     "PrefixedRepositoryTag",
-			repoTag:  "v0.2.1",
-			expected: "v0.2.1",
-		},
-		{
-			name:     "RepositoryNoTag",
-			repoTag:  "",
-			expected: "",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			git.InitRepo(t)
-			if tt.repoTag != "" {
-				git.EmptyCommitAndTag(t, tt.repoTag, "testing")
-			}
+// Task ...
+type Task struct{}
 
-			ctx := &context.Context{}
-			err := CurrentVersion{}.Run(ctx)
-			if err != nil {
-				t.Errorf("unexpected error: %s", err)
-			}
+// String generates a string representation of the task
+func (t Task) String() string {
+	return "tag"
+}
 
-			if ctx.CurrentVersion.Raw != tt.expected {
-				t.Errorf("expected tag %s but received tag %s", tt.expected, ctx.CurrentVersion.Raw)
-			}
-		})
+// Run ...
+func (t Task) Run(ctx *context.Context) error {
+	if ctx.CurrentVersion.Raw == ctx.NextVersion.Raw {
+		return nil
 	}
+
+	if ctx.DryRun {
+		fmt.Fprintf(ctx.Out, ctx.NextVersion.Raw)
+		return nil
+	}
+
+	return git.Tag(ctx.NextVersion.Raw)
 }

@@ -20,4 +20,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package tasks
+package currentversion
+
+import (
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/gembaadvantage/uplift/internal/semver"
+)
+
+// Task ...
+type Task struct{}
+
+// String ...
+func (t Task) String() string {
+	return "current-version"
+}
+
+// Run ...
+func (t Task) Run(ctx *context.Context) error {
+	tag := git.LatestTag()
+	if tag == "" {
+		return nil
+	}
+
+	// Only a semantic version tag will have been retrieved by this point
+	ctx.CurrentVersion, _ = semver.Parse(tag)
+	return nil
+}
