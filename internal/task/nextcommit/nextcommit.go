@@ -20,35 +20,44 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package tag
+package nextcommit
 
-import (
-	"fmt"
-
-	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
-)
+import "context"
 
 // Task ...
 type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "tag"
+	return "next-commit"
 }
-
-// TODO: support annotated tags
 
 // Run ...
 func (t Task) Run(ctx *context.Context) error {
-	if ctx.CurrentVersion.Raw == ctx.NextVersion.Raw {
-		return nil
-	}
-
-	if ctx.DryRun {
-		fmt.Fprintf(ctx.Out, ctx.NextVersion.Raw)
-		return nil
-	}
-
-	return git.Tag(ctx.NextVersion.Raw)
+	return nil
 }
+
+/*
+func (b Bumper) buildCommit(ver string, commit git.CommitDetails) git.CommitDetails {
+	c := git.CommitDetails{
+		Author:  commit.Author,
+		Email:   commit.Email,
+		Message: fmt.Sprintf("ci(bump): bumped version to %s", ver),
+	}
+
+	if b.config.CommitAuthor.Name != "" {
+		c.Author = b.config.CommitAuthor.Name
+	}
+
+	if b.config.CommitAuthor.Email != "" {
+		c.Email = b.config.CommitAuthor.Email
+	}
+
+	if b.config.CommitMessage != "" {
+		c.Message = b.config.CommitMessage
+	}
+
+	b.logger.Info("Any commits will use:\n%s", c)
+	return c
+}
+*/

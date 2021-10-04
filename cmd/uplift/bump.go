@@ -49,6 +49,11 @@ func newBumpCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 	return cmd
 }
 
+// current version
+// next version
+// bump files
+// commit
+
 func bump(out io.Writer, ctx *context.Context) error {
 	// b := semver.NewBumper(out, semver.BumpOptions{
 	// 	Config:  cfg,

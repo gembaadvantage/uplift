@@ -29,11 +29,14 @@ import (
 )
 
 const (
-	pattern = `(v?)(\d+)\.(\d+)\.(\d+)`
+	// Pattern defines the regular expression for matching a semantic version
+	// as a raw sequence of characters
+	Pattern = `(v?)(\d+)\.(\d+)\.(\d+)`
 )
 
 var (
-	verRgx = regexp.MustCompile(pattern)
+	// Regex for parsing a matching a semantic version
+	Regex = regexp.MustCompile(Pattern)
 )
 
 // Version provides a less strict implementation of a semantic version
@@ -49,7 +52,7 @@ type Version struct {
 
 // Parse ...
 func Parse(ver string) (Version, error) {
-	if m := verRgx.FindStringSubmatch(ver); len(m) > 4 {
+	if m := Regex.FindStringSubmatch(ver); len(m) > 4 {
 		return Version{
 			Prefix: m[1],
 			Major:  toUint64(m[2]),

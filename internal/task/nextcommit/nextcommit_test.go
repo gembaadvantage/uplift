@@ -20,35 +20,4 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package tag
-
-import (
-	"fmt"
-
-	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
-)
-
-// Task ...
-type Task struct{}
-
-// String generates a string representation of the task
-func (t Task) String() string {
-	return "tag"
-}
-
-// TODO: support annotated tags
-
-// Run ...
-func (t Task) Run(ctx *context.Context) error {
-	if ctx.CurrentVersion.Raw == ctx.NextVersion.Raw {
-		return nil
-	}
-
-	if ctx.DryRun {
-		fmt.Fprintf(ctx.Out, ctx.NextVersion.Raw)
-		return nil
-	}
-
-	return git.Tag(ctx.NextVersion.Raw)
-}
+package nextcommit

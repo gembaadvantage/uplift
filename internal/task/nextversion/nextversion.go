@@ -49,6 +49,8 @@ func (t Task) Run(ctx *context.Context) error {
 		return err
 	}
 
+	// TODO: Store the commit details within the context
+
 	inc := semver.ParseCommit(commit.Message)
 	if inc == semver.NoIncrement {
 		ctx.NextVersion = ctx.CurrentVersion
