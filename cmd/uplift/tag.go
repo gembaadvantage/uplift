@@ -25,10 +25,11 @@ package main
 import (
 	"io"
 
+	"github.com/apex/log"
+	"github.com/apex/log/handlers/cli"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
-	"github.com/gembaadvantage/uplift/internal/task/gitpush"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
 	"github.com/gembaadvantage/uplift/internal/task/tag"
@@ -55,13 +56,19 @@ func tagRepo(out io.Writer, ctx *context.Context) error {
 		nextversion.Task{},
 		nextcommit.Task{},
 		tag.Task{},
-		gitpush.Task{},
 	}
 
+	// TODO: wrapper that handles logging and invokes the task
+	dp := cli.Default.Padding
+
 	for _, tsk := range tsks {
+		log.Info(tsk.String())
+		cli.Default.Padding = dp * 2
+
 		if err := tsk.Run(ctx); err != nil {
 			return err
 		}
+		cli.Default.Padding = dp
 	}
 
 	return nil

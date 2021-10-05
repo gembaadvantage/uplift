@@ -23,8 +23,7 @@ SOFTWARE.
 package tag
 
 import (
-	"fmt"
-
+	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 )
@@ -41,17 +40,23 @@ func (t Task) String() string {
 // standard and annotated git tags
 func (t Task) Run(ctx *context.Context) error {
 	if ctx.CurrentVersion.Raw == ctx.NextVersion.Raw {
+		log.WithFields(log.Fields{
+			"current": ctx.CurrentVersion.Raw,
+			"next":    ctx.NextVersion.Raw,
+		}).Info("no version change detected")
 		return nil
 	}
 
 	if ctx.DryRun {
-		fmt.Fprintf(ctx.Out, ctx.NextVersion.Raw)
+		log.Info("skipping tag in dry run mode")
 		return nil
 	}
 
 	if ctx.Config.AnnotatedTags {
+		log.WithField("tag", ctx.NextVersion.Raw).Info("with annotated tag")
 		return git.AnnotatedTag(ctx.NextVersion.Raw, ctx.CommitDetails)
 	}
 
+	log.WithField("tag", ctx.NextVersion.Raw).Info("with standard tag")
 	return git.Tag(ctx.NextVersion.Raw)
 }

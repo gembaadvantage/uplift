@@ -28,6 +28,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
@@ -42,7 +43,7 @@ type FileBump struct {
 	SemVer  bool
 }
 
-// Task ...
+// Task for bumping versions within files
 type Task struct{}
 
 // String generates a string representation of the task
@@ -50,9 +51,11 @@ func (t Task) String() string {
 	return "bump"
 }
 
-// Run ...
+// Run the task bumping the semantic version of any file identified within
+// the uplift configuration file
 func (t Task) Run(ctx *context.Context) error {
 	if len(ctx.Config.Bumps) == 0 {
+		log.Info("no files to bump")
 		return nil
 	}
 
@@ -76,12 +79,14 @@ func (t Task) Run(ctx *context.Context) error {
 				if err := git.Stage(bump.File); err != nil {
 					return err
 				}
+				log.WithField("file", bump.File).Info("successfully staged file")
 			}
 			n++
 		}
 	}
 
 	if n > 0 {
+		log.Info("attempting to commit file changes")
 		return git.Commit(ctx.CommitDetails)
 	}
 
@@ -91,7 +96,6 @@ func (t Task) Run(ctx *context.Context) error {
 func bumpFile(ctx *context.Context, path string, bump FileBump) (bool, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		//b.logger.Warn("failed to open %s", path)
 		return false, err
 	}
 
@@ -105,13 +109,16 @@ func bumpFile(ctx *context.Context, path string, bump FileBump) (bool, error) {
 
 	m := rgx.Find(data)
 	if m == nil {
-		//b.logger.Warn("version regex hasn't matched")
 		return false, errors.New("no version matched in file")
 	}
 	mstr := string(m)
 
 	if strings.Contains(mstr, bump.Version) {
-		//b.logger.Info("skipped bumping %s as version already at %s", path, bump.Version)
+		log.WithFields(log.Fields{
+			"file":    path,
+			"current": ctx.CurrentVersion.Raw,
+			"next":    ctx.NextVersion.Raw,
+		}).Info("skipping bump")
 		return false, nil
 	}
 
@@ -130,10 +137,15 @@ func bumpFile(ctx *context.Context, path string, bump FileBump) (bool, error) {
 	verRpl := semver.Regex.ReplaceAllString(mstr, v)
 	str := strings.Replace(string(data), mstr, verRpl, n)
 
-	//b.logger.Success("bumped %s to version %s", path, bump.Version)
+	log.WithFields(log.Fields{
+		"file":    path,
+		"current": ctx.CurrentVersion.Raw,
+		"next":    ctx.NextVersion.Raw,
+	}).Info("file bumped")
 
 	// Don't make any file changes if part of a dry-run
 	if ctx.DryRun {
+		log.Info("file not modified in dry run mode")
 		return false, nil
 	}
 

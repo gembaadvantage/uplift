@@ -23,6 +23,7 @@ SOFTWARE.
 package gitpush
 
 import (
+	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 )
@@ -32,14 +33,16 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "git-push"
+	return "git push"
 }
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
 	if ctx.DryRun {
+		log.Info("skipping push in dry run mode")
 		return nil
 	}
 
+	log.Info("check and push any outstanding commits")
 	return git.Push()
 }

@@ -24,6 +24,7 @@ package nextversion
 
 import (
 	semv "github.com/Masterminds/semver"
+	"github.com/apex/log"
 
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -40,7 +41,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "next-version"
+	return "next version"
 }
 
 // Run the task
@@ -54,12 +55,20 @@ func (t Task) Run(ctx *context.Context) error {
 	inc := semver.ParseCommit(commit.Message)
 	if inc == semver.NoIncrement {
 		ctx.NextVersion = ctx.CurrentVersion
+		log.WithField("commit", ctx.CommitDetails.Message).Info("no change in version needed")
 		return nil
 	}
+
+	log.WithField("increment", string(inc)).Debug("increment detected from commit")
 
 	// If this is the first tag, use the required default
 	if ctx.CurrentVersion.Raw == "" {
 		ctx.NextVersion, _ = semver.Parse(firstVersion(ctx))
+		log.WithFields(log.Fields{
+			"current": ctx.CurrentVersion.Raw,
+			"next":    ctx.NextVersion.Raw,
+			"commit":  ctx.CommitDetails.Message,
+		}).Info("identified first version")
 		return nil
 	}
 
@@ -83,6 +92,11 @@ func (t Task) Run(ctx *context.Context) error {
 		Major:  uint64(nxt.Major()),
 		Raw:    nxt.Original(),
 	}
+	log.WithFields(log.Fields{
+		"current": ctx.CurrentVersion.Raw,
+		"next":    ctx.NextVersion.Raw,
+		"commit":  ctx.CommitDetails.Message,
+	}).Info("identified next version")
 	return nil
 }
 

@@ -23,6 +23,9 @@ SOFTWARE.
 package currentversion
 
 import (
+	"errors"
+
+	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
@@ -33,17 +36,24 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "current-version"
+	return "current version"
 }
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
+	if !git.IsRepo() {
+		return errors.New("current directory must be a git repo")
+	}
+
 	tag := git.LatestTag()
 	if tag == "" {
+		log.Info("repository not tagged with version")
 		return nil
 	}
 
 	// Only a semantic version tag will have been retrieved by this point
 	ctx.CurrentVersion, _ = semver.Parse(tag)
+
+	log.WithField("current", ctx.CurrentVersion).Info("identified version")
 	return nil
 }

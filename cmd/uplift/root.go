@@ -25,15 +25,25 @@ package main
 import (
 	"io"
 
+	"github.com/apex/log"
+	"github.com/apex/log/handlers/cli"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/spf13/cobra"
 )
 
 func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Command, error) {
+	log.SetHandler(cli.Default)
+
 	cmd := &cobra.Command{
 		Use:          "uplift",
 		Short:        "Semantic versioning the easy way",
 		SilenceUsage: true,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			// Turn on verbose logging if required
+			if ctx.Verbose {
+				log.SetLevel(log.DebugLevel)
+			}
+		},
 	}
 
 	// Write persistent flags straight into the context

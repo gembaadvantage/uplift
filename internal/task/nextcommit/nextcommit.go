@@ -25,6 +25,7 @@ package nextcommit
 import (
 	"fmt"
 
+	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 )
@@ -34,7 +35,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "next-commit"
+	return "next commit"
 }
 
 // Run the task and generate the next commit by either impersonating the author
@@ -47,17 +48,25 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	if ctx.Config.CommitAuthor.Name != "" {
+		log.Debug("overwriting commit author name")
 		c.Author = ctx.Config.CommitAuthor.Name
 	}
 
 	if ctx.Config.CommitAuthor.Email != "" {
+		log.Debug("overwriting commit author email")
 		c.Email = ctx.Config.CommitAuthor.Email
 	}
 
 	if ctx.Config.CommitMessage != "" {
+		log.Debug("overwriting commit message")
 		c.Message = ctx.Config.CommitMessage
 	}
 
 	ctx.CommitDetails = c
+	log.WithFields(log.Fields{
+		"name":    ctx.CommitDetails.Author,
+		"email":   ctx.CommitDetails.Email,
+		"message": ctx.CommitDetails.Message,
+	}).Info("committing with")
 	return nil
 }
