@@ -20,49 +20,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package gitpush
 
 import (
-	"io"
-
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/task"
-	"github.com/gembaadvantage/uplift/internal/task/currentversion"
-	"github.com/gembaadvantage/uplift/internal/task/gitpush"
-	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
-	"github.com/gembaadvantage/uplift/internal/task/nextversion"
-	"github.com/gembaadvantage/uplift/internal/task/tag"
-	"github.com/spf13/cobra"
+	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-func newTagCmd(out io.Writer, ctx *context.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "tag",
-		Short: "Tag a Git repository with the next semantic version",
-		Long:  "",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return tagRepo(out, ctx)
-		},
-	}
+// Task ...
+type Task struct{}
 
-	return cmd
+// String ...
+func (t Task) String() string {
+	return "git-push"
 }
 
-func tagRepo(out io.Writer, ctx *context.Context) error {
-	tsks := []task.Runner{
-		currentversion.Task{},
-		nextversion.Task{},
-		nextcommit.Task{},
-		tag.Task{},
-		gitpush.Task{},
+// Run ...
+func (t Task) Run(ctx *context.Context) error {
+	if ctx.DryRun {
+		return nil
 	}
 
-	for _, tsk := range tsks {
-		if err := tsk.Run(ctx); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return git.Push()
 }

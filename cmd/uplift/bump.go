@@ -26,6 +26,12 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/task"
+	"github.com/gembaadvantage/uplift/internal/task/bump"
+	"github.com/gembaadvantage/uplift/internal/task/currentversion"
+	"github.com/gembaadvantage/uplift/internal/task/gitpush"
+	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
+	"github.com/gembaadvantage/uplift/internal/task/nextversion"
 	"github.com/spf13/cobra"
 )
 
@@ -42,26 +48,27 @@ func newBumpCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 		Long:  bumpDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return bump(out, ctx)
+			return bumpFiles(out, ctx)
 		},
 	}
 
 	return cmd
 }
 
-// current version
-// next version
-// bump files
-// commit
+func bumpFiles(out io.Writer, ctx *context.Context) error {
+	tsks := []task.Runner{
+		currentversion.Task{},
+		nextversion.Task{},
+		nextcommit.Task{},
+		bump.Task{},
+		gitpush.Task{},
+	}
 
-func bump(out io.Writer, ctx *context.Context) error {
-	// b := semver.NewBumper(out, semver.BumpOptions{
-	// 	Config:  cfg,
-	// 	DryRun:  opts.dryRun,
-	// 	Verbose: opts.verbose,
-	// })
-
-	// return b.Bump()
+	for _, tsk := range tsks {
+		if err := tsk.Run(ctx); err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

@@ -42,9 +42,9 @@ scoop install uplift
 To install using a shell script:
 
 ```sh
-curl https://raw.githubusercontent.com/gembaadvantage/uplift/master/scripts/get-uplift > get-uplift
-chmod 700 get-uplift
-./get-uplift
+curl https://raw.githubusercontent.com/gembaadvantage/uplift/master/scripts/install > install
+chmod 700 install
+./install
 ```
 
 ## Quick Start
