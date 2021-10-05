@@ -81,9 +81,9 @@ func (t Task) Run(ctx *context.Context) error {
 		}
 	}
 
-	// if n == 0 {
-	// 	// Log that no files were changed
-	// }
+	if n > 0 {
+		return git.Commit(ctx.CommitDetails)
+	}
 
 	return nil
 }
