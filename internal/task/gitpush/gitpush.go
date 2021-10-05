@@ -27,15 +27,15 @@ import (
 	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-// Task ...
+// Task for pushing commits to a git remote
 type Task struct{}
 
-// String ...
+// String generates a string representation of the task
 func (t Task) String() string {
 	return "git-push"
 }
 
-// Run ...
+// Run the task
 func (t Task) Run(ctx *context.Context) error {
 	if ctx.DryRun {
 		return nil

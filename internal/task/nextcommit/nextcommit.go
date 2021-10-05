@@ -29,7 +29,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-// Task ...
+// Task for generating the next commit message
 type Task struct{}
 
 // String generates a string representation of the task
@@ -37,7 +37,8 @@ func (t Task) String() string {
 	return "next-commit"
 }
 
-// Run ...
+// Run the task and generate the next commit by either impersonating the author
+// from the last commit or by generating a user defined commit
 func (t Task) Run(ctx *context.Context) error {
 	c := git.CommitDetails{
 		Author:  ctx.CommitDetails.Author,

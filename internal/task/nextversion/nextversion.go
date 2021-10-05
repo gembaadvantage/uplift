@@ -34,15 +34,16 @@ const (
 	defaultVersion = "0.1.0"
 )
 
-// Task ...
+// Task that determines the next semantic version of a repository
+// based on the conventional commit of the last commit message
 type Task struct{}
 
-// String ...
+// String generates a string representation of the task
 func (t Task) String() string {
 	return "next-version"
 }
 
-// Run ...
+// Run the task
 func (t Task) Run(ctx *context.Context) error {
 	commit, err := git.LatestCommit()
 	if err != nil {

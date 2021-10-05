@@ -28,15 +28,15 @@ import (
 	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
-// Task ...
+// Task that identifies the current semantic version of a repository
 type Task struct{}
 
-// String ...
+// String generates a string representation of the task
 func (t Task) String() string {
 	return "current-version"
 }
 
-// Run ...
+// Run the task
 func (t Task) Run(ctx *context.Context) error {
 	tag := git.LatestTag()
 	if tag == "" {

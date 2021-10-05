@@ -29,7 +29,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-// Task ...
+// Task for tagging a repository
 type Task struct{}
 
 // String generates a string representation of the task
@@ -37,7 +37,8 @@ func (t Task) String() string {
 	return "tag"
 }
 
-// Run ...
+// Run the task tagging a repository with the next semantic version. Supports both
+// standard and annotated git tags
 func (t Task) Run(ctx *context.Context) error {
 	if ctx.CurrentVersion.Raw == ctx.NextVersion.Raw {
 		return nil
