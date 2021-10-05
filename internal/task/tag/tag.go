@@ -37,8 +37,6 @@ func (t Task) String() string {
 	return "tag"
 }
 
-// TODO: support annotated tags
-
 // Run ...
 func (t Task) Run(ctx *context.Context) error {
 	if ctx.CurrentVersion.Raw == ctx.NextVersion.Raw {
@@ -48,6 +46,10 @@ func (t Task) Run(ctx *context.Context) error {
 	if ctx.DryRun {
 		fmt.Fprintf(ctx.Out, ctx.NextVersion.Raw)
 		return nil
+	}
+
+	if ctx.Config.AnnotatedTags {
+		return git.AnnotatedTag(ctx.NextVersion.Raw, ctx.CommitDetails)
 	}
 
 	return git.Tag(ctx.NextVersion.Raw)

@@ -48,8 +48,7 @@ func (t Task) Run(ctx *context.Context) error {
 	if err != nil {
 		return err
 	}
-
-	// TODO: Store the commit details within the context
+	ctx.CommitDetails = commit
 
 	inc := semver.ParseCommit(commit.Message)
 	if inc == semver.NoIncrement {

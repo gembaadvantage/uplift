@@ -21,3 +21,60 @@ SOFTWARE.
 */
 
 package nextcommit
+
+import (
+	"testing"
+
+	"github.com/gembaadvantage/uplift/internal/config"
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestRun_DefaultCommitMessage(t *testing.T) {
+	ctx := &context.Context{
+		NextVersion: semver.Version{
+			Raw: "0.1.0",
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, "ci(bump): bumped version to 0.1.0", ctx.CommitDetails.Message)
+}
+
+func TestRun_ImpersonatesAuthor(t *testing.T) {
+	cd := git.CommitDetails{
+		Author: "john.doe",
+		Email:  "john.doe@example.com",
+	}
+
+	ctx := &context.Context{
+		CommitDetails: cd,
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, cd.Author, ctx.CommitDetails.Author)
+	assert.Equal(t, cd.Email, ctx.CommitDetails.Email)
+}
+
+func TestRun_CustomCommit(t *testing.T) {
+	ctx := &context.Context{
+		Config: config.Uplift{
+			CommitMessage: "ci(release): this is a custom message",
+			CommitAuthor: config.CommitAuthor{
+				Name:  "releasebot",
+				Email: "releasebot@example.com",
+			},
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, "releasebot", ctx.CommitDetails.Author)
+	assert.Equal(t, "releasebot@example.com", ctx.CommitDetails.Email)
+	assert.Equal(t, "ci(release): this is a custom message", ctx.CommitDetails.Message)
+}

@@ -27,6 +27,7 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/config"
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
@@ -39,6 +40,7 @@ type Context struct {
 	Verbose        bool
 	CurrentVersion semver.Version
 	NextVersion    semver.Version
+	CommitDetails  git.CommitDetails
 }
 
 // New constructs a context that captures both runtime configuration and

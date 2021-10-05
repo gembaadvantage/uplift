@@ -22,7 +22,12 @@ SOFTWARE.
 
 package nextcommit
 
-import "context"
+import (
+	"fmt"
+
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
+)
 
 // Task ...
 type Task struct{}
@@ -34,30 +39,24 @@ func (t Task) String() string {
 
 // Run ...
 func (t Task) Run(ctx *context.Context) error {
+	c := git.CommitDetails{
+		Author:  ctx.CommitDetails.Author,
+		Email:   ctx.CommitDetails.Email,
+		Message: fmt.Sprintf("ci(bump): bumped version to %s", ctx.NextVersion.Raw),
+	}
+
+	if ctx.Config.CommitAuthor.Name != "" {
+		c.Author = ctx.Config.CommitAuthor.Name
+	}
+
+	if ctx.Config.CommitAuthor.Email != "" {
+		c.Email = ctx.Config.CommitAuthor.Email
+	}
+
+	if ctx.Config.CommitMessage != "" {
+		c.Message = ctx.Config.CommitMessage
+	}
+
+	ctx.CommitDetails = c
 	return nil
 }
-
-/*
-func (b Bumper) buildCommit(ver string, commit git.CommitDetails) git.CommitDetails {
-	c := git.CommitDetails{
-		Author:  commit.Author,
-		Email:   commit.Email,
-		Message: fmt.Sprintf("ci(bump): bumped version to %s", ver),
-	}
-
-	if b.config.CommitAuthor.Name != "" {
-		c.Author = b.config.CommitAuthor.Name
-	}
-
-	if b.config.CommitAuthor.Email != "" {
-		c.Email = b.config.CommitAuthor.Email
-	}
-
-	if b.config.CommitMessage != "" {
-		c.Message = b.config.CommitMessage
-	}
-
-	b.logger.Info("Any commits will use:\n%s", c)
-	return c
-}
-*/

@@ -36,8 +36,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: run tests in a dummy git repository, prevent tests files appearing in current repo
-
 func TestRun(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -136,6 +134,7 @@ func TestRun(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			git.InitRepo(t)
 			path := WriteFile(t, tt.content)
 
 			ctx := &context.Context{
@@ -168,6 +167,7 @@ func TestRun(t *testing.T) {
 }
 
 func TestRun_ForceSemanticVersion(t *testing.T) {
+	git.InitRepo(t)
 	path := WriteFile(t, "version: 0.1.0")
 
 	ctx := &context.Context{
@@ -237,6 +237,8 @@ func TestRun_FileDoesNotExist(t *testing.T) {
 }
 
 func TestRun_MultipleFiles(t *testing.T) {
+	git.InitRepo(t)
+
 	contents := "version: 0.1.0"
 	file1 := WriteFile(t, contents)
 	file2 := WriteFile(t, contents)
@@ -271,6 +273,7 @@ func TestRun_MultipleFiles(t *testing.T) {
 }
 
 func TestRun_NonMatchingRegex(t *testing.T) {
+	git.InitRepo(t)
 	file := WriteFile(t, "version: 0.1.0")
 
 	ctx := &context.Context{
@@ -298,7 +301,6 @@ func TestRun_NoBumpConfig(t *testing.T) {
 
 func TestRun_NotGitRepository(t *testing.T) {
 	git.MkTmpDir(t)
-
 	file := WriteFile(t, "version: 0.1.0")
 
 	ctx := &context.Context{
@@ -319,8 +321,52 @@ func TestRun_NotGitRepository(t *testing.T) {
 	assert.EqualError(t, err, "fatal: not a git repository (or any of the parent directories): .git")
 }
 
-// TODO: skip bumping if file already at version
-// TODO: error on malformed regex
+func TestRun_NextVersionMatchesExistingVersion(t *testing.T) {
+	git.InitRepo(t)
+	file := WriteFile(t, "version: 0.1.0")
+
+	efi, _ := os.Stat(file)
+
+	ctx := &context.Context{
+		NextVersion: semver.Version{
+			Raw: "0.1.0",
+		},
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File:  file,
+					Regex: "version: $VERSION",
+				},
+			},
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	// Check that the file has not been modified
+	afi, _ := os.Stat(file)
+	assert.Equal(t, efi.ModTime(), afi.ModTime())
+}
+
+func TestRun_MalformedRegexError(t *testing.T) {
+	git.MkTmpDir(t)
+	file := WriteFile(t, "version: 0.1.0")
+
+	ctx := &context.Context{
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File:  file,
+					Regex: "[",
+				},
+			},
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	assert.Error(t, err)
+}
 
 func WriteFile(t *testing.T, s string) string {
 	t.Helper()
@@ -352,6 +398,8 @@ func ReadFile(t *testing.T, path string) string {
 }
 
 func TestRun_MavenPom(t *testing.T) {
+	git.InitRepo(t)
+
 	file := WriteFile(t, `<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -423,6 +471,8 @@ func TestRun_MavenPom(t *testing.T) {
 }
 
 func TestRun_HelmChart(t *testing.T) {
+	git.InitRepo(t)
+
 	file := WriteFile(t, `apiVersion: v2
 name: test-chart
 description: This is a test chart
@@ -456,6 +506,8 @@ appVersion: 0.1.0`, actual)
 }
 
 func TestRun_PackageJson(t *testing.T) {
+	git.InitRepo(t)
+
 	file := WriteFile(t, `{
   "name": "test",
   "version": "0.1.0",

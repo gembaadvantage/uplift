@@ -24,8 +24,10 @@ package tag
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
+	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
@@ -103,4 +105,33 @@ func TestRun_NoGitRepository(t *testing.T) {
 		},
 	})
 	require.Error(t, err)
+}
+
+func TestRun_AnnotatedTag(t *testing.T) {
+	tag := "1.1.0"
+	git.InitRepo(t)
+	git.EmptyCommitAndTag(t, "1.0.0", "commit")
+
+	ctx := &context.Context{
+		NextVersion: semver.Version{
+			Raw: tag,
+		},
+		CommitDetails: git.CommitDetails{
+			Author:  "john.doe",
+			Email:   "john.doe@example.com",
+			Message: "custom message",
+		},
+		Config: config.Uplift{
+			AnnotatedTags: true,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	out, _ := git.Clean(git.Run("for-each-ref", fmt.Sprintf("refs/tags/%s", tag),
+		"--format='%(taggername):%(taggeremail):%(contents)'"))
+
+	assert.Contains(t, out, fmt.Sprintf("%s:<%s>:%s",
+		ctx.CommitDetails.Author, ctx.CommitDetails.Email, ctx.CommitDetails.Message))
 }
