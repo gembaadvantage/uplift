@@ -37,6 +37,7 @@ import (
 // FileBump defines how a version within a file will be matched through a regex
 // and bumped using the provided version
 type FileBump struct {
+	Path    string
 	Regex   string
 	Version string
 	Count   int
@@ -62,13 +63,14 @@ func (t Task) Run(ctx *context.Context) error {
 	n := 0
 	for _, bump := range ctx.Config.Bumps {
 		fb := FileBump{
+			Path:    bump.File,
 			Regex:   bump.Regex,
 			Version: ctx.NextVersion.Raw,
 			Count:   bump.Count,
 			SemVer:  bump.SemVer,
 		}
 
-		ok, err := bumpFile(ctx, bump.File, fb)
+		ok, err := bumpFile(ctx, fb)
 		if err != nil {
 			return err
 		}
@@ -93,11 +95,8 @@ func (t Task) Run(ctx *context.Context) error {
 	return nil
 }
 
-// TODO: tidy up what gets passed in
-// TODO: update readme
-
-func bumpFile(ctx *context.Context, path string, bump FileBump) (bool, error) {
-	data, err := ioutil.ReadFile(path)
+func bumpFile(ctx *context.Context, bump FileBump) (bool, error) {
+	data, err := ioutil.ReadFile(bump.Path)
 	if err != nil {
 		return false, err
 	}
@@ -118,7 +117,7 @@ func bumpFile(ctx *context.Context, path string, bump FileBump) (bool, error) {
 
 	if strings.Contains(mstr, bump.Version) {
 		log.WithFields(log.Fields{
-			"file":    path,
+			"file":    bump.Path,
 			"current": ctx.CurrentVersion.Raw,
 			"next":    ctx.NextVersion.Raw,
 		}).Info("skipping bump")
@@ -141,7 +140,7 @@ func bumpFile(ctx *context.Context, path string, bump FileBump) (bool, error) {
 	str := strings.Replace(string(data), mstr, verRpl, n)
 
 	log.WithFields(log.Fields{
-		"file":    path,
+		"file":    bump.Path,
 		"current": ctx.CurrentVersion.Raw,
 		"next":    ctx.NextVersion.Raw,
 	}).Info("file bumped")
@@ -152,5 +151,5 @@ func bumpFile(ctx *context.Context, path string, bump FileBump) (bool, error) {
 		return false, nil
 	}
 
-	return true, ioutil.WriteFile(path, []byte(str), 0644)
+	return true, ioutil.WriteFile(bump.Path, []byte(str), 0644)
 }
