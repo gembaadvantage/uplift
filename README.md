@@ -42,43 +42,53 @@ scoop install uplift
 To install using a shell script:
 
 ```sh
-curl https://raw.githubusercontent.com/gembaadvantage/uplift/master/scripts/get-uplift > get-uplift
-chmod 700 get-uplift
-./get-uplift
+curl https://raw.githubusercontent.com/gembaadvantage/uplift/master/scripts/install > install
+chmod 700 install
+./install
 ```
 
 ## Quick Start
 
-Based on the latest commit, the repository will be tagged with the next calculated version.
-
-```sh
-$ uplift bump
-0.2.0
-```
+Uplift can carry out different semantic versioning operations on your repository. All operations support running in a dry run mode (`--dry-run`), providing a preview of changes only. Extra output can be logged to console using debug mode (`--debug`).
 
 Uplift supports the use of a `v` prefix and includes it with subsequent bumps.
 
+### Tagging
+
+Based on the latest commit, the repository will be tagged with the next semantic version.
+
 ```sh
-$ uplift bump
-v0.2.0
+$ uplift tag
+
+  • current version
+    • identified version        current=0.1.2
+  • next version
+    • identified next version   commit=feat: new feature current=0.1.2 next=0.2.0
+  • next commit
+    • committing with           email=joe.bloggs@example.com message=ci(bump): bumped version to 0.2.0 name=joe.bloggs
+  • tag
+    • with standard tag         tag=0.2.0
 ```
 
-A `dry run` can be carried out with optional `verbose` output, to show what uplift is up to.
+### File Bumping
+
+When configured, the version within any file in a git repository can be bumped to the next semantic version. The version is identified by inspecting the latest commit.
 
 ```sh
-$ uplift bump --dry-run --verbose
+$ uplift bump
 
-✅ git repo found
-✅ retrieved latest commit:
-'feat: a new snazzy feature'
-✅ commit contains a bump prefix, increment identified as 'Minor'
-ℹ️ existing version found: 0.1.0
-✅ bumped version to: 0.2.0
-ℹ️  Any commits will use:
-joe.bloggs <joe.bloggs@gmail.com>
-chore(release): a custom message
-ℹ️ no files to bump, skipping!
-0.2.0
+  • current version
+    • identified version        current=0.2.0
+  • next version
+    • identified next version   commit=feat: new feature current=0.2.0 next=0.3.0
+  • next commit
+    • committing with           email=joe.bloggs@example.com message=ci(bump): bumped version to 0.2.0 name=joe.bloggs
+  • bump
+    • file bumped               current=0.2.0 file=chart/test/Chart.yaml next=0.3.0
+    • successfully staged file  file=chart/test/Chart.yaml
+    • attempting to commit file changes
+  • git push
+    • check and push any outstanding commits
 ```
 
 ## Configuration

@@ -20,29 +20,57 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package semver
 
 import (
-	"os"
-
-	"github.com/gembaadvantage/uplift/internal/context"
+	"errors"
+	"regexp"
+	"strconv"
 )
 
-func main() {
-	cfg, err := loadConfig()
-	if err != nil {
-		os.Exit(1)
+const (
+	// Pattern defines the regular expression for matching a semantic version
+	// as a raw sequence of characters
+	Pattern = `(v?)(\d+)\.(\d+)\.(\d+)`
+)
+
+var (
+	// Regex for parsing a matching a semantic version
+	Regex = regexp.MustCompile(Pattern)
+)
+
+// Version provides a less strict implementation of a semantic version
+// and supports the optional use of a prefix, which is a common standard with
+// Git tags
+type Version struct {
+	Prefix string
+	Patch  uint64
+	Minor  uint64
+	Major  uint64
+	Raw    string
+}
+
+// Parse ...
+func Parse(ver string) (Version, error) {
+	if m := Regex.FindStringSubmatch(ver); len(m) > 4 {
+		return Version{
+			Prefix: m[1],
+			Major:  toUint64(m[2]),
+			Minor:  toUint64(m[3]),
+			Patch:  toUint64(m[4]),
+			Raw:    ver,
+		}, nil
 	}
 
-	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
+	return Version{}, errors.New("unrecognised semantic version format")
+}
 
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
-	if err != nil {
-		os.Exit(1)
-	}
+func toUint64(d string) uint64 {
+	v, _ := strconv.Atoi(d)
+	return uint64(v)
+}
 
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+// String outputs the unparsed semantic version
+func (v Version) String() string {
+	return v.Raw
 }

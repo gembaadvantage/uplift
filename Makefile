@@ -26,7 +26,7 @@ LDFLAGS += -X github.com/gembaadvantage/uplift/internal/version.gitCommit=${GIT_
 LDFLAGS += -X github.com/gembaadvantage/uplift/internal/version.gitBranch=${GIT_BRANCH}
 
 .PHONY: all
-all: build
+all: clean lint test build
 
 .PHONY: build
 build: $(BINDIR)/$(BINNAME)

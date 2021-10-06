@@ -28,41 +28,38 @@ import (
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/task"
-	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
-	"github.com/gembaadvantage/uplift/internal/task/gitpush"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
+	"github.com/gembaadvantage/uplift/internal/task/tag"
 	"github.com/spf13/cobra"
 )
 
 const (
-	bumpDesc = `Bumps the semantic version within files in your git repository. The
-version bump is based on the conventional commit message from the last commit.
-Uplift can bump the version in any file using regex pattern matching`
+	tagDesc = `Tags a git repository with the next semantic version. The tag
+is based on the conventional commit message from the last commit.`
 )
 
-func newBumpCmd(out io.Writer, ctx *context.Context) *cobra.Command {
+func newTagCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "bump",
-		Short: "Bump the semantic version within files",
-		Long:  bumpDesc,
+		Use:   "tag",
+		Short: "Tag a git repository with the next semantic version",
+		Long:  tagDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return bumpFiles(out, ctx)
+			return tagRepo(out, ctx)
 		},
 	}
 
 	return cmd
 }
 
-func bumpFiles(out io.Writer, ctx *context.Context) error {
+func tagRepo(out io.Writer, ctx *context.Context) error {
 	tsks := []task.Runner{
 		currentversion.Task{},
 		nextversion.Task{},
 		nextcommit.Task{},
-		bump.Task{},
-		gitpush.Task{},
+		tag.Task{},
 	}
 
 	for _, tsk := range tsks {

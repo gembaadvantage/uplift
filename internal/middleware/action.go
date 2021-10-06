@@ -20,40 +20,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package log
+package middleware
 
-import (
-	"fmt"
-	"io"
-)
+import "github.com/gembaadvantage/uplift/internal/context"
 
-// SimpleLogger defines a logger that logs without any text decoration
-// and only supports logging using standard output. Logging with any of the
-// provided logging levels will simply be ignored
-type SimpleLogger struct {
-	w io.Writer
-}
-
-// NewSimpleLogger creates a new simple logger
-func NewSimpleLogger(out io.Writer) ConsoleLogger {
-	return SimpleLogger{
-		w: out,
-	}
-}
-
-// Out will log without any text decoration
-func (l SimpleLogger) Out(s string, args ...interface{}) {
-	fmt.Fprintf(l.w, s, args...)
-}
-
-// Success will not log anything
-func (l SimpleLogger) Success(s string, args ...interface{}) {
-}
-
-// Info will not log anything
-func (l SimpleLogger) Info(s string, args ...interface{}) {
-}
-
-// Warn will  not log anything
-func (l SimpleLogger) Warn(s string, args ...interface{}) {
-}
+// Action defines a function that allows middleware to easily be chained.
+// Action is defined with the same method signature as a task Runner, allowing
+// tasks to be transparently wrapped more easily
+type Action func(ctx *context.Context) error

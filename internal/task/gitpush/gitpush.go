@@ -20,29 +20,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package gitpush
 
 import (
-	"os"
-
+	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-func main() {
-	cfg, err := loadConfig()
-	if err != nil {
-		os.Exit(1)
+// Task for pushing commits to a git remote
+type Task struct{}
+
+// String generates a string representation of the task
+func (t Task) String() string {
+	return "git push"
+}
+
+// Run the task
+func (t Task) Run(ctx *context.Context) error {
+	if ctx.DryRun {
+		log.Info("skipping push in dry run mode")
+		return nil
 	}
 
-	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
-
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+	log.Info("check and push any outstanding commits")
+	return git.Push()
 }

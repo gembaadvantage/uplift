@@ -20,29 +20,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package logging
 
 import (
-	"os"
-
+	"github.com/apex/log"
+	"github.com/apex/log/handlers/cli"
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/middleware"
 )
 
-func main() {
-	cfg, err := loadConfig()
-	if err != nil {
-		os.Exit(1)
-	}
+const (
+	// DefaultPadding ensures all titles are indented by a set number of spaces
+	DefaultPadding = 3
 
-	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
+	// PrettyPadding ensures all other logging is indented twice the size of the default padding
+	PrettyPadding = DefaultPadding * 2
+)
 
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
-	if err != nil {
-		os.Exit(1)
-	}
+// Log executes the given task and ensures the output is pretty printed.
+// The task title will always be followed by any indented output from the
+// task itself
+func Log(title string, act middleware.Action) middleware.Action {
+	return func(ctx *context.Context) error {
+		defer func() {
+			cli.Default.Padding = DefaultPadding
+		}()
 
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
+		cli.Default.Padding = DefaultPadding
+		log.Info(title)
+		cli.Default.Padding = PrettyPadding
+
+		return act(ctx)
 	}
 }

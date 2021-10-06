@@ -20,29 +20,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package logging
 
 import (
-	"os"
+	"testing"
 
+	"github.com/apex/log/handlers/cli"
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func main() {
-	cfg, err := loadConfig()
-	if err != nil {
-		os.Exit(1)
-	}
+func TestLog(t *testing.T) {
+	err := Log("test", func(ctx *context.Context) error {
+		return nil
+	})(&context.Context{})
 
-	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
+	require.NoError(t, err)
+}
 
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
-	if err != nil {
-		os.Exit(1)
-	}
+func TestLog_PrettyPrints(t *testing.T) {
+	Log("test", func(ctx *context.Context) error {
+		require.Equal(t, 6, cli.Default.Padding)
+		return nil
+	})(&context.Context{})
 
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+	assert.Equal(t, 3, cli.Default.Padding)
 }

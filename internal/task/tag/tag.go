@@ -20,19 +20,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package log
+package tag
 
-const (
-	GreenTick   = "\u2705"
-	RedCross    = "\u274C"
-	Warning     = "\u26a0\ufe0f"
-	Information = "\u2139\ufe0f"
+import (
+	"github.com/apex/log"
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-// ConsoleLogger defines an interface for logging to the console
-type ConsoleLogger interface {
-	Out(s string, args ...interface{})
-	Success(s string, args ...interface{})
-	Info(s string, args ...interface{})
-	Warn(s string, args ...interface{})
+// Task for tagging a repository
+type Task struct{}
+
+// String generates a string representation of the task
+func (t Task) String() string {
+	return "tag"
+}
+
+// Run the task tagging a repository with the next semantic version. Supports both
+// standard and annotated git tags
+func (t Task) Run(ctx *context.Context) error {
+	if ctx.CurrentVersion.Raw == ctx.NextVersion.Raw {
+		log.WithFields(log.Fields{
+			"current": ctx.CurrentVersion.Raw,
+			"next":    ctx.NextVersion.Raw,
+		}).Info("no version change detected")
+		return nil
+	}
+
+	if ctx.DryRun {
+		log.Info("skipping tag in dry run mode")
+		return nil
+	}
+
+	if ctx.Config.AnnotatedTags {
+		log.WithField("tag", ctx.NextVersion.Raw).Info("with annotated tag")
+		return git.AnnotatedTag(ctx.NextVersion.Raw, ctx.CommitDetails)
+	}
+
+	log.WithField("tag", ctx.NextVersion.Raw).Info("with standard tag")
+	return git.Tag(ctx.NextVersion.Raw)
 }

@@ -20,29 +20,53 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package currentversion
 
 import (
-	"os"
+	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-func main() {
-	cfg, err := loadConfig()
-	if err != nil {
-		os.Exit(1)
+func TestRun(t *testing.T) {
+	tests := []struct {
+		name     string
+		repoTag  string
+		expected string
+	}{
+		{
+			name:     "RepositoryTag",
+			repoTag:  "1.1.1",
+			expected: "1.1.1",
+		},
+		{
+			name:     "PrefixedRepositoryTag",
+			repoTag:  "v0.2.1",
+			expected: "v0.2.1",
+		},
+		{
+			name:     "RepositoryNoTag",
+			repoTag:  "",
+			expected: "",
+		},
 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			git.InitRepo(t)
+			if tt.repoTag != "" {
+				git.EmptyCommitAndTag(t, tt.repoTag, "testing")
+			}
 
-	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
+			ctx := &context.Context{}
+			err := Task{}.Run(ctx)
+			if err != nil {
+				t.Errorf("unexpected error: %s", err)
+			}
 
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
+			if ctx.CurrentVersion.Raw != tt.expected {
+				t.Errorf("expected tag %s but received tag %s", tt.expected, ctx.CurrentVersion.Raw)
+			}
+		})
 	}
 }

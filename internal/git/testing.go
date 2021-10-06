@@ -33,6 +33,8 @@ import (
 // the current testing context will operate from within that directory until the calling
 // test has completed
 func InitRepo(t *testing.T) {
+	t.Helper()
+
 	MkTmpDir(t)
 
 	// Initialise the git repo

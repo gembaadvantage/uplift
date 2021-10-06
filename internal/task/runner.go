@@ -20,29 +20,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package task
 
 import (
-	"os"
+	"fmt"
 
 	"github.com/gembaadvantage/uplift/internal/context"
 )
 
-func main() {
-	cfg, err := loadConfig()
-	if err != nil {
-		os.Exit(1)
-	}
+// Runner defines a way of running a task. A task can either be run as a
+// standalone operation or chained into a series of consecutive operations
+type Runner interface {
+	fmt.Stringer
 
-	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
-
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+	// Run the task. A context is provided allowing state between tasks to
+	// be shared. Useful if multiple tasks are executed in order
+	Run(ctx *context.Context) error
 }

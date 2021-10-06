@@ -20,29 +20,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package context
 
 import (
-	"os"
+	ctx "context"
 
-	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/config"
+	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
-func main() {
-	cfg, err := loadConfig()
-	if err != nil {
-		os.Exit(1)
-	}
+// Context provides a way to share common state across tasks
+type Context struct {
+	ctx.Context
+	Config         config.Uplift
+	DryRun         bool
+	Debug          bool
+	CurrentVersion semver.Version
+	NextVersion    semver.Version
+	CommitDetails  git.CommitDetails
+}
 
-	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
-
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
+// New constructs a context that captures both runtime configuration and
+// user defined runtime options
+func New(cfg config.Uplift) *Context {
+	return &Context{
+		Context: ctx.Background(),
+		Config:  cfg,
 	}
 }

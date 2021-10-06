@@ -20,29 +20,40 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package currentversion
 
 import (
-	"os"
+	"errors"
 
+	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
-func main() {
-	cfg, err := loadConfig()
-	if err != nil {
-		os.Exit(1)
+// Task that identifies the current semantic version of a repository
+type Task struct{}
+
+// String generates a string representation of the task
+func (t Task) String() string {
+	return "current version"
+}
+
+// Run the task
+func (t Task) Run(ctx *context.Context) error {
+	if !git.IsRepo() {
+		return errors.New("current directory must be a git repo")
 	}
 
-	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
-
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
-	if err != nil {
-		os.Exit(1)
+	tag := git.LatestTag()
+	if tag == "" {
+		log.Info("repository not tagged with version")
+		return nil
 	}
 
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+	// Only a semantic version tag will have been retrieved by this point
+	ctx.CurrentVersion, _ = semver.Parse(tag)
+
+	log.WithField("current", ctx.CurrentVersion).Info("identified version")
+	return nil
 }

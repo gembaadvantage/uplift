@@ -25,17 +25,35 @@ package main
 import (
 	"io"
 
-	"github.com/gembaadvantage/uplift/internal/config"
+	"github.com/apex/log"
+	"github.com/apex/log/handlers/cli"
+	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/spf13/cobra"
 )
 
-func newRootCmd(out io.Writer, args []string, cfg config.Uplift) (*cobra.Command, error) {
+func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Command, error) {
+	log.SetHandler(cli.Default)
+
 	cmd := &cobra.Command{
 		Use:          "uplift",
 		Short:        "Semantic versioning the easy way",
 		SilenceUsage: true,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			if ctx.Debug {
+				log.SetLevel(log.DebugLevel)
+			}
+		},
 	}
 
-	cmd.AddCommand(newVersionCmd(out), newBumpCmd(out, cfg), newCompletionCmd(out))
+	// Write persistent flags straight into the context
+	pf := cmd.PersistentFlags()
+	pf.BoolVar(&ctx.DryRun, "dry-run", false, "run without making any changes")
+	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
+
+	cmd.AddCommand(newVersionCmd(out),
+		newBumpCmd(out, ctx),
+		newCompletionCmd(out),
+		newTagCmd(out, ctx))
+
 	return cmd, nil
 }
