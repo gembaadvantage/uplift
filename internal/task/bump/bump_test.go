@@ -38,8 +38,8 @@ import (
 
 var (
 	commit = git.CommitDetails{
-		Author:  "john.doe",
-		Email:   "john.doe@example.com",
+		Author:  "joe.bloggs",
+		Email:   "joe.bloggs@example.com",
 		Message: "dummy commit",
 	}
 )

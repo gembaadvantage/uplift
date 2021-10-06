@@ -47,8 +47,8 @@ func TestRun_DefaultCommitMessage(t *testing.T) {
 
 func TestRun_ImpersonatesAuthor(t *testing.T) {
 	cd := git.CommitDetails{
-		Author: "john.doe",
-		Email:  "john.doe@example.com",
+		Author: "joe.bloggs",
+		Email:  "joe.bloggs@example.com",
 	}
 
 	ctx := &context.Context{

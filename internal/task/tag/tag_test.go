@@ -113,8 +113,8 @@ func TestRun_AnnotatedTag(t *testing.T) {
 			Raw: tag,
 		},
 		CommitDetails: git.CommitDetails{
-			Author:  "john.doe",
-			Email:   "john.doe@example.com",
+			Author:  "joe.bloggs",
+			Email:   "joe.bloggs@example.com",
 			Message: "custom message",
 		},
 		Config: config.Uplift{

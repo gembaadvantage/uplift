@@ -58,7 +58,16 @@ Uplift supports the use of a `v` prefix and includes it with subsequent bumps.
 Based on the latest commit, the repository will be tagged with the next semantic version.
 
 ```sh
-uplift tag
+$ uplift tag
+
+  • current version
+    • identified version        current=0.1.2
+  • next version
+    • identified next version   commit=feat: new feature current=0.1.2 next=0.2.0
+  • next commit
+    • committing with           email=joe.bloggs@example.com message=ci(bump): bumped version to 0.2.0 name=joe.bloggs
+  • tag
+    • with standard tag         tag=0.2.0
 ```
 
 ### File Bumping
@@ -66,7 +75,20 @@ uplift tag
 When configured, the version within any file in a git repository can be bumped to the next semantic version. The version is identified by inspecting the latest commit.
 
 ```sh
-uplift bump
+$ uplift bump
+
+  • current version
+    • identified version        current=0.2.0
+  • next version
+    • identified next version   commit=feat: new feature current=0.2.0 next=0.3.0
+  • next commit
+    • committing with           email=joe.bloggs@example.com message=ci(bump): bumped version to 0.2.0 name=joe.bloggs
+  • bump
+    • file bumped               current=0.2.0 file=chart/test/Chart.yaml next=0.3.0
+    • successfully staged file  file=chart/test/Chart.yaml
+    • attempting to commit file changes
+  • git push
+    • check and push any outstanding commits
 ```
 
 ## Configuration
