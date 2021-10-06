@@ -39,8 +39,7 @@ func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Comm
 		Short:        "Semantic versioning the easy way",
 		SilenceUsage: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			// Turn on verbose logging if required
-			if ctx.Verbose {
+			if ctx.Debug {
 				log.SetLevel(log.DebugLevel)
 			}
 		},
@@ -49,7 +48,7 @@ func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Comm
 	// Write persistent flags straight into the context
 	pf := cmd.PersistentFlags()
 	pf.BoolVar(&ctx.DryRun, "dry-run", false, "run without making any changes")
-	pf.BoolVar(&ctx.Verbose, "verbose", false, "show me everything that happens")
+	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
 
 	cmd.AddCommand(newVersionCmd(out),
 		newBumpCmd(out, ctx),

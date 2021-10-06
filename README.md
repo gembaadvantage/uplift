@@ -49,36 +49,24 @@ chmod 700 install
 
 ## Quick Start
 
-Based on the latest commit, the repository will be tagged with the next calculated version.
-
-```sh
-$ uplift bump
-0.2.0
-```
+Uplift can carry out different semantic versioning operations on your repository. All operations support running in a dry run mode (`--dry-run`), providing a preview of changes only. Extra output can be logged to console using debug mode (`--debug`).
 
 Uplift supports the use of a `v` prefix and includes it with subsequent bumps.
 
+### Tagging
+
+Based on the latest commit, the repository will be tagged with the next semantic version.
+
 ```sh
-$ uplift bump
-v0.2.0
+uplift tag
 ```
 
-A `dry run` can be carried out with optional `verbose` output, to show what uplift is up to.
+### File Bumping
+
+When configured, the version within any file in a git repository can be bumped to the next semantic version. The version is identified by inspecting the latest commit.
 
 ```sh
-$ uplift bump --dry-run --verbose
-
-✅ git repo found
-✅ retrieved latest commit:
-'feat: a new snazzy feature'
-✅ commit contains a bump prefix, increment identified as 'Minor'
-ℹ️ existing version found: 0.1.0
-✅ bumped version to: 0.2.0
-ℹ️  Any commits will use:
-joe.bloggs <joe.bloggs@gmail.com>
-chore(release): a custom message
-ℹ️ no files to bump, skipping!
-0.2.0
+uplift bump
 ```
 
 ## Configuration

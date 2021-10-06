@@ -35,7 +35,7 @@ type Context struct {
 	ctx.Context
 	Config         config.Uplift
 	DryRun         bool
-	Verbose        bool
+	Debug          bool
 	CurrentVersion semver.Version
 	NextVersion    semver.Version
 	CommitDetails  git.CommitDetails
