@@ -243,7 +243,7 @@ func TestRun_FileDoesNotExist(t *testing.T) {
 	}
 
 	err := Task{}.Run(ctx)
-	assert.EqualError(t, err, "open missing.txt: no such file or directory")
+	assert.Error(t, err)
 }
 
 func TestRun_MultipleFiles(t *testing.T) {
