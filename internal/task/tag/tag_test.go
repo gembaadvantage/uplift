@@ -23,7 +23,6 @@ SOFTWARE.
 package tag
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 
@@ -58,9 +57,7 @@ func TestRun_DryRunMode(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommit(t, "commit")
 
-	var out bytes.Buffer
 	ctx := &context.Context{
-		Out: &out,
 		NextVersion: semver.Version{
 			Raw: tag,
 		},
@@ -69,7 +66,6 @@ func TestRun_DryRunMode(t *testing.T) {
 
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, tag, out.String())
 
 	ltag := git.LatestTag()
 	assert.Empty(t, ltag)
