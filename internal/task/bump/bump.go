@@ -93,6 +93,10 @@ func (t Task) Run(ctx *context.Context) error {
 	return nil
 }
 
+// TODO: tidy up what gets passed in
+// TODO: fix unit tests
+// TODO: update readme
+
 func bumpFile(ctx *context.Context, path string, bump FileBump) (bool, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {

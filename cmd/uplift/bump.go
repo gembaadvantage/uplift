@@ -25,9 +25,8 @@ package main
 import (
 	"io"
 
-	"github.com/apex/log"
-	"github.com/apex/log/handlers/cli"
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
@@ -38,15 +37,15 @@ import (
 )
 
 const (
-	bumpDesc = `Bumps the semantic version within your git repository. The version bump 
-is based on the conventional commit message from the last commit. Uplift
-can also bump individual files in your repository to keep them in sync`
+	bumpDesc = `Bumps the semantic version within files in your git repository. The
+version bump is based on the conventional commit message from the last commit.
+Uplift can bump the version in any file using regex pattern matching`
 )
 
 func newBumpCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bump",
-		Short: "Bump the semantic version",
+		Short: "Bump the semantic version within files",
 		Long:  bumpDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -66,17 +65,10 @@ func bumpFiles(out io.Writer, ctx *context.Context) error {
 		gitpush.Task{},
 	}
 
-	// TODO: wrapper that handles logging and invokes the task
-	dp := cli.Default.Padding
-
 	for _, tsk := range tsks {
-		log.Info(tsk.String())
-		cli.Default.Padding = dp * 2
-
-		if err := tsk.Run(ctx); err != nil {
+		if err := logging.Log(tsk.String(), tsk.Run)(ctx); err != nil {
 			return err
 		}
-		cli.Default.Padding = dp
 	}
 
 	return nil
