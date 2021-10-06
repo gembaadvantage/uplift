@@ -50,5 +50,7 @@ jobs:
       - name: Tag
         if: github.ref == 'refs/heads/main'
         uses: gembaadvantage/uplift-action@v1
+        with:
+          version: v0.7.0
         env:
           GITHUB_TOKEN: ${{ secrets.GH_UPLIFT }}
