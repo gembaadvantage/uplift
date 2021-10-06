@@ -51,7 +51,7 @@ initOS() {
 }
 
 canDownload() {
-    local supported="darwin-amd64\ndarwin-x86_64\nlinux-arm\nlinux-arm64\nlinux-arm386\nlinux-i386\nlinux-ppc64le\nlinx-x86_64\nwindows-arm\nwindows-i386\nwindows-x86_64"
+    local supported="darwin-amd64\ndarwin-x86_64\nlinux-arm\nlinux-arm64\nlinux-arm386\nlinux-i386\nlinux-ppc64le\nlinux-x86_64\nwindows-arm\nwindows-i386\nwindows-x86_64"
     if ! echo "${supported}" | grep -q "${OS}-${ARCH}"; then
       echo "No prebuilt binary currently exists for ${OS}-${ARCH}."
       exit 1
