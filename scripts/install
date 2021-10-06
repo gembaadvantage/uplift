@@ -96,7 +96,7 @@ install() {
   local extract_dir="$DOWNLOAD_DIR/uplift-$VERSION"
   mkdir -p $extract_dir
   tar xf "$UPLIFT_FILE" -C "${extract_dir}"
-  sudo cp "${extract_dir}/uplift" "/usr/local/bin/uplift"
+  cp "${extract_dir}/uplift" "/usr/local/bin/uplift"
 
   echo "Installed uplift to /usr/local/bin"
 }
