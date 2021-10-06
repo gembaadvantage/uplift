@@ -94,7 +94,6 @@ func (t Task) Run(ctx *context.Context) error {
 }
 
 // TODO: tidy up what gets passed in
-// TODO: fix unit tests
 // TODO: update readme
 
 func bumpFile(ctx *context.Context, path string, bump FileBump) (bool, error) {

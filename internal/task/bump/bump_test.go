@@ -36,6 +36,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	commit = git.CommitDetails{
+		Author:  "john.doe",
+		Email:   "john.doe@example.com",
+		Message: "dummy commit",
+	}
+)
+
 func TestRun(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -141,6 +149,7 @@ func TestRun(t *testing.T) {
 				NextVersion: semver.Version{
 					Raw: tt.nextVer,
 				},
+				CommitDetails: commit,
 				Config: config.Uplift{
 					Bumps: []config.Bump{
 						{
@@ -174,6 +183,7 @@ func TestRun_ForceSemanticVersion(t *testing.T) {
 		NextVersion: semver.Version{
 			Raw: "v0.2.0",
 		},
+		CommitDetails: commit,
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
@@ -247,6 +257,7 @@ func TestRun_MultipleFiles(t *testing.T) {
 		NextVersion: semver.Version{
 			Raw: "0.1.1",
 		},
+		CommitDetails: commit,
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
@@ -429,6 +440,7 @@ func TestRun_MavenPom(t *testing.T) {
 		NextVersion: semver.Version{
 			Raw: "0.2.0",
 		},
+		CommitDetails: commit,
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
@@ -483,6 +495,7 @@ appVersion: 0.1.0`)
 		NextVersion: semver.Version{
 			Raw: "0.1.1",
 		},
+		CommitDetails: commit,
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
@@ -527,6 +540,7 @@ func TestRun_PackageJson(t *testing.T) {
 		NextVersion: semver.Version{
 			Raw: "1.0.0",
 		},
+		CommitDetails: commit,
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
