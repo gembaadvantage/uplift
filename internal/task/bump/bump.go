@@ -52,6 +52,11 @@ func (t Task) String() string {
 	return "bump"
 }
 
+// Skip running the task if no version has changed
+func (t Task) Skip(ctx *context.Context) bool {
+	return ctx.NoVersionChanged
+}
+
 // Run the task bumping the semantic version of any file identified within
 // the uplift configuration file
 func (t Task) Run(ctx *context.Context) error {

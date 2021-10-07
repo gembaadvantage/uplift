@@ -27,6 +27,7 @@ import (
 
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
+	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
@@ -66,7 +67,7 @@ func bumpFiles(out io.Writer, ctx *context.Context) error {
 	}
 
 	for _, tsk := range tsks {
-		if err := logging.Log(tsk.String(), tsk.Run)(ctx); err != nil {
+		if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
 			return err
 		}
 	}
