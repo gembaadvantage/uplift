@@ -20,11 +20,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package middleware
+package skip
 
-import "github.com/gembaadvantage/uplift/internal/context"
+import (
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/middleware"
+)
 
-// Action defines a function that allows middleware to easily be chained.
-// Action is defined with the same method signature as task.Runner Run(),
-// allowing tasks to be transparently wrapped more easily
-type Action func(ctx *context.Context) error
+// Action defines a function that supports the skipping of future middleware
+// in the chain. Action is defined with the same method signature as task.Runner
+// Skip(), allow taks to be transparently wrapped
+type Action func(ctx *context.Context) bool
+
+// Running checks if a skip condition is satisfied before invoking the action itself.
+// When used within a middleware chain, any wrap actions will be skipped if the
+// skip condition resolves to true
+func Running(skipAct Action, act middleware.Action) middleware.Action {
+	return func(ctx *context.Context) error {
+		if skipAct(ctx) {
+			return nil
+		}
+		return act(ctx)
+	}
+}

@@ -39,6 +39,11 @@ func (t Task) String() string {
 	return "current version"
 }
 
+// Skip is disabled for this task
+func (t Task) Skip(ctx *context.Context) bool {
+	return false
+}
+
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
 	if !git.IsRepo() {

@@ -36,6 +36,11 @@ func (t Task) String() string {
 	return "tag"
 }
 
+// Skip running the task if no version has changed
+func (t Task) Skip(ctx *context.Context) bool {
+	return ctx.NoVersionChanged
+}
+
 // Run the task tagging a repository with the next semantic version. Supports both
 // standard and annotated git tags
 func (t Task) Run(ctx *context.Context) error {

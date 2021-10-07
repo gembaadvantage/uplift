@@ -44,6 +44,11 @@ func (t Task) String() string {
 	return "next version"
 }
 
+// Skip is disabled for this task
+func (t Task) Skip(ctx *context.Context) bool {
+	return false
+}
+
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
 	commit, err := git.LatestCommit()
@@ -55,6 +60,7 @@ func (t Task) Run(ctx *context.Context) error {
 	inc := semver.ParseCommit(commit.Message)
 	if inc == semver.NoIncrement {
 		ctx.NextVersion = ctx.CurrentVersion
+		ctx.NoVersionChanged = true
 		log.WithField("commit", ctx.CommitDetails.Message).Info("no change in version needed")
 		return nil
 	}

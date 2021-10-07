@@ -37,9 +37,9 @@ const (
 	PrettyPadding = DefaultPadding * 2
 )
 
-// Log executes the given task and ensures the output is pretty printed.
-// The task title will always be followed by any indented output from the
-// task itself
+// Log executes the given action and ensures the output is pretty printed.
+// The title will always be followed by any indented output from the
+// action itself
 func Log(title string, act middleware.Action) middleware.Action {
 	return func(ctx *context.Context) error {
 		defer func() {

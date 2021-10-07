@@ -33,12 +33,13 @@ import (
 // Context provides a way to share common state across tasks
 type Context struct {
 	ctx.Context
-	Config         config.Uplift
-	DryRun         bool
-	Debug          bool
-	CurrentVersion semver.Version
-	NextVersion    semver.Version
-	CommitDetails  git.CommitDetails
+	Config           config.Uplift
+	DryRun           bool
+	Debug            bool
+	CurrentVersion   semver.Version
+	NextVersion      semver.Version
+	NoVersionChanged bool
+	CommitDetails    git.CommitDetails
 }
 
 // New constructs a context that captures both runtime configuration and

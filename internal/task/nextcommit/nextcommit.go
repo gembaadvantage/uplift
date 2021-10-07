@@ -38,6 +38,11 @@ func (t Task) String() string {
 	return "next commit"
 }
 
+// Skip is disabled for this task
+func (t Task) Skip(ctx *context.Context) bool {
+	return ctx.NoVersionChanged
+}
+
 // Run the task and generate the next commit by either impersonating the author
 // from the last commit or by generating a user defined commit
 func (t Task) Run(ctx *context.Context) error {

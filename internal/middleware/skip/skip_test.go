@@ -20,11 +20,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package middleware
+package skip
 
-import "github.com/gembaadvantage/uplift/internal/context"
+import (
+	"testing"
 
-// Action defines a function that allows middleware to easily be chained.
-// Action is defined with the same method signature as task.Runner Run(),
-// allowing tasks to be transparently wrapped more easily
-type Action func(ctx *context.Context) error
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestRunning(t *testing.T) {
+	Running(func(ctx *context.Context) bool {
+		return true
+	}, func(ctx *context.Context) error {
+		assert.Fail(t, "action should be skipped")
+		return nil
+	})(&context.Context{})
+}
+
+func TestRunning_NoSkip(t *testing.T) {
+	exec := false
+
+	Running(func(ctx *context.Context) bool {
+		return false
+	}, func(ctx *context.Context) error {
+		exec = true
+		return nil
+	})(&context.Context{})
+
+	assert.True(t, exec)
+}

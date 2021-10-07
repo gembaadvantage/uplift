@@ -36,4 +36,7 @@ type Runner interface {
 	// Run the task. A context is provided allowing state between tasks to
 	// be shared. Useful if multiple tasks are executed in order
 	Run(ctx *context.Context) error
+
+	// Skip running of the task based on the current context state
+	Skip(ctx *context.Context) bool
 }
