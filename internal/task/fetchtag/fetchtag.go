@@ -20,34 +20,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package context
+package fetchtag
 
 import (
-	ctx "context"
-
-	"github.com/gembaadvantage/uplift/internal/config"
+	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
-// Context provides a way to share common state across tasks
-type Context struct {
-	ctx.Context
-	Config           config.Uplift
-	DryRun           bool
-	Debug            bool
-	CurrentVersion   semver.Version
-	NextVersion      semver.Version
-	NoVersionChanged bool
-	CommitDetails    git.CommitDetails
-	FetchTags        bool
+// Task for fetching tags from a remote repository
+type Task struct{}
+
+// String generates a string representation of the task
+func (t Task) String() string {
+	return "fetch tags"
 }
 
-// New constructs a context that captures both runtime configuration and
-// user defined runtime options
-func New(cfg config.Uplift) *Context {
-	return &Context{
-		Context: ctx.Background(),
-		Config:  cfg,
-	}
+// Skip running the task if no flag has been provided
+func (t Task) Skip(ctx *context.Context) bool {
+	return !ctx.FetchTags
+}
+
+// Run the task fetching all tags from the remote repository
+func (t Task) Run(ctx *context.Context) error {
+	return git.FetchTags()
 }

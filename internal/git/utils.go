@@ -58,6 +58,15 @@ func IsRepo() bool {
 	return err == nil && strings.TrimSpace(out) == "true"
 }
 
+// FetchTags retrieves all tags associated with the remote repository
+func FetchTags() error {
+	if _, err := Clean(Run("fetch", "--all", "--tags")); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // LatestTag retrieves the latest tag within the repository
 func LatestTag() string {
 	// Filter out all tags that are non in the supported formats

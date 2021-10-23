@@ -30,6 +30,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
+	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
 	"github.com/gembaadvantage/uplift/internal/task/tag"
@@ -52,11 +53,13 @@ func newTagCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 		},
 	}
 
+	cmd.Flags().BoolVar(&ctx.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
 	return cmd
 }
 
 func tagRepo(out io.Writer, ctx *context.Context) error {
 	tsks := []task.Runner{
+		fetchtag.Task{},
 		currentversion.Task{},
 		nextversion.Task{},
 		nextcommit.Task{},
