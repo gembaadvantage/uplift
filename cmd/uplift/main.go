@@ -23,6 +23,7 @@ SOFTWARE.
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gembaadvantage/uplift/internal/context"
@@ -31,6 +32,7 @@ import (
 func main() {
 	cfg, err := loadConfig()
 	if err != nil {
+		fmt.Printf("failed to load uplift config. %v", err)
 		os.Exit(1)
 	}
 
