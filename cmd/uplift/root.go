@@ -53,7 +53,8 @@ func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Comm
 	cmd.AddCommand(newVersionCmd(out),
 		newBumpCmd(out, ctx),
 		newCompletionCmd(out),
-		newTagCmd(out, ctx))
+		newTagCmd(out, ctx),
+		newReleaseCmd(out, ctx))
 
 	return cmd, nil
 }
