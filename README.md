@@ -91,6 +91,14 @@ $ uplift bump
     • check and push any outstanding commits
 ```
 
+### Release
+
+A full semantic release will be carried out. Combining both the `bump` and `tag` operations, in that order.
+
+```sh
+uplift release
+```
+
 ## Configuration
 
 Uplift can be configured through the existance of an optional `.uplift.yml` configuration file in the root of your repository. Other supported variations are: `.uplift.yaml`, `uplift.yml` and `uplift.yaml`.
