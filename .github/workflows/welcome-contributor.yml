@@ -31,7 +31,7 @@ jobs:
           script: |
             // Retrieve all issues by the current user
             const creator = context.payload.sender.login
-            const opts = github.issues.listForRepo.endpoint.merge({
+            const opts = github.rest.issues.listForRepo.endpoint.merge({
               ...context.issue,
               creator,
               state: 'all'
@@ -43,7 +43,7 @@ jobs:
             }
 
             // Assign label to first issue
-            github.issues.addLabels({
+            github.rest.issues.addLabels({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -51,7 +51,7 @@ jobs:
             })
 
             // Welcome the new contributer
-            await github.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
