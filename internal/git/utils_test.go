@@ -36,7 +36,7 @@ func TestIsRepo(t *testing.T) {
 	assert.True(t, IsRepo())
 }
 
-func TestIsRepoDetectsNonGitRepo(t *testing.T) {
+func TestIsRepo_DetectsNonGitRepo(t *testing.T) {
 	MkTmpDir(t)
 	assert.False(t, IsRepo())
 }
@@ -53,14 +53,14 @@ func TestLatestTag(t *testing.T) {
 	assert.Equal(t, v2, tag)
 }
 
-func TestLatestTagNoTagsExist(t *testing.T) {
+func TestLatestTag_NoTagsExist(t *testing.T) {
 	MkTmpDir(t)
 
 	tag := LatestTag()
 	assert.Equal(t, "", tag)
 }
 
-func TestLatestTagNoSemanticTags(t *testing.T) {
+func TestLatestTag_NoSemanticTags(t *testing.T) {
 	InitRepo(t)
 
 	v1 := "v1"
@@ -86,7 +86,7 @@ func TestLatestCommit(t *testing.T) {
 	assert.Equal(t, c.Message, m)
 }
 
-func TestLatestCommitMultipleCommits(t *testing.T) {
+func TestLatestCommit_MultipleCommits(t *testing.T) {
 	InitRepo(t)
 
 	m := "third commit"
@@ -180,4 +180,30 @@ func StagedFile(t *testing.T) string {
 	require.NoError(t, err)
 
 	return file
+}
+
+func TestLogBetween_TwoTags(t *testing.T) {
+	InitRepo(t)
+	EmptyCommitAndTag(t, "1.0.0", "first commit")
+	EmptyCommitsAndTag(t, "2.0.0", "second commit", "third commit", "forth commit")
+
+	log, err := LogBetween("2.0.0", "1.0.0")
+	require.NoError(t, err)
+
+	require.Len(t, log, 3)
+	assert.Equal(t, log[0].Message, "forth commit")
+	assert.Equal(t, log[1].Message, "third commit")
+	assert.Equal(t, log[2].Message, "second commit")
+}
+
+func TestLogBetween_TwoSHAs(t *testing.T) {
+	InitRepo(t)
+	h := EmptyCommits(t, "first commit", "second commit", "third commit", "forth commit")
+
+	log, err := LogBetween(h[2], h[0])
+	require.NoError(t, err)
+
+	require.Len(t, log, 2)
+	assert.Equal(t, log[0].Message, "third commit")
+	assert.Equal(t, log[1].Message, "second commit")
 }

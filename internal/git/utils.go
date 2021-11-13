@@ -36,6 +36,13 @@ type CommitDetails struct {
 	Email   string
 }
 
+// LogEntry contains details about a specific git log entry
+type LogEntry struct {
+	Hash       string
+	AbbrevHash string
+	Message    string
+}
+
 // String prints out a user friendly string representation
 func (c CommitDetails) String() string {
 	return fmt.Sprintf("%s <%s>\n%s", c.Author, c.Email, c.Message)
@@ -200,6 +207,34 @@ func Push() error {
 	}
 
 	return nil
+}
+
+// LogBetween retrieves all log entries between two points of time within the
+// git history of the repository. Supports tags and specific git hashes as its
+// reference points. From must always be the closest point to HEAD
+func LogBetween(from, to string) ([]LogEntry, error) {
+	args := []string{
+		"log",
+		fmt.Sprintf("%s...%s", from, to),
+		"--pretty=format:'%H%s'",
+	}
+
+	log, err := Clean(Run(args...))
+	if err != nil {
+		return []LogEntry{}, err
+	}
+
+	rows := strings.Split(log, "\n")
+	les := make([]LogEntry, 0, len(rows))
+	for _, r := range rows {
+		les = append(les, LogEntry{
+			Hash:       r[:40],
+			AbbrevHash: r[:7],
+			Message:    r[40:],
+		})
+	}
+
+	return les, nil
 }
 
 // Clean the output

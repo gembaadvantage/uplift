@@ -24,6 +24,7 @@ package git
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -62,7 +63,7 @@ func MkTmpDir(t *testing.T) {
 
 // EmptyCommit will create an empty commit without the need for modifying any existing files
 // within the repository
-func EmptyCommit(t *testing.T, commit string) {
+func EmptyCommit(t *testing.T, commit string) string {
 	t.Helper()
 
 	args := []string{
@@ -76,36 +77,49 @@ func EmptyCommit(t *testing.T, commit string) {
 		commit,
 	}
 
-	_, err := Run(args...)
+	out, err := Run(args...)
 	require.NoError(t, err)
+
+	return abbrevHash(out)
+}
+
+func abbrevHash(m string) string {
+	i := strings.Index(m, "]")
+	return m[i-7 : i]
 }
 
 // EmptyCommits will create any number of empty commits without the need for modifying any
 // existing files within the repository
-func EmptyCommits(t *testing.T, commits ...string) {
+func EmptyCommits(t *testing.T, commits ...string) []string {
 	t.Helper()
 
+	hs := make([]string, 0, len(commits))
 	for _, msg := range commits {
-		EmptyCommit(t, msg)
+		hs = append(hs, EmptyCommit(t, msg))
 	}
+	return hs
 }
 
 // EmptyCommitAndTag will create an empty commit with an associated tag. No existing files
 // will be modified within the repository
-func EmptyCommitAndTag(t *testing.T, tag, msg string) {
+func EmptyCommitAndTag(t *testing.T, tag, msg string) string {
 	t.Helper()
 
-	EmptyCommit(t, msg)
+	h := EmptyCommit(t, msg)
 	err := Tag(tag)
 	require.NoError(t, err)
+
+	return h
 }
 
 // EmptyCommitsAndTag will create any number of empty commits and associate them with a tag.
 // No existing files will be modified within the repository
-func EmptyCommitsAndTag(t *testing.T, tag string, msgs ...string) {
+func EmptyCommitsAndTag(t *testing.T, tag string, msgs ...string) []string {
 	t.Helper()
 
-	EmptyCommits(t, msgs...)
+	hs := EmptyCommits(t, msgs...)
 	err := Tag(tag)
 	require.NoError(t, err)
+
+	return hs
 }
