@@ -8,6 +8,8 @@
 
 Semantic versioning the easy way. Automatic tagging and version bumping of files in your respositories based on your commit messages. Powered by [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Easy to include in your CI.
 
+:octocat: Github [action](https://github.com/marketplace/actions/uplift-action) available.
+
 ## Install
 
 Binary downloads of `uplift` can be found on the [Releases](https://github.com/gembaadvantage/uplift/releases) page. Unpack the `uplift` binary and add it to your PATH.
