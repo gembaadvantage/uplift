@@ -30,10 +30,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	initCommit = "initialise repo"
+)
+
 // InitRepo creates an empty git repository within a temporary directory. Once created
 // the current testing context will operate from within that directory until the calling
 // test has completed
-func InitRepo(t *testing.T) {
+func InitRepo(t *testing.T) string {
 	t.Helper()
 
 	MkTmpDir(t)
@@ -42,7 +46,7 @@ func InitRepo(t *testing.T) {
 	_, err := Run("init")
 	require.NoError(t, err)
 
-	EmptyCommit(t, "initialise repo")
+	return EmptyCommit(t, initCommit)
 }
 
 // MkTmpDir creates an empty directory that is not a git repository. Once created the

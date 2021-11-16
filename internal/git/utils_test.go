@@ -196,14 +196,85 @@ func TestLogBetween_TwoTags(t *testing.T) {
 	assert.Equal(t, log[2].Message, "second commit")
 }
 
-func TestLogBetween_TwoSHAs(t *testing.T) {
+func TestLogBetween_TwoHashes(t *testing.T) {
 	InitRepo(t)
 	h := EmptyCommits(t, "first commit", "second commit", "third commit", "forth commit")
 
-	log, err := LogBetween(h[2], h[0])
+	log, err := LogBetween(h[2], h[1])
 	require.NoError(t, err)
 
-	require.Len(t, log, 2)
+	require.Len(t, log, 1)
+	assert.Equal(t, log[0].Message, "third commit")
+}
+
+func TestLogBetween_FromSpecificTag(t *testing.T) {
+	InitRepo(t)
+	EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
+	EmptyCommit(t, "third commit")
+
+	log, err := LogBetween("1.0.0", "")
+	require.NoError(t, err)
+
+	require.Len(t, log, 3)
+	assert.Equal(t, log[0].Message, "second commit")
+	assert.Equal(t, log[1].Message, "first commit")
+	assert.Equal(t, log[2].Message, initCommit)
+}
+
+func TestLogBetween_FromSpecificHash(t *testing.T) {
+	InitRepo(t)
+	h := EmptyCommits(t, "first commit", "second commit", "third commit", "forth commit")
+
+	log, err := LogBetween(h[2], "")
+	require.NoError(t, err)
+
+	require.Len(t, log, 4)
 	assert.Equal(t, log[0].Message, "third commit")
 	assert.Equal(t, log[1].Message, "second commit")
+	assert.Equal(t, log[2].Message, "first commit")
+	assert.Equal(t, log[3].Message, initCommit)
+}
+
+func TestLogBetween_ToSpecificHash(t *testing.T) {
+	InitRepo(t)
+	h := EmptyCommits(t, "first commit", "second commit", "third commit", "forth commit")
+
+	log, err := LogBetween("", h[2])
+	require.NoError(t, err)
+
+	require.Len(t, log, 1)
+	assert.Equal(t, log[0].Message, "forth commit")
+}
+
+func TestLogBetween_ToSpecificTag(t *testing.T) {
+	InitRepo(t)
+	EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
+	EmptyCommit(t, "third commit")
+
+	log, err := LogBetween("", "1.0.0")
+	require.NoError(t, err)
+
+	require.Len(t, log, 1)
+	assert.Equal(t, log[0].Message, "third commit")
+}
+
+func TestLogBetween_All(t *testing.T) {
+	InitRepo(t)
+	EmptyCommits(t, "first commit", "second commit", "third commit")
+
+	log, err := LogBetween("", "")
+	require.NoError(t, err)
+
+	require.Len(t, log, 4)
+	assert.Equal(t, log[0].Message, "third commit")
+	assert.Equal(t, log[1].Message, "second commit")
+	assert.Equal(t, log[2].Message, "first commit")
+	assert.Equal(t, log[3].Message, initCommit)
+}
+
+func TestLogBetween_ErrorInvalidRevision(t *testing.T) {
+	InitRepo(t)
+
+	_, err := LogBetween("1234567", "")
+	require.Error(t, err)
 }

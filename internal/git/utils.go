@@ -213,9 +213,20 @@ func Push() error {
 // git history of the repository. Supports tags and specific git hashes as its
 // reference points. From must always be the closest point to HEAD
 func LogBetween(from, to string) ([]LogEntry, error) {
+	fmtFrom := from
+	if fmtFrom == "" {
+		fmtFrom = "HEAD"
+	}
+
+	fmtTo := to
+	if fmtTo != "" {
+		// A range query requires ... ellipses
+		fmtTo = fmt.Sprintf("...%s", fmtTo)
+	}
+
 	args := []string{
 		"log",
-		fmt.Sprintf("%s...%s", from, to),
+		fmt.Sprintf("%s%s", fmtFrom, fmtTo),
 		"--pretty=format:'%H%s'",
 	}
 
