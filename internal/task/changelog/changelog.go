@@ -20,35 +20,63 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package context
+package changelog
 
 import (
-	ctx "context"
+	_ "embed"
+	"os"
+	"text/template"
+	"time"
 
-	"github.com/gembaadvantage/uplift/internal/config"
+	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
-// Context provides a way to share common state across tasks
-type Context struct {
-	ctx.Context
-	Config           config.Uplift
-	DryRun           bool
-	Debug            bool
-	CurrentVersion   semver.Version
-	NextVersion      semver.Version
-	NoVersionChanged bool
-	CommitDetails    git.CommitDetails
-	FetchTags        bool
-	NoChangelog      bool
+//go:embed template/new.tpl
+var new string
+
+// Release ...
+type Release struct {
+	Tag     string
+	Date    string
+	Changes []git.LogEntry
 }
 
-// New constructs a context that captures both runtime configuration and
-// user defined runtime options
-func New(cfg config.Uplift) *Context {
-	return &Context{
-		Context: ctx.Background(),
-		Config:  cfg,
+// Task that generates a changelog for the current repository
+type Task struct{}
+
+// String generates a string representation of the task
+func (t Task) String() string {
+	return "changelog"
+}
+
+// Skip running the task if no changelog is needed
+func (t Task) Skip(ctx *context.Context) bool {
+	return ctx.NoChangelog
+}
+
+// Run the task
+func (t Task) Run(ctx *context.Context) error {
+	if ctx.NextVersion.Raw == "" {
+		// TODO: log
+		return nil
 	}
+
+	ents, err := git.LogBetween(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.OpenFile("CHANGELOG.md", os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	tmpl := template.Must(template.New("changelog").Parse(new))
+	return tmpl.Execute(f, Release{
+		Tag:     ctx.NextVersion.Raw,
+		Date:    time.Now().UTC().Format("2006-01-02"),
+		Changes: ents,
+	})
 }

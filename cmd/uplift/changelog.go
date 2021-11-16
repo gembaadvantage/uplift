@@ -20,35 +20,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package context
+package main
 
 import (
-	ctx "context"
+	"io"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/spf13/cobra"
 )
 
-// Context provides a way to share common state across tasks
-type Context struct {
-	ctx.Context
-	Config           config.Uplift
-	DryRun           bool
-	Debug            bool
-	CurrentVersion   semver.Version
-	NextVersion      semver.Version
-	NoVersionChanged bool
-	CommitDetails    git.CommitDetails
-	FetchTags        bool
-	NoChangelog      bool
+const (
+	chlogDesc = ``
+)
+
+func newChangelogCmd(out io.Writer, ctx *context.Context) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "changelog",
+		Short: "",
+		Long:  chlogDesc,
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return changelog(out, ctx)
+		},
+	}
+
+	// uplift changelog
+	// generates a changelog between the last 2 tags (needs a minimum of 1 tag)
+	return cmd
 }
 
-// New constructs a context that captures both runtime configuration and
-// user defined runtime options
-func New(cfg config.Uplift) *Context {
-	return &Context{
-		Context: ctx.Background(),
-		Config:  cfg,
-	}
+func changelog(out io.Writer, ctx *context.Context) error {
+	return nil
 }
