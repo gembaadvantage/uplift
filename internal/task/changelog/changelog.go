@@ -87,17 +87,36 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
+	log.WithField("tag", ctx.NextVersion.Raw).Info("determine changes for release")
 	ents, err := git.LogBetween(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw)
 	if err != nil {
 		return err
 	}
-	log.WithField("next", ctx.NextVersion.Raw).Info("generating changelog for release")
 
 	// Package log entries into release ready for template generation
 	rel := release{
 		Tag:     ctx.NextVersion.Raw,
 		Date:    time.Now().UTC().Format(ChangeDate),
 		Changes: ents,
+	}
+	log.WithFields(log.Fields{
+		"tag":     ctx.NextVersion.Raw,
+		"date":    time.Now().UTC().Format(ChangeDate),
+		"commits": len(rel.Changes),
+	}).Info("changeset identified")
+
+	if ctx.Debug {
+		for _, c := range rel.Changes {
+			log.WithFields(log.Fields{
+				"hash":    c.AbbrevHash,
+				"message": c.Message,
+			}).Debug("commit")
+		}
+	}
+
+	if ctx.DryRun {
+		log.Info("skip writing to changelog in dry run mode")
+		return nil
 	}
 
 	if noChangelogExists() {
