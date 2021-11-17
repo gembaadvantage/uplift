@@ -23,17 +23,43 @@ SOFTWARE.
 package changelog
 
 import (
+	"bytes"
 	_ "embed"
+	"errors"
+	"io/ioutil"
 	"os"
+	"strings"
 	"text/template"
 	"time"
 
+	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-//go:embed template/new.tpl
-var new string
+const (
+	//  MarkdownFile defines the name of the changelog markdown file within a repository
+	MarkdownFile = "CHANGELOG.md"
+
+	// ChangeDate defines a date formatting used when logging a new change
+	ChangeDate = "2006-01-02"
+
+	appendHeader = "## [Unreleased]\n\n"
+)
+
+var (
+	//go:embed template/new.tpl
+	newTpl string
+
+	//go:embed template/append.tpl
+	appendTpl string
+
+	newTplBody    = template.Must(template.New("new").Parse(newTpl))
+	appendTplBody = template.Must(template.New("append").Parse(appendTpl))
+
+	// ErrNoAppendHeader is reported if a changelog is missing the expected append header
+	ErrNoAppendHeader = errors.New("changelog missing supported append header")
+)
 
 // Release ...
 type Release struct {
@@ -58,7 +84,7 @@ func (t Task) Skip(ctx *context.Context) bool {
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
 	if ctx.NextVersion.Raw == "" {
-		// TODO: log
+		log.Info("no release detected, skipping changelog")
 		return nil
 	}
 
@@ -66,17 +92,50 @@ func (t Task) Run(ctx *context.Context) error {
 	if err != nil {
 		return err
 	}
+	log.WithField("next", ctx.NextVersion.Raw).Info("generating changelog for release")
 
-	f, err := os.OpenFile("CHANGELOG.md", os.O_CREATE|os.O_RDWR, 0644)
+	// Package log entries into release ready for template generation
+	rel := Release{
+		Tag:     ctx.NextVersion.Raw,
+		Date:    time.Now().UTC().Format(ChangeDate),
+		Changes: ents,
+	}
+
+	if noChangelogExists() {
+		f, err := os.OpenFile(MarkdownFile, os.O_CREATE|os.O_RDWR, 0644)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		log.Debug("create new changelog in repository")
+		return newTplBody.Execute(f, rel)
+	}
+
+	// When modifying an existing changelog, simply overwrite the existing file
+	cl, err := ioutil.ReadFile(MarkdownFile)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	tmpl := template.Must(template.New("changelog").Parse(new))
-	return tmpl.Execute(f, Release{
-		Tag:     ctx.NextVersion.Raw,
-		Date:    time.Now().UTC().Format("2006-01-02"),
-		Changes: ents,
-	})
+	// Appending is only possible if token token exists
+	clStr := string(cl)
+	if idx := strings.Index(clStr, appendHeader); idx == -1 {
+		return ErrNoAppendHeader
+	}
+
+	var buf bytes.Buffer
+	if err := appendTplBody.Execute(&buf, rel); err != nil {
+		return err
+	}
+
+	apnd := strings.Replace(clStr, appendHeader, buf.String(), 1)
+
+	log.Debug("append to existing changelog in repository")
+	return ioutil.WriteFile(MarkdownFile, []byte(apnd), 0644)
+}
+
+func noChangelogExists() bool {
+	_, err := os.Stat(MarkdownFile)
+	return os.IsNotExist(err)
 }

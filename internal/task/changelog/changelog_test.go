@@ -53,7 +53,7 @@ func changelogExists(t *testing.T) bool {
 	current, err := os.Getwd()
 	require.NoError(t, err)
 
-	if _, err := os.Stat(filepath.Join(current, "CHANGELOG.md")); err != nil {
+	if _, err := os.Stat(filepath.Join(current, MarkdownFile)); err != nil {
 		if os.IsNotExist(err) {
 			return false
 		}
@@ -113,15 +113,82 @@ All notable changes to this project will be documented in this file.
 func readChangelog(t *testing.T) string {
 	t.Helper()
 
-	data, err := ioutil.ReadFile("CHANGELOG.md")
+	data, err := ioutil.ReadFile(MarkdownFile)
 	require.NoError(t, err)
 
 	return string(data)
 }
 
-// TODO: make this a constant
-
 func changelogDate(t *testing.T) string {
 	t.Helper()
-	return time.Now().UTC().Format("2006-01-02")
+	return time.Now().UTC().Format(ChangeDate)
+}
+
+func TestRun_AppendToExistingChangelog(t *testing.T) {
+	ih := git.InitRepo(t)
+	h1 := git.EmptyCommitsAndTag(t, "1.0.0", "first commit")
+	h2 := git.EmptyCommitsAndTag(t, "1.1.0", "second commit", "third commit")
+
+	// Initial changelog
+	cl := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+## [1.0.0] - 2021-09-17
+
+%s first commit
+%s initialise repo
+`, h1[0], ih)
+	ioutil.WriteFile(MarkdownFile, []byte(cl), 0644)
+
+	ctx := &context.Context{
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextVersion: semver.Version{
+			Raw: "1.1.0",
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+## [1.1.0] - %s
+
+%s third commit
+%s second commit
+
+## [1.0.0] - 2021-09-17
+
+%s first commit
+%s initialise repo
+`, changelogDate(t), h2[1], h2[0], h1[0], ih)
+
+	assert.Equal(t, expected, readChangelog(t))
+}
+
+func TestRun_AppendToUnsupportedTemplate(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommitsAndTag(t, "1.0.0", "first commit")
+
+	cl := `# Changelog
+This changelog is deliberately missing the append marker`
+	ioutil.WriteFile(MarkdownFile, []byte(cl), 0644)
+
+	ctx := &context.Context{
+		NextVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.ErrorIs(t, err, ErrNoAppendHeader)
 }
