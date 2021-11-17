@@ -26,29 +26,54 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/middleware/logging"
+	"github.com/gembaadvantage/uplift/internal/middleware/skip"
+	"github.com/gembaadvantage/uplift/internal/task"
+	"github.com/gembaadvantage/uplift/internal/task/changelog"
+	"github.com/gembaadvantage/uplift/internal/task/currentversion"
+	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
+	"github.com/gembaadvantage/uplift/internal/task/nextversion"
 	"github.com/spf13/cobra"
 )
 
 const (
-	chlogDesc = ``
+	chlogDesc = `Create or update an existing changelog with an entry for
+the latest semantic release. For a first release, all commits
+between the latest tag and trunk will be written to the
+changelog. Subsequent entries will contain only commits between 
+release tags`
 )
 
 func newChangelogCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "changelog",
-		Short: "",
+		Short: "Create or update a changelog with the latest semantic release",
 		Long:  chlogDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return changelog(out, ctx)
+			return writeChangelog(out, ctx)
 		},
 	}
 
-	// uplift changelog
-	// generates a changelog between the last 2 tags (needs a minimum of 1 tag)
 	return cmd
 }
 
-func changelog(out io.Writer, ctx *context.Context) error {
+func writeChangelog(out io.Writer, ctx *context.Context) error {
+	// TODO: retrieve last 2 tags
+	// TODO: commit message isn't the same ci(bump): doesn't make sense in this context
+	tsks := []task.Runner{
+		currentversion.Task{},
+		nextversion.Task{},
+		nextcommit.Task{},
+		changelog.Task{},
+		//gitpush.Task{},
+	}
+
+	for _, tsk := range tsks {
+		if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

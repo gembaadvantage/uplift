@@ -54,7 +54,8 @@ func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Comm
 		newBumpCmd(out, ctx),
 		newCompletionCmd(out),
 		newTagCmd(out, ctx),
-		newReleaseCmd(out, ctx))
+		newReleaseCmd(out, ctx),
+		newChangelogCmd(out, ctx))
 
 	return cmd, nil
 }

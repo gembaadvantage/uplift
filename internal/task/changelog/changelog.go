@@ -61,8 +61,7 @@ var (
 	ErrNoAppendHeader = errors.New("changelog missing supported append header")
 )
 
-// Release ...
-type Release struct {
+type release struct {
 	Tag     string
 	Date    string
 	Changes []git.LogEntry
@@ -78,7 +77,7 @@ func (t Task) String() string {
 
 // Skip running the task if no changelog is needed
 func (t Task) Skip(ctx *context.Context) bool {
-	return ctx.NoChangelog
+	return false
 }
 
 // Run the task
@@ -95,7 +94,7 @@ func (t Task) Run(ctx *context.Context) error {
 	log.WithField("next", ctx.NextVersion.Raw).Info("generating changelog for release")
 
 	// Package log entries into release ready for template generation
-	rel := Release{
+	rel := release{
 		Tag:     ctx.NextVersion.Raw,
 		Date:    time.Now().UTC().Format(ChangeDate),
 		Changes: ents,
