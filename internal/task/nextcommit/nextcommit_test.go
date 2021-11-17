@@ -42,7 +42,7 @@ func TestRun_DefaultCommitMessage(t *testing.T) {
 
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, "ci(bump): bumped version to 0.1.0", ctx.CommitDetails.Message)
+	assert.Equal(t, "ci(uplift): uplifted to version 0.1.0", ctx.CommitDetails.Message)
 }
 
 func TestRun_ImpersonatesAuthor(t *testing.T) {

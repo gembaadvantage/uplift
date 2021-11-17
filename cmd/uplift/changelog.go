@@ -26,13 +26,13 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
-	"github.com/gembaadvantage/uplift/internal/task/currentversion"
+	"github.com/gembaadvantage/uplift/internal/task/gitpush"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
-	"github.com/gembaadvantage/uplift/internal/task/nextversion"
 	"github.com/spf13/cobra"
 )
 
@@ -51,6 +51,15 @@ func newChangelogCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 		Long:  chlogDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Attempt to retrieve the latest 2 tags for generating a changelog entry
+			tags := git.AllTags()
+			if len(tags) == 1 {
+				ctx.NextVersion.Raw = tags[0]
+			} else if len(tags) > 1 {
+				ctx.NextVersion.Raw = tags[0]
+				ctx.CurrentVersion.Raw = tags[1]
+			}
+
 			return writeChangelog(out, ctx)
 		},
 	}
@@ -59,14 +68,10 @@ func newChangelogCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 }
 
 func writeChangelog(out io.Writer, ctx *context.Context) error {
-	// TODO: retrieve last 2 tags
-	// TODO: commit message isn't the same ci(bump): doesn't make sense in this context
 	tsks := []task.Runner{
-		currentversion.Task{},
-		nextversion.Task{},
 		nextcommit.Task{},
 		changelog.Task{},
-		//gitpush.Task{},
+		gitpush.Task{},
 	}
 
 	for _, tsk := range tsks {

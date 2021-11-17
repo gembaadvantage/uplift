@@ -74,20 +74,30 @@ func FetchTags() error {
 	return nil
 }
 
-// LatestTag retrieves the latest tag within the repository
-func LatestTag() string {
+// AllTags retrieves all tags within the repository from newest to oldest
+func AllTags() []string {
 	// Filter out all tags that are non in the supported formats
 	tags, err := Clean(Run("tag", "-l", "--sort=-v:refname", "v*.*.*", "*.*.*"))
 	if err != nil {
-		return ""
+		return []string{}
 	}
 
-	// If no tags are found, then just return an empty string
+	// If no tags are found, then just return an empty slice
 	if tags == "" {
+		return []string{}
+	}
+
+	return strings.Split(tags, "\n")
+}
+
+// LatestTag retrieves the latest tag within the repository
+func LatestTag() string {
+	tags := AllTags()
+	if len(tags) == 0 {
 		return ""
 	}
 
-	return strings.Split(tags, "\n")[0]
+	return tags[0]
 }
 
 // LatestCommit retrieves the latest commit within the repository

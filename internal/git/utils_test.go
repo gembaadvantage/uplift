@@ -41,6 +41,20 @@ func TestIsRepo_DetectsNonGitRepo(t *testing.T) {
 	assert.False(t, IsRepo())
 }
 
+func TestAllTags(t *testing.T) {
+	InitRepo(t)
+
+	v1 := "v1.0.0"
+	EmptyCommitAndTag(t, v1, "first commit")
+	v2 := "v2.0.0"
+	EmptyCommitAndTag(t, v2, "second commit")
+	v3 := "v3.0.0"
+	EmptyCommitAndTag(t, v3, "third commit")
+
+	tags := AllTags()
+	assert.Equal(t, []string{v3, v2, v1}, tags)
+}
+
 func TestLatestTag(t *testing.T) {
 	InitRepo(t)
 
