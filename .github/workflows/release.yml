@@ -41,6 +41,15 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Snapcraft Install
+        # https://github.com/goreleaser/goreleaser/issues/1715
+        run: |
+          sudo apt-get update
+          sudo apt-get -yq --no-install-suggests --no-install-recommends install snapcraft
+          mkdir -p $HOME/.cache/snapcraft/download
+          mkdir -p $HOME/.cache/snapcraft/stage-packages
+      - name: Snapcraft Login
+        run: snapcraft login --with <(echo "${{ secrets.GH_SNAPCRAFT_LOGIN }}")
       - name: GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
