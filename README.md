@@ -6,7 +6,7 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/gembaadvantage/uplift.svg?style=flat-square)](go.mod)
 [![codecov](https://codecov.io/gh/gembaadvantage/uplift/branch/main/graph/badge.svg)](https://codecov.io/gh/gembaadvantage/uplift)
 
-Semantic versioning the easy way. Automatic tagging and version bumping of files in your respositories based on your commit messages. Powered by [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Easy to include in your CI.
+Semantic versioning the easy way. Automatic tagging and version bumping of files in your repositories based on your commit messages. Powered by [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Easy to include in your CI.
 
 :octocat: Github [action](https://github.com/marketplace/actions/uplift-action) available.
 
@@ -103,7 +103,7 @@ uplift release
 
 ## Configuration
 
-Uplift can be configured through the existance of an optional `.uplift.yml` configuration file in the root of your repository. Other supported variations are: `.uplift.yaml`, `uplift.yml` and `uplift.yaml`.
+Uplift can be configured through the existence of an optional `.uplift.yml` configuration file in the root of your repository. Other supported variations are: `.uplift.yaml`, `uplift.yml` and `uplift.yaml`.
 
 ```yaml
 # An initial version that will be used for the first tag in your repository.
