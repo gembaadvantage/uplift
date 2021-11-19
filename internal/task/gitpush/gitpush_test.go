@@ -23,31 +23,45 @@ SOFTWARE.
 package gitpush
 
 import (
-	"github.com/apex/log"
+	"io/ioutil"
+	"testing"
+
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// Task for pushing commits to a git remote
-type Task struct{}
+func TestRun(t *testing.T) {
+	git.InitRepo(t)
+	trackFile(t, "test.txt")
 
-// String generates a string representation of the task
-func (t Task) String() string {
-	return "git push"
+	err := Task{}.Run(&context.Context{
+		CommitDetails: git.CommitDetails{
+			Author:  "uplift",
+			Email:   "uplift@test.com",
+			Message: "test commit",
+		},
+	})
+	require.NoError(t, err)
+
+	c, _ := git.LatestCommit()
+	assert.Equal(t, "uplift", c.Author)
+	assert.Equal(t, "uplift@test.com", c.Email)
+	assert.Equal(t, "test commit", c.Message)
 }
 
-// Skip running the task if no version has changed
-func (t Task) Skip(ctx *context.Context) bool {
-	return ctx.DryRun || ctx.NoVersionChanged
+func trackFile(t *testing.T, name string) {
+	err := ioutil.WriteFile(name, []byte(`hello, world`), 0644)
+	require.NoError(t, err)
+
+	err = git.Stage(name)
+	require.NoError(t, err)
 }
 
-// Run the task
-func (t Task) Run(ctx *context.Context) error {
-	log.Info("commit outstanding changes")
-	if err := git.Commit(ctx.CommitDetails); err != nil {
-		return err
-	}
+func TestRun_NoGitRepository(t *testing.T) {
+	git.MkTmpDir(t)
 
-	log.Info("check and push any outstanding commits")
-	return git.Push()
+	err := Task{}.Run(&context.Context{})
+	require.Error(t, err)
 }

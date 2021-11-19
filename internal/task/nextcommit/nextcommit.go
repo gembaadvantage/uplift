@@ -72,6 +72,6 @@ func (t Task) Run(ctx *context.Context) error {
 		"name":    ctx.CommitDetails.Author,
 		"email":   ctx.CommitDetails.Email,
 		"message": ctx.CommitDetails.Message,
-	}).Info("committing with")
+	}).Info("changes will be committed with")
 	return nil
 }

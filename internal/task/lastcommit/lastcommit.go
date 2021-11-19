@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package gitpush
+package lastcommit
 
 import (
 	"github.com/apex/log"
@@ -28,26 +28,31 @@ import (
 	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-// Task for pushing commits to a git remote
+// Task for reading the last commit message
 type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "git push"
+	return "latest commit"
 }
 
-// Skip running the task if no version has changed
+// Skip is disabled for this task
 func (t Task) Skip(ctx *context.Context) bool {
-	return ctx.DryRun || ctx.NoVersionChanged
+	return false
 }
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	log.Info("commit outstanding changes")
-	if err := git.Commit(ctx.CommitDetails); err != nil {
+	commit, err := git.LatestCommit()
+	if err != nil {
 		return err
 	}
+	log.WithFields(log.Fields{
+		"author":  commit.Author,
+		"email":   commit.Email,
+		"message": commit.Message,
+	}).Info("retrieved latest commit")
 
-	log.Info("check and push any outstanding commits")
-	return git.Push()
+	ctx.CommitDetails = commit
+	return nil
 }

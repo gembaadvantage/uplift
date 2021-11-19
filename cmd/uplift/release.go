@@ -33,6 +33,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
 	"github.com/gembaadvantage/uplift/internal/task/gitpush"
+	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
 	"github.com/gembaadvantage/uplift/internal/task/tag"
@@ -63,6 +64,7 @@ func newReleaseCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 func release(out io.Writer, ctx *context.Context) error {
 	tsks := []task.Runner{
 		fetchtag.Task{},
+		lastcommit.Task{},
 		currentversion.Task{},
 		nextversion.Task{},
 		nextcommit.Task{},
