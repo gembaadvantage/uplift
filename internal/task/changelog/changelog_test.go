@@ -120,13 +120,11 @@ All notable changes to this project will be documented in this file.
 
 %s second commit
 %s first commit
-%s initialise repo
-`, changelogDate(t), h[1], h[0], ih)
+%s %s
+`, changelogDate(t), h[1], h[0], ih, git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
-
-// TODO: expose init message to use within tests
 
 func readChangelog(t *testing.T) string {
 	t.Helper()
@@ -187,8 +185,8 @@ All notable changes to this project will be documented in this file.
 ## [1.0.0] - 2021-09-17
 
 %s first commit
-%s initialise repo
-`, changelogDate(t), h2[1], h2[0], h1[0], ih)
+%s %s
+`, changelogDate(t), h2[1], h2[0], h1[0], ih, git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }

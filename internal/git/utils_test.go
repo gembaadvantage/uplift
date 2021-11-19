@@ -232,7 +232,7 @@ func TestLogBetween_FromSpecificTag(t *testing.T) {
 	require.Len(t, log, 3)
 	assert.Equal(t, log[0].Message, "second commit")
 	assert.Equal(t, log[1].Message, "first commit")
-	assert.Equal(t, log[2].Message, initCommit)
+	assert.Equal(t, log[2].Message, InitCommit)
 }
 
 func TestLogBetween_FromSpecificHash(t *testing.T) {
@@ -246,7 +246,7 @@ func TestLogBetween_FromSpecificHash(t *testing.T) {
 	assert.Equal(t, log[0].Message, "third commit")
 	assert.Equal(t, log[1].Message, "second commit")
 	assert.Equal(t, log[2].Message, "first commit")
-	assert.Equal(t, log[3].Message, initCommit)
+	assert.Equal(t, log[3].Message, InitCommit)
 }
 
 func TestLogBetween_ToSpecificHash(t *testing.T) {
@@ -283,7 +283,7 @@ func TestLogBetween_All(t *testing.T) {
 	assert.Equal(t, log[0].Message, "third commit")
 	assert.Equal(t, log[1].Message, "second commit")
 	assert.Equal(t, log[2].Message, "first commit")
-	assert.Equal(t, log[3].Message, initCommit)
+	assert.Equal(t, log[3].Message, InitCommit)
 }
 
 func TestLogBetween_ErrorInvalidRevision(t *testing.T) {

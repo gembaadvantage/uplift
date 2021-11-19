@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	initCommit = "initialise repo"
+	InitCommit = "initialise repo"
 )
 
 // InitRepo creates an empty git repository within a temporary directory. Once created
@@ -46,7 +46,7 @@ func InitRepo(t *testing.T) string {
 	_, err := Run("init")
 	require.NoError(t, err)
 
-	return EmptyCommit(t, initCommit)
+	return EmptyCommit(t, InitCommit)
 }
 
 // MkTmpDir creates an empty directory that is not a git repository. Once created the
