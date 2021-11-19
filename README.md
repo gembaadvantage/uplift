@@ -69,7 +69,7 @@ $ uplift tag
    • next version
       • identified next version   commit=feat: new feature current=0.1.2 next=0.2.0
    • next commit
-      • changes will be committed with email=joe.bloggs@example.com message=ci(uplift): uplifted to version 0.2.0 name=joe.bloggs
+      • changes will be committed with email=joe.bloggs@example.com message=ci(uplift): uplifted for version 0.2.0 name=joe.bloggs
    • tag
       • with standard tag         tag=1.0.0
 ```
@@ -88,7 +88,7 @@ $ uplift bump
    • next version
       • identified next version   commit=feat: new feature current=1.0.0 next=1.1.0
    • next commit
-      • changes will be committed with email=joe.bloggs@example.com message=ci(uplift): uplifted to version 1.1.0 name=joe.bloggs
+      • changes will be committed with email=joe.bloggs@example.com message=ci(uplift): uplifted for version 1.1.0 name=joe.bloggs
    • bump
       • file bumped               current=1.0.0 file=chart/test/Chart.yaml next=1.1.0
       • successfully staged file  file=chart/test/Chart.yaml
@@ -107,7 +107,7 @@ $ uplift changelog
    • latest commit
       • retrieved latest commit   author=joe.bloggs email=joe.bloggs@example.com message=fix: a bug fix
    • next commit
-      • changes will be committed with email=paul.t@gembaadvantage.com message=ci(uplift): uplifted to version 1.0.1 name=paul.t
+      • changes will be committed with email=paul.t@gembaadvantage.com message=ci(uplift): uplifted for version 1.0.1 name=paul.t
    • changelog
       • determine changes for release tag=1.0.1
       • changeset identified      commits=3 date=2021-11-19 tag=1.0.1
@@ -141,7 +141,7 @@ firstVersion: v1.0.0
 annotatedTags: true
 
 # Changes the  default commit message used when committing any staged changes
-# Defaults to ci(uplift): uplifted to version $VERSION
+# Defaults to ci(uplift): uplifted for version $VERSION
 commitMessage: "chore: a custom commit message"
 
 # Changes the commit author used when committing any staged changes

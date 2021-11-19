@@ -49,7 +49,7 @@ func (t Task) Run(ctx *context.Context) error {
 	c := git.CommitDetails{
 		Author:  ctx.CommitDetails.Author,
 		Email:   ctx.CommitDetails.Email,
-		Message: fmt.Sprintf("ci(uplift): uplifted to version %s", ctx.NextVersion.Raw),
+		Message: fmt.Sprintf("ci(uplift): uplifted for version %s", ctx.NextVersion.Raw),
 	}
 
 	if ctx.Config.CommitAuthor.Name != "" {
