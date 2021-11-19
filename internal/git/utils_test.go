@@ -292,3 +292,28 @@ func TestLogBetween_ErrorInvalidRevision(t *testing.T) {
 	_, err := LogBetween("1234567", "")
 	require.Error(t, err)
 }
+
+func TestStaged(t *testing.T) {
+	InitRepo(t)
+	ioutil.WriteFile("test1.txt", []byte(`testing`), 0644)
+	Stage("test1.txt")
+
+	ioutil.WriteFile("test2.txt", []byte(`testing`), 0644)
+	Stage("test2.txt")
+
+	stg, err := Staged()
+	require.NoError(t, err)
+
+	assert.Len(t, stg, 2)
+	assert.ElementsMatch(t, stg, []string{"test1.txt", "test2.txt"})
+}
+
+func TestStaged_NoFilesStaged(t *testing.T) {
+	InitRepo(t)
+	ioutil.WriteFile("test.txt", []byte(`testing`), 0644)
+
+	stg, err := Staged()
+	require.NoError(t, err)
+
+	assert.Len(t, stg, 0)
+}

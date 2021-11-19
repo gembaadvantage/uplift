@@ -258,6 +258,20 @@ func LogBetween(from, to string) ([]LogEntry, error) {
 	return les, nil
 }
 
+// Staged retrieves a list of all files that are currently staged
+func Staged() ([]string, error) {
+	files, err := Clean(Run("diff", "--cached", "--name-only"))
+	if err != nil {
+		return []string{}, err
+	}
+
+	if files == "" {
+		return []string{}, nil
+	}
+
+	return strings.Split(files, "\n"), nil
+}
+
 // Clean the output
 func Clean(output string, err error) (string, error) {
 	// Preserve multi-line output, but trim the trailing newline

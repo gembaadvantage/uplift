@@ -32,6 +32,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
 	"github.com/gembaadvantage/uplift/internal/task/gitpush"
+	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/spf13/cobra"
 )
@@ -69,6 +70,7 @@ func newChangelogCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 
 func writeChangelog(out io.Writer, ctx *context.Context) error {
 	tsks := []task.Runner{
+		lastcommit.Task{},
 		nextcommit.Task{},
 		changelog.Task{},
 		gitpush.Task{},
