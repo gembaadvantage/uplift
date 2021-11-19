@@ -79,6 +79,24 @@ func TestRun_ChangelogCreatedIfNotExists(t *testing.T) {
 	assert.True(t, changelogExists(t))
 }
 
+func TestRun_ChangelogStaged(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
+
+	ctx := &context.Context{
+		NextVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	stg, _ := git.Staged()
+	assert.Len(t, stg, 1)
+	assert.Equal(t, "CHANGELOG.md", stg[0])
+}
+
 func TestRun_ChangelogEntriesFromFirstTag(t *testing.T) {
 	ih := git.InitRepo(t)
 	h := git.EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")

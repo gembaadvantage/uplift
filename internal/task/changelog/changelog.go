@@ -119,18 +119,37 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
+	var chgErr error
 	if noChangelogExists() {
-		f, err := os.OpenFile(MarkdownFile, os.O_CREATE|os.O_RDWR, 0644)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		log.Debug("create new changelog in repository")
-		return newTplBody.Execute(f, rel)
+		chgErr = newChangelog(rel)
+	} else {
+		chgErr = appendChangelog(rel)
+	}
+	if chgErr != nil {
+		return chgErr
 	}
 
-	// When modifying an existing changelog, simply overwrite the existing file
+	log.Debug("staging CHANGELOG.md")
+	return git.Stage(MarkdownFile)
+}
+
+func noChangelogExists() bool {
+	_, err := os.Stat(MarkdownFile)
+	return os.IsNotExist(err)
+}
+
+func newChangelog(rel release) error {
+	f, err := os.OpenFile(MarkdownFile, os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	log.Debug("create new changelog in repository")
+	return newTplBody.Execute(f, rel)
+}
+
+func appendChangelog(rel release) error {
 	cl, err := ioutil.ReadFile(MarkdownFile)
 	if err != nil {
 		return err
@@ -151,9 +170,4 @@ func (t Task) Run(ctx *context.Context) error {
 
 	log.Debug("append to existing changelog in repository")
 	return ioutil.WriteFile(MarkdownFile, []byte(apnd), 0644)
-}
-
-func noChangelogExists() bool {
-	_, err := os.Stat(MarkdownFile)
-	return os.IsNotExist(err)
 }
