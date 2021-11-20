@@ -23,12 +23,10 @@ SOFTWARE.
 package changelog
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -95,100 +93,6 @@ func TestRun_ChangelogStaged(t *testing.T) {
 	stg, _ := git.Staged()
 	assert.Len(t, stg, 1)
 	assert.Equal(t, "CHANGELOG.md", stg[0])
-}
-
-func TestRun_ChangelogEntriesFromFirstTag(t *testing.T) {
-	ih := git.InitRepo(t)
-	h := git.EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
-
-	ctx := &context.Context{
-		NextVersion: semver.Version{
-			Raw: "1.0.0",
-		},
-	}
-
-	err := Task{}.Run(ctx)
-	require.NoError(t, err)
-
-	expected := fmt.Sprintf(`# Changelog
-
-All notable changes to this project will be documented in this file.
-
-## [Unreleased]
-
-## [1.0.0] - %s
-
-%s second commit
-%s first commit
-%s %s
-`, changelogDate(t), h[1], h[0], ih, git.InitCommit)
-
-	assert.Equal(t, expected, readChangelog(t))
-}
-
-func readChangelog(t *testing.T) string {
-	t.Helper()
-
-	data, err := ioutil.ReadFile(MarkdownFile)
-	require.NoError(t, err)
-
-	return string(data)
-}
-
-func changelogDate(t *testing.T) string {
-	t.Helper()
-	return time.Now().UTC().Format(ChangeDate)
-}
-
-func TestRun_AppendToExistingChangelog(t *testing.T) {
-	ih := git.InitRepo(t)
-	h1 := git.EmptyCommitsAndTag(t, "1.0.0", "first commit")
-	h2 := git.EmptyCommitsAndTag(t, "1.1.0", "second commit", "third commit")
-
-	// Initial changelog
-	cl := fmt.Sprintf(`# Changelog
-
-All notable changes to this project will be documented in this file.
-
-## [Unreleased]
-
-## [1.0.0] - 2021-09-17
-
-%s first commit
-%s initialise repo
-`, h1[0], ih)
-	ioutil.WriteFile(MarkdownFile, []byte(cl), 0644)
-
-	ctx := &context.Context{
-		CurrentVersion: semver.Version{
-			Raw: "1.0.0",
-		},
-		NextVersion: semver.Version{
-			Raw: "1.1.0",
-		},
-	}
-
-	err := Task{}.Run(ctx)
-	require.NoError(t, err)
-
-	expected := fmt.Sprintf(`# Changelog
-
-All notable changes to this project will be documented in this file.
-
-## [Unreleased]
-
-## [1.1.0] - %s
-
-%s third commit
-%s second commit
-
-## [1.0.0] - 2021-09-17
-
-%s first commit
-%s %s
-`, changelogDate(t), h2[1], h2[0], h1[0], ih, git.InitCommit)
-
-	assert.Equal(t, expected, readChangelog(t))
 }
 
 func TestRun_AppendToUnsupportedTemplate(t *testing.T) {
