@@ -150,7 +150,7 @@ All notable changes to this project will be documented in this file.
 	require.NoError(t, err)
 
 	expected := fmt.Sprintf(`# Changelog
-s
+
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
