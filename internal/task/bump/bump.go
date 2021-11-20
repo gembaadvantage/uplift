@@ -93,8 +93,7 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	if n > 0 {
-		log.Info("attempting to commit file changes")
-		return git.Commit(ctx.CommitDetails)
+		log.WithField("count", n).Debug("bumped files staged")
 	}
 
 	return nil

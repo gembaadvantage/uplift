@@ -36,18 +36,29 @@ func (t Task) String() string {
 	return "git push"
 }
 
-// Skip running the task if no version has changed
+// Skip running the task if no version change is detected, or if running
+// in dry-run mode
 func (t Task) Skip(ctx *context.Context) bool {
-	return ctx.NoVersionChanged
+	return ctx.DryRun || ctx.NoVersionChanged
 }
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	if ctx.DryRun {
-		log.Info("skipping push in dry run mode")
+	stg, err := git.Staged()
+	if err != nil {
+		return err
+	}
+
+	if len(stg) == 0 {
+		log.Info("no files staged skipping push")
 		return nil
 	}
 
-	log.Info("check and push any outstanding commits")
+	log.Info("commit outstanding changes")
+	if err := git.Commit(ctx.CommitDetails); err != nil {
+		return err
+	}
+
+	log.Info("push commit to remote")
 	return git.Push()
 }

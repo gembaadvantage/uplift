@@ -36,6 +36,13 @@ type CommitDetails struct {
 	Email   string
 }
 
+// LogEntry contains details about a specific git log entry
+type LogEntry struct {
+	Hash       string
+	AbbrevHash string
+	Message    string
+}
+
 // String prints out a user friendly string representation
 func (c CommitDetails) String() string {
 	return fmt.Sprintf("%s <%s>\n%s", c.Author, c.Email, c.Message)
@@ -67,20 +74,30 @@ func FetchTags() error {
 	return nil
 }
 
-// LatestTag retrieves the latest tag within the repository
-func LatestTag() string {
+// AllTags retrieves all tags within the repository from newest to oldest
+func AllTags() []string {
 	// Filter out all tags that are non in the supported formats
 	tags, err := Clean(Run("tag", "-l", "--sort=-v:refname", "v*.*.*", "*.*.*"))
 	if err != nil {
-		return ""
+		return []string{}
 	}
 
-	// If no tags are found, then just return an empty string
+	// If no tags are found, then just return an empty slice
 	if tags == "" {
+		return []string{}
+	}
+
+	return strings.Split(tags, "\n")
+}
+
+// LatestTag retrieves the latest tag within the repository
+func LatestTag() string {
+	tags := AllTags()
+	if len(tags) == 0 {
 		return ""
 	}
 
-	return strings.Split(tags, "\n")[0]
+	return tags[0]
 }
 
 // LatestCommit retrieves the latest commit within the repository
@@ -200,6 +217,59 @@ func Push() error {
 	}
 
 	return nil
+}
+
+// LogBetween retrieves all log entries between two points of time within the
+// git history of the repository. Supports tags and specific git hashes as its
+// reference points. From must always be the closest point to HEAD
+func LogBetween(from, to string) ([]LogEntry, error) {
+	fmtFrom := from
+	if fmtFrom == "" {
+		fmtFrom = "HEAD"
+	}
+
+	fmtTo := to
+	if fmtTo != "" {
+		// A range query requires ... ellipses
+		fmtTo = fmt.Sprintf("...%s", fmtTo)
+	}
+
+	args := []string{
+		"log",
+		fmt.Sprintf("%s%s", fmtFrom, fmtTo),
+		"--pretty=format:'%H%s'",
+	}
+
+	log, err := Clean(Run(args...))
+	if err != nil {
+		return []LogEntry{}, err
+	}
+
+	rows := strings.Split(log, "\n")
+	les := make([]LogEntry, 0, len(rows))
+	for _, r := range rows {
+		les = append(les, LogEntry{
+			Hash:       r[:40],
+			AbbrevHash: r[:7],
+			Message:    r[40:],
+		})
+	}
+
+	return les, nil
+}
+
+// Staged retrieves a list of all files that are currently staged
+func Staged() ([]string, error) {
+	files, err := Clean(Run("diff", "--cached", "--name-only"))
+	if err != nil {
+		return []string{}, err
+	}
+
+	if files == "" {
+		return []string{}, nil
+	}
+
+	return strings.Split(files, "\n"), nil
 }
 
 // Clean the output

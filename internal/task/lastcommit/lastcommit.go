@@ -20,42 +20,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package lastcommit
 
 import (
-	"io"
-
 	"github.com/apex/log"
-	"github.com/apex/log/handlers/cli"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/spf13/cobra"
+	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Command, error) {
-	log.SetHandler(cli.Default)
+// Task for reading the last commit message
+type Task struct{}
 
-	cmd := &cobra.Command{
-		Use:          "uplift",
-		Short:        "Semantic versioning the easy way",
-		SilenceUsage: true,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			if ctx.Debug {
-				log.SetLevel(log.DebugLevel)
-			}
-		},
+// String generates a string representation of the task
+func (t Task) String() string {
+	return "latest commit"
+}
+
+// Skip is disabled for this task
+func (t Task) Skip(ctx *context.Context) bool {
+	return false
+}
+
+// Run the task
+func (t Task) Run(ctx *context.Context) error {
+	commit, err := git.LatestCommit()
+	if err != nil {
+		return err
 	}
+	log.WithFields(log.Fields{
+		"author":  commit.Author,
+		"email":   commit.Email,
+		"message": commit.Message,
+	}).Info("retrieved latest commit")
 
-	// Write persistent flags straight into the context
-	pf := cmd.PersistentFlags()
-	pf.BoolVar(&ctx.DryRun, "dry-run", false, "run without making any changes")
-	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
-
-	cmd.AddCommand(newVersionCmd(out),
-		newBumpCmd(out, ctx),
-		newCompletionCmd(out),
-		newTagCmd(out, ctx),
-		newReleaseCmd(out, ctx),
-		newChangelogCmd(out, ctx))
-
-	return cmd, nil
+	ctx.CommitDetails = commit
+	return nil
 }

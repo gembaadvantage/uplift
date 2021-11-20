@@ -20,61 +20,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package nextcommit
+package lastcommit
 
 import (
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestRun_DefaultCommitMessage(t *testing.T) {
-	ctx := &context.Context{
-		NextVersion: semver.Version{
-			Raw: "0.1.0",
-		},
-	}
+func TestRun(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommit(t, "test commit")
 
+	ctx := &context.Context{}
 	err := Task{}.Run(ctx)
+
 	require.NoError(t, err)
-	assert.Equal(t, "ci(uplift): uplifted for version 0.1.0", ctx.CommitDetails.Message)
+	assert.Equal(t, "uplift", ctx.CommitDetails.Author)
+	assert.Equal(t, "uplift@test.com", ctx.CommitDetails.Email)
+	assert.Equal(t, "test commit", ctx.CommitDetails.Message)
 }
 
-func TestRun_ImpersonatesAuthor(t *testing.T) {
-	cd := git.CommitDetails{
-		Author: "joe.bloggs",
-		Email:  "joe.bloggs@example.com",
-	}
+func TestRun_NoGitRepository(t *testing.T) {
+	git.MkTmpDir(t)
 
-	ctx := &context.Context{
-		CommitDetails: cd,
-	}
-
-	err := Task{}.Run(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, cd.Author, ctx.CommitDetails.Author)
-	assert.Equal(t, cd.Email, ctx.CommitDetails.Email)
-}
-
-func TestRun_CustomCommit(t *testing.T) {
-	ctx := &context.Context{
-		Config: config.Uplift{
-			CommitMessage: "ci(release): this is a custom message",
-			CommitAuthor: config.CommitAuthor{
-				Name:  "releasebot",
-				Email: "releasebot@example.com",
-			},
-		},
-	}
-
-	err := Task{}.Run(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, "releasebot", ctx.CommitDetails.Author)
-	assert.Equal(t, "releasebot@example.com", ctx.CommitDetails.Email)
-	assert.Equal(t, "ci(release): this is a custom message", ctx.CommitDetails.Message)
+	err := Task{}.Run(&context.Context{})
+	require.Error(t, err)
 }

@@ -36,9 +36,23 @@ func TestIsRepo(t *testing.T) {
 	assert.True(t, IsRepo())
 }
 
-func TestIsRepoDetectsNonGitRepo(t *testing.T) {
+func TestIsRepo_DetectsNonGitRepo(t *testing.T) {
 	MkTmpDir(t)
 	assert.False(t, IsRepo())
+}
+
+func TestAllTags(t *testing.T) {
+	InitRepo(t)
+
+	v1 := "v1.0.0"
+	EmptyCommitAndTag(t, v1, "first commit")
+	v2 := "v2.0.0"
+	EmptyCommitAndTag(t, v2, "second commit")
+	v3 := "v3.0.0"
+	EmptyCommitAndTag(t, v3, "third commit")
+
+	tags := AllTags()
+	assert.Equal(t, []string{v3, v2, v1}, tags)
 }
 
 func TestLatestTag(t *testing.T) {
@@ -53,14 +67,14 @@ func TestLatestTag(t *testing.T) {
 	assert.Equal(t, v2, tag)
 }
 
-func TestLatestTagNoTagsExist(t *testing.T) {
+func TestLatestTag_NoTagsExist(t *testing.T) {
 	MkTmpDir(t)
 
 	tag := LatestTag()
 	assert.Equal(t, "", tag)
 }
 
-func TestLatestTagNoSemanticTags(t *testing.T) {
+func TestLatestTag_NoSemanticTags(t *testing.T) {
 	InitRepo(t)
 
 	v1 := "v1"
@@ -86,7 +100,7 @@ func TestLatestCommit(t *testing.T) {
 	assert.Equal(t, c.Message, m)
 }
 
-func TestLatestCommitMultipleCommits(t *testing.T) {
+func TestLatestCommit_MultipleCommits(t *testing.T) {
 	InitRepo(t)
 
 	m := "third commit"
@@ -180,4 +194,126 @@ func StagedFile(t *testing.T) string {
 	require.NoError(t, err)
 
 	return file
+}
+
+func TestLogBetween_TwoTags(t *testing.T) {
+	InitRepo(t)
+	EmptyCommitAndTag(t, "1.0.0", "first commit")
+	EmptyCommitsAndTag(t, "2.0.0", "second commit", "third commit", "forth commit")
+
+	log, err := LogBetween("2.0.0", "1.0.0")
+	require.NoError(t, err)
+
+	require.Len(t, log, 3)
+	assert.Equal(t, log[0].Message, "forth commit")
+	assert.Equal(t, log[1].Message, "third commit")
+	assert.Equal(t, log[2].Message, "second commit")
+}
+
+func TestLogBetween_TwoHashes(t *testing.T) {
+	InitRepo(t)
+	h := EmptyCommits(t, "first commit", "second commit", "third commit", "forth commit")
+
+	log, err := LogBetween(h[2], h[1])
+	require.NoError(t, err)
+
+	require.Len(t, log, 1)
+	assert.Equal(t, log[0].Message, "third commit")
+}
+
+func TestLogBetween_FromSpecificTag(t *testing.T) {
+	InitRepo(t)
+	EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
+	EmptyCommit(t, "third commit")
+
+	log, err := LogBetween("1.0.0", "")
+	require.NoError(t, err)
+
+	require.Len(t, log, 3)
+	assert.Equal(t, log[0].Message, "second commit")
+	assert.Equal(t, log[1].Message, "first commit")
+	assert.Equal(t, log[2].Message, InitCommit)
+}
+
+func TestLogBetween_FromSpecificHash(t *testing.T) {
+	InitRepo(t)
+	h := EmptyCommits(t, "first commit", "second commit", "third commit", "forth commit")
+
+	log, err := LogBetween(h[2], "")
+	require.NoError(t, err)
+
+	require.Len(t, log, 4)
+	assert.Equal(t, log[0].Message, "third commit")
+	assert.Equal(t, log[1].Message, "second commit")
+	assert.Equal(t, log[2].Message, "first commit")
+	assert.Equal(t, log[3].Message, InitCommit)
+}
+
+func TestLogBetween_ToSpecificHash(t *testing.T) {
+	InitRepo(t)
+	h := EmptyCommits(t, "first commit", "second commit", "third commit", "forth commit")
+
+	log, err := LogBetween("", h[2])
+	require.NoError(t, err)
+
+	require.Len(t, log, 1)
+	assert.Equal(t, log[0].Message, "forth commit")
+}
+
+func TestLogBetween_ToSpecificTag(t *testing.T) {
+	InitRepo(t)
+	EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
+	EmptyCommit(t, "third commit")
+
+	log, err := LogBetween("", "1.0.0")
+	require.NoError(t, err)
+
+	require.Len(t, log, 1)
+	assert.Equal(t, log[0].Message, "third commit")
+}
+
+func TestLogBetween_All(t *testing.T) {
+	InitRepo(t)
+	EmptyCommits(t, "first commit", "second commit", "third commit")
+
+	log, err := LogBetween("", "")
+	require.NoError(t, err)
+
+	require.Len(t, log, 4)
+	assert.Equal(t, log[0].Message, "third commit")
+	assert.Equal(t, log[1].Message, "second commit")
+	assert.Equal(t, log[2].Message, "first commit")
+	assert.Equal(t, log[3].Message, InitCommit)
+}
+
+func TestLogBetween_ErrorInvalidRevision(t *testing.T) {
+	InitRepo(t)
+
+	_, err := LogBetween("1234567", "")
+	require.Error(t, err)
+}
+
+func TestStaged(t *testing.T) {
+	InitRepo(t)
+	ioutil.WriteFile("test1.txt", []byte(`testing`), 0644)
+	Stage("test1.txt")
+
+	ioutil.WriteFile("test2.txt", []byte(`testing`), 0644)
+	Stage("test2.txt")
+
+	stg, err := Staged()
+	require.NoError(t, err)
+
+	assert.Len(t, stg, 2)
+	assert.ElementsMatch(t, stg, []string{"test1.txt", "test2.txt"})
+}
+
+func TestStaged_NoFilesStaged(t *testing.T) {
+	InitRepo(t)
+	ioutil.WriteFile("test.txt", []byte(`testing`), 0644)
+
+	stg, err := Staged()
+	require.NoError(t, err)
+
+	assert.Len(t, stg, 0)
 }

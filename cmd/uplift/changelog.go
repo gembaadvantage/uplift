@@ -26,51 +26,54 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/task"
-	"github.com/gembaadvantage/uplift/internal/task/bump"
-	"github.com/gembaadvantage/uplift/internal/task/currentversion"
-	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
+	"github.com/gembaadvantage/uplift/internal/task/changelog"
 	"github.com/gembaadvantage/uplift/internal/task/gitpush"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
-	"github.com/gembaadvantage/uplift/internal/task/nextversion"
-	"github.com/gembaadvantage/uplift/internal/task/tag"
 	"github.com/spf13/cobra"
 )
 
 const (
-	releaseDesc = `Release the next semantic version of your git repository. A release
-will automatically bump any files and tag the associated commit with 
-the required semantic version`
+	chlogDesc = `Create or update an existing changelog with an entry for
+the latest semantic release. For a first release, all commits
+between the latest tag and trunk will be written to the
+changelog. Subsequent entries will contain only commits between 
+release tags`
 )
 
-func newReleaseCmd(out io.Writer, ctx *context.Context) *cobra.Command {
+func newChangelogCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "release",
-		Short: "Release the next semantic version of a repository",
-		Long:  releaseDesc,
+		Use:   "changelog",
+		Short: "Create or update a changelog with the latest semantic release",
+		Long:  chlogDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return release(out, ctx)
+			// Attempt to retrieve the latest 2 tags for generating a changelog entry
+			tags := git.AllTags()
+			if len(tags) == 1 {
+				ctx.NextVersion.Raw = tags[0]
+			} else if len(tags) > 1 {
+				ctx.NextVersion.Raw = tags[0]
+				ctx.CurrentVersion.Raw = tags[1]
+			}
+
+			return writeChangelog(out, ctx)
 		},
 	}
 
-	cmd.Flags().BoolVar(&ctx.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
 	return cmd
 }
 
-func release(out io.Writer, ctx *context.Context) error {
+func writeChangelog(out io.Writer, ctx *context.Context) error {
 	tsks := []task.Runner{
-		fetchtag.Task{},
 		lastcommit.Task{},
-		currentversion.Task{},
-		nextversion.Task{},
 		nextcommit.Task{},
-		bump.Task{},
+		changelog.Task{},
 		gitpush.Task{},
-		tag.Task{},
 	}
 
 	for _, tsk := range tsks {

@@ -62,14 +62,16 @@ Based on the latest commit, the repository will be tagged with the next semantic
 ```sh
 $ uplift tag
 
-  • current version
-    • identified version        current=0.1.2
-  • next version
-    • identified next version   commit=feat: new feature current=0.1.2 next=0.2.0
-  • next commit
-    • committing with           email=joe.bloggs@example.com message=ci(bump): bumped version to 0.2.0 name=joe.bloggs
-  • tag
-    • with standard tag         tag=0.2.0
+  • latest commit
+      • retrieved latest commit   author=joe.bloggs email=joe.bloggs@example.com message=feat: new feature
+   • current version
+      • identified version        current=0.1.2
+   • next version
+      • identified next version   commit=feat: new feature current=0.1.2 next=0.2.0
+   • next commit
+      • changes will be committed with email=joe.bloggs@example.com message=ci(uplift): uplifted for version 0.2.0 name=joe.bloggs
+   • tag
+      • with standard tag         tag=1.0.0
 ```
 
 ### File Bumping
@@ -79,18 +81,39 @@ When configured, the version within any file in a git repository can be bumped t
 ```sh
 $ uplift bump
 
-  • current version
-    • identified version        current=0.2.0
-  • next version
-    • identified next version   commit=feat: new feature current=0.2.0 next=0.3.0
-  • next commit
-    • committing with           email=joe.bloggs@example.com message=ci(bump): bumped version to 0.2.0 name=joe.bloggs
-  • bump
-    • file bumped               current=0.2.0 file=chart/test/Chart.yaml next=0.3.0
-    • successfully staged file  file=chart/test/Chart.yaml
-    • attempting to commit file changes
-  • git push
-    • check and push any outstanding commits
+  • latest commit
+      • retrieved latest commit   author=joe.bloggs email=joe.bloggs@example.com message=feat: new feature
+   • current version
+      • identified version        current=1.0.0
+   • next version
+      • identified next version   commit=feat: new feature current=1.0.0 next=1.1.0
+   • next commit
+      • changes will be committed with email=joe.bloggs@example.com message=ci(uplift): uplifted for version 1.1.0 name=joe.bloggs
+   • bump
+      • file bumped               current=1.0.0 file=chart/test/Chart.yaml next=1.1.0
+      • successfully staged file  file=chart/test/Chart.yaml
+   • git push
+      • commit outstanding changes
+      • push commit to remote
+```
+
+### Changelog
+
+A changelog can be generated for the latest tagged semantic release and written to a `CHANGELOG.md` file. File will be created if one doesn't exist. Format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+```sh
+$ uplift changelog
+
+   • latest commit
+      • retrieved latest commit   author=joe.bloggs email=joe.bloggs@example.com message=fix: a bug fix
+   • next commit
+      • changes will be committed with email=paul.t@gembaadvantage.com message=ci(uplift): uplifted for version 1.0.1 name=paul.t
+   • changelog
+      • determine changes for release tag=1.0.1
+      • changeset identified      commits=3 date=2021-11-19 tag=1.0.1
+   • git push
+      • commit outstanding changes
+      • push commit to remote
 ```
 
 ### Release
@@ -117,11 +140,11 @@ firstVersion: v1.0.0
 # Defaults to false
 annotatedTags: true
 
-# Changes the commit message when bumping files
-# Defaults to ci(bump): bumped version to $VERSION
+# Changes the  default commit message used when committing any staged changes
+# Defaults to ci(uplift): uplifted for version $VERSION
 commitMessage: "chore: a custom commit message"
 
-# Changes the commit author when bumping files
+# Changes the commit author used when committing any staged changes
 commitAuthor:
   # Name of the author
   # Defaults to the author name within the last commit

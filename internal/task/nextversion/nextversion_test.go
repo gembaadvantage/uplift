@@ -73,6 +73,9 @@ func TestRun(t *testing.T) {
 			}
 
 			ctx := &context.Context{
+				CommitDetails: git.CommitDetails{
+					Message: tt.commit,
+				},
 				CurrentVersion: semver.Version{
 					Raw: tt.curVer,
 				},
@@ -93,7 +96,11 @@ func TestRun_FirstTagDefault(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommit(t, "feat: a new feature")
 
-	ctx := &context.Context{}
+	ctx := &context.Context{
+		CommitDetails: git.CommitDetails{
+			Message: "feat: a new feature",
+		},
+	}
 	err := Task{}.Run(ctx)
 
 	require.NoError(t, err)
@@ -105,6 +112,9 @@ func TestRun_FirstTagDefaultFromConfig(t *testing.T) {
 	git.EmptyCommit(t, "feat: a new feature")
 
 	ctx := &context.Context{
+		CommitDetails: git.CommitDetails{
+			Message: "feat: a new feature",
+		},
 		Config: config.Uplift{
 			FirstVersion: "1.0.0",
 		},
@@ -113,11 +123,4 @@ func TestRun_FirstTagDefaultFromConfig(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, ctx.Config.FirstVersion, ctx.NextVersion.Raw)
-}
-
-func TestRun_NoGitRepository(t *testing.T) {
-	git.MkTmpDir(t)
-
-	err := Task{}.Run(&context.Context{})
-	require.Error(t, err)
 }

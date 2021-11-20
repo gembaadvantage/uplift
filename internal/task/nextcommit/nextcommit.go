@@ -49,7 +49,7 @@ func (t Task) Run(ctx *context.Context) error {
 	c := git.CommitDetails{
 		Author:  ctx.CommitDetails.Author,
 		Email:   ctx.CommitDetails.Email,
-		Message: fmt.Sprintf("ci(bump): bumped version to %s", ctx.NextVersion.Raw),
+		Message: fmt.Sprintf("ci(uplift): uplifted for version %s", ctx.NextVersion.Raw),
 	}
 
 	if ctx.Config.CommitAuthor.Name != "" {
@@ -72,6 +72,6 @@ func (t Task) Run(ctx *context.Context) error {
 		"name":    ctx.CommitDetails.Author,
 		"email":   ctx.CommitDetails.Email,
 		"message": ctx.CommitDetails.Message,
-	}).Info("committing with")
+	}).Info("changes will be committed with")
 	return nil
 }

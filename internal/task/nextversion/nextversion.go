@@ -27,7 +27,6 @@ import (
 	"github.com/apex/log"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
@@ -51,13 +50,7 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	commit, err := git.LatestCommit()
-	if err != nil {
-		return err
-	}
-	ctx.CommitDetails = commit
-
-	inc := semver.ParseCommit(commit.Message)
+	inc := semver.ParseCommit(ctx.CommitDetails.Message)
 	if inc == semver.NoIncrement {
 		ctx.NextVersion = ctx.CurrentVersion
 		ctx.NoVersionChanged = true

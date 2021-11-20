@@ -32,6 +32,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/gitpush"
+	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
 	"github.com/spf13/cobra"
@@ -59,6 +60,7 @@ func newBumpCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 
 func bumpFiles(out io.Writer, ctx *context.Context) error {
 	tsks := []task.Runner{
+		lastcommit.Task{},
 		currentversion.Task{},
 		nextversion.Task{},
 		nextcommit.Task{},
