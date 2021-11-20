@@ -1,5 +1,3 @@
-//go:build windows
-
 /*
 Copyright (c) 2021 Gemba Advantage
 
@@ -43,7 +41,7 @@ func TestRun_AppendToExistingChangelog(t *testing.T) {
 
 	// Initial changelog
 	cl := fmt.Sprintf(`# Changelog
-s
+
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
