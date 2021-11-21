@@ -56,10 +56,10 @@ func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Comm
 
 	// Write persistent flags straight into the context
 	pf := cmd.PersistentFlags()
-	pf.BoolVarP(&ctx.DryRun, "dry-run", "d", false, "run without making any changes")
-	pf.BoolVarP(&ctx.Debug, "debug", "v", false, "show me everything that happens")
-	pf.BoolVarP(&ctx.NoPush, "no-push", "n", false, "no changes will be pushed to the git remote")
-	pf.BoolVarP(&silent, "silent", "s", false, "silence all logging")
+	pf.BoolVar(&ctx.DryRun, "dry-run", false, "run without making any changes")
+	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
+	pf.BoolVar(&ctx.NoPush, "no-push", false, "no changes will be pushed to the git remote")
+	pf.BoolVar(&silent, "silent", false, "silence all logging")
 
 	cmd.AddCommand(newVersionCmd(out),
 		newBumpCmd(out, ctx),
