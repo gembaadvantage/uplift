@@ -56,6 +56,7 @@ Uplift can carry out different semantic versioning operations on your repository
 - `--dry-run` provide a preview of changes only. Nothing is changed
 - `--debug` log extra output to the console in debug mode
 - `--no-push` no changes will be committed and pushed back to your git remote
+- `--silent` silence all log output from uplift
 
 Uplift supports the use of a `v` prefix and includes it with subsequent bumps.
 
