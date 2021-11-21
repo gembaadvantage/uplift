@@ -27,12 +27,16 @@ import (
 
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
+	"github.com/apex/log/handlers/discard"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/spf13/cobra"
 )
 
 func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Command, error) {
 	log.SetHandler(cli.Default)
+
+	// support toggling of logging
+	var silent bool
 
 	cmd := &cobra.Command{
 		Use:          "uplift",
@@ -42,14 +46,20 @@ func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Comm
 			if ctx.Debug {
 				log.SetLevel(log.InvalidLevel)
 			}
+
+			if silent {
+				// Switch logging handler, to ensure all logging is discarded
+				log.SetHandler(discard.Default)
+			}
 		},
 	}
 
 	// Write persistent flags straight into the context
 	pf := cmd.PersistentFlags()
-	pf.BoolVar(&ctx.DryRun, "dry-run", false, "run without making any changes")
-	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
-	pf.BoolVar(&ctx.NoPush, "no-push", false, "no changes will be pushed to the git remote")
+	pf.BoolVarP(&ctx.DryRun, "dry-run", "d", false, "run without making any changes")
+	pf.BoolVarP(&ctx.Debug, "debug", "v", false, "show me everything that happens")
+	pf.BoolVarP(&ctx.NoPush, "no-push", "n", false, "no changes will be pushed to the git remote")
+	pf.BoolVarP(&silent, "silent", "s", false, "silence all logging")
 
 	cmd.AddCommand(newVersionCmd(out),
 		newBumpCmd(out, ctx),
