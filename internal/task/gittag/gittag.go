@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package tag
+package gittag
 
 import (
 	"github.com/apex/log"
@@ -33,7 +33,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "tag"
+	return "git tag"
 }
 
 // Skip running the task if no version has changed

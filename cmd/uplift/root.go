@@ -40,7 +40,7 @@ func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Comm
 		SilenceUsage: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if ctx.Debug {
-				log.SetLevel(log.DebugLevel)
+				log.SetLevel(log.InvalidLevel)
 			}
 		},
 	}
@@ -49,6 +49,7 @@ func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Comm
 	pf := cmd.PersistentFlags()
 	pf.BoolVar(&ctx.DryRun, "dry-run", false, "run without making any changes")
 	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
+	pf.BoolVar(&ctx.NoPush, "no-push", false, "no changes will be pushed to the git remote")
 
 	cmd.AddCommand(newVersionCmd(out),
 		newBumpCmd(out, ctx),

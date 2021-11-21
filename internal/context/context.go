@@ -41,6 +41,7 @@ type Context struct {
 	NoVersionChanged bool
 	CommitDetails    git.CommitDetails
 	FetchTags        bool
+	NoPush           bool
 }
 
 // New constructs a context that captures both runtime configuration and

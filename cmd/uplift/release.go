@@ -33,10 +33,10 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
 	"github.com/gembaadvantage/uplift/internal/task/gitpush"
+	"github.com/gembaadvantage/uplift/internal/task/gittag"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
-	"github.com/gembaadvantage/uplift/internal/task/tag"
 	"github.com/spf13/cobra"
 )
 
@@ -70,7 +70,7 @@ func release(out io.Writer, ctx *context.Context) error {
 		nextcommit.Task{},
 		bump.Task{},
 		gitpush.Task{},
-		tag.Task{},
+		gittag.Task{},
 	}
 
 	for _, tsk := range tsks {

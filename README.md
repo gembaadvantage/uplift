@@ -51,7 +51,11 @@ chmod 700 install
 
 ## Quick Start
 
-Uplift can carry out different semantic versioning operations on your repository. All operations support running in a dry run mode (`--dry-run`), providing a preview of changes only. Extra output can be logged to console using debug mode (`--debug`).
+Uplift can carry out different semantic versioning operations on your repository. All operations support the following global flags:
+
+- `--dry-run` provide a preview of changes only. Nothing is changed
+- `--debug` log extra output to the console in debug mode
+- `--no-push` no changes will be committed and pushed back to your git remote
 
 Uplift supports the use of a `v` prefix and includes it with subsequent bumps.
 
@@ -70,7 +74,7 @@ $ uplift tag
       • identified next version   commit=feat: new feature current=0.1.2 next=0.2.0
    • next commit
       • changes will be committed with email=joe.bloggs@example.com message=ci(uplift): uplifted for version 0.2.0 name=joe.bloggs
-   • tag
+   • git tag
       • with standard tag         tag=1.0.0
 ```
 

@@ -59,6 +59,22 @@ func trackFile(t *testing.T, name string) {
 	require.NoError(t, err)
 }
 
+func TestRun_NoStagedFiles(t *testing.T) {
+	git.InitRepo(t)
+
+	err := Task{}.Run(&context.Context{
+		CommitDetails: git.CommitDetails{
+			Author:  "uplift",
+			Email:   "uplift@test.com",
+			Message: "test commit",
+		},
+	})
+	require.NoError(t, err)
+
+	c, _ := git.LatestCommit()
+	assert.Equal(t, git.InitCommit, c.Message)
+}
+
 func TestRun_NoGitRepository(t *testing.T) {
 	git.MkTmpDir(t)
 
