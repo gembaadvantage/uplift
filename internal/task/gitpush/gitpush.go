@@ -36,10 +36,9 @@ func (t Task) String() string {
 	return "git push"
 }
 
-// Skip running the task if no version change is detected, or if running
-// in dry-run mode
+// Skip running the task
 func (t Task) Skip(ctx *context.Context) bool {
-	return ctx.DryRun || ctx.NoVersionChanged
+	return ctx.NoPush || ctx.DryRun || ctx.NoVersionChanged
 }
 
 // Run the task

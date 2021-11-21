@@ -31,10 +31,10 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
+	"github.com/gembaadvantage/uplift/internal/task/gittag"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
-	"github.com/gembaadvantage/uplift/internal/task/tag"
 	"github.com/spf13/cobra"
 )
 
@@ -65,7 +65,7 @@ func tagRepo(out io.Writer, ctx *context.Context) error {
 		currentversion.Task{},
 		nextversion.Task{},
 		nextcommit.Task{},
-		tag.Task{},
+		gittag.Task{},
 	}
 
 	for _, tsk := range tsks {
