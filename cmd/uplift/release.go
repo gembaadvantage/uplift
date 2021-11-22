@@ -23,9 +23,13 @@ SOFTWARE.
 package main
 
 import (
+	"errors"
+
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
+	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
@@ -45,17 +49,27 @@ the required semantic version`
 )
 
 func newReleaseCmd(ctx *context.Context) *cobra.Command {
+	var check bool
+
 	cmd := &cobra.Command{
 		Use:   "release",
 		Short: "Release the next semantic version of a repository",
 		Long:  releaseDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Just check if uplift would trigger a release
+			if check {
+				return checkRelease()
+			}
+
 			return release(ctx)
 		},
 	}
 
-	cmd.Flags().BoolVar(&ctx.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
+	f := cmd.Flags()
+	f.BoolVar(&ctx.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
+	f.BoolVar(&check, "check", false, "check if a release will be triggered")
+
 	return cmd
 }
 
@@ -75,6 +89,20 @@ func release(ctx *context.Context) error {
 		if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func checkRelease() error {
+	cd, err := git.LatestCommit()
+	if err != nil {
+		return err
+	}
+
+	inc := semver.ParseCommit(cd.Message)
+	if inc == semver.NoIncrement {
+		return errors.New("no release will be triggered")
 	}
 
 	return nil
