@@ -80,7 +80,7 @@ $ uplift tag
       • tagged repository with standard tag
 ```
 
-### Next Tag Only
+#### Next Tag Only
 
 Identify the next tag without tagging a repository by using the `--next` flag:
 
@@ -137,6 +137,14 @@ A full semantic release will be carried out. Combining both the `bump` and `tag`
 
 ```sh
 uplift release
+```
+
+#### Check Release
+
+Check if uplift will carry out a release without running the release workflow:
+
+```sh
+uplift release --check
 ```
 
 ## Configuration
