@@ -24,6 +24,7 @@ package context
 
 import (
 	ctx "context"
+	"io"
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -33,6 +34,7 @@ import (
 // Context provides a way to share common state across tasks
 type Context struct {
 	ctx.Context
+	Out              io.Writer
 	Config           config.Uplift
 	DryRun           bool
 	Debug            bool
@@ -41,14 +43,16 @@ type Context struct {
 	NoVersionChanged bool
 	CommitDetails    git.CommitDetails
 	FetchTags        bool
+	NextTagOnly      bool
 	NoPush           bool
 }
 
 // New constructs a context that captures both runtime configuration and
 // user defined runtime options
-func New(cfg config.Uplift) *Context {
+func New(cfg config.Uplift, out io.Writer) *Context {
 	return &Context{
 		Context: ctx.Background(),
 		Config:  cfg,
+		Out:     out,
 	}
 }

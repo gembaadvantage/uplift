@@ -23,8 +23,6 @@ SOFTWARE.
 package main
 
 import (
-	"io"
-
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
 	"github.com/apex/log/handlers/discard"
@@ -32,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Command, error) {
+func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 	log.SetHandler(cli.Default)
 
 	// support toggling of logging
@@ -61,12 +59,12 @@ func newRootCmd(out io.Writer, args []string, ctx *context.Context) (*cobra.Comm
 	pf.BoolVar(&ctx.NoPush, "no-push", false, "no changes will be pushed to the git remote")
 	pf.BoolVar(&silent, "silent", false, "silence all logging")
 
-	cmd.AddCommand(newVersionCmd(out),
-		newBumpCmd(out, ctx),
-		newCompletionCmd(out),
-		newTagCmd(out, ctx),
-		newReleaseCmd(out, ctx),
-		newChangelogCmd(out, ctx))
+	cmd.AddCommand(newVersionCmd(ctx),
+		newBumpCmd(ctx),
+		newCompletionCmd(ctx),
+		newTagCmd(ctx),
+		newReleaseCmd(ctx),
+		newChangelogCmd(ctx))
 
 	return cmd, nil
 }

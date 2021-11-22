@@ -37,9 +37,9 @@ func main() {
 	}
 
 	// Wrap the config within a context and pass to commands
-	ctx := context.New(cfg)
+	ctx := context.New(cfg, os.Stdout)
 
-	cmd, err := newRootCmd(os.Stdout, os.Args[1:], ctx)
+	cmd, err := newRootCmd(os.Args[1:], ctx)
 	if err != nil {
 		os.Exit(1)
 	}

@@ -23,8 +23,6 @@ SOFTWARE.
 package main
 
 import (
-	"io"
-
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
@@ -43,22 +41,25 @@ const (
 is based on the conventional commit message from the last commit.`
 )
 
-func newTagCmd(out io.Writer, ctx *context.Context) *cobra.Command {
+func newTagCmd(ctx *context.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tag",
 		Short: "Tag a git repository with the next semantic version",
 		Long:  tagDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return tagRepo(out, ctx)
+			return tagRepo(ctx)
 		},
 	}
 
-	cmd.Flags().BoolVar(&ctx.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
+	f := cmd.Flags()
+	f.BoolVar(&ctx.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
+	f.BoolVar(&ctx.NextTagOnly, "next", false, "output the next tag only")
+
 	return cmd
 }
 
-func tagRepo(out io.Writer, ctx *context.Context) error {
+func tagRepo(ctx *context.Context) error {
 	tsks := []task.Runner{
 		fetchtag.Task{},
 		lastcommit.Task{},

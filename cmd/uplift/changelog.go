@@ -23,8 +23,6 @@ SOFTWARE.
 package main
 
 import (
-	"io"
-
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
@@ -45,7 +43,7 @@ changelog. Subsequent entries will contain only commits between
 release tags`
 )
 
-func newChangelogCmd(out io.Writer, ctx *context.Context) *cobra.Command {
+func newChangelogCmd(ctx *context.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "changelog",
 		Short: "Create or update a changelog with the latest semantic release",
@@ -61,14 +59,14 @@ func newChangelogCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 				ctx.CurrentVersion.Raw = tags[1]
 			}
 
-			return writeChangelog(out, ctx)
+			return writeChangelog(ctx)
 		},
 	}
 
 	return cmd
 }
 
-func writeChangelog(out io.Writer, ctx *context.Context) error {
+func writeChangelog(ctx *context.Context) error {
 	tsks := []task.Runner{
 		lastcommit.Task{},
 		nextcommit.Task{},

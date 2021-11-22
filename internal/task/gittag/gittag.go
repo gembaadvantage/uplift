@@ -23,6 +23,8 @@ SOFTWARE.
 package gittag
 
 import (
+	"fmt"
+
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -52,16 +54,22 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
+	log.WithField("tag", ctx.NextVersion.Raw).Info("identified next tag")
 	if ctx.DryRun {
 		log.Info("skipping tag in dry run mode")
 		return nil
 	}
 
+	if ctx.NextTagOnly {
+		fmt.Fprint(ctx.Out, ctx.NextVersion.Raw)
+		return nil
+	}
+
 	if ctx.Config.AnnotatedTags {
-		log.WithField("tag", ctx.NextVersion.Raw).Info("with annotated tag")
+		log.Info("tagged repository with annotated tag")
 		return git.AnnotatedTag(ctx.NextVersion.Raw, ctx.CommitDetails)
 	}
 
-	log.WithField("tag", ctx.NextVersion.Raw).Info("with standard tag")
+	log.Info("tagged repository with standard tag")
 	return git.Tag(ctx.NextVersion.Raw)
 }
