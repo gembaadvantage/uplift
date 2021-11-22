@@ -76,7 +76,8 @@ $ uplift tag
    • next commit
       • changes will be committed with email=joe.bloggs@example.com message=ci(uplift): uplifted for version 0.2.0 name=joe.bloggs
    • git tag
-      • with standard tag         tag=1.0.0
+      • identified next tag       tag=0.2.0
+      • tagged repository with standard tag
 ```
 
 ### Next Tag Only
@@ -85,7 +86,7 @@ Identify the next tag without tagging a repository by using the `--next` flag:
 
 ```sh
 $ uplift tag --next --silent
-1.1.0
+0.2.0
 ```
 
 ### File Bumping
