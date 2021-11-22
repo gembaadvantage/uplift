@@ -79,6 +79,15 @@ $ uplift tag
       • with standard tag         tag=1.0.0
 ```
 
+### Next Tag Only
+
+Identify the next tag without tagging a repository by using the `--next` flag:
+
+```sh
+$ uplift tag --next --silent
+1.1.0
+```
+
 ### File Bumping
 
 When configured, the version within any file in a git repository can be bumped to the next semantic version. The version is identified by inspecting the latest commit.

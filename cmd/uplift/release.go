@@ -23,8 +23,6 @@ SOFTWARE.
 package main
 
 import (
-	"io"
-
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
@@ -46,14 +44,14 @@ will automatically bump any files and tag the associated commit with
 the required semantic version`
 )
 
-func newReleaseCmd(out io.Writer, ctx *context.Context) *cobra.Command {
+func newReleaseCmd(ctx *context.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "release",
 		Short: "Release the next semantic version of a repository",
 		Long:  releaseDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return release(out, ctx)
+			return release(ctx)
 		},
 	}
 
@@ -61,7 +59,7 @@ func newReleaseCmd(out io.Writer, ctx *context.Context) *cobra.Command {
 	return cmd
 }
 
-func release(out io.Writer, ctx *context.Context) error {
+func release(ctx *context.Context) error {
 	tsks := []task.Runner{
 		fetchtag.Task{},
 		lastcommit.Task{},

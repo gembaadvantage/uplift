@@ -23,6 +23,7 @@ SOFTWARE.
 package gittag
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 
@@ -130,4 +131,23 @@ func TestRun_AnnotatedTag(t *testing.T) {
 
 	assert.Contains(t, out, fmt.Sprintf("%s:<%s>:%s",
 		ctx.CommitDetails.Author, ctx.CommitDetails.Email, ctx.CommitDetails.Message))
+}
+
+func TestRun_NextTagOnly(t *testing.T) {
+	git.InitRepo(t)
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		Out: &buf,
+		NextVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextTagOnly: true,
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	assert.Equal(t, "1.0.0", buf.String())
+	assert.Len(t, git.AllTags(), 0)
 }

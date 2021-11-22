@@ -23,8 +23,6 @@ SOFTWARE.
 package main
 
 import (
-	"io"
-
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
@@ -44,21 +42,21 @@ version bump is based on the conventional commit message from the last commit.
 Uplift can bump the version in any file using regex pattern matching`
 )
 
-func newBumpCmd(out io.Writer, ctx *context.Context) *cobra.Command {
+func newBumpCmd(ctx *context.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bump",
 		Short: "Bump the semantic version within files",
 		Long:  bumpDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return bumpFiles(out, ctx)
+			return bumpFiles(ctx)
 		},
 	}
 
 	return cmd
 }
 
-func bumpFiles(out io.Writer, ctx *context.Context) error {
+func bumpFiles(ctx *context.Context) error {
 	tsks := []task.Runner{
 		lastcommit.Task{},
 		currentversion.Task{},
