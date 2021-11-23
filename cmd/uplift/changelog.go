@@ -59,9 +59,17 @@ func newChangelogCmd(ctx *context.Context) *cobra.Command {
 				ctx.CurrentVersion.Raw = tags[1]
 			}
 
+			if ctx.ChangelogDiff {
+				// Run a condensed workflow when just calculating the diff
+				return writeChangelogDiff(ctx)
+			}
+
 			return writeChangelog(ctx)
 		},
 	}
+
+	f := cmd.Flags()
+	f.BoolVar(&ctx.ChangelogDiff, "diff-only", false, "output the changelog diff only")
 
 	return cmd
 }
@@ -78,6 +86,15 @@ func writeChangelog(ctx *context.Context) error {
 		if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func writeChangelogDiff(ctx *context.Context) error {
+	tsk := changelog.Task{}
+	if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
+		return err
 	}
 
 	return nil

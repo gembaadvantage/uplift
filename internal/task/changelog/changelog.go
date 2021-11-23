@@ -26,6 +26,7 @@ import (
 	"bytes"
 	_ "embed"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -54,8 +55,12 @@ var (
 	//go:embed template/append.tpl
 	appendTpl string
 
+	//go:embed template/diff.tpl
+	diffTpl string
+
 	newTplBody    = template.Must(template.New("new").Parse(newTpl))
 	appendTplBody = template.Must(template.New("append").Parse(appendTpl))
+	diffTplBody   = template.Must(template.New("diff").Parse(diffTpl))
 
 	// ErrNoAppendHeader is reported if a changelog is missing the expected append header
 	ErrNoAppendHeader = errors.New("changelog missing supported append header")
@@ -119,6 +124,15 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
+	if ctx.ChangelogDiff {
+		diff, err := diffChangelog(rel)
+		if err != nil {
+			return err
+		}
+		fmt.Fprint(ctx.Out, diff)
+		return nil
+	}
+
 	var chgErr error
 	if noChangelogExists() {
 		chgErr = newChangelog(rel)
@@ -136,6 +150,15 @@ func (t Task) Run(ctx *context.Context) error {
 func noChangelogExists() bool {
 	_, err := os.Stat(MarkdownFile)
 	return os.IsNotExist(err)
+}
+
+func diffChangelog(rel release) (string, error) {
+	var buf bytes.Buffer
+	if err := diffTplBody.Execute(&buf, rel); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }
 
 func newChangelog(rel release) error {

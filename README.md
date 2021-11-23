@@ -131,6 +131,17 @@ $ uplift changelog
       • push commit to remote
 ```
 
+#### Diff Only
+
+Output the changelog diff without modifying an existing `CHANGELOG.md` by using the `--diff-only` flag:
+
+```sh
+$ uplift changelog --diff-only --silent
+## [1.2.0] - 2021-11-23
+
+1c85055 feat: a brand new feature
+```
+
 ### Release
 
 A full semantic release will be carried out. Combining both the `bump` and `tag` operations, in that order.
