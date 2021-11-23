@@ -45,6 +45,7 @@ type Context struct {
 	FetchTags        bool
 	NextTagOnly      bool
 	NoPush           bool
+	ChangelogDiff    bool
 }
 
 // New constructs a context that captures both runtime configuration and

@@ -23,6 +23,7 @@ SOFTWARE.
 package changelog
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -207,4 +208,35 @@ func readChangelog(t *testing.T) string {
 func changelogDate(t *testing.T) string {
 	t.Helper()
 	return time.Now().UTC().Format(ChangeDate)
+}
+
+func TestChangelog_DiffOnly(t *testing.T) {
+	git.InitRepo(t)
+	git.Tag("1.0.0")
+	h := git.EmptyCommitsAndTag(t, "1.1.0", "first commit", "second commit", "third commit")
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		Out:           &buf,
+		ChangelogDiff: true,
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextVersion: semver.Version{
+			Raw: "1.1.0",
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`## [1.1.0] - %s
+
+%s third commit
+%s second commit
+%s first commit
+`, changelogDate(t), h[2], h[1], h[0])
+
+	assert.False(t, changelogExists(t))
+	assert.Equal(t, expected, buf.String())
 }
