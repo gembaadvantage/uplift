@@ -86,9 +86,9 @@ func (t Task) Run(ctx *context.Context) error {
 
 	ctx.NextVersion = semver.Version{
 		Prefix: ctx.CurrentVersion.Prefix,
-		Patch:  uint64(nxt.Patch()),
-		Minor:  uint64(nxt.Minor()),
-		Major:  uint64(nxt.Major()),
+		Patch:  nxt.Patch(),
+		Minor:  nxt.Minor(),
+		Major:  nxt.Major(),
 		Raw:    nxt.Original(),
 	}
 	log.WithFields(log.Fields{

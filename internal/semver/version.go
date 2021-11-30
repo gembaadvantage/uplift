@@ -23,51 +23,58 @@ SOFTWARE.
 package semver
 
 import (
-	"errors"
 	"regexp"
-	"strconv"
+
+	semv "github.com/Masterminds/semver"
 )
 
 const (
-	// Pattern defines the regular expression for matching a semantic version
-	// as a raw sequence of characters
-	Pattern = `(v?)(\d+)\.(\d+)\.(\d+)`
+	// Pattern defines the regular expression for matching a semantic version.
+	// Taken directly from github.com/Masterminds/semver
+	Pattern = `v?([0-9]+)(\.[0-9]+)?(\.[0-9]+)?` +
+		`(-([0-9A-Za-z\-]+(\.[0-9A-Za-z\-]+)*))?` +
+		`(\+([0-9A-Za-z\-]+(\.[0-9A-Za-z\-]+)*))?`
 )
 
 var (
-	// Regex for parsing a matching a semantic version
+	// Regex for matching a semantic version
 	Regex = regexp.MustCompile(Pattern)
 )
 
 // Version provides a less strict implementation of a semantic version
-// and supports the optional use of a prefix, which is a common standard with
-// Git tags
+// by supporting an optional use of a 'v' prefix
 type Version struct {
-	Prefix string
-	Patch  uint64
-	Minor  uint64
-	Major  uint64
-	Raw    string
+	Prefix     string
+	Patch      int64
+	Minor      int64
+	Major      int64
+	Prerelease string
+	Metadata   string
+	Raw        string
 }
 
-// Parse ...
+// Parse a semantic version
 func Parse(ver string) (Version, error) {
-	if m := Regex.FindStringSubmatch(ver); len(m) > 4 {
-		return Version{
-			Prefix: m[1],
-			Major:  toUint64(m[2]),
-			Minor:  toUint64(m[3]),
-			Patch:  toUint64(m[4]),
-			Raw:    ver,
-		}, nil
+	v, err := semv.NewVersion(ver)
+	if err != nil {
+		return Version{}, err
 	}
 
-	return Version{}, errors.New("unrecognised semantic version format")
-}
+	// Detect and capture optionally supported prefix
+	prefix := ""
+	if ver[0] == 'v' {
+		prefix = "v"
+	}
 
-func toUint64(d string) uint64 {
-	v, _ := strconv.Atoi(d)
-	return uint64(v)
+	return Version{
+		Prefix:     prefix,
+		Major:      v.Major(),
+		Minor:      v.Minor(),
+		Patch:      v.Patch(),
+		Prerelease: v.Prerelease(),
+		Metadata:   v.Metadata(),
+		Raw:        ver,
+	}, nil
 }
 
 // String outputs the unparsed semantic version
