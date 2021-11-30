@@ -49,6 +49,8 @@ func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 				// Switch logging handler, to ensure all logging is discarded
 				log.SetHandler(discard.Default)
 			}
+
+			// TODO: validate prerelease suffix (use semver)
 		},
 	}
 
@@ -58,6 +60,7 @@ func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
 	pf.BoolVar(&ctx.NoPush, "no-push", false, "no changes will be pushed to the git remote")
 	pf.BoolVar(&silent, "silent", false, "silence all logging")
+	pf.StringVar(&ctx.Prerelease, "prerelease", "", "append prerelease suffix to calculated semantic version")
 
 	cmd.AddCommand(newVersionCmd(ctx),
 		newBumpCmd(ctx),
