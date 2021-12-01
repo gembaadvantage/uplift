@@ -23,24 +23,28 @@ SOFTWARE.
 package main
 
 import (
+	"errors"
+
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
 	"github.com/apex/log/handlers/discard"
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/spf13/cobra"
 )
 
 func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 	log.SetHandler(cli.Default)
 
-	// support toggling of logging
+	// Capture temporary flags
 	var silent bool
+	var pre string
 
 	cmd := &cobra.Command{
 		Use:          "uplift",
 		Short:        "Semantic versioning the easy way",
 		SilenceUsage: true,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if ctx.Debug {
 				log.SetLevel(log.InvalidLevel)
 			}
@@ -50,7 +54,14 @@ func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 				log.SetHandler(discard.Default)
 			}
 
-			// TODO: validate prerelease suffix (use semver)
+			// TODO: wrap into method
+
+			// Ensure any prerelease suffix is semantically valid
+			if _, err := semver.Parse("1.0.0-" + ctx.Prerelease); err != nil {
+				return errors.New("invalid semantic versioning prerelease suffix")
+			}
+
+			return nil
 		},
 	}
 
@@ -60,7 +71,7 @@ func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
 	pf.BoolVar(&ctx.NoPush, "no-push", false, "no changes will be pushed to the git remote")
 	pf.BoolVar(&silent, "silent", false, "silence all logging")
-	pf.StringVar(&ctx.Prerelease, "prerelease", "", "append prerelease suffix to calculated semantic version")
+	pf.StringVar(&pre, "prerelease", "", "append a prerelease suffix to calculated semantic version")
 
 	cmd.AddCommand(newVersionCmd(ctx),
 		newBumpCmd(ctx),

@@ -41,6 +41,7 @@ type Context struct {
 	CurrentVersion   semver.Version
 	NextVersion      semver.Version
 	Prerelease       string
+	Metadata         string
 	NoVersionChanged bool
 	CommitDetails    git.CommitDetails
 	FetchTags        bool

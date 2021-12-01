@@ -35,10 +35,12 @@ import (
 
 func TestRun(t *testing.T) {
 	tests := []struct {
-		name     string
-		commit   string
-		curVer   string
-		expected string
+		name       string
+		commit     string
+		curVer     string
+		prerelease string
+		metadata   string
+		expected   string
 	}{
 		{
 			name:     "PatchIncrement",
@@ -64,6 +66,14 @@ func TestRun(t *testing.T) {
 			curVer:   "v0.1.0",
 			expected: "v0.1.0",
 		},
+		{
+			name:       "MinorIncrementWithPrerelease",
+			commit:     "feat: a new feature",
+			curVer:     "v0.1.0",
+			prerelease: "beta.1",
+			metadata:   "12345",
+			expected:   "v0.2.0-beta.1+12345",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -79,6 +89,8 @@ func TestRun(t *testing.T) {
 				CurrentVersion: semver.Version{
 					Raw: tt.curVer,
 				},
+				Prerelease: tt.prerelease,
+				Metadata:   tt.metadata,
 			}
 			err := Task{}.Run(ctx)
 			if err != nil {
@@ -86,7 +98,7 @@ func TestRun(t *testing.T) {
 			}
 
 			if ctx.NextVersion.Raw != tt.expected {
-				t.Errorf("expected tag %s but received tag %s", tt.expected, ctx.NextVersion.Raw)
+				t.Errorf("expected version %s but received version %s", tt.expected, ctx.NextVersion.Raw)
 			}
 		})
 	}
@@ -123,4 +135,25 @@ func TestRun_FirstTagDefaultFromConfig(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, ctx.Config.FirstVersion, ctx.NextVersion.Raw)
+}
+
+func TestRun_FirstTagPrerelease(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommit(t, "feat: a new feature")
+
+	ctx := &context.Context{
+		CommitDetails: git.CommitDetails{
+			Message: "feat: a new feature",
+		},
+		Config: config.Uplift{
+			FirstVersion: "1.0.0",
+		},
+		Prerelease: "beta.1",
+		Metadata:   "12345",
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	assert.Equal(t, "1.0.0-beta.1+12345", ctx.NextVersion.Raw)
 }

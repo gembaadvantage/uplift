@@ -84,13 +84,20 @@ func (t Task) Run(ctx *context.Context) error {
 		nxt = pver.IncPatch()
 	}
 
+	// Append any prerelease suffixes
+	nxt, _ = nxt.SetPrerelease(ctx.Prerelease)
+	nxt, _ = nxt.SetMetadata(ctx.Metadata)
+
 	ctx.NextVersion = semver.Version{
-		Prefix: ctx.CurrentVersion.Prefix,
-		Patch:  nxt.Patch(),
-		Minor:  nxt.Minor(),
-		Major:  nxt.Major(),
-		Raw:    nxt.Original(),
+		Prefix:     ctx.CurrentVersion.Prefix,
+		Patch:      nxt.Patch(),
+		Minor:      nxt.Minor(),
+		Major:      nxt.Major(),
+		Prerelease: nxt.Prerelease(),
+		Metadata:   nxt.Metadata(),
+		Raw:        nxt.Original(),
 	}
+
 	log.WithFields(log.Fields{
 		"current": ctx.CurrentVersion.Raw,
 		"next":    ctx.NextVersion.Raw,
@@ -100,8 +107,15 @@ func (t Task) Run(ctx *context.Context) error {
 }
 
 func firstVersion(ctx *context.Context) string {
-	if ctx.Config.FirstVersion == "" {
-		return defaultVersion
+	fv := defaultVersion
+	if ctx.Config.FirstVersion != "" {
+		fv = ctx.Config.FirstVersion
 	}
-	return ctx.Config.FirstVersion
+
+	// Append any semantic prerelease suffix if needed
+	v, _ := semv.NewVersion(fv)
+	*v, _ = v.SetPrerelease(ctx.Prerelease)
+	*v, _ = v.SetMetadata(ctx.Metadata)
+
+	return v.Original()
 }
