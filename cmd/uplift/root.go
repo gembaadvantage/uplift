@@ -54,14 +54,9 @@ func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 				log.SetHandler(discard.Default)
 			}
 
-			// TODO: wrap into method
-
-			// Ensure any prerelease suffix is semantically valid
-			if _, err := semver.Parse("1.0.0-" + ctx.Prerelease); err != nil {
-				return errors.New("invalid semantic versioning prerelease suffix")
-			}
-
-			return nil
+			var err error
+			ctx.Prerelease, ctx.Metadata, err = parsePrereleaseArg(pre)
+			return err
 		},
 	}
 
@@ -81,4 +76,23 @@ func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 		newChangelogCmd(ctx))
 
 	return cmd, nil
+}
+
+func parsePrereleaseArg(pre string) (string, string, error) {
+	if pre == "" {
+		return "", "", errors.New("prerelease suffix is blank")
+	}
+
+	// Has prefix been provided
+	i := 0
+	if pre[0] == '-' {
+		i = 1
+	}
+
+	v, err := semver.Parse("1.0.0-" + pre[i:])
+	if err != nil {
+		return "", "", errors.New("invalid semantic versioning prerelease suffix")
+	}
+
+	return v.Prerelease, v.Metadata, nil
 }
