@@ -85,8 +85,15 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	// Append any prerelease suffixes
-	nxt, _ = nxt.SetPrerelease(ctx.Prerelease)
-	nxt, _ = nxt.SetMetadata(ctx.Metadata)
+	if ctx.Prerelease != "" {
+		nxt, _ = nxt.SetPrerelease(ctx.Prerelease)
+		nxt, _ = nxt.SetMetadata(ctx.Metadata)
+
+		log.WithFields(log.Fields{
+			"prerelease": ctx.Prerelease,
+			"metadata":   ctx.Metadata,
+		}).Info("prerelease version detected")
+	}
 
 	ctx.NextVersion = semver.Version{
 		Prefix:     ctx.CurrentVersion.Prefix,
