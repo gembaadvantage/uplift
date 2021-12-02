@@ -24,38 +24,87 @@ package main
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestTag(t *testing.T) {
-	untaggedRepo(t)
+func TestChangelog(t *testing.T) {
+	taggedRepo(t)
 
-	cmd := newTagCmd(&context.Context{})
-
+	cmd := newChangelogCmd(&context.Context{})
 	err := cmd.Execute()
 	require.NoError(t, err)
 
-	tags := git.AllTags()
-	assert.Len(t, tags, 1)
+	assert.True(t, changelogExists(t))
 }
 
-func TestTag_NextFlag(t *testing.T) {
-	untaggedRepo(t)
+func TestChangelog_WriteTagToContext(t *testing.T) {
+	tests := []struct {
+		name       string
+		tags       []string
+		currentVer string
+		nextVer    string
+	}{
+		{
+			name:       "SingleTag",
+			tags:       []string{"1.0.0"},
+			currentVer: "",
+			nextVer:    "1.0.0",
+		},
+		{
+			name:       "MultipleTags",
+			tags:       []string{"1.0.0", "1.1.0", "1.2.0", "1.3.0"},
+			currentVer: "1.2.0",
+			nextVer:    "1.3.0",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tagRepoWith(t, tt.tags)
+			ctx := &context.Context{}
+
+			cmd := newChangelogCmd(ctx)
+			err := cmd.Execute()
+			require.NoError(t, err)
+
+			require.Equal(t, tt.currentVer, ctx.CurrentVersion.Raw)
+			require.Equal(t, tt.nextVer, ctx.NextVersion.Raw)
+		})
+	}
+}
+
+func TestChangelog_DiffOnly(t *testing.T) {
+	taggedRepo(t)
 
 	var buf bytes.Buffer
-	cmd := newTagCmd(context.New(config.Uplift{}, &buf))
-	cmd.SetArgs([]string{"--next"})
+	cmd := newChangelogCmd(context.New(config.Uplift{}, &buf))
+	cmd.SetArgs([]string{"--diff-only"})
 
 	err := cmd.Execute()
 	require.NoError(t, err)
 
-	tags := git.AllTags()
-	assert.Len(t, tags, 0)
+	assert.False(t, changelogExists(t))
 	assert.NotEmpty(t, buf.String())
+}
+
+func changelogExists(t *testing.T) bool {
+	t.Helper()
+
+	current, err := os.Getwd()
+	require.NoError(t, err)
+
+	if _, err := os.Stat(filepath.Join(current, "CHANGELOG.md")); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+		require.NoError(t, err)
+	}
+
+	return true
 }

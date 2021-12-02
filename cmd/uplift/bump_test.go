@@ -23,39 +23,45 @@ SOFTWARE.
 package main
 
 import (
-	"bytes"
+	"fmt"
+	"io/ioutil"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestTag(t *testing.T) {
-	untaggedRepo(t)
+func TestBump(t *testing.T) {
+	taggedRepo(t)
+	data := testFileWithConfig(t, "test.txt", ".uplift.yml")
 
-	cmd := newTagCmd(&context.Context{})
+	cfg, _ := config.Load(".uplift.yml")
+	cmd := newBumpCmd(&context.Context{Config: cfg})
 
 	err := cmd.Execute()
 	require.NoError(t, err)
 
-	tags := git.AllTags()
-	assert.Len(t, tags, 1)
+	actual, err := ioutil.ReadFile("test.txt")
+	require.NoError(t, err)
+	assert.NotEqual(t, string(data), string(actual))
 }
 
-func TestTag_NextFlag(t *testing.T) {
-	untaggedRepo(t)
+func testFileWithConfig(t *testing.T, f string, cfg string) []byte {
+	t.Helper()
 
-	var buf bytes.Buffer
-	cmd := newTagCmd(context.New(config.Uplift{}, &buf))
-	cmd.SetArgs([]string{"--next"})
-
-	err := cmd.Execute()
+	c := []byte("version: 0.0.0")
+	err := ioutil.WriteFile(f, c, 0644)
 	require.NoError(t, err)
 
-	tags := git.AllTags()
-	assert.Len(t, tags, 0)
-	assert.NotEmpty(t, buf.String())
+	yml := fmt.Sprintf(`
+bumps:
+  - file: %s
+    regex: "version: $VERSION"`, f)
+
+	err = ioutil.WriteFile(cfg, []byte(yml), 0644)
+	require.NoError(t, err)
+
+	return c
 }

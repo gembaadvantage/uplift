@@ -28,34 +28,55 @@ import (
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestTag(t *testing.T) {
-	untaggedRepo(t)
-
-	cmd := newTagCmd(&context.Context{})
+func TestCompletion_Bash(t *testing.T) {
+	var buf bytes.Buffer
+	cmd := newCompletionCmd(context.New(config.Uplift{}, &buf))
+	cmd.SetArgs([]string{"bash"})
 
 	err := cmd.Execute()
 	require.NoError(t, err)
 
-	tags := git.AllTags()
-	assert.Len(t, tags, 1)
+	assert.NotEmpty(t, buf.String())
+	assert.Contains(t, buf.String(), "bash completion V2 for completion ")
 }
 
-func TestTag_NextFlag(t *testing.T) {
-	untaggedRepo(t)
-
+func TestCompletion_Zsh(t *testing.T) {
 	var buf bytes.Buffer
-	cmd := newTagCmd(context.New(config.Uplift{}, &buf))
-	cmd.SetArgs([]string{"--next"})
+	cmd := newCompletionCmd(context.New(config.Uplift{}, &buf))
+	cmd.SetArgs([]string{"zsh"})
 
 	err := cmd.Execute()
 	require.NoError(t, err)
 
-	tags := git.AllTags()
-	assert.Len(t, tags, 0)
 	assert.NotEmpty(t, buf.String())
+	assert.Contains(t, buf.String(), "zsh completion for completion")
+}
+
+func TestCompletion_ZshNoDescriptions(t *testing.T) {
+	var buf bytes.Buffer
+	cmd := newCompletionCmd(context.New(config.Uplift{}, &buf))
+	cmd.SetArgs([]string{"zsh", "--no-descriptions"})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, buf.String())
+	assert.Contains(t, buf.String(), "zsh completion for completion")
+	assert.Contains(t, buf.String(), "__completeNoDesc")
+}
+
+func TestCompletion_Fish(t *testing.T) {
+	var buf bytes.Buffer
+	cmd := newCompletionCmd(context.New(config.Uplift{}, &buf))
+	cmd.SetArgs([]string{"fish"})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, buf.String())
+	assert.Contains(t, buf.String(), "fish completion for completion")
 }
