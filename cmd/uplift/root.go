@@ -66,7 +66,7 @@ func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
 	pf.BoolVar(&ctx.NoPush, "no-push", false, "no changes will be pushed to the git remote")
 	pf.BoolVar(&silent, "silent", false, "silence all logging")
-	pf.StringVar(&pre, "prerelease", "", "append a prerelease suffix to calculated semantic version")
+	pf.StringVar(&pre, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
 
 	cmd.AddCommand(newVersionCmd(ctx),
 		newBumpCmd(ctx),

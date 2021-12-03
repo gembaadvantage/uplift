@@ -57,8 +57,17 @@ Uplift can carry out different semantic versioning operations on your repository
 - `--debug` log extra output to the console in debug mode
 - `--no-push` no changes will be committed and pushed back to your git remote
 - `--silent` silence all log output from uplift
+- `--prerelease` append a prerelease suffix to the next calculated semantic version
 
 Uplift supports the use of a `v` prefix and includes it with subsequent bumps.
+
+### Prerelease Support
+
+Prerelease suffixes such as `beta.1+5cc9b6e` can be provided to uplift on an adhoc basis. Prerelease support isn't offered through configuration and must be provided explicitly using the `--prerelease` flag:
+
+```sh
+uplift tag --prerelease beta.1+5cc9b6e
+```
 
 ### Tagging
 
