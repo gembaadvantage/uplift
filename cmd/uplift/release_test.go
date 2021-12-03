@@ -21,3 +21,55 @@ SOFTWARE.
 */
 
 package main
+
+import (
+	"io/ioutil"
+	"testing"
+
+	"github.com/gembaadvantage/uplift/internal/config"
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestRelease(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommit(t, "feat: this is a release")
+	data := testFileWithConfig(t, "test.txt", ".uplift.yml")
+
+	cfg, _ := config.Load(".uplift.yml")
+	cmd := newReleaseCmd(&context.Context{Config: cfg})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	tags := git.AllTags()
+	assert.Len(t, tags, 1)
+
+	actual, err := ioutil.ReadFile("test.txt")
+	require.NoError(t, err)
+	assert.NotEqual(t, string(data), string(actual))
+}
+
+func TestRelease_CheckFlag(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommit(t, "feat: this is a release")
+
+	cmd := newReleaseCmd(&context.Context{})
+	cmd.SetArgs([]string{"--check"})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+}
+
+func TestRelease_CheckFlagNoRelease(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommit(t, "ci: not a release")
+
+	cmd := newReleaseCmd(&context.Context{})
+	cmd.SetArgs([]string{"--check"})
+
+	err := cmd.Execute()
+	require.Error(t, err)
+}

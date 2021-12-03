@@ -25,10 +25,48 @@ package main
 import (
 	"testing"
 
+	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestParsePrereleaseArg(t *testing.T) {
+func TestRoot_DryRunFlag(t *testing.T) {
+	ctx := &context.Context{}
+	cmd, err := newRootCmd([]string{}, ctx)
+	require.NoError(t, err)
+
+	cmd.SetArgs([]string{"--dry-run"})
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	assert.Equal(t, true, ctx.DryRun)
+}
+
+func TestRoot_DebugFlag(t *testing.T) {
+	ctx := &context.Context{}
+	cmd, err := newRootCmd([]string{}, ctx)
+	require.NoError(t, err)
+
+	cmd.SetArgs([]string{"--debug"})
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	assert.Equal(t, true, ctx.Debug)
+}
+
+func TestRoot_NoPushFlag(t *testing.T) {
+	ctx := &context.Context{}
+	cmd, err := newRootCmd([]string{}, ctx)
+	require.NoError(t, err)
+
+	cmd.SetArgs([]string{"--no-push"})
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	assert.Equal(t, true, ctx.NoPush)
+}
+
+func TestRoot_PrereleaseFlag(t *testing.T) {
 	tests := []struct {
 		name       string
 		prerelease string
@@ -56,29 +94,33 @@ func TestParsePrereleaseArg(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pre, meta, err := parsePrereleaseArg(tt.prerelease)
+			ctx := &context.Context{}
+			cmd, err := newRootCmd([]string{}, ctx)
+			require.NoError(t, err)
 
-			if err != nil {
-				t.Errorf("Unexpected error: %s", err)
-			}
-
-			if pre != tt.pre {
-				t.Errorf("Expected: %s but received: %s\n", tt.pre, pre)
-			}
-
-			if meta != tt.meta {
-				t.Errorf("Expected: %s but received: %s\n", tt.meta, meta)
-			}
+			cmd.SetArgs([]string{"tag", "--prerelease", tt.prerelease})
+			err = cmd.Execute()
+			require.NoError(t, err)
+			require.Equal(t, tt.pre, ctx.Prerelease)
+			require.Equal(t, tt.meta, ctx.Metadata)
 		})
 	}
 }
 
-func TestParsePrereleaseArg_Empty(t *testing.T) {
-	_, _, err := parsePrereleaseArg("")
+func TestRoot_PrereleaseFlagEmpty(t *testing.T) {
+	cmd, err := newRootCmd([]string{}, &context.Context{})
+	require.NoError(t, err)
+
+	cmd.SetArgs([]string{"tag", "--prerelease", ""})
+	err = cmd.Execute()
 	assert.EqualError(t, err, "prerelease suffix is blank")
 }
 
-func TestParsePrerelease_Invalid(t *testing.T) {
-	_, _, err := parsePrereleaseArg("-#")
+func TestRoot_PrereleaseFlagInvalid(t *testing.T) {
+	cmd, err := newRootCmd([]string{}, &context.Context{})
+	require.NoError(t, err)
+
+	cmd.SetArgs([]string{"tag", "--prerelease", "-#"})
+	err = cmd.Execute()
 	assert.EqualError(t, err, "invalid semantic versioning prerelease suffix")
 }
