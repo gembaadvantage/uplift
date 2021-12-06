@@ -69,6 +69,8 @@ Prerelease suffixes such as `beta.1+5cc9b6e` can be provided to uplift on an adh
 uplift tag --prerelease beta.1+5cc9b6e
 ```
 
+Uplift commands that support the `--prerelease` flag are: `tag`, `bump` and `release`.
+
 ### Tagging
 
 Based on the latest commit, the repository will be tagged with the next semantic version.
