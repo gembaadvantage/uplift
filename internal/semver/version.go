@@ -23,6 +23,7 @@ SOFTWARE.
 package semver
 
 import (
+	"errors"
 	"regexp"
 
 	semv "github.com/Masterminds/semver"
@@ -75,6 +76,27 @@ func Parse(ver string) (Version, error) {
 		Metadata:   v.Metadata(),
 		Raw:        ver,
 	}, nil
+}
+
+// ParsePrerelease attempts to parse a prerelease suffix. Supports
+// a prerelease suffix with and without a leading '-'
+func ParsePrerelease(pre string) (string, string, error) {
+	if pre == "" {
+		return "", "", errors.New("prerelease suffix is blank")
+	}
+
+	// Has prefix been provided
+	i := 0
+	if pre[0] == '-' {
+		i = 1
+	}
+
+	v, err := Parse("1.0.0-" + pre[i:])
+	if err != nil {
+		return "", "", errors.New("invalid semantic prerelease suffix")
+	}
+
+	return v.Prerelease, v.Metadata, nil
 }
 
 // String outputs the unparsed semantic version

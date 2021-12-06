@@ -68,3 +68,52 @@ func TestString_ReturnsRaw(t *testing.T) {
 
 	assert.Equal(t, "1.0.0-beta.1", buf.String())
 }
+
+func TestParsePrerelease(t *testing.T) {
+	tests := []struct {
+		name       string
+		prerelease string
+		pre        string
+		meta       string
+	}{
+		{
+			name:       "WithLeadingHyphen",
+			prerelease: "-beta.1+a2sd3ef",
+			pre:        "beta.1",
+			meta:       "a2sd3ef",
+		},
+		{
+			name:       "NoLeadingHyphen",
+			prerelease: "beta.1+a2sd3ef",
+			pre:        "beta.1",
+			meta:       "a2sd3ef",
+		},
+		{
+			name:       "NoMetadata",
+			prerelease: "beta.1",
+			pre:        "beta.1",
+			meta:       "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pre, meta, err := ParsePrerelease(tt.prerelease)
+
+			require.NoError(t, err)
+			require.Equal(t, tt.pre, pre)
+			require.Equal(t, tt.meta, meta)
+		})
+	}
+}
+
+func TestParsePrerelease_Empty(t *testing.T) {
+	_, _, err := ParsePrerelease("")
+
+	assert.EqualError(t, err, "prerelease suffix is blank")
+}
+
+func TestParsePrerelease_Invalid(t *testing.T) {
+	_, _, err := ParsePrerelease("-#")
+
+	assert.EqualError(t, err, "invalid semantic prerelease suffix")
+}

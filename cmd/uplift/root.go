@@ -23,13 +23,10 @@ SOFTWARE.
 package main
 
 import (
-	"errors"
-
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
 	"github.com/apex/log/handlers/discard"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/spf13/cobra"
 )
 
@@ -38,13 +35,12 @@ func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 
 	// Capture temporary flags
 	var silent bool
-	var pre string
 
 	cmd := &cobra.Command{
 		Use:          "uplift",
 		Short:        "Semantic versioning the easy way",
 		SilenceUsage: true,
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if ctx.Debug {
 				log.SetLevel(log.InvalidLevel)
 			}
@@ -53,10 +49,6 @@ func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 				// Switch logging handler, to ensure all logging is discarded
 				log.SetHandler(discard.Default)
 			}
-
-			var err error
-			ctx.Prerelease, ctx.Metadata, err = parsePrereleaseArg(pre)
-			return err
 		},
 	}
 
@@ -66,7 +58,6 @@ func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
 	pf.BoolVar(&ctx.NoPush, "no-push", false, "no changes will be pushed to the git remote")
 	pf.BoolVar(&silent, "silent", false, "silence all logging")
-	pf.StringVar(&pre, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
 
 	cmd.AddCommand(newVersionCmd(ctx),
 		newBumpCmd(ctx),
@@ -76,23 +67,4 @@ func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 		newChangelogCmd(ctx))
 
 	return cmd, nil
-}
-
-func parsePrereleaseArg(pre string) (string, string, error) {
-	if pre == "" {
-		return "", "", errors.New("prerelease suffix is blank")
-	}
-
-	// Has prefix been provided
-	i := 0
-	if pre[0] == '-' {
-		i = 1
-	}
-
-	v, err := semver.Parse("1.0.0-" + pre[i:])
-	if err != nil {
-		return "", "", errors.New("invalid semantic versioning prerelease suffix")
-	}
-
-	return v.Prerelease, v.Metadata, nil
 }

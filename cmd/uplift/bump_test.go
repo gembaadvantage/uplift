@@ -65,3 +65,19 @@ bumps:
 
 	return c
 }
+
+func TestBump_PrereleaseFlag(t *testing.T) {
+	untaggedRepo(t)
+	testFileWithConfig(t, "test.txt", ".uplift.yml")
+
+	cfg, _ := config.Load(".uplift.yml")
+	cmd := newBumpCmd(&context.Context{Config: cfg})
+	cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	actual, err := ioutil.ReadFile("test.txt")
+	require.NoError(t, err)
+	assert.Equal(t, "version: 0.1.0-beta.1+12345", string(actual))
+}

@@ -26,6 +26,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
+	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
@@ -43,15 +44,28 @@ Uplift can bump the version in any file using regex pattern matching`
 )
 
 func newBumpCmd(ctx *context.Context) *cobra.Command {
+	var pre string
+
 	cmd := &cobra.Command{
 		Use:   "bump",
 		Short: "Bump the semantic version within files",
 		Long:  bumpDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Handle prerelease suffix if one is provided
+			if pre != "" {
+				var err error
+				if ctx.Prerelease, ctx.Metadata, err = semver.ParsePrerelease(pre); err != nil {
+					return err
+				}
+			}
+
 			return bumpFiles(ctx)
 		},
 	}
+
+	f := cmd.Flags()
+	f.StringVar(&pre, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
 
 	return cmd
 }

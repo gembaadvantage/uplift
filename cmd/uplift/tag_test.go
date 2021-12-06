@@ -59,3 +59,18 @@ func TestTag_NextFlag(t *testing.T) {
 	assert.Len(t, tags, 0)
 	assert.NotEmpty(t, buf.String())
 }
+
+func TestTag_PrereleaseFlag(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommit(t, "feat: a new feature")
+
+	cmd := newTagCmd(&context.Context{})
+	cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	tags := git.AllTags()
+	assert.Len(t, tags, 1)
+	assert.Equal(t, "0.1.0-beta.1+12345", tags[0])
+}

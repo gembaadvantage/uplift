@@ -73,3 +73,24 @@ func TestRelease_CheckFlagNoRelease(t *testing.T) {
 	err := cmd.Execute()
 	require.Error(t, err)
 }
+
+func TestRelease_PrereleaseFlag(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommit(t, "feat: this is a release")
+	testFileWithConfig(t, "test.txt", ".uplift.yml")
+
+	cfg, _ := config.Load(".uplift.yml")
+	cmd := newReleaseCmd(&context.Context{Config: cfg})
+	cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	tags := git.AllTags()
+	assert.Len(t, tags, 1)
+	assert.Equal(t, "0.1.0-beta.1+12345", tags[0])
+
+	actual, err := ioutil.ReadFile("test.txt")
+	require.NoError(t, err)
+	assert.Contains(t, string(actual), "version: 0.1.0-beta.1+12345")
+}
