@@ -98,6 +98,14 @@ func (t Task) Run(ctx *context.Context) error {
 		return err
 	}
 
+	if len(ents) == 0 {
+		log.WithFields(log.Fields{
+			"tag":  ctx.NextVersion.Raw,
+			"prev": ctx.CurrentVersion.Raw,
+		}).Info("no log entries between tags")
+		return nil
+	}
+
 	// Package log entries into release ready for template generation
 	rel := release{
 		Tag:     ctx.NextVersion.Raw,
