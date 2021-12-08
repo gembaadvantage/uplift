@@ -20,42 +20,45 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package context
+package main
 
 import (
-	ctx "context"
-	"io"
+	"io/ioutil"
+	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/stretchr/testify/require"
 )
 
-// Context provides a way to share common state across tasks
-type Context struct {
-	ctx.Context
-	Out              io.Writer
-	Config           config.Uplift
-	DryRun           bool
-	Debug            bool
-	CurrentVersion   semver.Version
-	NextVersion      semver.Version
-	Prerelease       string
-	Metadata         string
-	NoVersionChanged bool
-	CommitDetails    git.CommitDetails
-	FetchTags        bool
-	NextTagOnly      bool
-	NoPush           bool
-	ChangelogDiff    bool
+func untaggedRepo(t *testing.T) {
+	t.Helper()
+
+	git.InitRepo(t)
+	git.EmptyCommit(t, "feat: a new feature")
+	require.Len(t, git.AllTags(), 0)
 }
 
-// New constructs a context that captures both runtime configuration and
-// user defined runtime options
-func New(cfg config.Uplift, out io.Writer) *Context {
-	return &Context{
-		Context: ctx.Background(),
-		Config:  cfg,
-		Out:     out,
+func taggedRepo(t *testing.T) {
+	t.Helper()
+
+	git.InitRepo(t)
+	git.EmptyCommitAndTag(t, "1.0.0", "feat: a new feature")
+}
+
+func tagRepoWith(t *testing.T, tags []string) {
+	t.Helper()
+
+	git.InitRepo(t)
+	for _, tag := range tags {
+		git.EmptyCommitAndTag(t, tag, "feat: a new feature")
 	}
+}
+
+func upliftConfigFile(t *testing.T, name string) {
+	t.Helper()
+
+	yml := "firstVersion: 1.0.0"
+
+	err := ioutil.WriteFile(name, []byte(yml), 0644)
+	require.NoError(t, err)
 }

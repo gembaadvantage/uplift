@@ -56,7 +56,7 @@ func TestRun(t *testing.T) {
 		{
 			name:     "SingleLineAtEnd",
 			nextVer:  "v1.0.1",
-			regex:    `version $VERSION`,
+			regex:    "version $VERSION",
 			content:  "file is currently at version v1.0.0",
 			expected: "file is currently at version v1.0.1",
 		},
@@ -66,6 +66,13 @@ func TestRun(t *testing.T) {
 			regex:    "$VERSION",
 			content:  "1.0.0 contains many new changes",
 			expected: "1.1.0 contains many new changes",
+		},
+		{
+			name:     "SingleWithPrerelease",
+			nextVer:  "0.3.1-beta.1+ade3f12",
+			regex:    "version $VERSION",
+			content:  "file is at version 0.3.0",
+			expected: "file is at version 0.3.1-beta.1+ade3f12",
 		},
 		{
 			name:     "SingleLineWrapped",

@@ -33,7 +33,7 @@ import (
 func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
 	log.SetHandler(cli.Default)
 
-	// support toggling of logging
+	// Capture temporary flags
 	var silent bool
 
 	cmd := &cobra.Command{

@@ -26,6 +26,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
+	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
@@ -42,12 +43,22 @@ is based on the conventional commit message from the last commit.`
 )
 
 func newTagCmd(ctx *context.Context) *cobra.Command {
+	var pre string
+
 	cmd := &cobra.Command{
 		Use:   "tag",
 		Short: "Tag a git repository with the next semantic version",
 		Long:  tagDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Handle prerelease suffix if one is provided
+			if pre != "" {
+				var err error
+				if ctx.Prerelease, ctx.Metadata, err = semver.ParsePrerelease(pre); err != nil {
+					return err
+				}
+			}
+
 			return tagRepo(ctx)
 		},
 	}
@@ -55,6 +66,7 @@ func newTagCmd(ctx *context.Context) *cobra.Command {
 	f := cmd.Flags()
 	f.BoolVar(&ctx.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
 	f.BoolVar(&ctx.NextTagOnly, "next", false, "output the next tag only")
+	f.StringVar(&pre, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
 
 	return cmd
 }

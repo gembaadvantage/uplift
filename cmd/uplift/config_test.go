@@ -20,42 +20,64 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package context
+package main
 
 import (
-	ctx "context"
-	"io"
+	"io/ioutil"
+	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// Context provides a way to share common state across tasks
-type Context struct {
-	ctx.Context
-	Out              io.Writer
-	Config           config.Uplift
-	DryRun           bool
-	Debug            bool
-	CurrentVersion   semver.Version
-	NextVersion      semver.Version
-	Prerelease       string
-	Metadata         string
-	NoVersionChanged bool
-	CommitDetails    git.CommitDetails
-	FetchTags        bool
-	NextTagOnly      bool
-	NoPush           bool
-	ChangelogDiff    bool
+func TestLoadConfig(t *testing.T) {
+	tests := []struct {
+		name     string
+		filename string
+	}{
+		{
+			name:     "DotUpliftYml",
+			filename: ".uplift.yml",
+		},
+		{
+			name:     "DotUpliftYaml",
+			filename: ".uplift.yaml",
+		},
+		{
+			name:     "UpliftYml",
+			filename: "uplift.yml",
+		},
+		{
+			name:     "UpliftYaml",
+			filename: "uplift.yaml",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			git.MkTmpDir(t)
+			upliftConfigFile(t, tt.filename)
+
+			cfg, err := loadConfig()
+
+			require.NoError(t, err)
+			require.Equal(t, "1.0.0", cfg.FirstVersion)
+		})
+	}
 }
 
-// New constructs a context that captures both runtime configuration and
-// user defined runtime options
-func New(cfg config.Uplift, out io.Writer) *Context {
-	return &Context{
-		Context: ctx.Background(),
-		Config:  cfg,
-		Out:     out,
-	}
+func TestLoadConfig_Malformed(t *testing.T) {
+	git.MkTmpDir(t)
+	yml := `firstV`
+	ioutil.WriteFile(".uplift.yml", []byte(yml), 0644)
+
+	_, err := loadConfig()
+	assert.Error(t, err)
+}
+
+func TestLoadConfig_NotExists(t *testing.T) {
+	git.MkTmpDir(t)
+
+	_, err := loadConfig()
+	assert.NoError(t, err)
 }

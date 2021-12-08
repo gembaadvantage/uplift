@@ -210,6 +210,19 @@ func TestLogBetween_TwoTags(t *testing.T) {
 	assert.Equal(t, log[2].Message, "second commit")
 }
 
+func TestLogBetween_PrereleaseTag(t *testing.T) {
+	InitRepo(t)
+	EmptyCommitAndTag(t, "0.1.0", "first commit")
+	EmptyCommitsAndTag(t, "0.2.0-beta1+12345", "second commit", "third commit")
+
+	log, err := LogBetween("0.2.0-beta1+12345", "0.1.0")
+	require.NoError(t, err)
+
+	require.Len(t, log, 2)
+	assert.Equal(t, log[0].Message, "third commit")
+	assert.Equal(t, log[1].Message, "second commit")
+}
+
 func TestLogBetween_TwoHashes(t *testing.T) {
 	InitRepo(t)
 	h := EmptyCommits(t, "first commit", "second commit", "third commit", "forth commit")
@@ -291,6 +304,19 @@ func TestLogBetween_ErrorInvalidRevision(t *testing.T) {
 
 	_, err := LogBetween("1234567", "")
 	require.Error(t, err)
+}
+
+func TestLogBetween_TwoTagsAtSameCommit(t *testing.T) {
+	InitRepo(t)
+	EmptyCommitAndTag(t, "1.0.0", "first commit")
+
+	err := Tag("1.1.0")
+	require.NoError(t, err)
+
+	log, err := LogBetween("1.1.0", "1.0.0")
+	require.NoError(t, err)
+
+	assert.Len(t, log, 0)
 }
 
 func TestStaged(t *testing.T) {

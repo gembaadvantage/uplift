@@ -20,42 +20,57 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package context
+package main
 
 import (
-	ctx "context"
-	"io"
+	"bytes"
+	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/config"
+	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// Context provides a way to share common state across tasks
-type Context struct {
-	ctx.Context
-	Out              io.Writer
-	Config           config.Uplift
-	DryRun           bool
-	Debug            bool
-	CurrentVersion   semver.Version
-	NextVersion      semver.Version
-	Prerelease       string
-	Metadata         string
-	NoVersionChanged bool
-	CommitDetails    git.CommitDetails
-	FetchTags        bool
-	NextTagOnly      bool
-	NoPush           bool
-	ChangelogDiff    bool
+func TestTag(t *testing.T) {
+	untaggedRepo(t)
+
+	cmd := newTagCmd(&context.Context{})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	tags := git.AllTags()
+	assert.Len(t, tags, 1)
 }
 
-// New constructs a context that captures both runtime configuration and
-// user defined runtime options
-func New(cfg config.Uplift, out io.Writer) *Context {
-	return &Context{
-		Context: ctx.Background(),
-		Config:  cfg,
-		Out:     out,
-	}
+func TestTag_NextFlag(t *testing.T) {
+	untaggedRepo(t)
+
+	var buf bytes.Buffer
+	cmd := newTagCmd(context.New(config.Uplift{}, &buf))
+	cmd.SetArgs([]string{"--next"})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	tags := git.AllTags()
+	assert.Len(t, tags, 0)
+	assert.NotEmpty(t, buf.String())
+}
+
+func TestTag_PrereleaseFlag(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommit(t, "feat: a new feature")
+
+	cmd := newTagCmd(&context.Context{})
+	cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	tags := git.AllTags()
+	assert.Len(t, tags, 1)
+	assert.Equal(t, "0.1.0-beta.1+12345", tags[0])
 }

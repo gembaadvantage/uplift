@@ -20,42 +20,48 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package context
+package main
 
 import (
-	ctx "context"
-	"io"
+	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// Context provides a way to share common state across tasks
-type Context struct {
-	ctx.Context
-	Out              io.Writer
-	Config           config.Uplift
-	DryRun           bool
-	Debug            bool
-	CurrentVersion   semver.Version
-	NextVersion      semver.Version
-	Prerelease       string
-	Metadata         string
-	NoVersionChanged bool
-	CommitDetails    git.CommitDetails
-	FetchTags        bool
-	NextTagOnly      bool
-	NoPush           bool
-	ChangelogDiff    bool
+func TestRoot_DryRunFlag(t *testing.T) {
+	ctx := &context.Context{}
+	cmd, err := newRootCmd([]string{}, ctx)
+	require.NoError(t, err)
+
+	cmd.SetArgs([]string{"--dry-run"})
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	assert.Equal(t, true, ctx.DryRun)
 }
 
-// New constructs a context that captures both runtime configuration and
-// user defined runtime options
-func New(cfg config.Uplift, out io.Writer) *Context {
-	return &Context{
-		Context: ctx.Background(),
-		Config:  cfg,
-		Out:     out,
-	}
+func TestRoot_DebugFlag(t *testing.T) {
+	ctx := &context.Context{}
+	cmd, err := newRootCmd([]string{}, ctx)
+	require.NoError(t, err)
+
+	cmd.SetArgs([]string{"--debug"})
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	assert.Equal(t, true, ctx.Debug)
+}
+
+func TestRoot_NoPushFlag(t *testing.T) {
+	ctx := &context.Context{}
+	cmd, err := newRootCmd([]string{}, ctx)
+	require.NoError(t, err)
+
+	cmd.SetArgs([]string{"--no-push"})
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	assert.Equal(t, true, ctx.NoPush)
 }

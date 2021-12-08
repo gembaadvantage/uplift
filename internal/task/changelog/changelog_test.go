@@ -240,3 +240,24 @@ func TestChangelog_DiffOnly(t *testing.T) {
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
 }
+
+func TestChangelog_NoLogEntries(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommitAndTag(t, "1.0.0", "commit")
+
+	err := git.Tag("2.0.0")
+	require.NoError(t, err)
+
+	ctx := &context.Context{
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextVersion: semver.Version{
+			Raw: "2.0.0",
+		},
+	}
+
+	err = Task{}.Run(ctx)
+	require.NoError(t, err)
+	assert.False(t, changelogExists(t))
+}

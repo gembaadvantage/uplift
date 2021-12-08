@@ -50,6 +50,7 @@ the required semantic version`
 
 func newReleaseCmd(ctx *context.Context) *cobra.Command {
 	var check bool
+	var pre string
 
 	cmd := &cobra.Command{
 		Use:   "release",
@@ -62,6 +63,14 @@ func newReleaseCmd(ctx *context.Context) *cobra.Command {
 				return checkRelease()
 			}
 
+			// Handle prerelease suffix if one is provided
+			if pre != "" {
+				var err error
+				if ctx.Prerelease, ctx.Metadata, err = semver.ParsePrerelease(pre); err != nil {
+					return err
+				}
+			}
+
 			return release(ctx)
 		},
 	}
@@ -69,6 +78,7 @@ func newReleaseCmd(ctx *context.Context) *cobra.Command {
 	f := cmd.Flags()
 	f.BoolVar(&ctx.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
 	f.BoolVar(&check, "check", false, "check if a release will be triggered")
+	f.StringVar(&pre, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
 
 	return cmd
 }
