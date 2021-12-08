@@ -245,6 +245,10 @@ func LogBetween(from, to string) ([]LogEntry, error) {
 		return []LogEntry{}, err
 	}
 
+	if log == "" {
+		return []LogEntry{}, nil
+	}
+
 	rows := strings.Split(log, "\n")
 	les := make([]LogEntry, 0, len(rows))
 	for _, r := range rows {
