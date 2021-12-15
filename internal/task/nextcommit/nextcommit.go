@@ -24,10 +24,12 @@ package nextcommit
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
 // Task for generating the next commit message
@@ -64,7 +66,7 @@ func (t Task) Run(ctx *context.Context) error {
 
 	if ctx.Config.CommitMessage != "" {
 		log.Debug("overwriting commit message")
-		c.Message = ctx.Config.CommitMessage
+		c.Message = strings.ReplaceAll(ctx.Config.CommitMessage, semver.Token, ctx.NextVersion.Raw)
 	}
 
 	ctx.CommitDetails = c

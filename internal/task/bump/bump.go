@@ -106,7 +106,7 @@ func bumpFile(ctx *context.Context, bump FileBump) (bool, error) {
 	}
 
 	// Ensure the supplied regex is valid, replacing the $VERSION token
-	verRgx := strings.Replace(bump.Regex, "$VERSION", semver.Pattern, 1)
+	verRgx := strings.Replace(bump.Regex, semver.Token, semver.Pattern, 1)
 
 	rgx, err := regexp.Compile(verRgx)
 	if err != nil {
