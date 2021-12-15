@@ -61,7 +61,7 @@ func TestRun_ImpersonatesAuthor(t *testing.T) {
 	assert.Equal(t, cd.Email, ctx.CommitDetails.Email)
 }
 
-func TestRun_CustomCommit(t *testing.T) {
+func TestRun_CustomCommitDetails(t *testing.T) {
 	ctx := &context.Context{
 		Config: config.Uplift{
 			CommitMessage: "ci(release): this is a custom message",
@@ -77,4 +77,19 @@ func TestRun_CustomCommit(t *testing.T) {
 	assert.Equal(t, "releasebot", ctx.CommitDetails.Author)
 	assert.Equal(t, "releasebot@example.com", ctx.CommitDetails.Email)
 	assert.Equal(t, "ci(release): this is a custom message", ctx.CommitDetails.Message)
+}
+
+func TestRun_CustomCommitWithVersionToken(t *testing.T) {
+	ctx := &context.Context{
+		NextVersion: semver.Version{
+			Raw: "0.1.0",
+		},
+		Config: config.Uplift{
+			CommitMessage: "ci(release): a release for $VERSION",
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, "ci(release): a release for 0.1.0", ctx.CommitDetails.Message)
 }

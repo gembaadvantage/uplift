@@ -35,6 +35,10 @@ const (
 	Pattern = `v?([0-9]+)(\.[0-9]+)?(\.[0-9]+)?` +
 		`(-([0-9A-Za-z\-]+(\.[0-9A-Za-z\-]+)*))?` +
 		`(\+([0-9A-Za-z\-]+(\.[0-9A-Za-z\-]+)*))?`
+
+	// Token defines a constant that can be used to perform a string replacement
+	// in a consistent manner. Will be replaced with template support in future
+	Token = "$VERSION"
 )
 
 var (
