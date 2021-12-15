@@ -24,7 +24,9 @@ package main
 
 import (
 	"errors"
+	"strings"
 
+	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
@@ -105,15 +107,21 @@ func release(ctx *context.Context) error {
 }
 
 func checkRelease() error {
-	cd, err := git.LatestCommit()
-	if err != nil {
-		return err
-	}
+	return logging.Log("check release", func(ctx *context.Context) error {
+		cd, err := git.LatestCommit()
+		if err != nil {
+			return err
+		}
 
-	inc := semver.ParseCommit(cd.Message)
-	if inc == semver.NoIncrement {
-		return errors.New("no release will be triggered")
-	}
+		log.WithField("message", cd.Message).Info("retrieved latest commit")
 
-	return nil
+		inc := semver.ParseCommit(cd.Message)
+		if inc == semver.NoIncrement {
+			log.Info("nothing to release")
+			return errors.New("no release would be triggered for this commit")
+		}
+
+		log.WithField("increment", strings.ToLower(string(inc))).Info("detected releasable commit")
+		return nil
+	})(&context.Context{})
 }
