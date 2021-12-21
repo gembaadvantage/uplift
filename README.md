@@ -153,6 +153,14 @@ $ uplift changelog --diff-only --silent
 1c85055 feat: a brand new feature
 ```
 
+### Exclude Commits
+
+Commits can be excluded during changelog creation by providing the `--exclude` flag and specifying a list of prefixes:
+
+```sh
+uplift changelog --exclude chore,ci,docs
+```
+
 ### Release
 
 A full semantic release will be carried out. Combining both the `bump` and `tag` operations, in that order.
@@ -217,6 +225,17 @@ bumps:
     # The number of times any matched version should be replaced
     # Defaults to 0, which replaces all matches
     count: 1
+
+# Customise how the changelog is generated
+# Defaults to generating a changelog without any customisations
+changelog:
+  # A list of commits to exclude during the creation of a changelog. Provide a list
+  # of conventional commit prefixes to filter on
+  # Defaults to an empty list
+  excludes:
+    - chore(deps)
+    - docs
+    - ci
 ```
 
 ### $VERSION
