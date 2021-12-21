@@ -83,7 +83,9 @@ func TestChangelog_DiffOnly(t *testing.T) {
 	taggedRepo(t)
 
 	var buf bytes.Buffer
-	cmd := newChangelogCmd(context.New(config.Uplift{}, &buf))
+	ctx := context.New(config.Uplift{}, &buf)
+
+	cmd := newChangelogCmd(ctx)
 	cmd.SetArgs([]string{"--diff-only"})
 
 	err := cmd.Execute()
@@ -91,6 +93,24 @@ func TestChangelog_DiffOnly(t *testing.T) {
 
 	assert.False(t, changelogExists(t))
 	assert.NotEmpty(t, buf.String())
+	assert.True(t, ctx.ChangelogDiff)
+}
+
+func TestChangelog_WithExclude(t *testing.T) {
+	taggedRepo(t)
+
+	ctx := context.New(config.Uplift{}, nil)
+
+	cmd := newChangelogCmd(ctx)
+	cmd.SetArgs([]string{"--exclude", "prefix1", "--exclude", "prefix2"})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+	assert.Len(t, ctx.ChangelogExcludes, 2)
+	assert.Contains(t, ctx.ChangelogExcludes[0], "prefix1")
+	assert.Contains(t, ctx.ChangelogExcludes[1], "prefix2")
 }
 
 func changelogExists(t *testing.T) bool {

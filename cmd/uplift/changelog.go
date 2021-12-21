@@ -70,6 +70,7 @@ func newChangelogCmd(ctx *context.Context) *cobra.Command {
 
 	f := cmd.Flags()
 	f.BoolVar(&ctx.ChangelogDiff, "diff-only", false, "output the changelog diff only")
+	f.StringArrayVar(&ctx.ChangelogExcludes, "exclude", []string{}, "a list of conventional commit prefixes to exclude")
 
 	return cmd
 }

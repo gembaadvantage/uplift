@@ -219,10 +219,12 @@ func Push() error {
 	return nil
 }
 
+// git log --pretty=format:'%H%s' --grep="chore(deps)" --grep="fix" --invert-grep
+
 // LogBetween retrieves all log entries between two points of time within the
 // git history of the repository. Supports tags and specific git hashes as its
 // reference points. From must always be the closest point to HEAD
-func LogBetween(from, to string) ([]LogEntry, error) {
+func LogBetween(from, to string, excludes []string) ([]LogEntry, error) {
 	fmtFrom := from
 	if fmtFrom == "" {
 		fmtFrom = "HEAD"
@@ -239,6 +241,19 @@ func LogBetween(from, to string) ([]LogEntry, error) {
 		fmt.Sprintf("%s%s", fmtFrom, fmtTo),
 		"--pretty=format:'%H%s'",
 	}
+
+	// Convert excludes list into git grep commands
+	if len(excludes) > 0 {
+		for i := range excludes {
+			excludes[i] = fmt.Sprintf("--grep=%s", excludes[i])
+		}
+		excludes = append(excludes, "--invert-grep")
+
+		// Append to original set of arguments
+		args = append(args, excludes...)
+	}
+
+	fmt.Printf("%#v\n", args)
 
 	log, err := Clean(Run(args...))
 	if err != nil {

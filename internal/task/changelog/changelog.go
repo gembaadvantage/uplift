@@ -93,7 +93,7 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	log.WithField("tag", ctx.NextVersion.Raw).Info("determine changes for release")
-	ents, err := git.LogBetween(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw)
+	ents, err := git.LogBetween(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw, ctx.ChangelogExcludes)
 	if err != nil {
 		return err
 	}

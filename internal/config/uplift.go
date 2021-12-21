@@ -36,9 +36,10 @@ type Uplift struct {
 	CommitMessage string       `yaml:"commitMessage"`
 	CommitAuthor  CommitAuthor `yaml:"commitAuthor"`
 	AnnotatedTags bool         `yaml:"annotatedTags"`
+	Changelog     Changelog    `yaml:"changelog"`
 }
 
-// Bump defines configuration for bumping indvidual files based
+// Bump defines configuration for bumping individual files based
 // on the new calculated semantic version number
 type Bump struct {
 	File   string `yaml:"file"`
@@ -51,6 +52,12 @@ type Bump struct {
 type CommitAuthor struct {
 	Name  string `yaml:"name"`
 	Email string `yaml:"email"`
+}
+
+// Changelog defines configuration for generating a changelog of the latest
+// semantic version based release
+type Changelog struct {
+	Excludes []string `yaml:"excludes"`
 }
 
 // Load the YAML config file
