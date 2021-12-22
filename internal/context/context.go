@@ -34,20 +34,21 @@ import (
 // Context provides a way to share common state across tasks
 type Context struct {
 	ctx.Context
-	Out              io.Writer
-	Config           config.Uplift
-	DryRun           bool
-	Debug            bool
-	CurrentVersion   semver.Version
-	NextVersion      semver.Version
-	Prerelease       string
-	Metadata         string
-	NoVersionChanged bool
-	CommitDetails    git.CommitDetails
-	FetchTags        bool
-	NextTagOnly      bool
-	NoPush           bool
-	ChangelogDiff    bool
+	Out               io.Writer
+	Config            config.Uplift
+	DryRun            bool
+	Debug             bool
+	CurrentVersion    semver.Version
+	NextVersion       semver.Version
+	Prerelease        string
+	Metadata          string
+	NoVersionChanged  bool
+	CommitDetails     git.CommitDetails
+	FetchTags         bool
+	NextTagOnly       bool
+	NoPush            bool
+	ChangelogDiff     bool
+	ChangelogExcludes []string
 }
 
 // New constructs a context that captures both runtime configuration and

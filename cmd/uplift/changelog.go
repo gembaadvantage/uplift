@@ -49,6 +49,10 @@ func newChangelogCmd(ctx *context.Context) *cobra.Command {
 		Short: "Create or update a changelog with the latest semantic release",
 		Long:  chlogDesc,
 		Args:  cobra.NoArgs,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			// Merge config and command line arguments together
+			ctx.ChangelogExcludes = append(ctx.ChangelogExcludes, ctx.Config.Changelog.Exclude...)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Attempt to retrieve the latest 2 tags for generating a changelog entry
 			tags := git.AllTags()
@@ -70,6 +74,7 @@ func newChangelogCmd(ctx *context.Context) *cobra.Command {
 
 	f := cmd.Flags()
 	f.BoolVar(&ctx.ChangelogDiff, "diff-only", false, "output the changelog diff only")
+	f.StringSliceVar(&ctx.ChangelogExcludes, "exclude", []string{}, "a list of conventional commit prefixes to exclude")
 
 	return cmd
 }

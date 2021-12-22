@@ -267,3 +267,58 @@ func TestChangelog_NoLogEntries(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, changelogExists(t))
 }
+
+func TestChangelog_WithExcludes(t *testing.T) {
+	git.InitRepo(t)
+	git.Tag("1.0.0")
+	h := git.EmptyCommitsAndTag(t, "1.1.0", "first commit", "exclude: second commit", "third commit", "ignore: forth commit")
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		Out:               &buf,
+		ChangelogDiff:     true,
+		ChangelogExcludes: []string{"exclude", "ignore"},
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextVersion: semver.Version{
+			Raw: "1.1.0",
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`## [1.1.0] - %s
+
+%s third commit
+%s first commit
+`, changelogDate(t), h[2], h[0])
+
+	assert.False(t, changelogExists(t))
+	assert.Equal(t, expected, buf.String())
+}
+
+func TestChangelog_ExcludeAllEntries(t *testing.T) {
+	git.InitRepo(t)
+	git.Tag("1.0.0")
+	git.EmptyCommitsAndTag(t, "1.1.0", "prefix: first commit", "prefix: second commit", "prefix: third commit", "prefix: forth commit")
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		Out:               &buf,
+		ChangelogExcludes: []string{"prefix"},
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextVersion: semver.Version{
+			Raw: "1.1.0",
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	assert.False(t, changelogExists(t))
+	assert.Equal(t, "", buf.String())
+}
