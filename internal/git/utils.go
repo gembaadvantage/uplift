@@ -253,8 +253,6 @@ func LogBetween(from, to string, excludes []string) ([]LogEntry, error) {
 		args = append(args, excludes...)
 	}
 
-	fmt.Printf("%#v\n", args)
-
 	log, err := Clean(Run(args...))
 	if err != nil {
 		return []LogEntry{}, err

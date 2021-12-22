@@ -102,7 +102,7 @@ func TestChangelog_WithExclude(t *testing.T) {
 	ctx := context.New(config.Uplift{}, nil)
 
 	cmd := newChangelogCmd(ctx)
-	cmd.SetArgs([]string{"--exclude", "prefix1", "--exclude", "prefix2"})
+	cmd.SetArgs([]string{"--exclude", "prefix1,prefix2"})
 
 	err := cmd.Execute()
 	require.NoError(t, err)

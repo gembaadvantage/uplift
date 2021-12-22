@@ -57,7 +57,7 @@ type CommitAuthor struct {
 // Changelog defines configuration for generating a changelog of the latest
 // semantic version based release
 type Changelog struct {
-	Excludes []string `yaml:"excludes"`
+	Exclude []string `yaml:"exclude"`
 }
 
 // Load the YAML config file

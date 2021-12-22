@@ -232,7 +232,7 @@ changelog:
   # A list of commits to exclude during the creation of a changelog. Provide a list
   # of conventional commit prefixes to filter on
   # Defaults to an empty list
-  excludes:
+  exclude:
     - chore(deps)
     - docs
     - ci
