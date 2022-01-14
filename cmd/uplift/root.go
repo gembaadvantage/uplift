@@ -23,6 +23,9 @@ SOFTWARE.
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
 	"github.com/apex/log/handlers/discard"
@@ -30,34 +33,59 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
+type globalOpts struct {
+	DryRun     bool
+	Debug      bool
+	NoPush     bool
+	Silent     bool
+	ConfigDir  string
+	ConfigFile string
+}
+
+func newRootCmd(args []string) (*cobra.Command, error) {
 	log.SetHandler(cli.Default)
 
 	// Capture temporary flags
-	var silent bool
+	var opts globalOpts
+	var ctx *context.Context
 
 	cmd := &cobra.Command{
 		Use:          "uplift",
 		Short:        "Semantic versioning the easy way",
 		SilenceUsage: true,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			cfg, err := loadConfig(opts.ConfigDir)
+			if err != nil {
+				fmt.Printf("failed to load uplift config. %v", err)
+				return err
+			}
+			ctx = context.New(cfg, os.Stdout)
+
+			// Assign flags
+			ctx.Debug = opts.Debug
+			ctx.DryRun = opts.DryRun
+			ctx.NoPush = opts.NoPush
+
 			if ctx.Debug {
 				log.SetLevel(log.InvalidLevel)
 			}
 
-			if silent {
+			if opts.Silent {
 				// Switch logging handler, to ensure all logging is discarded
 				log.SetHandler(discard.Default)
 			}
+
+			return nil
 		},
 	}
 
-	// Write persistent flags straight into the context
+	// Persistent flags to be written into the context
 	pf := cmd.PersistentFlags()
-	pf.BoolVar(&ctx.DryRun, "dry-run", false, "run without making any changes")
-	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
-	pf.BoolVar(&ctx.NoPush, "no-push", false, "no changes will be pushed to the git remote")
-	pf.BoolVar(&silent, "silent", false, "silence all logging")
+	pf.StringVar(&opts.ConfigDir, "config-dir", currentWorkingDir, "a custom path to a directory containing uplift config")
+	pf.BoolVar(&opts.DryRun, "dry-run", false, "run without making any changes")
+	pf.BoolVar(&opts.Debug, "debug", false, "show me everything that happens")
+	pf.BoolVar(&opts.NoPush, "no-push", false, "no changes will be pushed to the git remote")
+	pf.BoolVar(&opts.Silent, "silent", false, "silence all logging")
 
 	cmd.AddCommand(newVersionCmd(ctx),
 		newBumpCmd(ctx),

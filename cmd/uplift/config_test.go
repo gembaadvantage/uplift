@@ -58,7 +58,7 @@ func TestLoadConfig(t *testing.T) {
 			git.MkTmpDir(t)
 			upliftConfigFile(t, tt.filename)
 
-			cfg, err := loadConfig()
+			cfg, err := loadConfig(currentWorkingDir)
 
 			require.NoError(t, err)
 			require.Equal(t, "1.0.0", cfg.FirstVersion)
@@ -71,13 +71,13 @@ func TestLoadConfig_Malformed(t *testing.T) {
 	yml := `firstV`
 	ioutil.WriteFile(".uplift.yml", []byte(yml), 0644)
 
-	_, err := loadConfig()
+	_, err := loadConfig(currentWorkingDir)
 	assert.Error(t, err)
 }
 
 func TestLoadConfig_NotExists(t *testing.T) {
 	git.MkTmpDir(t)
 
-	_, err := loadConfig()
+	_, err := loadConfig(currentWorkingDir)
 	assert.NoError(t, err)
 }
