@@ -29,7 +29,7 @@ Issues are used as the primary method for tracking anything to do with the Uplif
 There are 2 types of issue:
 
 - `new feature`: There are used to track feature requests (or new ideas) from inception through to completion. A feature is typically raised to enhance the current functionality of the code
-- `bug report`: These are used to track bugs within the code. And should provide clear and concise instructions on how to replicate the issue
+- `bug report`: These are used to track bugs within the code and should provide clear and concise instructions on how to replicate the issue
 
 ## Pull Requests
 
