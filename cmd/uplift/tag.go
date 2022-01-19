@@ -23,6 +23,9 @@ SOFTWARE.
 package main
 
 import (
+	"fmt"
+	"io"
+
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
@@ -42,8 +45,24 @@ const (
 is based on the conventional commit message from the last commit.`
 )
 
-func newTagCmd(ctx *context.Context) *cobra.Command {
-	var pre string
+type tagOptions struct {
+	FetchTags   bool
+	NextTagOnly bool
+	Prerelease  string
+	globalOptions
+}
+
+type tagCommand struct {
+	Cmd  *cobra.Command
+	Opts tagOptions
+}
+
+func newTagCmd(gopts globalOptions, out io.Writer) *tagCommand {
+	tagCmd := &tagCommand{
+		Opts: tagOptions{
+			globalOptions: gopts,
+		},
+	}
 
 	cmd := &cobra.Command{
 		Use:   "tag",
@@ -51,27 +70,25 @@ func newTagCmd(ctx *context.Context) *cobra.Command {
 		Long:  tagDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Handle prerelease suffix if one is provided
-			if pre != "" {
-				var err error
-				if ctx.Prerelease, ctx.Metadata, err = semver.ParsePrerelease(pre); err != nil {
-					return err
-				}
-			}
-
-			return tagRepo(ctx)
+			return tagRepo(tagCmd.Opts, out)
 		},
 	}
 
 	f := cmd.Flags()
-	f.BoolVar(&ctx.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
-	f.BoolVar(&ctx.NextTagOnly, "next", false, "output the next tag only")
-	f.StringVar(&pre, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
+	f.BoolVar(&tagCmd.Opts.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
+	f.BoolVar(&tagCmd.Opts.NextTagOnly, "next", false, "output the next tag only")
+	f.StringVar(&tagCmd.Opts.Prerelease, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
 
-	return cmd
+	tagCmd.Cmd = cmd
+	return tagCmd
 }
 
-func tagRepo(ctx *context.Context) error {
+func tagRepo(opts tagOptions, out io.Writer) error {
+	ctx, err := setupTagContext(opts, out)
+	if err != nil {
+		return err
+	}
+
 	tsks := []task.Runner{
 		fetchtag.Task{},
 		lastcommit.Task{},
@@ -88,4 +105,30 @@ func tagRepo(ctx *context.Context) error {
 	}
 
 	return nil
+}
+
+func setupTagContext(opts tagOptions, out io.Writer) (*context.Context, error) {
+	cfg, err := loadConfig(opts.ConfigDir)
+	if err != nil {
+		fmt.Printf("failed to load uplift config. %v", err)
+		return nil, err
+	}
+	ctx := context.New(cfg, out)
+
+	// Set all values within the context
+	ctx.Debug = opts.Debug
+	ctx.DryRun = opts.DryRun
+	ctx.NoPush = opts.NoPush
+	ctx.FetchTags = opts.FetchTags
+	ctx.NextTagOnly = opts.NextTagOnly
+
+	// Handle prerelease suffix if one is provided
+	if opts.Prerelease != "" {
+		var err error
+		if ctx.Prerelease, ctx.Metadata, err = semver.ParsePrerelease(opts.Prerelease); err != nil {
+			return nil, err
+		}
+	}
+
+	return ctx, nil
 }

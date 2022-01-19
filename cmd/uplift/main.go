@@ -27,12 +27,9 @@ import (
 )
 
 func main() {
-	cmd, err := newRootCmd(os.Args[1:])
-	if err != nil {
-		os.Exit(1)
-	}
+	rootCmd := newRootCmd(os.Stdout)
 
-	if err := cmd.Execute(); err != nil {
+	if err := rootCmd.Cmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }

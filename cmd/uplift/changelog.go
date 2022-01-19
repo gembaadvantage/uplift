@@ -23,6 +23,9 @@ SOFTWARE.
 package main
 
 import (
+	"fmt"
+	"io"
+
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
@@ -43,43 +46,53 @@ changelog. Subsequent entries will contain only commits between
 release tags`
 )
 
-func newChangelogCmd(ctx *context.Context) *cobra.Command {
+type changelogOptions struct {
+	DiffOnly bool
+	Exclude  []string
+	globalOptions
+}
+
+type changelogCommand struct {
+	Cmd  *cobra.Command
+	Opts changelogOptions
+}
+
+func newChangelogCmd(gopts globalOptions, out io.Writer) *changelogCommand {
+	chglogCmd := &changelogCommand{
+		Opts: changelogOptions{
+			globalOptions: gopts,
+		},
+	}
+
 	cmd := &cobra.Command{
 		Use:   "changelog",
 		Short: "Create or update a changelog with the latest semantic release",
 		Long:  chlogDesc,
 		Args:  cobra.NoArgs,
-		PreRun: func(cmd *cobra.Command, args []string) {
-			// Merge config and command line arguments together
-			ctx.ChangelogExcludes = append(ctx.ChangelogExcludes, ctx.Config.Changelog.Exclude...)
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Attempt to retrieve the latest 2 tags for generating a changelog entry
-			tags := git.AllTags()
-			if len(tags) == 1 {
-				ctx.NextVersion.Raw = tags[0]
-			} else if len(tags) > 1 {
-				ctx.NextVersion.Raw = tags[0]
-				ctx.CurrentVersion.Raw = tags[1]
-			}
-
-			if ctx.ChangelogDiff {
+			if chglogCmd.Opts.DiffOnly {
 				// Run a condensed workflow when just calculating the diff
-				return writeChangelogDiff(ctx)
+				return writeChangelogDiff(chglogCmd.Opts, out)
 			}
 
-			return writeChangelog(ctx)
+			return writeChangelog(chglogCmd.Opts, out)
 		},
 	}
 
 	f := cmd.Flags()
-	f.BoolVar(&ctx.ChangelogDiff, "diff-only", false, "output the changelog diff only")
-	f.StringSliceVar(&ctx.ChangelogExcludes, "exclude", []string{}, "a list of conventional commit prefixes to exclude")
+	f.BoolVar(&chglogCmd.Opts.DiffOnly, "diff-only", false, "output the changelog diff only")
+	f.StringSliceVar(&chglogCmd.Opts.Exclude, "exclude", []string{}, "a list of conventional commit prefixes to exclude")
 
-	return cmd
+	chglogCmd.Cmd = cmd
+	return chglogCmd
 }
 
-func writeChangelog(ctx *context.Context) error {
+func writeChangelog(opts changelogOptions, out io.Writer) error {
+	ctx, err := setupChangelogContext(opts, out)
+	if err != nil {
+		return err
+	}
+
 	tsks := []task.Runner{
 		lastcommit.Task{},
 		nextcommit.Task{},
@@ -96,11 +109,45 @@ func writeChangelog(ctx *context.Context) error {
 	return nil
 }
 
-func writeChangelogDiff(ctx *context.Context) error {
+func writeChangelogDiff(opts changelogOptions, out io.Writer) error {
+	ctx, err := setupChangelogContext(opts, out)
+	if err != nil {
+		return err
+	}
+
 	tsk := changelog.Task{}
 	if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Context, error) {
+	cfg, err := loadConfig(opts.ConfigDir)
+	if err != nil {
+		fmt.Printf("failed to load uplift config. %v", err)
+		return nil, err
+	}
+	ctx := context.New(cfg, out)
+
+	// Set all values within the context
+	ctx.Debug = opts.Debug
+	ctx.DryRun = opts.DryRun
+	ctx.NoPush = opts.NoPush
+
+	// Merge config and command line arguments together
+	ctx.ChangelogExcludes = opts.Exclude
+	ctx.ChangelogExcludes = append(ctx.ChangelogExcludes, ctx.Config.Changelog.Exclude...)
+
+	// Attempt to retrieve the latest 2 tags for generating a changelog entry
+	tags := git.AllTags()
+	if len(tags) == 1 {
+		ctx.NextVersion.Raw = tags[0]
+	} else if len(tags) > 1 {
+		ctx.NextVersion.Raw = tags[0]
+		ctx.CurrentVersion.Raw = tags[1]
+	}
+
+	return ctx, nil
 }

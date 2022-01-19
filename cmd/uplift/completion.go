@@ -25,7 +25,6 @@ package main
 import (
 	"io"
 
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/spf13/cobra"
 )
 
@@ -72,7 +71,7 @@ type completionOptions struct {
 	shell          string
 }
 
-func newCompletionCmd(ctx *context.Context) *cobra.Command {
+func newCompletionCmd(out io.Writer) *cobra.Command {
 	opts := completionOptions{}
 
 	cmd := &cobra.Command{
@@ -89,7 +88,7 @@ func newCompletionCmd(ctx *context.Context) *cobra.Command {
 		DisableFlagsInUseLine: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts.shell = "bash"
-			return opts.Run(ctx.Out, cmd)
+			return opts.Run(out, cmd)
 		},
 	}
 
@@ -100,7 +99,7 @@ func newCompletionCmd(ctx *context.Context) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts.shell = "zsh"
-			return opts.Run(ctx.Out, cmd)
+			return opts.Run(out, cmd)
 		},
 	}
 	zsh.Flags().BoolVar(&opts.noDescriptions, noDescFlag, false, noDescFlagText)
@@ -112,7 +111,7 @@ func newCompletionCmd(ctx *context.Context) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts.shell = "fish"
-			return opts.Run(ctx.Out, cmd)
+			return opts.Run(out, cmd)
 		},
 	}
 	fish.Flags().BoolVar(&opts.noDescriptions, noDescFlag, false, noDescFlagText)

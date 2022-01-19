@@ -23,76 +23,62 @@ SOFTWARE.
 package main
 
 import (
-	"fmt"
-	"os"
+	"io"
 
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
 	"github.com/apex/log/handlers/discard"
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/spf13/cobra"
 )
 
-type globalOpts struct {
-	DryRun     bool
-	Debug      bool
-	NoPush     bool
-	Silent     bool
-	ConfigDir  string
-	ConfigFile string
+type globalOptions struct {
+	DryRun    bool
+	Debug     bool
+	NoPush    bool
+	Silent    bool
+	ConfigDir string
+}
+type rootCommand struct {
+	Cmd  *cobra.Command
+	Opts globalOptions
 }
 
-func newRootCmd(args []string) (*cobra.Command, error) {
+func newRootCmd(out io.Writer) *rootCommand {
 	log.SetHandler(cli.Default)
 
-	// Capture temporary flags
-	var opts globalOpts
-	var ctx *context.Context
+	rootCmd := &rootCommand{}
 
 	cmd := &cobra.Command{
 		Use:          "uplift",
 		Short:        "Semantic versioning the easy way",
 		SilenceUsage: true,
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := loadConfig(opts.ConfigDir)
-			if err != nil {
-				fmt.Printf("failed to load uplift config. %v", err)
-				return err
-			}
-			ctx = context.New(cfg, os.Stdout)
-
-			// Assign flags
-			ctx.Debug = opts.Debug
-			ctx.DryRun = opts.DryRun
-			ctx.NoPush = opts.NoPush
-
-			if ctx.Debug {
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			if rootCmd.Opts.Debug {
 				log.SetLevel(log.InvalidLevel)
 			}
 
-			if opts.Silent {
+			if rootCmd.Opts.Silent {
 				// Switch logging handler, to ensure all logging is discarded
 				log.SetHandler(discard.Default)
 			}
-
-			return nil
 		},
 	}
 
 	// Persistent flags to be written into the context
 	pf := cmd.PersistentFlags()
-	pf.StringVar(&opts.ConfigDir, "config-dir", currentWorkingDir, "a custom path to a directory containing uplift config")
-	pf.BoolVar(&opts.DryRun, "dry-run", false, "run without making any changes")
-	pf.BoolVar(&opts.Debug, "debug", false, "show me everything that happens")
-	pf.BoolVar(&opts.NoPush, "no-push", false, "no changes will be pushed to the git remote")
-	pf.BoolVar(&opts.Silent, "silent", false, "silence all logging")
+	pf.StringVar(&rootCmd.Opts.ConfigDir, "config-dir", currentWorkingDir, "a custom path to a directory containing uplift config")
+	pf.BoolVar(&rootCmd.Opts.DryRun, "dry-run", false, "run without making any changes")
+	pf.BoolVar(&rootCmd.Opts.Debug, "debug", false, "show me everything that happens")
+	pf.BoolVar(&rootCmd.Opts.NoPush, "no-push", false, "no changes will be pushed to the git remote")
+	pf.BoolVar(&rootCmd.Opts.Silent, "silent", false, "silence all logging")
 
-	cmd.AddCommand(newVersionCmd(ctx),
-		newBumpCmd(ctx),
-		newCompletionCmd(ctx),
-		newTagCmd(ctx),
-		newReleaseCmd(ctx),
-		newChangelogCmd(ctx))
+	cmd.AddCommand(newVersionCmd(out),
+		newCompletionCmd(out),
+		newBumpCmd(rootCmd.Opts, out).Cmd,
+		newTagCmd(rootCmd.Opts, out).Cmd,
+		newReleaseCmd(rootCmd.Opts, out).Cmd,
+		newChangelogCmd(rootCmd.Opts, out).Cmd)
 
-	return cmd, nil
+	rootCmd.Cmd = cmd
+	return rootCmd
 }

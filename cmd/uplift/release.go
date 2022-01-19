@@ -24,6 +24,8 @@ package main
 
 import (
 	"errors"
+	"fmt"
+	"io"
 	"strings"
 
 	"github.com/apex/log"
@@ -50,9 +52,24 @@ will automatically bump any files and tag the associated commit with
 the required semantic version`
 )
 
-func newReleaseCmd(ctx *context.Context) *cobra.Command {
-	var check bool
-	var pre string
+type releaseOptions struct {
+	FetchTags  bool
+	Check      bool
+	Prerelease string
+	globalOptions
+}
+
+type releaseCommand struct {
+	Cmd  *cobra.Command
+	Opts releaseOptions
+}
+
+func newReleaseCmd(gopts globalOptions, out io.Writer) *releaseCommand {
+	relCmd := &releaseCommand{
+		Opts: releaseOptions{
+			globalOptions: gopts,
+		},
+	}
 
 	cmd := &cobra.Command{
 		Use:   "release",
@@ -61,31 +78,29 @@ func newReleaseCmd(ctx *context.Context) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Just check if uplift would trigger a release
-			if check {
+			if relCmd.Opts.Check {
 				return checkRelease()
 			}
 
-			// Handle prerelease suffix if one is provided
-			if pre != "" {
-				var err error
-				if ctx.Prerelease, ctx.Metadata, err = semver.ParsePrerelease(pre); err != nil {
-					return err
-				}
-			}
-
-			return release(ctx)
+			return release(relCmd.Opts, out)
 		},
 	}
 
 	f := cmd.Flags()
-	f.BoolVar(&ctx.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
-	f.BoolVar(&check, "check", false, "check if a release will be triggered")
-	f.StringVar(&pre, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
+	f.BoolVar(&relCmd.Opts.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
+	f.BoolVar(&relCmd.Opts.Check, "check", false, "check if a release will be triggered")
+	f.StringVar(&relCmd.Opts.Prerelease, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
 
-	return cmd
+	relCmd.Cmd = cmd
+	return relCmd
 }
 
-func release(ctx *context.Context) error {
+func release(opts releaseOptions, out io.Writer) error {
+	ctx, err := setupReleaseContext(opts, out)
+	if err != nil {
+		return err
+	}
+
 	tsks := []task.Runner{
 		fetchtag.Task{},
 		lastcommit.Task{},
@@ -104,6 +119,30 @@ func release(ctx *context.Context) error {
 	}
 
 	return nil
+}
+
+func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, error) {
+	cfg, err := loadConfig(opts.ConfigDir)
+	if err != nil {
+		fmt.Printf("failed to load uplift config. %v", err)
+		return nil, err
+	}
+	ctx := context.New(cfg, out)
+
+	// Set all values within the context
+	ctx.Debug = opts.Debug
+	ctx.DryRun = opts.DryRun
+	ctx.NoPush = opts.NoPush
+
+	// Handle prerelease suffix if one is provided
+	if opts.Prerelease != "" {
+		var err error
+		if ctx.Prerelease, ctx.Metadata, err = semver.ParsePrerelease(opts.Prerelease); err != nil {
+			return nil, err
+		}
+	}
+
+	return ctx, nil
 }
 
 func checkRelease() error {

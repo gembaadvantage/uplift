@@ -23,58 +23,42 @@ SOFTWARE.
 package main
 
 import (
-	"bytes"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCompletion_Bash(t *testing.T) {
-	var buf bytes.Buffer
-	cmd := newCompletionCmd(&buf)
-	cmd.SetArgs([]string{"bash"})
-
-	err := cmd.Execute()
+func TestRoot_DryRunFlag(t *testing.T) {
+	rootCmd, err := newRootCmd([]string{}, os.Stdout)
 	require.NoError(t, err)
 
-	assert.NotEmpty(t, buf.String())
-	assert.Contains(t, buf.String(), "bash completion V2 for completion ")
+	rootCmd.cmd.SetArgs([]string{"--dry-run"})
+	err = rootCmd.cmd.Execute()
+	require.NoError(t, err)
+
+	assert.Equal(t, true, rootCmd.ctx.DryRun)
 }
 
-func TestCompletion_Zsh(t *testing.T) {
-	var buf bytes.Buffer
-	cmd := newCompletionCmd(&buf)
-	cmd.SetArgs([]string{"zsh"})
-
-	err := cmd.Execute()
+func TestRoot_DebugFlag(t *testing.T) {
+	rootCmd, err := newRootCmd([]string{}, os.Stdout)
 	require.NoError(t, err)
 
-	assert.NotEmpty(t, buf.String())
-	assert.Contains(t, buf.String(), "zsh completion for completion")
+	rootCmd.cmd.SetArgs([]string{"--debug"})
+	err = rootCmd.cmd.Execute()
+	require.NoError(t, err)
+
+	assert.Equal(t, true, rootCmd.ctx.Debug)
 }
 
-func TestCompletion_ZshNoDescriptions(t *testing.T) {
-	var buf bytes.Buffer
-	cmd := newCompletionCmd(&buf)
-	cmd.SetArgs([]string{"zsh", "--no-descriptions"})
-
-	err := cmd.Execute()
+func TestRoot_NoPushFlag(t *testing.T) {
+	rootCmd, err := newRootCmd([]string{}, os.Stdout)
 	require.NoError(t, err)
 
-	assert.NotEmpty(t, buf.String())
-	assert.Contains(t, buf.String(), "zsh completion for completion")
-	assert.Contains(t, buf.String(), "__completeNoDesc")
-}
-
-func TestCompletion_Fish(t *testing.T) {
-	var buf bytes.Buffer
-	cmd := newCompletionCmd(&buf)
-	cmd.SetArgs([]string{"fish"})
-
-	err := cmd.Execute()
+	rootCmd.cmd.SetArgs([]string{"--no-push"})
+	err = rootCmd.cmd.Execute()
 	require.NoError(t, err)
 
-	assert.NotEmpty(t, buf.String())
-	assert.Contains(t, buf.String(), "fish completion for completion")
+	assert.Equal(t, true, rootCmd.ctx.NoPush)
 }
