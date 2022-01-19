@@ -25,10 +25,9 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -37,10 +36,9 @@ func TestBump(t *testing.T) {
 	taggedRepo(t)
 	data := testFileWithConfig(t, "test.txt", ".uplift.yml")
 
-	cfg, _ := config.Load(".uplift.yml")
-	cmd := newBumpCmd(&context.Context{Config: cfg})
+	bmpCmd := newBumpCmd(globalOptions{}, os.Stdout)
 
-	err := cmd.Execute()
+	err := bmpCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	actual, err := ioutil.ReadFile("test.txt")
@@ -70,11 +68,10 @@ func TestBump_PrereleaseFlag(t *testing.T) {
 	untaggedRepo(t)
 	testFileWithConfig(t, "test.txt", ".uplift.yml")
 
-	cfg, _ := config.Load(".uplift.yml")
-	cmd := newBumpCmd(&context.Context{Config: cfg})
-	cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
+	bmpCmd := newBumpCmd(globalOptions{}, os.Stdout)
+	bmpCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
 
-	err := cmd.Execute()
+	err := bmpCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	actual, err := ioutil.ReadFile("test.txt")

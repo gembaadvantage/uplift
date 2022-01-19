@@ -31,34 +31,31 @@ import (
 )
 
 func TestRoot_DryRunFlag(t *testing.T) {
-	rootCmd, err := newRootCmd([]string{}, os.Stdout)
+	rootCmd := newRootCmd(os.Stdout)
+
+	rootCmd.Cmd.SetArgs([]string{"--dry-run"})
+	err := rootCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	rootCmd.cmd.SetArgs([]string{"--dry-run"})
-	err = rootCmd.cmd.Execute()
-	require.NoError(t, err)
-
-	assert.Equal(t, true, rootCmd.ctx.DryRun)
+	assert.Equal(t, true, rootCmd.Opts.DryRun)
 }
 
 func TestRoot_DebugFlag(t *testing.T) {
-	rootCmd, err := newRootCmd([]string{}, os.Stdout)
+	rootCmd := newRootCmd(os.Stdout)
+
+	rootCmd.Cmd.SetArgs([]string{"--debug"})
+	err := rootCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	rootCmd.cmd.SetArgs([]string{"--debug"})
-	err = rootCmd.cmd.Execute()
-	require.NoError(t, err)
-
-	assert.Equal(t, true, rootCmd.ctx.Debug)
+	assert.Equal(t, true, rootCmd.Opts.Debug)
 }
 
 func TestRoot_NoPushFlag(t *testing.T) {
-	rootCmd, err := newRootCmd([]string{}, os.Stdout)
+	rootCmd := newRootCmd(os.Stdout)
+
+	rootCmd.Cmd.SetArgs([]string{"--no-push"})
+	err := rootCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	rootCmd.cmd.SetArgs([]string{"--no-push"})
-	err = rootCmd.cmd.Execute()
-	require.NoError(t, err)
-
-	assert.Equal(t, true, rootCmd.ctx.NoPush)
+	assert.Equal(t, true, rootCmd.Opts.NoPush)
 }
