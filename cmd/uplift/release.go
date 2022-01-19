@@ -133,6 +133,7 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	ctx.Debug = opts.Debug
 	ctx.DryRun = opts.DryRun
 	ctx.NoPush = opts.NoPush
+	ctx.Out = out
 
 	// Handle prerelease suffix if one is provided
 	if opts.Prerelease != "" {

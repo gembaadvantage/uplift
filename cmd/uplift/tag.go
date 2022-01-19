@@ -121,6 +121,7 @@ func setupTagContext(opts tagOptions, out io.Writer) (*context.Context, error) {
 	ctx.NoPush = opts.NoPush
 	ctx.FetchTags = opts.FetchTags
 	ctx.NextTagOnly = opts.NextTagOnly
+	ctx.Out = out
 
 	// Handle prerelease suffix if one is provided
 	if opts.Prerelease != "" {

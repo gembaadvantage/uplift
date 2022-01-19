@@ -135,6 +135,8 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	ctx.Debug = opts.Debug
 	ctx.DryRun = opts.DryRun
 	ctx.NoPush = opts.NoPush
+	ctx.ChangelogDiff = opts.DiffOnly
+	ctx.Out = out
 
 	// Merge config and command line arguments together
 	ctx.ChangelogExcludes = opts.Exclude
