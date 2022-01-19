@@ -56,7 +56,7 @@ type releaseOptions struct {
 	FetchTags  bool
 	Check      bool
 	Prerelease string
-	globalOptions
+	*globalOptions
 }
 
 type releaseCommand struct {
@@ -64,7 +64,7 @@ type releaseCommand struct {
 	Opts releaseOptions
 }
 
-func newReleaseCmd(gopts globalOptions, out io.Writer) *releaseCommand {
+func newReleaseCmd(gopts *globalOptions, out io.Writer) *releaseCommand {
 	relCmd := &releaseCommand{
 		Opts: releaseOptions{
 			globalOptions: gopts,

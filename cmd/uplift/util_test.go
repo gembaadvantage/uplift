@@ -45,15 +45,6 @@ func taggedRepo(t *testing.T) {
 	git.EmptyCommitAndTag(t, "1.0.0", "feat: a new feature")
 }
 
-func tagRepoWith(t *testing.T, tags []string) {
-	t.Helper()
-
-	git.InitRepo(t)
-	for _, tag := range tags {
-		git.EmptyCommitAndTag(t, tag, "feat: a new feature")
-	}
-}
-
 func upliftConfigFile(t *testing.T, name string) {
 	t.Helper()
 

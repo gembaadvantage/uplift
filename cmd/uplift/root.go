@@ -40,13 +40,15 @@ type globalOptions struct {
 }
 type rootCommand struct {
 	Cmd  *cobra.Command
-	Opts globalOptions
+	Opts *globalOptions
 }
 
 func newRootCmd(out io.Writer) *rootCommand {
 	log.SetHandler(cli.Default)
 
-	rootCmd := &rootCommand{}
+	rootCmd := &rootCommand{
+		Opts: &globalOptions{},
+	}
 
 	cmd := &cobra.Command{
 		Use:          "uplift",

@@ -49,7 +49,7 @@ type tagOptions struct {
 	FetchTags   bool
 	NextTagOnly bool
 	Prerelease  string
-	globalOptions
+	*globalOptions
 }
 
 type tagCommand struct {
@@ -57,7 +57,7 @@ type tagCommand struct {
 	Opts tagOptions
 }
 
-func newTagCmd(gopts globalOptions, out io.Writer) *tagCommand {
+func newTagCmd(gopts *globalOptions, out io.Writer) *tagCommand {
 	tagCmd := &tagCommand{
 		Opts: tagOptions{
 			globalOptions: gopts,

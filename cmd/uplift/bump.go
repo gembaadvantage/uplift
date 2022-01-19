@@ -48,7 +48,7 @@ Uplift can bump the version in any file using regex pattern matching`
 
 type bumpOptions struct {
 	Prerelease string
-	globalOptions
+	*globalOptions
 }
 
 type bumpCommand struct {
@@ -56,7 +56,7 @@ type bumpCommand struct {
 	Opts bumpOptions
 }
 
-func newBumpCmd(gopts globalOptions, out io.Writer) *bumpCommand {
+func newBumpCmd(gopts *globalOptions, out io.Writer) *bumpCommand {
 	bmpCmd := &bumpCommand{
 		Opts: bumpOptions{
 			globalOptions: gopts,

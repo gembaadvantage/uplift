@@ -35,7 +35,7 @@ import (
 func TestTag(t *testing.T) {
 	untaggedRepo(t)
 
-	tagCmd := newTagCmd(globalOptions{}, os.Stdout)
+	tagCmd := newTagCmd(&globalOptions{}, os.Stdout)
 
 	err := tagCmd.Cmd.Execute()
 	require.NoError(t, err)
@@ -48,7 +48,7 @@ func TestTag_NextFlag(t *testing.T) {
 	untaggedRepo(t)
 
 	var buf bytes.Buffer
-	tagCmd := newTagCmd(globalOptions{}, &buf)
+	tagCmd := newTagCmd(&globalOptions{}, &buf)
 	tagCmd.Cmd.SetArgs([]string{"--next"})
 
 	err := tagCmd.Cmd.Execute()
@@ -63,7 +63,7 @@ func TestTag_PrereleaseFlag(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommit(t, "feat: a new feature")
 
-	tagCmd := newTagCmd(globalOptions{}, os.Stdout)
+	tagCmd := newTagCmd(&globalOptions{}, os.Stdout)
 	tagCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
 
 	err := tagCmd.Cmd.Execute()

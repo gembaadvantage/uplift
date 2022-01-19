@@ -59,3 +59,13 @@ func TestRoot_NoPushFlag(t *testing.T) {
 
 	assert.Equal(t, true, rootCmd.Opts.NoPush)
 }
+
+func TestRoot_ConfigDir(t *testing.T) {
+	rootCmd := newRootCmd(os.Stdout)
+
+	rootCmd.Cmd.SetArgs([]string{"--config-dir", "custom"})
+	err := rootCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.Equal(t, "custom", rootCmd.Opts.ConfigDir)
+}

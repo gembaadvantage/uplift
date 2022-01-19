@@ -51,7 +51,3 @@ func loadConfig(dir string) (config.Uplift, error) {
 
 	return config.Uplift{}, nil
 }
-
-// func loadConfigFile(path string) (config.Uplift, error) {
-// 	return config.Uplift{}, nil
-// }

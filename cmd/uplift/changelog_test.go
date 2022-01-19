@@ -35,45 +35,11 @@ import (
 func TestChangelog(t *testing.T) {
 	taggedRepo(t)
 
-	chglogCmd := newChangelogCmd(globalOptions{}, os.Stdout)
+	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
 	err := chglogCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	assert.True(t, changelogExists(t))
-}
-
-func TestChangelog_WriteTagToContext(t *testing.T) {
-	tests := []struct {
-		name       string
-		tags       []string
-		currentVer string
-		nextVer    string
-	}{
-		{
-			name:       "SingleTag",
-			tags:       []string{"1.0.0"},
-			currentVer: "",
-			nextVer:    "1.0.0",
-		},
-		{
-			name:       "MultipleTags",
-			tags:       []string{"1.0.0", "1.1.0", "1.2.0", "1.3.0"},
-			currentVer: "1.2.0",
-			nextVer:    "1.3.0",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tagRepoWith(t, tt.tags)
-
-			chglogCmd := newChangelogCmd(globalOptions{}, os.Stdout)
-			err := chglogCmd.Cmd.Execute()
-			require.NoError(t, err)
-
-			// require.Equal(t, tt.currentVer, ctx.CurrentVersion.Raw)
-			// require.Equal(t, tt.nextVer, ctx.NextVersion.Raw)
-		})
-	}
 }
 
 func TestChangelog_DiffOnly(t *testing.T) {
@@ -81,7 +47,7 @@ func TestChangelog_DiffOnly(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	chglogCmd := newChangelogCmd(globalOptions{}, &buf)
+	chglogCmd := newChangelogCmd(&globalOptions{}, &buf)
 	chglogCmd.Cmd.SetArgs([]string{"--diff-only"})
 
 	err := chglogCmd.Cmd.Execute()
@@ -95,7 +61,7 @@ func TestChangelog_DiffOnly(t *testing.T) {
 func TestChangelog_WithExclude(t *testing.T) {
 	taggedRepo(t)
 
-	chglogCmd := newChangelogCmd(globalOptions{}, os.Stdout)
+	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
 	chglogCmd.Cmd.SetArgs([]string{"--exclude", "prefix1,prefix2"})
 
 	err := chglogCmd.Cmd.Execute()

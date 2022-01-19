@@ -24,6 +24,7 @@ package main
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -80,4 +81,17 @@ func TestLoadConfig_NotExists(t *testing.T) {
 
 	_, err := loadConfig(currentWorkingDir)
 	assert.NoError(t, err)
+}
+
+func TestLoadConfig_CustomLocation(t *testing.T) {
+	git.MkTmpDir(t)
+
+	err := os.Mkdir("custom", 0755)
+	require.NoError(t, err)
+
+	upliftConfigFile(t, "./custom/.uplift.yml")
+
+	cfg, err := loadConfig("custom")
+	assert.NoError(t, err)
+	require.Equal(t, "1.0.0", cfg.FirstVersion)
 }

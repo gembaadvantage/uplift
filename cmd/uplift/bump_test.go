@@ -36,7 +36,7 @@ func TestBump(t *testing.T) {
 	taggedRepo(t)
 	data := testFileWithConfig(t, "test.txt", ".uplift.yml")
 
-	bmpCmd := newBumpCmd(globalOptions{}, os.Stdout)
+	bmpCmd := newBumpCmd(&globalOptions{}, os.Stdout)
 
 	err := bmpCmd.Cmd.Execute()
 	require.NoError(t, err)
@@ -68,7 +68,7 @@ func TestBump_PrereleaseFlag(t *testing.T) {
 	untaggedRepo(t)
 	testFileWithConfig(t, "test.txt", ".uplift.yml")
 
-	bmpCmd := newBumpCmd(globalOptions{}, os.Stdout)
+	bmpCmd := newBumpCmd(&globalOptions{}, os.Stdout)
 	bmpCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
 
 	err := bmpCmd.Cmd.Execute()

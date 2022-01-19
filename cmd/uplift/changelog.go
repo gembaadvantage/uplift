@@ -49,7 +49,7 @@ release tags`
 type changelogOptions struct {
 	DiffOnly bool
 	Exclude  []string
-	globalOptions
+	*globalOptions
 }
 
 type changelogCommand struct {
@@ -57,7 +57,7 @@ type changelogCommand struct {
 	Opts changelogOptions
 }
 
-func newChangelogCmd(gopts globalOptions, out io.Writer) *changelogCommand {
+func newChangelogCmd(gopts *globalOptions, out io.Writer) *changelogCommand {
 	chglogCmd := &changelogCommand{
 		Opts: changelogOptions{
 			globalOptions: gopts,
