@@ -26,7 +26,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/version"
 	"github.com/spf13/cobra"
 )
@@ -35,14 +34,14 @@ type versionOptions struct {
 	short bool
 }
 
-func newVersionCmd(ctx *context.Context) *cobra.Command {
+func newVersionCmd(out io.Writer) *cobra.Command {
 	opts := versionOptions{}
 
 	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "Prints the build time version information",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.run(ctx.Out)
+			return opts.run(out)
 		},
 	}
 

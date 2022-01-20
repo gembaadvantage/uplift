@@ -23,48 +23,64 @@ SOFTWARE.
 package main
 
 import (
+	"io"
+
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
 	"github.com/apex/log/handlers/discard"
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/spf13/cobra"
 )
 
-func newRootCmd(args []string, ctx *context.Context) (*cobra.Command, error) {
+type globalOptions struct {
+	DryRun    bool
+	Debug     bool
+	NoPush    bool
+	Silent    bool
+	ConfigDir string
+}
+type rootCommand struct {
+	Cmd  *cobra.Command
+	Opts *globalOptions
+}
+
+func newRootCmd(out io.Writer) *rootCommand {
 	log.SetHandler(cli.Default)
 
-	// Capture temporary flags
-	var silent bool
+	rootCmd := &rootCommand{
+		Opts: &globalOptions{},
+	}
 
 	cmd := &cobra.Command{
 		Use:          "uplift",
 		Short:        "Semantic versioning the easy way",
 		SilenceUsage: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			if ctx.Debug {
+			if rootCmd.Opts.Debug {
 				log.SetLevel(log.InvalidLevel)
 			}
 
-			if silent {
+			if rootCmd.Opts.Silent {
 				// Switch logging handler, to ensure all logging is discarded
 				log.SetHandler(discard.Default)
 			}
 		},
 	}
 
-	// Write persistent flags straight into the context
+	// Persistent flags to be written into the context
 	pf := cmd.PersistentFlags()
-	pf.BoolVar(&ctx.DryRun, "dry-run", false, "run without making any changes")
-	pf.BoolVar(&ctx.Debug, "debug", false, "show me everything that happens")
-	pf.BoolVar(&ctx.NoPush, "no-push", false, "no changes will be pushed to the git remote")
-	pf.BoolVar(&silent, "silent", false, "silence all logging")
+	pf.StringVar(&rootCmd.Opts.ConfigDir, "config-dir", currentWorkingDir, "a custom path to a directory containing uplift config")
+	pf.BoolVar(&rootCmd.Opts.DryRun, "dry-run", false, "run without making any changes")
+	pf.BoolVar(&rootCmd.Opts.Debug, "debug", false, "show me everything that happens")
+	pf.BoolVar(&rootCmd.Opts.NoPush, "no-push", false, "no changes will be pushed to the git remote")
+	pf.BoolVar(&rootCmd.Opts.Silent, "silent", false, "silence all logging")
 
-	cmd.AddCommand(newVersionCmd(ctx),
-		newBumpCmd(ctx),
-		newCompletionCmd(ctx),
-		newTagCmd(ctx),
-		newReleaseCmd(ctx),
-		newChangelogCmd(ctx))
+	cmd.AddCommand(newVersionCmd(out),
+		newCompletionCmd(out),
+		newBumpCmd(rootCmd.Opts, out).Cmd,
+		newTagCmd(rootCmd.Opts, out).Cmd,
+		newReleaseCmd(rootCmd.Opts, out).Cmd,
+		newChangelogCmd(rootCmd.Opts, out).Cmd)
 
-	return cmd, nil
+	rootCmd.Cmd = cmd
+	return rootCmd
 }

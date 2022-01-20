@@ -28,8 +28,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -37,44 +36,41 @@ import (
 func TestChangelog(t *testing.T) {
 	taggedRepo(t)
 
-	cmd := newChangelogCmd(&context.Context{})
-	err := cmd.Execute()
+	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+	err := chglogCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	assert.True(t, changelogExists(t))
 }
 
-func TestChangelog_WriteTagToContext(t *testing.T) {
+func TestChangelog_DetectsTags(t *testing.T) {
 	tests := []struct {
-		name       string
-		tags       []string
-		currentVer string
-		nextVer    string
+		name      string
+		tags      []string
+		detectTag string
 	}{
 		{
-			name:       "SingleTag",
-			tags:       []string{"1.0.0"},
-			currentVer: "",
-			nextVer:    "1.0.0",
+			name:      "SingleTag",
+			tags:      []string{"1.0.0"},
+			detectTag: "1.0.0",
 		},
 		{
-			name:       "MultipleTags",
-			tags:       []string{"1.0.0", "1.1.0", "1.2.0", "1.3.0"},
-			currentVer: "1.2.0",
-			nextVer:    "1.3.0",
+			name:      "MultipleTags",
+			tags:      []string{"1.0.0", "1.1.0", "1.2.0", "1.3.0"},
+			detectTag: "1.3.0",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tagRepoWith(t, tt.tags)
-			ctx := &context.Context{}
 
-			cmd := newChangelogCmd(ctx)
-			err := cmd.Execute()
+			chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+			err := chglogCmd.Cmd.Execute()
 			require.NoError(t, err)
 
-			require.Equal(t, tt.currentVer, ctx.CurrentVersion.Raw)
-			require.Equal(t, tt.nextVer, ctx.NextVersion.Raw)
+			assert.True(t, changelogExists(t))
+			chglog := readChangelog(t)
+			assert.Contains(t, chglog, tt.detectTag)
 		})
 	}
 }
@@ -83,34 +79,40 @@ func TestChangelog_DiffOnly(t *testing.T) {
 	taggedRepo(t)
 
 	var buf bytes.Buffer
-	ctx := context.New(config.Uplift{}, &buf)
 
-	cmd := newChangelogCmd(ctx)
-	cmd.SetArgs([]string{"--diff-only"})
+	chglogCmd := newChangelogCmd(&globalOptions{}, &buf)
+	chglogCmd.Cmd.SetArgs([]string{"--diff-only"})
 
-	err := cmd.Execute()
+	err := chglogCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	assert.False(t, changelogExists(t))
 	assert.NotEmpty(t, buf.String())
-	assert.True(t, ctx.ChangelogDiff)
+	assert.True(t, chglogCmd.Opts.DiffOnly)
 }
 
 func TestChangelog_WithExclude(t *testing.T) {
-	taggedRepo(t)
+	git.InitRepo(t)
+	git.EmptyCommitsAndTag(t, "2.0.0",
+		"feat: a new feat",
+		"fix: a new fix",
+		"ci: a ci task",
+		"docs: some new docs")
 
-	ctx := context.New(config.Uplift{}, nil)
+	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+	chglogCmd.Cmd.SetArgs([]string{"--exclude", "ci,docs"})
 
-	cmd := newChangelogCmd(ctx)
-	cmd.SetArgs([]string{"--exclude", "prefix1,prefix2"})
-
-	err := cmd.Execute()
+	err := chglogCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	assert.True(t, changelogExists(t))
-	assert.Len(t, ctx.ChangelogExcludes, 2)
-	assert.Contains(t, ctx.ChangelogExcludes[0], "prefix1")
-	assert.Contains(t, ctx.ChangelogExcludes[1], "prefix2")
+	assert.Len(t, chglogCmd.Opts.Exclude, 2)
+	assert.Contains(t, chglogCmd.Opts.Exclude[0], "ci")
+	assert.Contains(t, chglogCmd.Opts.Exclude[1], "docs")
+
+	chglog := readChangelog(t)
+	assert.NotContains(t, chglog, "ci:")
+	assert.NotContains(t, chglog, "docs:")
 }
 
 func changelogExists(t *testing.T) bool {
@@ -127,4 +129,13 @@ func changelogExists(t *testing.T) bool {
 	}
 
 	return true
+}
+
+func readChangelog(t *testing.T) string {
+	t.Helper()
+
+	data, err := os.ReadFile("CHANGELOG.md")
+	require.NoError(t, err)
+
+	return string(data)
 }

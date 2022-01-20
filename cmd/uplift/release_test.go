@@ -24,10 +24,9 @@ package main
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -38,10 +37,9 @@ func TestRelease(t *testing.T) {
 	git.EmptyCommit(t, "feat: this is a release")
 	data := testFileWithConfig(t, "test.txt", ".uplift.yml")
 
-	cfg, _ := config.Load(".uplift.yml")
-	cmd := newReleaseCmd(&context.Context{Config: cfg})
+	relCmd := newReleaseCmd(&globalOptions{}, os.Stdout)
 
-	err := cmd.Execute()
+	err := relCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	tags := git.AllTags()
@@ -56,10 +54,10 @@ func TestRelease_CheckFlag(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommit(t, "feat: this is a release")
 
-	cmd := newReleaseCmd(&context.Context{})
-	cmd.SetArgs([]string{"--check"})
+	relCmd := newReleaseCmd(&globalOptions{}, os.Stdout)
+	relCmd.Cmd.SetArgs([]string{"--check"})
 
-	err := cmd.Execute()
+	err := relCmd.Cmd.Execute()
 	require.NoError(t, err)
 }
 
@@ -67,10 +65,10 @@ func TestRelease_CheckFlagNoRelease(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommit(t, "ci: not a release")
 
-	cmd := newReleaseCmd(&context.Context{})
-	cmd.SetArgs([]string{"--check"})
+	relCmd := newReleaseCmd(&globalOptions{}, os.Stdout)
+	relCmd.Cmd.SetArgs([]string{"--check"})
 
-	err := cmd.Execute()
+	err := relCmd.Cmd.Execute()
 	require.Error(t, err)
 }
 
@@ -79,11 +77,10 @@ func TestRelease_PrereleaseFlag(t *testing.T) {
 	git.EmptyCommit(t, "feat: this is a release")
 	testFileWithConfig(t, "test.txt", ".uplift.yml")
 
-	cfg, _ := config.Load(".uplift.yml")
-	cmd := newReleaseCmd(&context.Context{Config: cfg})
-	cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
+	relCmd := newReleaseCmd(&globalOptions{}, os.Stdout)
+	relCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
 
-	err := cmd.Execute()
+	err := relCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	tags := git.AllTags()

@@ -58,6 +58,7 @@ Uplift can carry out different semantic versioning operations on your repository
 - `--no-push` no changes will be committed and pushed back to your git remote
 - `--silent` silence all log output from uplift
 - `--prerelease` append a prerelease suffix to the next calculated semantic version
+- `--config-dir` use a custom location containing an uplift configuration file
 
 Uplift supports the use of a `v` prefix and includes it with subsequent bumps.
 

@@ -26,15 +26,13 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCompletion_Bash(t *testing.T) {
 	var buf bytes.Buffer
-	cmd := newCompletionCmd(context.New(config.Uplift{}, &buf))
+	cmd := newCompletionCmd(&buf)
 	cmd.SetArgs([]string{"bash"})
 
 	err := cmd.Execute()
@@ -46,7 +44,7 @@ func TestCompletion_Bash(t *testing.T) {
 
 func TestCompletion_Zsh(t *testing.T) {
 	var buf bytes.Buffer
-	cmd := newCompletionCmd(context.New(config.Uplift{}, &buf))
+	cmd := newCompletionCmd(&buf)
 	cmd.SetArgs([]string{"zsh"})
 
 	err := cmd.Execute()
@@ -58,7 +56,7 @@ func TestCompletion_Zsh(t *testing.T) {
 
 func TestCompletion_ZshNoDescriptions(t *testing.T) {
 	var buf bytes.Buffer
-	cmd := newCompletionCmd(context.New(config.Uplift{}, &buf))
+	cmd := newCompletionCmd(&buf)
 	cmd.SetArgs([]string{"zsh", "--no-descriptions"})
 
 	err := cmd.Execute()
@@ -71,7 +69,7 @@ func TestCompletion_ZshNoDescriptions(t *testing.T) {
 
 func TestCompletion_Fish(t *testing.T) {
 	var buf bytes.Buffer
-	cmd := newCompletionCmd(context.New(config.Uplift{}, &buf))
+	cmd := newCompletionCmd(&buf)
 	cmd.SetArgs([]string{"fish"})
 
 	err := cmd.Execute()

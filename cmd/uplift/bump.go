@@ -23,6 +23,9 @@ SOFTWARE.
 package main
 
 import (
+	"fmt"
+	"io"
+
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
@@ -43,8 +46,22 @@ version bump is based on the conventional commit message from the last commit.
 Uplift can bump the version in any file using regex pattern matching`
 )
 
-func newBumpCmd(ctx *context.Context) *cobra.Command {
-	var pre string
+type bumpOptions struct {
+	Prerelease string
+	*globalOptions
+}
+
+type bumpCommand struct {
+	Cmd  *cobra.Command
+	Opts bumpOptions
+}
+
+func newBumpCmd(gopts *globalOptions, out io.Writer) *bumpCommand {
+	bmpCmd := &bumpCommand{
+		Opts: bumpOptions{
+			globalOptions: gopts,
+		},
+	}
 
 	cmd := &cobra.Command{
 		Use:   "bump",
@@ -52,25 +69,23 @@ func newBumpCmd(ctx *context.Context) *cobra.Command {
 		Long:  bumpDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Handle prerelease suffix if one is provided
-			if pre != "" {
-				var err error
-				if ctx.Prerelease, ctx.Metadata, err = semver.ParsePrerelease(pre); err != nil {
-					return err
-				}
-			}
-
-			return bumpFiles(ctx)
+			return bumpFiles(bmpCmd.Opts, out)
 		},
 	}
 
 	f := cmd.Flags()
-	f.StringVar(&pre, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
+	f.StringVar(&bmpCmd.Opts.Prerelease, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
 
-	return cmd
+	bmpCmd.Cmd = cmd
+	return bmpCmd
 }
 
-func bumpFiles(ctx *context.Context) error {
+func bumpFiles(opts bumpOptions, out io.Writer) error {
+	ctx, err := setupBumpContext(opts, out)
+	if err != nil {
+		return err
+	}
+
 	tsks := []task.Runner{
 		lastcommit.Task{},
 		currentversion.Task{},
@@ -87,4 +102,29 @@ func bumpFiles(ctx *context.Context) error {
 	}
 
 	return nil
+}
+
+func setupBumpContext(opts bumpOptions, out io.Writer) (*context.Context, error) {
+	cfg, err := loadConfig(opts.ConfigDir)
+	if err != nil {
+		fmt.Printf("failed to load uplift config. %v", err)
+		return nil, err
+	}
+	ctx := context.New(cfg, out)
+
+	// Set all values within the context
+	ctx.Debug = opts.Debug
+	ctx.DryRun = opts.DryRun
+	ctx.NoPush = opts.NoPush
+	ctx.Out = out
+
+	// Handle prerelease suffix if one is provided
+	if opts.Prerelease != "" {
+		var err error
+		if ctx.Prerelease, ctx.Metadata, err = semver.ParsePrerelease(opts.Prerelease); err != nil {
+			return nil, err
+		}
+	}
+
+	return ctx, nil
 }

@@ -24,10 +24,9 @@ package main
 
 import (
 	"bytes"
+	"os"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -36,9 +35,9 @@ import (
 func TestTag(t *testing.T) {
 	untaggedRepo(t)
 
-	cmd := newTagCmd(&context.Context{})
+	tagCmd := newTagCmd(&globalOptions{}, os.Stdout)
 
-	err := cmd.Execute()
+	err := tagCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	tags := git.AllTags()
@@ -49,10 +48,10 @@ func TestTag_NextFlag(t *testing.T) {
 	untaggedRepo(t)
 
 	var buf bytes.Buffer
-	cmd := newTagCmd(context.New(config.Uplift{}, &buf))
-	cmd.SetArgs([]string{"--next"})
+	tagCmd := newTagCmd(&globalOptions{}, &buf)
+	tagCmd.Cmd.SetArgs([]string{"--next"})
 
-	err := cmd.Execute()
+	err := tagCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	tags := git.AllTags()
@@ -64,10 +63,10 @@ func TestTag_PrereleaseFlag(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommit(t, "feat: a new feature")
 
-	cmd := newTagCmd(&context.Context{})
-	cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
+	tagCmd := newTagCmd(&globalOptions{}, os.Stdout)
+	tagCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
 
-	err := cmd.Execute()
+	err := tagCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	tags := git.AllTags()

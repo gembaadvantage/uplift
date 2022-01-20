@@ -23,45 +23,49 @@ SOFTWARE.
 package main
 
 import (
+	"os"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRoot_DryRunFlag(t *testing.T) {
-	ctx := &context.Context{}
-	cmd, err := newRootCmd([]string{}, ctx)
+	rootCmd := newRootCmd(os.Stdout)
+
+	rootCmd.Cmd.SetArgs([]string{"--dry-run"})
+	err := rootCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	cmd.SetArgs([]string{"--dry-run"})
-	err = cmd.Execute()
-	require.NoError(t, err)
-
-	assert.Equal(t, true, ctx.DryRun)
+	assert.Equal(t, true, rootCmd.Opts.DryRun)
 }
 
 func TestRoot_DebugFlag(t *testing.T) {
-	ctx := &context.Context{}
-	cmd, err := newRootCmd([]string{}, ctx)
+	rootCmd := newRootCmd(os.Stdout)
+
+	rootCmd.Cmd.SetArgs([]string{"--debug"})
+	err := rootCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	cmd.SetArgs([]string{"--debug"})
-	err = cmd.Execute()
-	require.NoError(t, err)
-
-	assert.Equal(t, true, ctx.Debug)
+	assert.Equal(t, true, rootCmd.Opts.Debug)
 }
 
 func TestRoot_NoPushFlag(t *testing.T) {
-	ctx := &context.Context{}
-	cmd, err := newRootCmd([]string{}, ctx)
+	rootCmd := newRootCmd(os.Stdout)
+
+	rootCmd.Cmd.SetArgs([]string{"--no-push"})
+	err := rootCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	cmd.SetArgs([]string{"--no-push"})
-	err = cmd.Execute()
+	assert.Equal(t, true, rootCmd.Opts.NoPush)
+}
+
+func TestRoot_ConfigDir(t *testing.T) {
+	rootCmd := newRootCmd(os.Stdout)
+
+	rootCmd.Cmd.SetArgs([]string{"--config-dir", "custom"})
+	err := rootCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	assert.Equal(t, true, ctx.NoPush)
+	assert.Equal(t, "custom", rootCmd.Opts.ConfigDir)
 }
