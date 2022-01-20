@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -40,6 +41,38 @@ func TestChangelog(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.True(t, changelogExists(t))
+}
+
+func TestChangelog_DetectsTags(t *testing.T) {
+	tests := []struct {
+		name      string
+		tags      []string
+		detectTag string
+	}{
+		{
+			name:      "SingleTag",
+			tags:      []string{"1.0.0"},
+			detectTag: "1.0.0",
+		},
+		{
+			name:      "MultipleTags",
+			tags:      []string{"1.0.0", "1.1.0", "1.2.0", "1.3.0"},
+			detectTag: "1.3.0",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tagRepoWith(t, tt.tags)
+
+			chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+			err := chglogCmd.Cmd.Execute()
+			require.NoError(t, err)
+
+			assert.True(t, changelogExists(t))
+			chglog := readChangelog(t)
+			assert.Contains(t, chglog, tt.detectTag)
+		})
+	}
 }
 
 func TestChangelog_DiffOnly(t *testing.T) {
@@ -59,18 +92,27 @@ func TestChangelog_DiffOnly(t *testing.T) {
 }
 
 func TestChangelog_WithExclude(t *testing.T) {
-	taggedRepo(t)
+	git.InitRepo(t)
+	git.EmptyCommitsAndTag(t, "2.0.0",
+		"feat: a new feat",
+		"fix: a new fix",
+		"ci: a ci task",
+		"docs: some new docs")
 
 	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
-	chglogCmd.Cmd.SetArgs([]string{"--exclude", "prefix1,prefix2"})
+	chglogCmd.Cmd.SetArgs([]string{"--exclude", "ci,docs"})
 
 	err := chglogCmd.Cmd.Execute()
 	require.NoError(t, err)
 
 	assert.True(t, changelogExists(t))
 	assert.Len(t, chglogCmd.Opts.Exclude, 2)
-	assert.Contains(t, chglogCmd.Opts.Exclude[0], "prefix1")
-	assert.Contains(t, chglogCmd.Opts.Exclude[1], "prefix2")
+	assert.Contains(t, chglogCmd.Opts.Exclude[0], "ci")
+	assert.Contains(t, chglogCmd.Opts.Exclude[1], "docs")
+
+	chglog := readChangelog(t)
+	assert.NotContains(t, chglog, "ci:")
+	assert.NotContains(t, chglog, "docs:")
 }
 
 func changelogExists(t *testing.T) bool {
@@ -87,4 +129,13 @@ func changelogExists(t *testing.T) bool {
 	}
 
 	return true
+}
+
+func readChangelog(t *testing.T) string {
+	t.Helper()
+
+	data, err := os.ReadFile("CHANGELOG.md")
+	require.NoError(t, err)
+
+	return string(data)
 }
