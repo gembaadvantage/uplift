@@ -49,13 +49,13 @@ const (
 )
 
 var (
-	//go:embed template/new.tpl
+	//go:embed template/new.tmpl
 	newTpl string
 
-	//go:embed template/append.tpl
+	//go:embed template/append.tmpl
 	appendTpl string
 
-	//go:embed template/diff.tpl
+	//go:embed template/diff.tmpl
 	diffTpl string
 
 	newTplBody    = template.Must(template.New("new").Parse(newTpl))
