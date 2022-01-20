@@ -132,8 +132,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [1.0.0] - 2021-09-17
 
-%s first commit
-%s initialise repo
+- %s first commit
+- %s initialise repo
 `, h1[0], ih)
 	ioutil.WriteFile(MarkdownFile, []byte(cl), 0644)
 
@@ -159,13 +159,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [1.1.0] - %s
 
-%s third commit
-%s second commit
+- %s third commit
+- %s second commit
 
 ## [1.0.0] - 2021-09-17
 
-%s first commit
-%s %s
+- %s first commit
+- %s %s
 `, changelogDate(t), h2[1], h2[0], h1[0], ih, git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
@@ -194,9 +194,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [1.0.0] - %s
 
-%s second commit
-%s first commit
-%s %s
+- %s second commit
+- %s first commit
+- %s %s
 `, changelogDate(t), h[1], h[0], ih, git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
@@ -238,9 +238,9 @@ func TestChangelog_DiffOnly(t *testing.T) {
 
 	expected := fmt.Sprintf(`## [1.1.0] - %s
 
-%s third commit
-%s second commit
-%s first commit
+- %s third commit
+- %s second commit
+- %s first commit
 `, changelogDate(t), h[2], h[1], h[0])
 
 	assert.False(t, changelogExists(t))
@@ -291,8 +291,8 @@ func TestChangelog_WithExcludes(t *testing.T) {
 
 	expected := fmt.Sprintf(`## [1.1.0] - %s
 
-%s third commit
-%s first commit
+- %s third commit
+- %s first commit
 `, changelogDate(t), h[2], h[0])
 
 	assert.False(t, changelogExists(t))
