@@ -83,7 +83,7 @@ body:
     id: debug
     attributes:
       label: Optional debug output
-      description: Please provide optional debug output if you think it will help. `uplift bump --verbose`
+      description: Please provide optional debug output if you think it will help. `uplift bump --debug`
       render: shell
     validations:
       required: false
