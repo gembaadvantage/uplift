@@ -9,3 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [v1.11.0] - 2022-01-20
 
 3a5b735 feat: add option to filter commits by prefix from changelog (#75)
+
+## [v1.11.0] - 2022-01-20
+
+3a5b735 feat: add option to filter commits by prefix from changelog (#75)
