@@ -38,6 +38,6 @@ jobs:
         with:
           go-version: 1.16
       - name: Install go-task
-        run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+        run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
       - name: Test
         run: task test
