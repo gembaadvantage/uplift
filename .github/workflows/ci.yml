@@ -37,8 +37,8 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
-      - name: Install go-task
-        run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+      - name: Install Task
+        uses: arduino/setup-task@v1
       - name: Lint
         uses: golangci/golangci-lint-action@v2
         with:
