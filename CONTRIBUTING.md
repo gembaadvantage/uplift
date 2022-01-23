@@ -6,7 +6,7 @@ Please note we operate by a strict [code of conduct](https://github.com/gembaadv
 
 ## Getting Started
 
-`uplift` is written using [Go 1.17+](https://go.dev/doc/install) and should be installed.
+`uplift` is written using [Go 1.17+](https://go.dev/doc/install) and should be installed along with [go-task](https://taskfile.dev/#/installation), as it is preferred over using make.
 
 Then clone `uplift`:
 
@@ -17,7 +17,7 @@ git clone git@github.com:gembaadvantage/uplift.git
 `cd` into the directory and check everything is fine:
 
 ```sh
-make
+task
 ```
 
 ## Issues
