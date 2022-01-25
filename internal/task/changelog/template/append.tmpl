@@ -1,7 +1,7 @@
 ## [Unreleased]
-
+{{range $i, $property := .}}
 ## [{{.Tag}}] - {{.Date}}
-{{range $chg := .Changes }}
-- {{.AbbrevHash}} {{.Message}}
-{{- end}}
 
+{{range $chg := .Changes -}}
+- {{.AbbrevHash}} {{.Message}}
+{{end}}{{end}}

@@ -87,43 +87,37 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	if ctx.NextVersion.Raw == "" {
+	if !ctx.ChangelogAll && ctx.NextVersion.Raw == "" {
 		log.Info("no release detected, skipping changelog")
 		return nil
 	}
 
-	log.WithField("tag", ctx.NextVersion.Raw).Info("determine changes for release")
-	ents, err := git.LogBetween(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw, ctx.ChangelogExcludes)
-	if err != nil {
-		return err
+	// Retrieve log entries based on the changelog expectations
+	var rels []release
+	var relErr error
+	if ctx.ChangelogAll {
+		fmt.Printf("")
+		rels, relErr = changelogReleases(ctx)
+	} else {
+		rels, relErr = changelogRelease(ctx)
+	}
+	if relErr != nil {
+		return relErr
 	}
 
-	if len(ents) == 0 {
-		log.WithFields(log.Fields{
-			"tag":  ctx.NextVersion.Raw,
-			"prev": ctx.CurrentVersion.Raw,
-		}).Info("no log entries between tags")
+	// If there are no releases to changelog, simply return
+	if len(rels) == 0 {
 		return nil
 	}
 
-	// Package log entries into release ready for template generation
-	rel := release{
-		Tag:     ctx.NextVersion.Raw,
-		Date:    time.Now().UTC().Format(ChangeDate),
-		Changes: ents,
-	}
-	log.WithFields(log.Fields{
-		"tag":     ctx.NextVersion.Raw,
-		"date":    time.Now().UTC().Format(ChangeDate),
-		"commits": len(rel.Changes),
-	}).Info("changeset identified")
-
 	if ctx.Debug {
-		for _, c := range rel.Changes {
-			log.WithFields(log.Fields{
-				"hash":    c.AbbrevHash,
-				"message": c.Message,
-			}).Debug("commit")
+		for _, rel := range rels {
+			for _, c := range rel.Changes {
+				log.WithFields(log.Fields{
+					"hash":    c.AbbrevHash,
+					"message": c.Message,
+				}).Debug("commit")
+			}
 		}
 	}
 
@@ -133,7 +127,7 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	if ctx.ChangelogDiff {
-		diff, err := diffChangelog(rel)
+		diff, err := diffChangelog(rels)
 		if err != nil {
 			return err
 		}
@@ -142,10 +136,10 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	var chgErr error
-	if noChangelogExists() {
-		chgErr = newChangelog(rel)
+	if noChangelogExists() || ctx.ChangelogAll {
+		chgErr = newChangelog(rels)
 	} else {
-		chgErr = appendChangelog(rel)
+		chgErr = appendChangelog(rels)
 	}
 	if chgErr != nil {
 		return chgErr
@@ -155,21 +149,91 @@ func (t Task) Run(ctx *context.Context) error {
 	return git.Stage(MarkdownFile)
 }
 
+func changelogRelease(ctx *context.Context) ([]release, error) {
+	log.WithField("tag", ctx.NextVersion.Raw).Info("determine changes for release")
+	ents, err := git.LogBetween(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw, ctx.ChangelogExcludes)
+	if err != nil {
+		return []release{}, err
+	}
+
+	if len(ents) == 0 {
+		log.WithFields(log.Fields{
+			"tag":  ctx.NextVersion.Raw,
+			"prev": ctx.CurrentVersion.Raw,
+		}).Info("no log entries between tags")
+		return []release{}, nil
+	}
+
+	// Package log entries into release ready for template generation
+	log.WithFields(log.Fields{
+		"tag":     ctx.NextVersion.Raw,
+		"date":    time.Now().UTC().Format(ChangeDate),
+		"commits": len(ents),
+	}).Info("changeset identified")
+
+	return []release{
+		{
+			Tag:     ctx.NextVersion.Raw,
+			Date:    time.Now().UTC().Format(ChangeDate),
+			Changes: ents,
+		},
+	}, nil
+}
+
+func changelogReleases(ctx *context.Context) ([]release, error) {
+	tags := git.AllTags()
+	if len(tags) == 0 {
+		// TODO: log message
+		return []release{}, nil
+	}
+
+	rels := make([]release, 0, len(tags))
+	for i := 0; i < len(tags); i++ {
+		nextTag := ""
+		if i+1 < len(tags) {
+			nextTag = tags[i+1]
+		}
+
+		log.WithField("tag", tags[i]).Info("determine changes for release")
+		ents, err := git.LogBetween(tags[i], nextTag, ctx.ChangelogExcludes)
+		if err != nil {
+			return []release{}, err
+		}
+
+		if len(ents) == 0 {
+			log.WithFields(log.Fields{
+				"tag":  ctx.NextVersion.Raw,
+				"prev": ctx.CurrentVersion.Raw,
+			}).Info("no log entries between tags")
+		}
+
+		rels = append(rels, release{
+			Tag:     tags[i],
+			Date:    time.Now().UTC().Format(ChangeDate),
+			Changes: ents,
+		})
+	}
+
+	return rels, nil
+}
+
 func noChangelogExists() bool {
 	_, err := os.Stat(MarkdownFile)
 	return os.IsNotExist(err)
 }
 
-func diffChangelog(rel release) (string, error) {
+func diffChangelog(rels []release) (string, error) {
 	var buf bytes.Buffer
-	if err := diffTplBody.Execute(&buf, rel); err != nil {
+	if err := diffTplBody.Execute(&buf, rels); err != nil {
 		return "", err
 	}
 
-	return buf.String(), nil
+	// Trim leading whitespace
+	diff := buf.String()
+	return diff[1:], nil
 }
 
-func newChangelog(rel release) error {
+func newChangelog(rels []release) error {
 	f, err := os.OpenFile(MarkdownFile, os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		return err
@@ -177,10 +241,10 @@ func newChangelog(rel release) error {
 	defer f.Close()
 
 	log.Debug("create new changelog in repository")
-	return newTplBody.Execute(f, rel)
+	return newTplBody.Execute(f, rels)
 }
 
-func appendChangelog(rel release) error {
+func appendChangelog(rels []release) error {
 	cl, err := ioutil.ReadFile(MarkdownFile)
 	if err != nil {
 		return err
@@ -193,7 +257,7 @@ func appendChangelog(rel release) error {
 	}
 
 	var buf bytes.Buffer
-	if err := appendTplBody.Execute(&buf, rel); err != nil {
+	if err := appendTplBody.Execute(&buf, rels); err != nil {
 		return err
 	}
 

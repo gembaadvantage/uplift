@@ -49,6 +49,7 @@ release tags`
 type changelogOptions struct {
 	DiffOnly bool
 	Exclude  []string
+	All      bool
 	*globalOptions
 }
 
@@ -81,6 +82,7 @@ func newChangelogCmd(gopts *globalOptions, out io.Writer) *changelogCommand {
 
 	f := cmd.Flags()
 	f.BoolVar(&chglogCmd.Opts.DiffOnly, "diff-only", false, "output the changelog diff only")
+	f.BoolVar(&chglogCmd.Opts.All, "all", false, "generate a changelog from the entire history of this repository")
 	f.StringSliceVar(&chglogCmd.Opts.Exclude, "exclude", []string{}, "a list of conventional commit prefixes to exclude")
 
 	chglogCmd.Cmd = cmd
@@ -136,6 +138,7 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	ctx.DryRun = opts.DryRun
 	ctx.NoPush = opts.NoPush
 	ctx.ChangelogDiff = opts.DiffOnly
+	ctx.ChangelogAll = opts.All
 	ctx.Out = out
 
 	// Merge config and command line arguments together
