@@ -110,17 +110,6 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
-	if ctx.Debug {
-		for _, rel := range rels {
-			for _, c := range rel.Changes {
-				log.WithFields(log.Fields{
-					"hash":    c.AbbrevHash,
-					"message": c.Message,
-				}).Debug("commit")
-			}
-		}
-	}
-
 	if ctx.DryRun {
 		log.Info("skip writing to changelog in dry run mode")
 		return nil
@@ -164,12 +153,20 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 		return []release{}, nil
 	}
 
-	// Package log entries into release ready for template generation
 	log.WithFields(log.Fields{
 		"tag":     ctx.NextVersion.Raw,
 		"date":    time.Now().UTC().Format(ChangeDate),
 		"commits": len(ents),
 	}).Info("changeset identified")
+
+	if ctx.Debug {
+		for _, c := range ents {
+			log.WithFields(log.Fields{
+				"hash":    c.AbbrevHash,
+				"message": c.Message,
+			}).Debug("commit")
+		}
+	}
 
 	return []release{
 		{
@@ -202,9 +199,24 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 
 		if len(ents) == 0 {
 			log.WithFields(log.Fields{
-				"tag":  ctx.NextVersion.Raw,
-				"prev": ctx.CurrentVersion.Raw,
+				"tag":  tags[i],
+				"prev": nextTag,
 			}).Info("no log entries between tags")
+		} else {
+			log.WithFields(log.Fields{
+				"tag":     tags[i],
+				"date":    time.Now().UTC().Format(ChangeDate),
+				"commits": len(ents),
+			}).Info("changeset identified")
+
+			if ctx.Debug {
+				for _, c := range ents {
+					log.WithFields(log.Fields{
+						"hash":    c.AbbrevHash,
+						"message": c.Message,
+					}).Debug("commit")
+				}
+			}
 		}
 
 		rels = append(rels, release{
