@@ -154,7 +154,7 @@ $ uplift changelog --diff-only --silent
 1c85055 feat: a brand new feature
 ```
 
-### Exclude Commits
+#### Exclude Commits
 
 Commits can be excluded during changelog creation by providing the `--exclude` flag and specifying a list of prefixes:
 
@@ -162,7 +162,7 @@ Commits can be excluded during changelog creation by providing the `--exclude` f
 uplift changelog --exclude chore,ci,docs
 ```
 
-### Full Changelog
+#### Full Changelog
 
 A complete changelog can be created, spanning the entire release history of a repository:
 
