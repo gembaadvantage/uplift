@@ -394,3 +394,40 @@ func TestChangelog_AllTagsDiffOnly(t *testing.T) {
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
 }
+
+func TestChangelog_AllWithExcludes(t *testing.T) {
+	ih := git.InitRepo(t)
+	h1 := git.EmptyCommitAndTag(t, "0.1.0", "feat: first feature")
+	git.EmptyCommitAndTag(t, "0.2.0", "fix: first bug")
+	h2 := git.EmptyCommitAndTag(t, "0.3.0", "refactor: use go embed")
+
+	ctx := &context.Context{
+		ChangelogAll:      true,
+		ChangelogExcludes: []string{"fix"},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.3.0] - %[1]s
+
+- %[2]s refactor: use go embed
+
+## [0.2.0] - %[1]s
+
+## [0.1.0] - %[1]s
+
+- %[3]s feat: first feature
+- %[4]s %[5]s
+`, changelogDate(t), h2, h1, ih, git.InitCommit)
+
+	assert.Equal(t, expected, readChangelog(t))
+}

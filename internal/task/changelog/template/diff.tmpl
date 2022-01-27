@@ -1,6 +1,6 @@
 {{range $i, $property := .}}
 ## [{{.Tag.Ref}}] - {{.Tag.Created}}
-{{range $chg := .Changes}}
+{{ if ne (len .Changes) 0 }}
+{{range $chg := .Changes -}}
 - {{.AbbrevHash}} {{.Message}}
-{{- end}}
-{{end}}
+{{end}}{{end}}{{end}}
