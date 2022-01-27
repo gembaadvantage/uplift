@@ -45,6 +45,7 @@ builds:
     ignore:
       - goos: darwin
         goarch: 386
+
 archives:
   - id: uplift-archive
     format: tar.gz
@@ -61,8 +62,10 @@ archives:
     files:
       - README.md
       - LICENSE
+
 signs:
   - artifacts: checksum
+
 brews:
   - name: uplift
     tap:
@@ -90,6 +93,7 @@ brews:
       - name: go
         type: optional
       - name: git
+
 scoop:
   bucket:
     owner: gembaadvantage
@@ -97,6 +101,7 @@ scoop:
   homepage: "https://github.com/gembaadvantage/uplift"
   description: "Semantic versioning the easy way"
   license: MIT
+
 snapcrafts:
   - name_template: |-
       {{ .ProjectName }}_{{ .Version }}_{{ .Os }}-{{ .Arch }}
@@ -108,4 +113,12 @@ snapcrafts:
     grade: stable
     confinement: classic
     publish: true
+    license: MIT
+
+rigs:
+  - rig:
+      owner: gembaadvantage
+      name: fish-food
+    homepage: "https://github.com/gembaadvantage/uplift"
+    description: "Semantic versioning the easy way"
     license: MIT
