@@ -43,6 +43,12 @@ type LogEntry struct {
 	Message    string
 }
 
+// TagEntry contains details about a specific tag
+type TagEntry struct {
+	Ref     string
+	Created string
+}
+
 // String prints out a user friendly string representation
 func (c CommitDetails) String() string {
 	return fmt.Sprintf("%s <%s>\n%s", c.Author, c.Email, c.Message)
@@ -75,29 +81,66 @@ func FetchTags() error {
 }
 
 // AllTags retrieves all tags within the repository from newest to oldest
-func AllTags() []string {
-	// Filter out all tags that are non in the supported formats
-	tags, err := Clean(Run("tag", "-l", "--sort=-v:refname", "v*.*.*", "*.*.*"))
+func AllTags() []TagEntry {
+	return retrieveTags(0)
+}
+
+func retrieveTags(n int) []TagEntry {
+	tags, err := Clean(Run("for-each-ref",
+		"refs/tags/v*.*.*",
+		"refs/tags/*.*.*",
+		"--sort=-v:refname",
+		`--format='%(creatordate:short),%(refname:short)'`,
+		fmt.Sprintf("--count=%d", n),
+	))
 	if err != nil {
-		return []string{}
+		return []TagEntry{}
 	}
 
 	// If no tags are found, then just return an empty slice
 	if tags == "" {
-		return []string{}
+		return []TagEntry{}
 	}
 
-	return strings.Split(tags, "\n")
+	rows := strings.Split(tags, "\n")
+	ents := make([]TagEntry, 0, len(rows))
+	for _, r := range rows {
+		p := strings.Split(r, ",")
+		ents = append(ents, TagEntry{
+			Ref:     p[1],
+			Created: p[0],
+		})
+	}
+
+	return ents
 }
 
 // LatestTag retrieves the latest tag within the repository
-func LatestTag() string {
-	tags := AllTags()
+func LatestTag() TagEntry {
+	tags := retrieveTags(1)
 	if len(tags) == 0 {
-		return ""
+		return TagEntry{}
 	}
 
 	return tags[0]
+}
+
+// DescribeTag retrieves details about a specific tag
+func DescribeTag(ref string) TagEntry {
+	tag, err := Clean(Run("tag", "-l", ref, `--format='%(creatordate:short),%(refname:short)'`))
+	if err != nil {
+		return TagEntry{}
+	}
+
+	if tag == "" {
+		return TagEntry{}
+	}
+
+	p := strings.Split(tag, ",")
+	return TagEntry{
+		Ref:     p[1],
+		Created: p[0],
+	}
 }
 
 // LatestCommit retrieves the latest commit within the repository

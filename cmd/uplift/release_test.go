@@ -85,7 +85,7 @@ func TestRelease_PrereleaseFlag(t *testing.T) {
 
 	tags := git.AllTags()
 	assert.Len(t, tags, 1)
-	assert.Equal(t, "0.1.0-beta.1+12345", tags[0])
+	assert.Equal(t, "0.1.0-beta.1+12345", tags[0].Ref)
 
 	actual, err := ioutil.ReadFile("test.txt")
 	require.NoError(t, err)

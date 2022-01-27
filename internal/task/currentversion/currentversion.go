@@ -51,13 +51,13 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	tag := git.LatestTag()
-	if tag == "" {
+	if tag.Ref == "" {
 		log.Info("repository not tagged with version")
 		return nil
 	}
 
 	// Only a semantic version tag will have been retrieved by this point
-	ctx.CurrentVersion, _ = semver.Parse(tag)
+	ctx.CurrentVersion, _ = semver.Parse(tag.Ref)
 
 	log.WithField("current", ctx.CurrentVersion).Info("identified version")
 	return nil

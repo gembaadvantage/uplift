@@ -67,8 +67,7 @@ var (
 )
 
 type release struct {
-	Tag     string
-	Date    string
+	Tag     git.TagEntry
 	Changes []git.LogEntry
 }
 
@@ -170,8 +169,7 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 
 	return []release{
 		{
-			Tag:     ctx.NextVersion.Raw,
-			Date:    time.Now().UTC().Format(ChangeDate),
+			Tag:     git.DescribeTag(ctx.NextVersion.Raw),
 			Changes: ents,
 		},
 	}, nil
@@ -180,7 +178,7 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 func changelogReleases(ctx *context.Context) ([]release, error) {
 	tags := git.AllTags()
 	if len(tags) == 0 {
-		// TODO: log message
+		log.Info("no tags found within repository")
 		return []release{}, nil
 	}
 
@@ -188,24 +186,24 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 	for i := 0; i < len(tags); i++ {
 		nextTag := ""
 		if i+1 < len(tags) {
-			nextTag = tags[i+1]
+			nextTag = tags[i+1].Ref
 		}
 
 		log.WithField("tag", tags[i]).Info("determine changes for release")
-		ents, err := git.LogBetween(tags[i], nextTag, ctx.ChangelogExcludes)
+		ents, err := git.LogBetween(tags[i].Ref, nextTag, ctx.ChangelogExcludes)
 		if err != nil {
 			return []release{}, err
 		}
 
 		if len(ents) == 0 {
 			log.WithFields(log.Fields{
-				"tag":  tags[i],
+				"tag":  tags[i].Ref,
 				"prev": nextTag,
 			}).Info("no log entries between tags")
 		} else {
 			log.WithFields(log.Fields{
-				"tag":     tags[i],
-				"date":    time.Now().UTC().Format(ChangeDate),
+				"tag":     tags[i].Ref,
+				"date":    tags[i].Created,
 				"commits": len(ents),
 			}).Info("changeset identified")
 
@@ -221,7 +219,6 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 
 		rels = append(rels, release{
 			Tag:     tags[i],
-			Date:    time.Now().UTC().Format(ChangeDate),
 			Changes: ents,
 		})
 	}

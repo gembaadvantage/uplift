@@ -1,5 +1,5 @@
 {{range $i, $property := .}}
-## [{{.Tag}}] - {{.Date}}
+## [{{.Tag.Ref}}] - {{.Tag.Created}}
 {{range $chg := .Changes}}
 - {{.AbbrevHash}} {{.Message}}
 {{- end}}
