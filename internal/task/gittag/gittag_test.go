@@ -50,7 +50,7 @@ func TestRun(t *testing.T) {
 	require.NoError(t, err)
 
 	ltag := git.LatestTag()
-	assert.Equal(t, tag, ltag)
+	assert.Equal(t, tag, ltag.Ref)
 }
 
 func TestRun_DryRunMode(t *testing.T) {
@@ -69,7 +69,7 @@ func TestRun_DryRunMode(t *testing.T) {
 	require.NoError(t, err)
 
 	ltag := git.LatestTag()
-	assert.Empty(t, ltag)
+	assert.Empty(t, ltag.Ref)
 }
 
 func TestRun_NoVersionChange(t *testing.T) {
@@ -90,7 +90,7 @@ func TestRun_NoVersionChange(t *testing.T) {
 	require.NoError(t, err)
 
 	ltag := git.LatestTag()
-	assert.Equal(t, tag, ltag)
+	assert.Equal(t, tag, ltag.Ref)
 }
 
 func TestRun_NoGitRepository(t *testing.T) {

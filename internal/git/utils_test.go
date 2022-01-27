@@ -52,7 +52,10 @@ func TestAllTags(t *testing.T) {
 	EmptyCommitAndTag(t, v3, "third commit")
 
 	tags := AllTags()
-	assert.Equal(t, []string{v3, v2, v1}, tags)
+	assert.Len(t, tags, 3)
+	assert.Equal(t, "v3.0.0", tags[0].Ref)
+	assert.Equal(t, "v2.0.0", tags[1].Ref)
+	assert.Equal(t, "v1.0.0", tags[2].Ref)
 }
 
 func TestLatestTag(t *testing.T) {
@@ -64,14 +67,14 @@ func TestLatestTag(t *testing.T) {
 	EmptyCommitAndTag(t, v2, "more work")
 
 	tag := LatestTag()
-	assert.Equal(t, v2, tag)
+	assert.Equal(t, v2, tag.Ref)
 }
 
 func TestLatestTag_NoTagsExist(t *testing.T) {
 	MkTmpDir(t)
 
 	tag := LatestTag()
-	assert.Equal(t, "", tag)
+	assert.Equal(t, "", tag.Ref)
 }
 
 func TestLatestTag_NoSemanticTags(t *testing.T) {
@@ -83,7 +86,7 @@ func TestLatestTag_NoSemanticTags(t *testing.T) {
 	EmptyCommitAndTag(t, v2, "more work")
 
 	tag := LatestTag()
-	assert.Equal(t, "", tag)
+	assert.Equal(t, "", tag.Ref)
 }
 
 func TestLatestCommit(t *testing.T) {

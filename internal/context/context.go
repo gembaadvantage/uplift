@@ -48,6 +48,7 @@ type Context struct {
 	NextTagOnly       bool
 	NoPush            bool
 	ChangelogDiff     bool
+	ChangelogAll      bool
 	ChangelogExcludes []string
 }
 

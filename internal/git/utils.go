@@ -43,6 +43,12 @@ type LogEntry struct {
 	Message    string
 }
 
+// TagEntry contains details about a specific tag
+type TagEntry struct {
+	Ref     string
+	Created string
+}
+
 // String prints out a user friendly string representation
 func (c CommitDetails) String() string {
 	return fmt.Sprintf("%s <%s>\n%s", c.Author, c.Email, c.Message)
@@ -75,29 +81,66 @@ func FetchTags() error {
 }
 
 // AllTags retrieves all tags within the repository from newest to oldest
-func AllTags() []string {
-	// Filter out all tags that are non in the supported formats
-	tags, err := Clean(Run("tag", "-l", "--sort=-v:refname", "v*.*.*", "*.*.*"))
+func AllTags() []TagEntry {
+	return retrieveTags(0)
+}
+
+func retrieveTags(n int) []TagEntry {
+	tags, err := Clean(Run("for-each-ref",
+		"refs/tags/v*.*.*",
+		"refs/tags/*.*.*",
+		"--sort=-v:refname",
+		`--format='%(creatordate:short),%(refname:short)'`,
+		fmt.Sprintf("--count=%d", n),
+	))
 	if err != nil {
-		return []string{}
+		return []TagEntry{}
 	}
 
 	// If no tags are found, then just return an empty slice
 	if tags == "" {
-		return []string{}
+		return []TagEntry{}
 	}
 
-	return strings.Split(tags, "\n")
+	rows := strings.Split(tags, "\n")
+	ents := make([]TagEntry, 0, len(rows))
+	for _, r := range rows {
+		p := strings.Split(r, ",")
+		ents = append(ents, TagEntry{
+			Ref:     p[1],
+			Created: p[0],
+		})
+	}
+
+	return ents
 }
 
 // LatestTag retrieves the latest tag within the repository
-func LatestTag() string {
-	tags := AllTags()
+func LatestTag() TagEntry {
+	tags := retrieveTags(1)
 	if len(tags) == 0 {
-		return ""
+		return TagEntry{}
 	}
 
 	return tags[0]
+}
+
+// DescribeTag retrieves details about a specific tag
+func DescribeTag(ref string) TagEntry {
+	tag, err := Clean(Run("tag", "-l", ref, `--format='%(creatordate:short),%(refname:short)'`))
+	if err != nil {
+		return TagEntry{}
+	}
+
+	if tag == "" {
+		return TagEntry{}
+	}
+
+	p := strings.Split(tag, ",")
+	return TagEntry{
+		Ref:     p[1],
+		Created: p[0],
+	}
 }
 
 // LatestCommit retrieves the latest commit within the repository
@@ -219,8 +262,6 @@ func Push() error {
 	return nil
 }
 
-// git log --pretty=format:'%H%s' --grep="chore(deps)" --grep="fix" --invert-grep
-
 // LogBetween retrieves all log entries between two points of time within the
 // git history of the repository. Supports tags and specific git hashes as its
 // reference points. From must always be the closest point to HEAD
@@ -244,13 +285,14 @@ func LogBetween(from, to string, excludes []string) ([]LogEntry, error) {
 
 	// Convert excludes list into git grep commands
 	if len(excludes) > 0 {
+		fmtExcludes := make([]string, len(excludes))
 		for i := range excludes {
-			excludes[i] = fmt.Sprintf("--grep=%s", excludes[i])
+			fmtExcludes[i] = fmt.Sprintf("--grep=%s", excludes[i])
 		}
-		excludes = append(excludes, "--invert-grep")
+		fmtExcludes = append(fmtExcludes, "--invert-grep")
 
 		// Append to original set of arguments
-		args = append(args, excludes...)
+		args = append(args, fmtExcludes...)
 	}
 
 	log, err := Clean(Run(args...))
