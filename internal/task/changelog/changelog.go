@@ -95,7 +95,6 @@ func (t Task) Run(ctx *context.Context) error {
 	var rels []release
 	var relErr error
 	if ctx.ChangelogAll {
-		fmt.Printf("")
 		rels, relErr = changelogReleases(ctx)
 	} else {
 		rels, relErr = changelogRelease(ctx)
