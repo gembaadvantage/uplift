@@ -49,6 +49,20 @@ func InitRepo(t *testing.T) string {
 	return EmptyCommit(t, InitCommit)
 }
 
+// RemoteOrigin sets the URL of the remote origin associated with the current git repository
+func RemoteOrigin(t *testing.T, url string) {
+	t.Helper()
+
+	_, err := Run("remote", "add", "origin", url)
+	require.NoError(t, err)
+
+	_, err = Run("config", "branch.main.remote", "origin")
+	require.NoError(t, err)
+
+	_, err = Run("config", "branch.main.merge", "refs/heads/main")
+	require.NoError(t, err)
+}
+
 // MkTmpDir creates an empty directory that is not a git repository. Once created the
 // current testing context will operate from within that directory until the calling
 // test has completed

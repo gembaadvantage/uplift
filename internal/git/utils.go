@@ -25,8 +25,19 @@ package git
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os/exec"
 	"strings"
+)
+
+// SCM ...
+type SCM string
+
+const (
+	GitHub       SCM = "GitHub"
+	GitLab       SCM = "GitLab"
+	CodeCommit   SCM = "CodeCommit"
+	Unrecognised SCM = "Unrecognised"
 )
 
 // CommitDetails contains mandatory details about a specific git commit
@@ -49,6 +60,14 @@ type TagEntry struct {
 	Created string
 }
 
+// Repository ...
+type Repository struct {
+	Provider SCM
+	Owner    string
+	Name     string
+	URL      string
+}
+
 // String prints out a user friendly string representation
 func (c CommitDetails) String() string {
 	return fmt.Sprintf("%s <%s>\n%s", c.Author, c.Email, c.Message)
@@ -69,6 +88,70 @@ func Run(args ...string) (string, error) {
 func IsRepo() bool {
 	out, err := Run("rev-parse", "--is-inside-work-tree")
 	return err == nil && strings.TrimSpace(out) == "true"
+}
+
+// Remote retrieves details about the remote origin of a repository
+func Remote() (Repository, error) {
+	remURL, err := Clean(Run("config", "--get", "remote.origin.url"))
+	if err != nil {
+		return Repository{}, err
+	}
+
+	// Strip off any trailing .git suffix
+	rem := strings.TrimRight(remURL, ".git")
+
+	if strings.HasPrefix(rem, "git@") {
+		// Sanitise any SSH based URL to ensure it is parseable
+		rem = strings.TrimPrefix(rem, "git@")
+		rem = strings.Replace(rem, ":", "/", 1)
+	} else if strings.HasPrefix(rem, "https://") {
+		// Sanitise any HTTPS based URL to ensure it is parseable. Handle username@password inclusion
+		rem = rem[strings.LastIndex(rem, ":")+1:]
+		rem = strings.TrimPrefix(rem, "//")
+	}
+
+	// Special use case for CodeCommit as that prefixes SSH URLs with ssh://
+	rem = strings.TrimPrefix(rem, "ssh://")
+
+	u, err := url.Parse(rem)
+	if err != nil {
+		return Repository{}, err
+	}
+
+	// Split into parts
+	p := strings.Split(u.Path, "/")
+	if len(p) < 3 {
+		return Repository{}, fmt.Errorf("malformed repository URL: %s", remURL)
+	}
+
+	// No concept of an owner with CodeCommit repositories
+	owner := p[1]
+	if strings.Contains(p[0], "codecommit") {
+		owner = ""
+	}
+
+	return Repository{
+		Provider: detectSCM(p[0]),
+		Owner:    owner,
+		Name:     p[len(p)-1],
+		URL:      fmt.Sprintf("https://%s", u.Path),
+	}, nil
+}
+
+func detectSCM(host string) SCM {
+	switch host {
+	case "github.com":
+		return GitHub
+	case "gitlab.com":
+		return GitLab
+	}
+
+	// Handle special case CodeCommit URLs
+	if strings.Contains(host, "codecommit") {
+		return CodeCommit
+	}
+
+	return Unrecognised
 }
 
 // FetchTags retrieves all tags associated with the remote repository

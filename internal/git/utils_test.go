@@ -41,6 +41,113 @@ func TestIsRepo_DetectsNonGitRepo(t *testing.T) {
 	assert.False(t, IsRepo())
 }
 
+func TestRemote(t *testing.T) {
+	tests := []struct {
+		name         string
+		url          string
+		scm          SCM
+		owner        string
+		repo         string
+		sanitisedURL string
+	}{
+		{
+			name:         "GitHubSSH",
+			url:          "git@github.com:owner/repository.git",
+			scm:          GitHub,
+			owner:        "owner",
+			repo:         "repository",
+			sanitisedURL: "https://github.com/owner/repository",
+		},
+		{
+			name:         "GitHubHTTPS",
+			url:          "https://github.com/owner/repository.git",
+			scm:          GitHub,
+			owner:        "owner",
+			repo:         "repository",
+			sanitisedURL: "https://github.com/owner/repository",
+		},
+		{
+			name:         "GitLabSSH",
+			url:          "git@gitlab.com:owner/repository.git",
+			scm:          GitLab,
+			owner:        "owner",
+			repo:         "repository",
+			sanitisedURL: "https://gitlab.com/owner/repository",
+		},
+		{
+			name:         "GitLabHTTPS",
+			url:          "https://gitlab.com/owner/repository.git",
+			scm:          GitLab,
+			owner:        "owner",
+			repo:         "repository",
+			sanitisedURL: "https://gitlab.com/owner/repository",
+		},
+		{
+			name:         "GitLabUsernamePasswordHTTPS",
+			url:          "https://username@password:gitlab.com/owner/repository.git",
+			scm:          GitLab,
+			owner:        "owner",
+			repo:         "repository",
+			sanitisedURL: "https://gitlab.com/owner/repository",
+		},
+		{
+			name:         "CodeCommitSSH",
+			url:          "ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
+			scm:          CodeCommit,
+			owner:        "",
+			repo:         "repository",
+			sanitisedURL: "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
+		},
+		{
+			name:         "CodeCommitHTTPS",
+			url:          "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
+			scm:          CodeCommit,
+			owner:        "",
+			repo:         "repository",
+			sanitisedURL: "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			InitRepo(t)
+			RemoteOrigin(t, tt.url)
+
+			repo, err := Remote()
+
+			require.NoError(t, err)
+			require.Equal(t, tt.scm, repo.Provider)
+			require.Equal(t, tt.owner, repo.Owner)
+			require.Equal(t, tt.repo, repo.Name)
+			require.Equal(t, tt.sanitisedURL, repo.URL)
+		})
+	}
+}
+
+func TestRemote_NoRemoteSet(t *testing.T) {
+	InitRepo(t)
+
+	_, err := Remote()
+	require.Error(t, err)
+}
+
+func TestRemote_MalformedURL(t *testing.T) {
+	InitRepo(t)
+	RemoteOrigin(t, "whizzbang.com/repository")
+
+	_, err := Remote()
+	require.EqualError(t, err, "malformed repository URL: whizzbang.com/repository")
+}
+
+func TestRemote_Unrecognised(t *testing.T) {
+	InitRepo(t)
+	RemoteOrigin(t, "https://whizzbang.com/owner/repository")
+
+	repo, err := Remote()
+
+	require.NoError(t, err)
+	assert.Equal(t, Unrecognised, repo.Provider)
+}
+
 func TestAllTags(t *testing.T) {
 	InitRepo(t)
 
