@@ -134,7 +134,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - %s first commit
 - %s initialise repo
-`, h1[0], ih)
+`, changelogHash(t, h1[0]), changelogHash(t, ih))
 	ioutil.WriteFile(MarkdownFile, []byte(cl), 0644)
 
 	ctx := &context.Context{
@@ -166,7 +166,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - %s first commit
 - %s %s
-`, changelogDate(t), h2[1], h2[0], h1[0], ih, git.InitCommit)
+`, changelogDate(t), changelogHash(t, h2[1]), changelogHash(t, h2[0]), changelogHash(t, h1[0]),
+		changelogHash(t, ih), git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
@@ -197,7 +198,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - %s second commit
 - %s first commit
 - %s %s
-`, changelogDate(t), h[1], h[0], ih, git.InitCommit)
+`, changelogDate(t), changelogHash(t, h[1]), changelogHash(t, h[0]), changelogHash(t, ih), git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
@@ -214,6 +215,11 @@ func readChangelog(t *testing.T) string {
 func changelogDate(t *testing.T) string {
 	t.Helper()
 	return time.Now().UTC().Format(ChangeDate)
+}
+
+func changelogHash(t *testing.T, hash string) string {
+	t.Helper()
+	return fmt.Sprintf("`%s`", hash)
 }
 
 func TestChangelog_DiffOnly(t *testing.T) {
@@ -241,7 +247,7 @@ func TestChangelog_DiffOnly(t *testing.T) {
 - %s third commit
 - %s second commit
 - %s first commit
-`, changelogDate(t), h[2], h[1], h[0])
+`, changelogDate(t), changelogHash(t, h[2]), changelogHash(t, h[1]), changelogHash(t, h[0]))
 
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
@@ -293,7 +299,7 @@ func TestChangelog_WithExcludes(t *testing.T) {
 
 - %s third commit
 - %s first commit
-`, changelogDate(t), h[2], h[0])
+`, changelogDate(t), changelogHash(t, h[2]), changelogHash(t, h[0]))
 
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
@@ -356,7 +362,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - %[4]s feat: first feature
 - %[5]s %[6]s
-`, changelogDate(t), h3, h2, h1, ih, git.InitCommit)
+`, changelogDate(t), changelogHash(t, h3), changelogHash(t, h2), changelogHash(t, h1), changelogHash(t, ih), git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
@@ -389,7 +395,7 @@ func TestChangelog_AllTagsDiffOnly(t *testing.T) {
 
 - %[4]s feat: first feature
 - %[5]s %[6]s
-`, changelogDate(t), h3, h2, h1, ih, git.InitCommit)
+`, changelogDate(t), changelogHash(t, h3), changelogHash(t, h2), changelogHash(t, h1), changelogHash(t, ih), git.InitCommit)
 
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
@@ -427,7 +433,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - %[3]s feat: first feature
 - %[4]s %[5]s
-`, changelogDate(t), h2, h1, ih, git.InitCommit)
+`, changelogDate(t), changelogHash(t, h2), changelogHash(t, h1), changelogHash(t, ih), git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
