@@ -43,68 +43,76 @@ func TestIsRepo_DetectsNonGitRepo(t *testing.T) {
 
 func TestRemote(t *testing.T) {
 	tests := []struct {
-		name         string
-		url          string
-		scm          SCM
-		owner        string
-		repo         string
-		sanitisedURL string
+		name      string
+		url       string
+		scm       SCM
+		owner     string
+		repo      string
+		cloneURL  string
+		browseURL string
 	}{
 		{
-			name:         "GitHubSSH",
-			url:          "git@github.com:owner/repository.git",
-			scm:          GitHub,
-			owner:        "owner",
-			repo:         "repository",
-			sanitisedURL: "https://github.com/owner/repository",
+			name:      "GitHubSSH",
+			url:       "git@github.com:owner/repository.git",
+			scm:       GitHub,
+			owner:     "owner",
+			repo:      "repository",
+			cloneURL:  "https://github.com/owner/repository",
+			browseURL: "https://github.com/owner/repository",
 		},
 		{
-			name:         "GitHubHTTPS",
-			url:          "https://github.com/owner/repository.git",
-			scm:          GitHub,
-			owner:        "owner",
-			repo:         "repository",
-			sanitisedURL: "https://github.com/owner/repository",
+			name:      "GitHubHTTPS",
+			url:       "https://github.com/owner/repository.git",
+			scm:       GitHub,
+			owner:     "owner",
+			repo:      "repository",
+			cloneURL:  "https://github.com/owner/repository",
+			browseURL: "https://github.com/owner/repository",
 		},
 		{
-			name:         "GitLabSSH",
-			url:          "git@gitlab.com:owner/repository.git",
-			scm:          GitLab,
-			owner:        "owner",
-			repo:         "repository",
-			sanitisedURL: "https://gitlab.com/owner/repository",
+			name:      "GitLabSSH",
+			url:       "git@gitlab.com:owner/repository.git",
+			scm:       GitLab,
+			owner:     "owner",
+			repo:      "repository",
+			cloneURL:  "https://gitlab.com/owner/repository",
+			browseURL: "https://gitlab.com/owner/repository",
 		},
 		{
-			name:         "GitLabHTTPS",
-			url:          "https://gitlab.com/owner/repository.git",
-			scm:          GitLab,
-			owner:        "owner",
-			repo:         "repository",
-			sanitisedURL: "https://gitlab.com/owner/repository",
+			name:      "GitLabHTTPS",
+			url:       "https://gitlab.com/owner/repository.git",
+			scm:       GitLab,
+			owner:     "owner",
+			repo:      "repository",
+			cloneURL:  "https://gitlab.com/owner/repository",
+			browseURL: "https://gitlab.com/owner/repository",
 		},
 		{
-			name:         "GitLabUsernamePasswordHTTPS",
-			url:          "https://username@password:gitlab.com/owner/repository.git",
-			scm:          GitLab,
-			owner:        "owner",
-			repo:         "repository",
-			sanitisedURL: "https://gitlab.com/owner/repository",
+			name:      "GitLabUsernamePasswordHTTPS",
+			url:       "https://username@password:gitlab.com/owner/repository.git",
+			scm:       GitLab,
+			owner:     "owner",
+			repo:      "repository",
+			cloneURL:  "https://gitlab.com/owner/repository",
+			browseURL: "https://gitlab.com/owner/repository",
 		},
 		{
-			name:         "CodeCommitSSH",
-			url:          "ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
-			scm:          CodeCommit,
-			owner:        "",
-			repo:         "repository",
-			sanitisedURL: "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
+			name:      "CodeCommitSSH",
+			url:       "ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
+			scm:       CodeCommit,
+			owner:     "",
+			repo:      "repository",
+			cloneURL:  "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
+			browseURL: "https://eu-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/repository",
 		},
 		{
-			name:         "CodeCommitHTTPS",
-			url:          "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
-			scm:          CodeCommit,
-			owner:        "",
-			repo:         "repository",
-			sanitisedURL: "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
+			name:      "CodeCommitHTTPS",
+			url:       "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
+			scm:       CodeCommit,
+			owner:     "",
+			repo:      "repository",
+			cloneURL:  "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
+			browseURL: "https://eu-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/repository",
 		},
 	}
 	for _, tt := range tests {
@@ -118,7 +126,8 @@ func TestRemote(t *testing.T) {
 			require.Equal(t, tt.scm, repo.Provider)
 			require.Equal(t, tt.owner, repo.Owner)
 			require.Equal(t, tt.repo, repo.Name)
-			require.Equal(t, tt.sanitisedURL, repo.URL)
+			require.Equal(t, tt.cloneURL, repo.CloneURL)
+			require.Equal(t, tt.browseURL, repo.BrowseURL)
 		})
 	}
 }

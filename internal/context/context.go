@@ -50,6 +50,15 @@ type Context struct {
 	ChangelogDiff     bool
 	ChangelogAll      bool
 	ChangelogExcludes []string
+	SCM               *SCM
+}
+
+// SCM provides details about the SCM provider of a repository
+type SCM struct {
+	Provider  git.SCM
+	URL       string
+	TagURL    string
+	CommitURL string
 }
 
 // New constructs a context that captures both runtime configuration and

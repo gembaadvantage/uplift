@@ -48,6 +48,8 @@ const (
 	appendHeader = "## [Unreleased]\n\n"
 )
 
+// TODO: create a custom function that resolves a template string
+
 var (
 	//go:embed template/new.tmpl
 	newTpl string
@@ -67,8 +69,10 @@ var (
 )
 
 type release struct {
-	Tag     git.TagEntry
-	Changes []git.LogEntry
+	Tag        git.TagEntry
+	TagURL     string
+	Changes    []git.LogEntry
+	ChangesURL string
 }
 
 // Task that generates a changelog for the current repository
@@ -168,8 +172,10 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 
 	return []release{
 		{
-			Tag:     git.DescribeTag(ctx.NextVersion.Raw),
-			Changes: ents,
+			Tag:        git.DescribeTag(ctx.NextVersion.Raw),
+			TagURL:     "This is a test {{.Tag}}",
+			Changes:    ents,
+			ChangesURL: "",
 		},
 	}, nil
 }
@@ -217,8 +223,10 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 		}
 
 		rels = append(rels, release{
-			Tag:     tags[i],
-			Changes: ents,
+			Tag:        tags[i],
+			TagURL:     "",
+			Changes:    ents,
+			ChangesURL: "",
 		})
 	}
 

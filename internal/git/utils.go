@@ -28,6 +28,8 @@ import (
 	"net/url"
 	"os/exec"
 	"strings"
+
+	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
 )
 
 // SCM ...
@@ -62,10 +64,11 @@ type TagEntry struct {
 
 // Repository ...
 type Repository struct {
-	Provider SCM
-	Owner    string
-	Name     string
-	URL      string
+	Provider  SCM
+	Owner     string
+	Name      string
+	CloneURL  string
+	BrowseURL string
 }
 
 // String prints out a user friendly string representation
@@ -123,18 +126,30 @@ func Remote() (Repository, error) {
 	if len(p) < 3 {
 		return Repository{}, fmt.Errorf("malformed repository URL: %s", remURL)
 	}
+	path := "https://" + u.Path
 
-	// No concept of an owner with CodeCommit repositories
+	// For most repositories the URL used to clone or browse the repo are identical
+	browse := path
+
 	owner := p[1]
 	if strings.Contains(p[0], "codecommit") {
+		// No concept of an owner with CodeCommit repositories
 		owner = ""
+
+		// Extract the region from the URL as this is required when constructing the browse URL
+		t, err := translate.RemoteHTTPS(path)
+		if err != nil {
+			return Repository{}, err
+		}
+		browse = fmt.Sprintf("https://%s.console.aws.amazon.com/codesuite/codecommit/repositories/repository", t.Region)
 	}
 
 	return Repository{
-		Provider: detectSCM(p[0]),
-		Owner:    owner,
-		Name:     p[len(p)-1],
-		URL:      fmt.Sprintf("https://%s", u.Path),
+		Provider:  detectSCM(p[0]),
+		Owner:     owner,
+		Name:      p[len(p)-1],
+		CloneURL:  path,
+		BrowseURL: browse,
 	}, nil
 }
 
