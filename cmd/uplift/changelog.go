@@ -25,6 +25,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -72,6 +73,9 @@ func newChangelogCmd(gopts *globalOptions, out io.Writer) *changelogCommand {
 		Long:  chlogDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Always lowercase sort
+			chglogCmd.Opts.Sort = strings.ToLower(chglogCmd.Opts.Sort)
+
 			if chglogCmd.Opts.DiffOnly {
 				// Run a condensed workflow when just calculating the diff
 				return writeChangelogDiff(chglogCmd.Opts, out)
