@@ -24,16 +24,11 @@ package scm
 
 import (
 	"fmt"
-	"regexp"
 
 	"github.com/apex/log"
 	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
-)
-
-var (
-	codecommitRgx = regexp.MustCompile(`^https://(.+@)?git-codecommit\.(.+)\.amazonaws.com/v1/repos/(.+)$`)
 )
 
 // Task that determines the SCM provider of a repository
@@ -57,7 +52,7 @@ func (t Task) Run(ctx *context.Context) error {
 		return err
 	}
 
-	ctx.SCM = &context.SCM{
+	ctx.SCM = context.SCM{
 		Provider: rem.Provider,
 		URL:      rem.BrowseURL,
 	}
@@ -86,5 +81,6 @@ func (t Task) Run(ctx *context.Context) error {
 		ctx.SCM.TagURL = fmt.Sprintf("%s/browse/refs/tags/{{.Ref}}?region=%s", rem.BrowseURL, t.Region)
 		ctx.SCM.CommitURL = fmt.Sprintf("%s/commit/{{.Hash}}?region=%s", rem.BrowseURL, t.Region)
 	}
+
 	return nil
 }

@@ -50,7 +50,7 @@ type Context struct {
 	ChangelogDiff     bool
 	ChangelogAll      bool
 	ChangelogExcludes []string
-	SCM               *SCM
+	SCM               SCM
 }
 
 // SCM provides details about the SCM provider of a repository

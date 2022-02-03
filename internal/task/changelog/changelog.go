@@ -45,10 +45,8 @@ const (
 	// ChangeDate defines a date formatting used when logging a new change
 	ChangeDate = "2006-01-02"
 
-	appendHeader = "## [Unreleased]\n\n"
+	appendHeader = "## Unreleased\n\n"
 )
-
-// TODO: create a custom function that resolves a template string
 
 var (
 	//go:embed template/new.tmpl
@@ -60,19 +58,22 @@ var (
 	//go:embed template/diff.tmpl
 	diffTpl string
 
-	newTplBody    = template.Must(template.New("new").Parse(newTpl))
-	appendTplBody = template.Must(template.New("append").Parse(appendTpl))
-	diffTplBody   = template.Must(template.New("diff").Parse(diffTpl))
+	funcs = template.FuncMap{
+		"tpl": execTemplate,
+	}
+
+	newTplBody    = template.Must(template.New("new").Funcs(funcs).Parse(newTpl))
+	appendTplBody = template.Must(template.New("append").Funcs(funcs).Parse(appendTpl))
+	diffTplBody   = template.Must(template.New("diff").Funcs(funcs).Parse(diffTpl))
 
 	// ErrNoAppendHeader is reported if a changelog is missing the expected append header
 	ErrNoAppendHeader = errors.New("changelog missing supported append header")
 )
 
 type release struct {
-	Tag        git.TagEntry
-	TagURL     string
-	Changes    []git.LogEntry
-	ChangesURL string
+	SCM     context.SCM
+	Tag     git.TagEntry
+	Changes []git.LogEntry
 }
 
 // Task that generates a changelog for the current repository
@@ -172,10 +173,9 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 
 	return []release{
 		{
-			Tag:        git.DescribeTag(ctx.NextVersion.Raw),
-			TagURL:     "This is a test {{.Tag}}",
-			Changes:    ents,
-			ChangesURL: "",
+			SCM:     ctx.SCM,
+			Tag:     git.DescribeTag(ctx.NextVersion.Raw),
+			Changes: ents,
 		},
 	}, nil
 }
@@ -223,10 +223,9 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 		}
 
 		rels = append(rels, release{
-			Tag:        tags[i],
-			TagURL:     "",
-			Changes:    ents,
-			ChangesURL: "",
+			SCM:     ctx.SCM,
+			Tag:     tags[i],
+			Changes: ents,
 		})
 	}
 
@@ -281,4 +280,13 @@ func appendChangelog(rels []release) error {
 
 	log.Debug("append to existing changelog in repository")
 	return ioutil.WriteFile(MarkdownFile, []byte(apnd), 0644)
+}
+
+func execTemplate(tmpl string, v interface{}) string {
+	t, _ := template.New("dynamic").Parse(tmpl)
+
+	var buf bytes.Buffer
+	t.Execute(&buf, v)
+
+	return buf.String()
 }

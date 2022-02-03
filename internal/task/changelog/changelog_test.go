@@ -38,6 +38,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO: tests
+// 1. new > links
+// 2. append > links
+// 3. diff > links
+
 func TestRun_NoNextTag(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommits(t, "first commit", "second commit", "third commit")
@@ -128,9 +133,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
 
-## [1.0.0] - 2021-09-17
+## 1.0.0 - 2021-09-17
 
 - %s first commit
 - %s initialise repo
@@ -144,6 +149,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 		NextVersion: semver.Version{
 			Raw: "1.1.0",
 		},
+		SCM: context.SCM{
+			Provider: git.Unrecognised,
+		},
 	}
 
 	err := Task{}.Run(ctx)
@@ -155,14 +163,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
 
-## [1.1.0] - %s
+## 1.1.0 - %s
 
 - %s third commit
 - %s second commit
 
-## [1.0.0] - 2021-09-17
+## 1.0.0 - 2021-09-17
 
 - %s first commit
 - %s %s
@@ -180,6 +188,9 @@ func TestRun_ChangelogEntriesFromFirstTag(t *testing.T) {
 		NextVersion: semver.Version{
 			Raw: "1.0.0",
 		},
+		SCM: context.SCM{
+			Provider: git.Unrecognised,
+		},
 	}
 
 	err := Task{}.Run(ctx)
@@ -191,9 +202,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
 
-## [1.0.0] - %s
+## 1.0.0 - %s
 
 - %s second commit
 - %s first commit
@@ -237,12 +248,15 @@ func TestChangelog_DiffOnly(t *testing.T) {
 		NextVersion: semver.Version{
 			Raw: "1.1.0",
 		},
+		SCM: context.SCM{
+			Provider: git.Unrecognised,
+		},
 	}
 
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	expected := fmt.Sprintf(`## [1.1.0] - %s
+	expected := fmt.Sprintf(`## 1.1.0 - %s
 
 - %s third commit
 - %s second commit
@@ -290,12 +304,15 @@ func TestChangelog_WithExcludes(t *testing.T) {
 		NextVersion: semver.Version{
 			Raw: "1.1.0",
 		},
+		SCM: context.SCM{
+			Provider: git.Unrecognised,
+		},
 	}
 
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	expected := fmt.Sprintf(`## [1.1.0] - %s
+	expected := fmt.Sprintf(`## 1.1.0 - %s
 
 - %s third commit
 - %s first commit
@@ -337,6 +354,9 @@ func TestChangelog_AllTags(t *testing.T) {
 
 	ctx := &context.Context{
 		ChangelogAll: true,
+		SCM: context.SCM{
+			Provider: git.Unrecognised,
+		},
 	}
 
 	err := Task{}.Run(ctx)
@@ -348,17 +368,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
 
-## [0.3.0] - %[1]s
+## 0.3.0 - %[1]s
 
 - %[2]s refactor: use go embed
 
-## [0.2.0] - %[1]s
+## 0.2.0 - %[1]s
 
 - %[3]s fix: first bug
 
-## [0.1.0] - %[1]s
+## 0.1.0 - %[1]s
 
 - %[4]s feat: first feature
 - %[5]s %[6]s
@@ -378,20 +398,23 @@ func TestChangelog_AllTagsDiffOnly(t *testing.T) {
 		ChangelogAll:  true,
 		ChangelogDiff: true,
 		Out:           &buf,
+		SCM: context.SCM{
+			Provider: git.Unrecognised,
+		},
 	}
 
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	expected := fmt.Sprintf(`## [0.3.0] - %[1]s
+	expected := fmt.Sprintf(`## 0.3.0 - %[1]s
 
 - %[2]s refactor: use go embed
 
-## [0.2.0] - %[1]s
+## 0.2.0 - %[1]s
 
 - %[3]s fix: first bug
 
-## [0.1.0] - %[1]s
+## 0.1.0 - %[1]s
 
 - %[4]s feat: first feature
 - %[5]s %[6]s
@@ -410,6 +433,9 @@ func TestChangelog_AllWithExcludes(t *testing.T) {
 	ctx := &context.Context{
 		ChangelogAll:      true,
 		ChangelogExcludes: []string{"fix"},
+		SCM: context.SCM{
+			Provider: git.Unrecognised,
+		},
 	}
 
 	err := Task{}.Run(ctx)
@@ -421,15 +447,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
 
-## [0.3.0] - %[1]s
+## 0.3.0 - %[1]s
 
 - %[2]s refactor: use go embed
 
-## [0.2.0] - %[1]s
+## 0.2.0 - %[1]s
 
-## [0.1.0] - %[1]s
+## 0.1.0 - %[1]s
 
 - %[3]s feat: first feature
 - %[4]s %[5]s
