@@ -155,6 +155,17 @@ func TestChangelog_AllAsDiff(t *testing.T) {
 	assert.Contains(t, chglog, "## [0.5.0]")
 }
 
+func TestChangelog_SortDescByDefault(t *testing.T) {
+	taggedRepo(t)
+
+	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+	err := chglogCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+	assert.Equal(t, "desc", chglogCmd.Opts.Sort)
+}
+
 func changelogExists(t *testing.T) bool {
 	t.Helper()
 

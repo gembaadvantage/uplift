@@ -50,6 +50,7 @@ type Context struct {
 	ChangelogDiff     bool
 	ChangelogAll      bool
 	ChangelogExcludes []string
+	ChangelogSort     string
 }
 
 // New constructs a context that captures both runtime configuration and

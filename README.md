@@ -238,6 +238,11 @@ bumps:
 # Customise how the changelog is generated
 # Defaults to generating a changelog without any customisations
 changelog:
+  # Change the sort order of the commits within each changelog entry. Supported
+  # values are asc or desc (case is ignored)
+  # Defaults to desc to mirror the default behaviour of "git log"
+  sort: asc
+
   # A list of commits to exclude during the creation of a changelog. Provide a list
   # of conventional commit prefixes to filter on
   # Defaults to an empty list

@@ -166,6 +166,10 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 		}
 	}
 
+	if ctx.ChangelogSort == "asc" {
+		reverse(ents)
+	}
+
 	return []release{
 		{
 			Tag:     git.DescribeTag(ctx.NextVersion.Raw),
@@ -214,6 +218,10 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 					}).Debug("commit")
 				}
 			}
+		}
+
+		if ctx.ChangelogSort == "asc" {
+			reverse(ents)
 		}
 
 		rels = append(rels, release{
@@ -273,4 +281,12 @@ func appendChangelog(rels []release) error {
 
 	log.Debug("append to existing changelog in repository")
 	return ioutil.WriteFile(MarkdownFile, []byte(apnd), 0644)
+}
+
+func reverse(ents []git.LogEntry) {
+	for i, j := 0, len(ents)-1; i < j; {
+		ents[i], ents[j] = ents[j], ents[i]
+		i++
+		j--
+	}
 }
