@@ -170,6 +170,14 @@ A complete changelog can be created, spanning the entire release history of a re
 uplift changelog --all
 ```
 
+#### Changing Sort Order
+
+Switch the order of commits within each changelog entry:
+
+```sh
+uplift changelog --sort asc
+```
+
 ### Release
 
 A full semantic release will be carried out. Combining both the `bump` and `tag` operations, in that order.
