@@ -198,7 +198,7 @@ func TestChangelog_SortOrder(t *testing.T) {
 	}
 }
 
-func TestChangelog_SortDescByDefault(t *testing.T) {
+func TestChangelog_SortEmptyByDefault(t *testing.T) {
 	taggedRepo(t)
 
 	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
@@ -206,7 +206,7 @@ func TestChangelog_SortDescByDefault(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.True(t, changelogExists(t))
-	assert.Equal(t, "desc", chglogCmd.Opts.Sort)
+	assert.Equal(t, "", chglogCmd.Opts.Sort)
 }
 
 func changelogExists(t *testing.T) bool {
