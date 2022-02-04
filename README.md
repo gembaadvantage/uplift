@@ -28,7 +28,8 @@ brew install uplift
 To use [Fish](https://gofi.sh/):
 
 ```sh
-gofish install uplift
+gofish rig add https://github.com/gembaadvantage/fish-food
+gofish install github.com/gembaadvantage/fish-food/uplift
 ```
 
 ### Scoop

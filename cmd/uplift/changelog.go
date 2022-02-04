@@ -145,7 +145,13 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	ctx.NoPush = opts.NoPush
 	ctx.ChangelogDiff = opts.DiffOnly
 	ctx.ChangelogAll = opts.All
+
+	// Sort order provided as a command-line flag takes precedence
 	ctx.ChangelogSort = opts.Sort
+	if ctx.ChangelogSort == "" {
+		ctx.ChangelogSort = cfg.Changelog.Sort
+	}
+
 	ctx.Out = out
 
 	// Merge config and command line arguments together
