@@ -48,6 +48,8 @@ func TestRelease(t *testing.T) {
 	actual, err := ioutil.ReadFile("test.txt")
 	require.NoError(t, err)
 	assert.NotEqual(t, string(data), string(actual))
+
+	assert.True(t, changelogExists(t))
 }
 
 func TestRelease_CheckFlag(t *testing.T) {

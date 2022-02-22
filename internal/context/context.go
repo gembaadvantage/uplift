@@ -51,6 +51,7 @@ type Context struct {
 	ChangelogAll      bool
 	ChangelogExcludes []string
 	ChangelogSort     string
+	ChangelogPreTag   bool
 }
 
 // New constructs a context that captures both runtime configuration and

@@ -91,6 +91,17 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
+	// To ensure the changelog is correctly generated during a release, the latest commit will
+	// need to be temporarily tagged. After changelog generation, it will be removed to
+	// ensure the release workflow behaves as expected. This will be a transparent operation
+	// that cannot be invoked by the caller
+	if ctx.ChangelogPreTag {
+		log.WithField("tag", ctx.NextVersion.Raw).Info("pre-tagging latest commit for changelog creation")
+		if err := git.Tag(ctx.NextVersion.Raw); err != nil {
+			return err
+		}
+	}
+
 	// Retrieve log entries based on the changelog expectations
 	var rels []release
 	var relErr error
@@ -192,7 +203,7 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 			nextTag = tags[i+1].Ref
 		}
 
-		log.WithField("tag", tags[i]).Info("determine changes for release")
+		log.WithField("tag", tags[i].Ref).Info("determine changes for release")
 		ents, err := git.LogBetween(tags[i].Ref, nextTag, ctx.ChangelogExcludes)
 		if err != nil {
 			return []release{}, err
