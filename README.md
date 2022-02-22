@@ -181,7 +181,7 @@ uplift changelog --sort asc
 
 ### Release
 
-A full semantic release will be carried out. Combining both the `bump` and `tag` operations, in that order.
+A full semantic release will be carried out. Combining the `bump`, `changelog` and `tag` operations, in that order.
 
 ```sh
 uplift release
