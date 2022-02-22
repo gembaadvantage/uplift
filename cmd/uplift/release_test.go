@@ -44,10 +44,17 @@ func TestRelease(t *testing.T) {
 
 	tags := git.AllTags()
 	assert.Len(t, tags, 1)
+	assert.Equal(t, tags[0].Ref, "0.1.0")
+
+	// Ensure the tag is associated with the correct commit
+	out, err := git.Clean(git.Run("tag", "-l", "0.1.0", `--format='%(subject)'`))
+	require.NoError(t, err)
+	assert.Contains(t, out, "ci(uplift):")
 
 	actual, err := ioutil.ReadFile("test.txt")
 	require.NoError(t, err)
 	assert.NotEqual(t, string(data), string(actual))
+	assert.Contains(t, string(actual), "version: 0.1.0")
 
 	assert.True(t, changelogExists(t))
 }
