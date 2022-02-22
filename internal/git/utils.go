@@ -168,7 +168,7 @@ func LatestCommit() (CommitDetails, error) {
 
 // Tag will create a lightweight tag against the repository and push it to the origin
 func Tag(tag string) error {
-	if _, err := Clean(Run("tag", tag)); err != nil {
+	if _, err := Clean(Run("tag", "-f", tag)); err != nil {
 		return err
 	}
 
@@ -194,6 +194,7 @@ func AnnotatedTag(tag string, cd CommitDetails) error {
 		"tag",
 		"-a",
 		tag,
+		"-f",
 		"-m",
 		cd.Message,
 	}

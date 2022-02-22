@@ -36,6 +36,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
+	"github.com/gembaadvantage/uplift/internal/task/changelog"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
 	"github.com/gembaadvantage/uplift/internal/task/gitpush"
@@ -108,6 +109,7 @@ func release(opts releaseOptions, out io.Writer) error {
 		nextversion.Task{},
 		nextcommit.Task{},
 		bump.Task{},
+		changelog.Task{},
 		gitpush.Task{},
 		gittag.Task{},
 	}
@@ -134,6 +136,9 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	ctx.DryRun = opts.DryRun
 	ctx.NoPush = opts.NoPush
 	ctx.Out = out
+
+	// Enable pre-tagging support for generating a changelog
+	ctx.ChangelogPreTag = true
 
 	// Handle prerelease suffix if one is provided
 	if opts.Prerelease != "" {
