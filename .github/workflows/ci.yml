@@ -48,7 +48,7 @@ jobs:
       - name: Install Task
         uses: arduino/setup-task@v1
       - name: Lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         with:
           skip-go-installation: true
       - name: Test
