@@ -52,12 +52,12 @@ func TestChangelog_DetectsTags(t *testing.T) {
 		{
 			name:      "SingleTag",
 			tags:      []string{"1.0.0"},
-			detectTag: "## [1.0.0]",
+			detectTag: "## 1.0.0",
 		},
 		{
 			name:      "MultipleTags",
 			tags:      []string{"1.0.0", "1.1.0", "1.2.0", "1.3.0"},
-			detectTag: "## [1.3.0]",
+			detectTag: "## 1.3.0",
 		},
 	}
 	for _, tt := range tests {
@@ -127,11 +127,11 @@ func TestChangelog_All(t *testing.T) {
 	assert.True(t, changelogExists(t))
 
 	chglog := readChangelog(t)
-	assert.Contains(t, chglog, "## [0.1.0]")
-	assert.Contains(t, chglog, "## [0.2.0]")
-	assert.Contains(t, chglog, "## [0.3.0]")
-	assert.Contains(t, chglog, "## [0.4.0]")
-	assert.Contains(t, chglog, "## [0.5.0]")
+	assert.Contains(t, chglog, "## 0.1.0")
+	assert.Contains(t, chglog, "## 0.2.0")
+	assert.Contains(t, chglog, "## 0.3.0")
+	assert.Contains(t, chglog, "## 0.4.0")
+	assert.Contains(t, chglog, "## 0.5.0")
 }
 
 func TestChangelog_AllAsDiff(t *testing.T) {
@@ -148,11 +148,11 @@ func TestChangelog_AllAsDiff(t *testing.T) {
 	assert.False(t, changelogExists(t))
 
 	chglog := buf.String()
-	assert.Contains(t, chglog, "## [0.1.0]")
-	assert.Contains(t, chglog, "## [0.2.0]")
-	assert.Contains(t, chglog, "## [0.3.0]")
-	assert.Contains(t, chglog, "## [0.4.0]")
-	assert.Contains(t, chglog, "## [0.5.0]")
+	assert.Contains(t, chglog, "## 0.1.0")
+	assert.Contains(t, chglog, "## 0.2.0")
+	assert.Contains(t, chglog, "## 0.3.0")
+	assert.Contains(t, chglog, "## 0.4.0")
+	assert.Contains(t, chglog, "## 0.5.0")
 }
 
 func TestChangelog_SortOrder(t *testing.T) {
