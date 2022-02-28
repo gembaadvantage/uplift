@@ -155,6 +155,60 @@ func TestChangelog_AllAsDiff(t *testing.T) {
 	assert.Contains(t, chglog, "## [0.5.0]")
 }
 
+func TestChangelog_SortOrder(t *testing.T) {
+	tests := []struct {
+		name     string
+		sort     string
+		expected string
+	}{
+		{
+			name:     "Ascending",
+			sort:     "asc",
+			expected: "asc",
+		},
+		{
+			name:     "AscendingUpper",
+			sort:     "ASC",
+			expected: "asc",
+		},
+		{
+			name:     "Descending",
+			sort:     "desc",
+			expected: "desc",
+		},
+		{
+			name:     "DescendingUpper",
+			sort:     "DESC",
+			expected: "desc",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			taggedRepo(t)
+
+			chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+			chglogCmd.Cmd.SetArgs([]string{"--sort", tt.sort})
+
+			err := chglogCmd.Cmd.Execute()
+			require.NoError(t, err)
+
+			assert.True(t, changelogExists(t))
+			assert.Equal(t, tt.expected, chglogCmd.Opts.Sort)
+		})
+	}
+}
+
+func TestChangelog_SortEmptyByDefault(t *testing.T) {
+	taggedRepo(t)
+
+	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+	err := chglogCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+	assert.Equal(t, "", chglogCmd.Opts.Sort)
+}
+
 func changelogExists(t *testing.T) bool {
 	t.Helper()
 

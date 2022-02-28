@@ -25,6 +25,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -50,6 +51,7 @@ type changelogOptions struct {
 	DiffOnly bool
 	Exclude  []string
 	All      bool
+	Sort     string
 	*globalOptions
 }
 
@@ -71,6 +73,9 @@ func newChangelogCmd(gopts *globalOptions, out io.Writer) *changelogCommand {
 		Long:  chlogDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Always lowercase sort
+			chglogCmd.Opts.Sort = strings.ToLower(chglogCmd.Opts.Sort)
+
 			if chglogCmd.Opts.DiffOnly {
 				// Run a condensed workflow when just calculating the diff
 				return writeChangelogDiff(chglogCmd.Opts, out)
@@ -84,6 +89,7 @@ func newChangelogCmd(gopts *globalOptions, out io.Writer) *changelogCommand {
 	f.BoolVar(&chglogCmd.Opts.DiffOnly, "diff-only", false, "output the changelog diff only")
 	f.BoolVar(&chglogCmd.Opts.All, "all", false, "generate a changelog from the entire history of this repository")
 	f.StringSliceVar(&chglogCmd.Opts.Exclude, "exclude", []string{}, "a list of conventional commit prefixes to exclude")
+	f.StringVar(&chglogCmd.Opts.Sort, "sort", "", "the sort order of commits within each changelog entry")
 
 	chglogCmd.Cmd = cmd
 	return chglogCmd
@@ -139,6 +145,13 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	ctx.NoPush = opts.NoPush
 	ctx.ChangelogDiff = opts.DiffOnly
 	ctx.ChangelogAll = opts.All
+
+	// Sort order provided as a command-line flag takes precedence
+	ctx.ChangelogSort = opts.Sort
+	if ctx.ChangelogSort == "" {
+		ctx.ChangelogSort = cfg.Changelog.Sort
+	}
+
 	ctx.Out = out
 
 	// Merge config and command line arguments together

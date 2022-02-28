@@ -96,6 +96,17 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
+	// To ensure the changelog is correctly generated during a release, the latest commit will
+	// need to be temporarily tagged. After changelog generation, it will be removed to
+	// ensure the release workflow behaves as expected. This will be a transparent operation
+	// that cannot be invoked by the caller
+	if ctx.ChangelogPreTag {
+		log.WithField("tag", ctx.NextVersion.Raw).Info("pre-tagging latest commit for changelog creation")
+		if err := git.Tag(ctx.NextVersion.Raw); err != nil {
+			return err
+		}
+	}
+
 	// Retrieve log entries based on the changelog expectations
 	var rels []release
 	var relErr error
@@ -171,6 +182,10 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 		}
 	}
 
+	if ctx.ChangelogSort == "asc" {
+		reverse(ents)
+	}
+
 	return []release{
 		{
 			SCM:     ctx.SCM,
@@ -194,7 +209,7 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 			nextTag = tags[i+1].Ref
 		}
 
-		log.WithField("tag", tags[i]).Info("determine changes for release")
+		log.WithField("tag", tags[i].Ref).Info("determine changes for release")
 		ents, err := git.LogBetween(tags[i].Ref, nextTag, ctx.ChangelogExcludes)
 		if err != nil {
 			return []release{}, err
@@ -220,6 +235,10 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 					}).Debug("commit")
 				}
 			}
+		}
+
+		if ctx.ChangelogSort == "asc" {
+			reverse(ents)
 		}
 
 		rels = append(rels, release{
@@ -289,4 +308,12 @@ func execTemplate(tmpl string, v interface{}) string {
 	t.Execute(&buf, v)
 
 	return buf.String()
+}
+
+func reverse(ents []git.LogEntry) {
+	for i, j := 0, len(ents)-1; i < j; {
+		ents[i], ents[j] = ents[j], ents[i]
+		i++
+		j--
+	}
 }

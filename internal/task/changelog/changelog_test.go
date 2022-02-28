@@ -38,11 +38,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: tests
-// 1. new > links
-// 2. append > links
-// 3. diff > links
-
 func TestRun_NoNextTag(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommits(t, "first commit", "second commit", "third commit")
@@ -69,7 +64,7 @@ func changelogExists(t *testing.T) bool {
 	return true
 }
 
-func TestRun_ChangelogCreatedIfNotExists(t *testing.T) {
+func TestRun_CreatedIfNotExists(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
 
@@ -85,7 +80,7 @@ func TestRun_ChangelogCreatedIfNotExists(t *testing.T) {
 	assert.True(t, changelogExists(t))
 }
 
-func TestRun_ChangelogStaged(t *testing.T) {
+func TestRun_Staged(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
 
@@ -121,7 +116,7 @@ This changelog is deliberately missing the append marker`
 	require.ErrorIs(t, err, ErrNoAppendHeader)
 }
 
-func TestRun_AppendToExistingChangelog(t *testing.T) {
+func TestRun_AppendToExisting(t *testing.T) {
 	ih := git.InitRepo(t)
 	h1 := git.EmptyCommitsAndTag(t, "1.0.0", "first commit")
 	h2 := git.EmptyCommitsAndTag(t, "1.1.0", "second commit", "third commit")
@@ -180,7 +175,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	assert.Equal(t, expected, readChangelog(t))
 }
 
-func TestRun_ChangelogEntriesFromFirstTag(t *testing.T) {
+func TestRun_EntriesFromFirstTag(t *testing.T) {
 	ih := git.InitRepo(t)
 	h := git.EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
 
@@ -233,7 +228,7 @@ func changelogHash(t *testing.T, hash string) string {
 	return fmt.Sprintf("`%s`", hash)
 }
 
-func TestChangelog_DiffOnly(t *testing.T) {
+func TestRun_DiffOnly(t *testing.T) {
 	git.InitRepo(t)
 	git.Tag("1.0.0")
 	h := git.EmptyCommitsAndTag(t, "1.1.0", "first commit", "second commit", "third commit")
@@ -267,7 +262,7 @@ func TestChangelog_DiffOnly(t *testing.T) {
 	assert.Equal(t, expected, buf.String())
 }
 
-func TestChangelog_NoLogEntries(t *testing.T) {
+func TestRun_NoLogEntries(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommitAndTag(t, "1.0.0", "commit")
 
@@ -288,7 +283,7 @@ func TestChangelog_NoLogEntries(t *testing.T) {
 	assert.False(t, changelogExists(t))
 }
 
-func TestChangelog_WithExcludes(t *testing.T) {
+func TestRun_WithExcludes(t *testing.T) {
 	git.InitRepo(t)
 	git.Tag("1.0.0")
 	h := git.EmptyCommitsAndTag(t, "1.1.0", "first commit", "exclude: second commit", "third commit", "ignore: forth commit")
@@ -322,7 +317,7 @@ func TestChangelog_WithExcludes(t *testing.T) {
 	assert.Equal(t, expected, buf.String())
 }
 
-func TestChangelog_ExcludeAllEntries(t *testing.T) {
+func TestRun_ExcludeAllEntries(t *testing.T) {
 	git.InitRepo(t)
 	git.Tag("1.0.0")
 	git.EmptyCommitsAndTag(t, "1.1.0", "prefix: first commit", "prefix: second commit", "prefix: third commit", "prefix: forth commit")
@@ -346,7 +341,7 @@ func TestChangelog_ExcludeAllEntries(t *testing.T) {
 	assert.Equal(t, "", buf.String())
 }
 
-func TestChangelog_AllTags(t *testing.T) {
+func TestRun_AllTags(t *testing.T) {
 	ih := git.InitRepo(t)
 	h1 := git.EmptyCommitAndTag(t, "0.1.0", "feat: first feature")
 	h2 := git.EmptyCommitAndTag(t, "0.2.0", "fix: first bug")
@@ -387,7 +382,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	assert.Equal(t, expected, readChangelog(t))
 }
 
-func TestChangelog_AllTagsDiffOnly(t *testing.T) {
+func TestRun_AllTagsDiffOnly(t *testing.T) {
 	ih := git.InitRepo(t)
 	h1 := git.EmptyCommitAndTag(t, "0.1.0", "feat: first feature")
 	h2 := git.EmptyCommitAndTag(t, "0.2.0", "fix: first bug")
@@ -424,7 +419,7 @@ func TestChangelog_AllTagsDiffOnly(t *testing.T) {
 	assert.Equal(t, expected, buf.String())
 }
 
-func TestChangelog_AllWithExcludes(t *testing.T) {
+func TestRun_AllWithExcludes(t *testing.T) {
 	ih := git.InitRepo(t)
 	h1 := git.EmptyCommitAndTag(t, "0.1.0", "feat: first feature")
 	git.EmptyCommitAndTag(t, "0.2.0", "fix: first bug")
@@ -460,6 +455,53 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - %[3]s feat: first feature
 - %[4]s %[5]s
 `, changelogDate(t), changelogHash(t, h2), changelogHash(t, h1), changelogHash(t, ih), git.InitCommit)
+
+	assert.Equal(t, expected, readChangelog(t))
+}
+
+func TestRun_SortCommitsAscending(t *testing.T) {
+	ih := git.InitRepo(t)
+	h1 := git.EmptyCommitsAndTag(t, "1.0.0", "docs: update to docs", "fix: first bug", "feat: first feature")
+	h2 := git.EmptyCommitsAndTag(t, "2.0.0", "ci: tweak scripts", "feat: next feature")
+
+	ctx := &context.Context{
+		ChangelogAll:  true,
+		ChangelogSort: "asc",
+		SCM: context.SCM{
+			Provider: git.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+## 2.0.0 - %[1]s
+
+- %[2]s ci: tweak scripts
+- %[3]s feat: next feature
+
+## 1.0.0 - %[1]s
+
+- %[4]s %[5]s
+- %[6]s docs: update to docs
+- %[7]s fix: first bug
+- %[8]s feat: first feature
+`, changelogDate(t),
+		changelogHash(t, h2[0]),
+		changelogHash(t, h2[1]),
+		changelogHash(t, ih),
+		git.InitCommit,
+		changelogHash(t, h1[0]),
+		changelogHash(t, h1[1]),
+		changelogHash(t, h1[2]))
 
 	assert.Equal(t, expected, readChangelog(t))
 }

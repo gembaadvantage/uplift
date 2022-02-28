@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -205,6 +206,16 @@ func TestLatestTag_NoSemanticTags(t *testing.T) {
 	assert.Equal(t, "", tag.Ref)
 }
 
+func TestDescribeTag(t *testing.T) {
+	InitRepo(t)
+	Run("tag", "1.0.0")
+
+	desc := DescribeTag("1.0.0")
+
+	assert.Equal(t, "1.0.0", desc.Ref)
+	assert.Equal(t, time.Now().Format("2006-01-02"), desc.Created)
+}
+
 func TestLatestCommit(t *testing.T) {
 	InitRepo(t)
 
@@ -229,6 +240,16 @@ func TestLatestCommit_MultipleCommits(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, c.Message, m)
+}
+
+func TestCommitDetails_String(t *testing.T) {
+	cd := CommitDetails{
+		Author:  "uplift",
+		Email:   "uplift@test.com",
+		Message: "this is a test commit",
+	}
+
+	assert.Equal(t, "uplift <uplift@test.com>\nthis is a test commit", cd.String())
 }
 
 func TestTag(t *testing.T) {
