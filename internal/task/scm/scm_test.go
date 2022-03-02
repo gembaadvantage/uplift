@@ -48,7 +48,7 @@ func TestRun(t *testing.T) {
 			name:      "GitLab",
 			remote:    "https://gitlab.com/owner/repository.git",
 			tagURL:    "https://gitlab.com/owner/repository/-/tags/{{.Ref}}",
-			commitURL: "https://gitlab.com/owner/repository/-/commit/{{.Has}}",
+			commitURL: "https://gitlab.com/owner/repository/-/commit/{{.Hash}}",
 		},
 		{
 			name:      "CodeCommit",

@@ -134,7 +134,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - %s first commit
 - %s initialise repo
-`, changelogHash(t, h1[0]), changelogHash(t, ih))
+`, abbrevHash(t, h1[0]), abbrevHash(t, ih))
 	ioutil.WriteFile(MarkdownFile, []byte(cl), 0644)
 
 	ctx := &context.Context{
@@ -169,8 +169,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - %s first commit
 - %s %s
-`, changelogDate(t), changelogHash(t, h2[1]), changelogHash(t, h2[0]), changelogHash(t, h1[0]),
-		changelogHash(t, ih), git.InitCommit)
+`, changelogDate(t), abbrevHash(t, h2[1]), abbrevHash(t, h2[0]), abbrevHash(t, h1[0]),
+		abbrevHash(t, ih), git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
@@ -204,7 +204,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - %s second commit
 - %s first commit
 - %s %s
-`, changelogDate(t), changelogHash(t, h[1]), changelogHash(t, h[0]), changelogHash(t, ih), git.InitCommit)
+`, changelogDate(t), abbrevHash(t, h[1]), abbrevHash(t, h[0]), abbrevHash(t, ih), git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
@@ -223,9 +223,9 @@ func changelogDate(t *testing.T) string {
 	return time.Now().UTC().Format(ChangeDate)
 }
 
-func changelogHash(t *testing.T, hash string) string {
+func abbrevHash(t *testing.T, hash string) string {
 	t.Helper()
-	return fmt.Sprintf("`%s`", hash)
+	return fmt.Sprintf("`%s`", hash[:7])
 }
 
 func TestRun_DiffOnly(t *testing.T) {
@@ -256,7 +256,7 @@ func TestRun_DiffOnly(t *testing.T) {
 - %s third commit
 - %s second commit
 - %s first commit
-`, changelogDate(t), changelogHash(t, h[2]), changelogHash(t, h[1]), changelogHash(t, h[0]))
+`, changelogDate(t), abbrevHash(t, h[2]), abbrevHash(t, h[1]), abbrevHash(t, h[0]))
 
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
@@ -311,7 +311,7 @@ func TestRun_WithExcludes(t *testing.T) {
 
 - %s third commit
 - %s first commit
-`, changelogDate(t), changelogHash(t, h[2]), changelogHash(t, h[0]))
+`, changelogDate(t), abbrevHash(t, h[2]), abbrevHash(t, h[0]))
 
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
@@ -377,7 +377,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - %[4]s feat: first feature
 - %[5]s %[6]s
-`, changelogDate(t), changelogHash(t, h3), changelogHash(t, h2), changelogHash(t, h1), changelogHash(t, ih), git.InitCommit)
+`, changelogDate(t), abbrevHash(t, h3), abbrevHash(t, h2), abbrevHash(t, h1), abbrevHash(t, ih), git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
@@ -413,7 +413,7 @@ func TestRun_AllTagsDiffOnly(t *testing.T) {
 
 - %[4]s feat: first feature
 - %[5]s %[6]s
-`, changelogDate(t), changelogHash(t, h3), changelogHash(t, h2), changelogHash(t, h1), changelogHash(t, ih), git.InitCommit)
+`, changelogDate(t), abbrevHash(t, h3), abbrevHash(t, h2), abbrevHash(t, h1), abbrevHash(t, ih), git.InitCommit)
 
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
@@ -454,7 +454,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - %[3]s feat: first feature
 - %[4]s %[5]s
-`, changelogDate(t), changelogHash(t, h2), changelogHash(t, h1), changelogHash(t, ih), git.InitCommit)
+`, changelogDate(t), abbrevHash(t, h2), abbrevHash(t, h1), abbrevHash(t, ih), git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
@@ -495,13 +495,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - %[7]s fix: first bug
 - %[8]s feat: first feature
 `, changelogDate(t),
-		changelogHash(t, h2[0]),
-		changelogHash(t, h2[1]),
-		changelogHash(t, ih),
+		abbrevHash(t, h2[0]),
+		abbrevHash(t, h2[1]),
+		abbrevHash(t, ih),
 		git.InitCommit,
-		changelogHash(t, h1[0]),
-		changelogHash(t, h1[1]),
-		changelogHash(t, h1[2]))
+		abbrevHash(t, h1[0]),
+		abbrevHash(t, h1[1]),
+		abbrevHash(t, h1[2]))
 
 	assert.Equal(t, expected, readChangelog(t))
+}
+
+func TestRun_IdentifiedSCM(t *testing.T) {
+	git.InitRepo(t)
+	h := git.EmptyCommitAndTag(t, "0.1.0", "feat: first feature")
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		ChangelogDiff: true,
+		Out:           &buf,
+		NextVersion: semver.Version{
+			Raw: "0.1.0",
+		},
+		SCM: context.SCM{
+			Provider:  git.GitHub,
+			TagURL:    "https://test.com/tag/{{.Ref}}",
+			CommitURL: "https://test.com/commit/{{.Hash}}",
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	tag := "[0.1.0](https://test.com/tag/0.1.0)"
+	hash := fmt.Sprintf("`[%s](https://test.com/commit/%s)`", h[:7], h)
+	expected := fmt.Sprintf(`## %s - %s
+
+- %s feat: first feature`, tag, changelogDate(t), hash)
+
+	assert.Contains(t, buf.String(), expected)
 }

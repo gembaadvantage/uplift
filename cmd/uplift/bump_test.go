@@ -36,7 +36,7 @@ func TestBump(t *testing.T) {
 	taggedRepo(t)
 	data := testFileWithConfig(t, "test.txt", ".uplift.yml")
 
-	bmpCmd := newBumpCmd(&globalOptions{}, os.Stdout)
+	bmpCmd := newBumpCmd(noChangesPushed(), os.Stdout)
 
 	err := bmpCmd.Cmd.Execute()
 	require.NoError(t, err)

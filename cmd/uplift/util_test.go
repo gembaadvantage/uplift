@@ -62,3 +62,7 @@ func upliftConfigFile(t *testing.T, name string) {
 	err := ioutil.WriteFile(name, []byte(yml), 0644)
 	require.NoError(t, err)
 }
+
+func noChangesPushed() *globalOptions {
+	return &globalOptions{NoPush: true}
+}

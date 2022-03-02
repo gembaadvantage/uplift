@@ -14,10 +14,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `{{.AbbrevHash}}` {{.Message}}
 {{end}}{{end}}
 
-{{- else -}}
-
+{{- else}}
 ## [{{.Tag.Ref}}]({{tpl .SCM.TagURL .Tag}}) - {{.Tag.Created}}
-{{$commitURL := .SCM.CommitURL}}
+{{- $commitURL := .SCM.CommitURL}}
 {{if ne (len .Changes) 0}}
 {{range $chg := .Changes -}}
 - `[{{.AbbrevHash}}]({{tpl $commitURL .}})` {{.Message}}

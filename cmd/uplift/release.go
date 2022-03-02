@@ -44,6 +44,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
+	"github.com/gembaadvantage/uplift/internal/task/scm"
 	"github.com/spf13/cobra"
 )
 
@@ -109,6 +110,7 @@ func release(opts releaseOptions, out io.Writer) error {
 		nextversion.Task{},
 		nextcommit.Task{},
 		bump.Task{},
+		scm.Task{},
 		changelog.Task{},
 		gitpush.Task{},
 		gittag.Task{},

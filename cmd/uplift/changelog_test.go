@@ -36,7 +36,8 @@ import (
 func TestChangelog(t *testing.T) {
 	taggedRepo(t)
 
-	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
+
 	err := chglogCmd.Cmd.Execute()
 	require.NoError(t, err)
 
@@ -64,7 +65,7 @@ func TestChangelog_DetectsTags(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tagRepoWith(t, tt.tags)
 
-			chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+			chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 			err := chglogCmd.Cmd.Execute()
 			require.NoError(t, err)
 
@@ -80,7 +81,7 @@ func TestChangelog_DiffOnly(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	chglogCmd := newChangelogCmd(&globalOptions{}, &buf)
+	chglogCmd := newChangelogCmd(noChangesPushed(), &buf)
 	chglogCmd.Cmd.SetArgs([]string{"--diff-only"})
 
 	err := chglogCmd.Cmd.Execute()
@@ -99,7 +100,7 @@ func TestChangelog_WithExclude(t *testing.T) {
 		"ci: a ci task",
 		"docs: some new docs")
 
-	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 	chglogCmd.Cmd.SetArgs([]string{"--exclude", "ci,docs"})
 
 	err := chglogCmd.Cmd.Execute()
@@ -118,7 +119,7 @@ func TestChangelog_WithExclude(t *testing.T) {
 func TestChangelog_All(t *testing.T) {
 	tagRepoWith(t, []string{"0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0"})
 
-	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 	chglogCmd.Cmd.SetArgs([]string{"--all"})
 
 	err := chglogCmd.Cmd.Execute()
@@ -139,7 +140,7 @@ func TestChangelog_AllAsDiff(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	chglogCmd := newChangelogCmd(&globalOptions{}, &buf)
+	chglogCmd := newChangelogCmd(noChangesPushed(), &buf)
 	chglogCmd.Cmd.SetArgs([]string{"--all", "--diff-only"})
 
 	err := chglogCmd.Cmd.Execute()
@@ -186,7 +187,7 @@ func TestChangelog_SortOrder(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			taggedRepo(t)
 
-			chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+			chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 			chglogCmd.Cmd.SetArgs([]string{"--sort", tt.sort})
 
 			err := chglogCmd.Cmd.Execute()
@@ -201,7 +202,7 @@ func TestChangelog_SortOrder(t *testing.T) {
 func TestChangelog_SortEmptyByDefault(t *testing.T) {
 	taggedRepo(t)
 
-	chglogCmd := newChangelogCmd(&globalOptions{}, os.Stdout)
+	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 	err := chglogCmd.Cmd.Execute()
 	require.NoError(t, err)
 

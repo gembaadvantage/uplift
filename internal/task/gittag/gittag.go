@@ -65,6 +65,8 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
+	// TODO: issue a separate push command
+
 	if ctx.Config.AnnotatedTags {
 		log.Info("tagged repository with annotated tag")
 		return git.AnnotatedTag(ctx.NextVersion.Raw, ctx.CommitDetails)

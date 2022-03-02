@@ -32,7 +32,8 @@ import (
 	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
 )
 
-// SCM ...
+// SCM is used for identifying the source code management tool used by the current
+// git repository
 type SCM string
 
 const (
@@ -62,7 +63,7 @@ type TagEntry struct {
 	Created string
 }
 
-// Repository ...
+// Repository contains details about a specific repository
 type Repository struct {
 	Provider  SCM
 	Owner     string
@@ -95,9 +96,9 @@ func IsRepo() bool {
 
 // Remote retrieves details about the remote origin of a repository
 func Remote() (Repository, error) {
-	remURL, err := Clean(Run("config", "--get", "remote.origin.url"))
+	remURL, err := Clean(Run("ls-remote", "--get-url"))
 	if err != nil {
-		return Repository{}, err
+		return Repository{}, errors.New("no remote origin detected")
 	}
 
 	// Strip off any trailing .git suffix
@@ -270,15 +271,6 @@ func Tag(tag string) error {
 		return err
 	}
 
-	// Inspect the repo for an origin. If no origin exists, then skip the push
-	if _, err := Clean(Run("remote", "show", "origin")); err != nil {
-		return nil
-	}
-
-	if _, err := Clean(Run("push", "origin", tag)); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -301,11 +293,11 @@ func AnnotatedTag(tag string, cd CommitDetails) error {
 		return err
 	}
 
-	// Inspect the repo for an origin. If no origin exists, then skip the push
-	if _, err := Clean(Run("remote", "show", "origin")); err != nil {
-		return nil
-	}
+	return nil
+}
 
+// PushTag attempts to push a newly created tag to the configured origin
+func PushTag(tag string) error {
 	if _, err := Clean(Run("push", "origin", tag)); err != nil {
 		return err
 	}

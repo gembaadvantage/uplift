@@ -36,6 +36,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/gitpush"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
+	"github.com/gembaadvantage/uplift/internal/task/scm"
 	"github.com/spf13/cobra"
 )
 
@@ -104,6 +105,7 @@ func writeChangelog(opts changelogOptions, out io.Writer) error {
 	tsks := []task.Runner{
 		lastcommit.Task{},
 		nextcommit.Task{},
+		scm.Task{},
 		changelog.Task{},
 		gitpush.Task{},
 	}

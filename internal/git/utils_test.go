@@ -135,6 +135,7 @@ func TestRemote(t *testing.T) {
 
 func TestRemote_NoRemoteSet(t *testing.T) {
 	InitRepo(t)
+	Run("remote", "remove", "origin")
 
 	_, err := Remote()
 	require.Error(t, err)

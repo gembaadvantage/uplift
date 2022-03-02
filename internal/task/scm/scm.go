@@ -64,15 +64,13 @@ func (t Task) Run(ctx *context.Context) error {
 
 	log.WithField("scm", rem.Provider).Info("scm provider identified")
 
-	// TODO: rename to template?
-
 	switch rem.Provider {
 	case git.GitHub:
 		ctx.SCM.TagURL = rem.BrowseURL + "/releases/tag/{{.Ref}}"
 		ctx.SCM.CommitURL = rem.BrowseURL + "/commit/{{.Hash}}"
 	case git.GitLab:
 		ctx.SCM.TagURL = rem.BrowseURL + "/-/tags/{{.Ref}}"
-		ctx.SCM.CommitURL = rem.BrowseURL + "/-/commit/{{.Has}}"
+		ctx.SCM.CommitURL = rem.BrowseURL + "/-/commit/{{.Hash}}"
 	case git.CodeCommit:
 		// CodeCommit URLs are a special case and require a region query parameter to be appended.
 		// Extract the region from the clone URL
