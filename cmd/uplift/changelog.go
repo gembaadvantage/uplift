@@ -33,7 +33,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
-	"github.com/gembaadvantage/uplift/internal/task/gitpush"
+	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/scm"
@@ -107,7 +107,7 @@ func writeChangelog(opts changelogOptions, out io.Writer) error {
 		nextcommit.Task{},
 		scm.Task{},
 		changelog.Task{},
-		gitpush.Task{},
+		gitcommit.Task{},
 	}
 
 	for _, tsk := range tsks {

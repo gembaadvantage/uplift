@@ -44,6 +44,7 @@ func TestRun(t *testing.T) {
 		NextVersion: semver.Version{
 			Raw: tag,
 		},
+		NoPush: true,
 	}
 
 	err := Task{}.Run(ctx)
@@ -121,6 +122,7 @@ func TestRun_AnnotatedTag(t *testing.T) {
 		Config: config.Uplift{
 			AnnotatedTags: true,
 		},
+		NoPush: true,
 	}
 
 	err := Task{}.Run(ctx)

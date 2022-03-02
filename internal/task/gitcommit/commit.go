@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package gitpush
+package gitcommit
 
 import (
 	"github.com/apex/log"
@@ -28,17 +28,18 @@ import (
 	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-// Task for pushing commits to a git remote
+// Task for committing all staged changes and optionally pushing
+// them to a git remote
 type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "git push"
+	return "git commit"
 }
 
 // Skip running the task
 func (t Task) Skip(ctx *context.Context) bool {
-	return ctx.NoPush || ctx.DryRun || ctx.NoVersionChanged
+	return ctx.DryRun || ctx.NoVersionChanged
 }
 
 // Run the task
@@ -58,6 +59,11 @@ func (t Task) Run(ctx *context.Context) error {
 		return err
 	}
 
-	log.Info("push commit to remote")
+	if ctx.NoPush {
+		log.Info("skipping push of commit to remote")
+		return nil
+	}
+
+	log.Info("pushing commit to remote")
 	return git.Push()
 }

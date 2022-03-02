@@ -39,7 +39,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
-	"github.com/gembaadvantage/uplift/internal/task/gitpush"
+	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
 	"github.com/gembaadvantage/uplift/internal/task/gittag"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
@@ -112,7 +112,7 @@ func release(opts releaseOptions, out io.Writer) error {
 		bump.Task{},
 		scm.Task{},
 		changelog.Task{},
-		gitpush.Task{},
+		gitcommit.Task{},
 		gittag.Task{},
 	}
 

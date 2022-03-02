@@ -65,13 +65,23 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
-	// TODO: issue a separate push command
-
 	if ctx.Config.AnnotatedTags {
 		log.Info("tagged repository with annotated tag")
-		return git.AnnotatedTag(ctx.NextVersion.Raw, ctx.CommitDetails)
+		if err := git.AnnotatedTag(ctx.NextVersion.Raw, ctx.CommitDetails); err != nil {
+			return err
+		}
+	} else {
+		log.Info("tagged repository with standard tag")
+		if err := git.Tag(ctx.NextVersion.Raw); err != nil {
+			return err
+		}
 	}
 
-	log.Info("tagged repository with standard tag")
-	return git.Tag(ctx.NextVersion.Raw)
+	if ctx.NoPush {
+		log.Info("skipping push of tag to remote")
+		return nil
+	}
+
+	log.Info("pushing tag to remote")
+	return git.PushTag(ctx.NextVersion.Raw)
 }
