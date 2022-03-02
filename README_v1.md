@@ -10,8 +10,6 @@ Semantic versioning the easy way. Automatic tagging and version bumping of files
 
 :octocat: Github [action](https://github.com/marketplace/actions/uplift-action) available.
 
-> Some breaking changes will be introduced during `v2` development of `uplift`. The `v1` README can be found [here](https://github.com/gembaadvantage/uplift/blob/main/README_v1.md)
-
 ## Install
 
 Binary downloads of `uplift` can be found on the [Releases](https://github.com/gembaadvantage/uplift/releases) page. Unpack the `uplift` binary and add it to your PATH.
