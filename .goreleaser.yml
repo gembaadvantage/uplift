@@ -102,19 +102,6 @@ scoop:
   description: "Semantic versioning the easy way"
   license: MIT
 
-snapcrafts:
-  - name_template: |-
-      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}-{{ .Arch }}
-    summary: "Semantic versioning the easy way"
-    description: |
-      Semantic versioning the easy way. Automatic tagging and version bumping of 
-      files in your repositories based on your commit messages. Powered by 
-      Conventional Commits. Easy to include in your CI.
-    grade: stable
-    confinement: classic
-    publish: true
-    license: MIT
-
 rigs:
   - rig:
       owner: gembaadvantage
