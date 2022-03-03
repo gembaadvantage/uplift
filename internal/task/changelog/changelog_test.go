@@ -528,7 +528,7 @@ func TestRun_IdentifiedSCM(t *testing.T) {
 	require.NoError(t, err)
 
 	tag := "[0.1.0](https://test.com/tag/0.1.0)"
-	hash := fmt.Sprintf("`[%s](https://test.com/commit/%s)`", h[:7], h)
+	hash := fmt.Sprintf("[`%s`](https://test.com/commit/%s)", h[:7], h)
 	expected := fmt.Sprintf(`## %s - %s
 
 - %s feat: first feature`, tag, changelogDate(t), hash)
