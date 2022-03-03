@@ -10,8 +10,6 @@ Semantic versioning the easy way. Automatic tagging and version bumping of files
 
 :octocat: Github [action](https://github.com/marketplace/actions/uplift-action) available.
 
-> ℹ️ Some breaking changes will be introduced during `v2` development of `uplift`. The `v1` README can be found [here](https://github.com/gembaadvantage/uplift/blob/main/README_v1.md)
-
 ## Install
 
 Binary downloads of `uplift` can be found on the [Releases](https://github.com/gembaadvantage/uplift/releases) page. Unpack the `uplift` binary and add it to your PATH.
@@ -129,7 +127,7 @@ $ uplift bump
 
 ### Changelog
 
-A changelog can be generated for the latest tagged semantic release and written to a `CHANGELOG.md` file. This file will be created if one doesn't already exist. Format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+A changelog can be generated for the latest tagged semantic release and written to a `CHANGELOG.md` file. File will be created if one doesn't exist. Format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ```sh
 $ uplift changelog
@@ -138,8 +136,6 @@ $ uplift changelog
       • retrieved latest commit   author=joe.bloggs email=joe.bloggs@example.com message=fix: a bug fix
    • next commit
       • changes will be committed with email=paul.t@gembaadvantage.com message=ci(uplift): uplifted for version 1.0.1 name=paul.t
-   • detect scm
-      • scm provider identified   scm=GitHub
    • changelog
       • determine changes for release tag=1.0.1
       • changeset identified      commits=3 date=2021-11-19 tag=1.0.1
@@ -148,21 +144,15 @@ $ uplift changelog
       • push commit to remote
 ```
 
-> ℹ️ Backwards compatibility between `v2` and `v1` isn't supported. Please migrate your existing `CHANGELOG.md` file:
-
-```sh
-uplift changelog --all
-```
-
 #### Diff Only
 
 Output the changelog diff without modifying an existing `CHANGELOG.md` by using the `--diff-only` flag:
 
 ```sh
 $ uplift changelog --diff-only --silent
-## 1.2.0 - 2021-11-23
+## [1.2.0] - 2021-11-23
 
-- `1c85055` feat: a brand new feature
+1c85055 feat: a brand new feature
 ```
 
 #### Exclude Commits

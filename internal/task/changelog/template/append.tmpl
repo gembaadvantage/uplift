@@ -1,7 +1,17 @@
-## [Unreleased]
+## Unreleased
 {{range $i, $property := .}}
-## [{{.Tag.Ref}}] - {{.Tag.Created}}
-{{ if ne (len .Changes) 0 }}
+
+{{- if eq .SCM.Provider "Unrecognised"}}
+## {{.Tag.Ref}} - {{.Tag.Created}}
+{{if ne (len .Changes) 0}}
 {{range $chg := .Changes -}}
-- {{.AbbrevHash}} {{.Message}}
-{{end}}{{end}}{{end}}
+- `{{.AbbrevHash}}` {{.Message}}
+{{end}}{{end}}
+
+{{- else}}
+## [{{.Tag.Ref}}]({{tpl .SCM.TagURL .Tag}}) - {{.Tag.Created}}
+{{- $commitURL := .SCM.CommitURL}}
+{{if ne (len .Changes) 0}}
+{{range $chg := .Changes -}}
+- [`{{.AbbrevHash}}`]({{tpl $commitURL .}}) {{.Message}}
+{{end}}{{end}}{{end}}{{end}}

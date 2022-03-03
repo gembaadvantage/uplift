@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 Gemba Advantage
+Copyright (c) 2022 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -52,6 +52,15 @@ type Context struct {
 	ChangelogExcludes []string
 	ChangelogSort     string
 	ChangelogPreTag   bool
+	SCM               SCM
+}
+
+// SCM provides details about the SCM provider of a repository
+type SCM struct {
+	Provider  git.SCM
+	URL       string
+	TagURL    string
+	CommitURL string
 }
 
 // New constructs a context that captures both runtime configuration and
@@ -61,5 +70,8 @@ func New(cfg config.Uplift, out io.Writer) *Context {
 		Context: ctx.Background(),
 		Config:  cfg,
 		Out:     out,
+		SCM: SCM{
+			Provider: git.Unrecognised,
+		},
 	}
 }

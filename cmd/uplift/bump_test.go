@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 Gemba Advantage
+Copyright (c) 2022 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ func TestBump(t *testing.T) {
 	taggedRepo(t)
 	data := testFileWithConfig(t, "test.txt", ".uplift.yml")
 
-	bmpCmd := newBumpCmd(&globalOptions{}, os.Stdout)
+	bmpCmd := newBumpCmd(noChangesPushed(), os.Stdout)
 
 	err := bmpCmd.Cmd.Execute()
 	require.NoError(t, err)

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 Gemba Advantage
+Copyright (c) 2022 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -61,4 +61,8 @@ func upliftConfigFile(t *testing.T, name string) {
 
 	err := ioutil.WriteFile(name, []byte(yml), 0644)
 	require.NoError(t, err)
+}
+
+func noChangesPushed() *globalOptions {
+	return &globalOptions{NoPush: true}
 }

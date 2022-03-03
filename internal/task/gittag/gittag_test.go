@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 Gemba Advantage
+Copyright (c) 2022 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,7 @@ func TestRun(t *testing.T) {
 		NextVersion: semver.Version{
 			Raw: tag,
 		},
+		NoPush: true,
 	}
 
 	err := Task{}.Run(ctx)
@@ -121,6 +122,7 @@ func TestRun_AnnotatedTag(t *testing.T) {
 		Config: config.Uplift{
 			AnnotatedTags: true,
 		},
+		NoPush: true,
 	}
 
 	err := Task{}.Run(ctx)

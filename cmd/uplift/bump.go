@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 Gemba Advantage
+Copyright (c) 2022 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
-	"github.com/gembaadvantage/uplift/internal/task/gitpush"
+	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
@@ -92,7 +92,7 @@ func bumpFiles(opts bumpOptions, out io.Writer) error {
 		nextversion.Task{},
 		nextcommit.Task{},
 		bump.Task{},
-		gitpush.Task{},
+		gitcommit.Task{},
 	}
 
 	for _, tsk := range tsks {

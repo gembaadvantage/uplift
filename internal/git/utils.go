@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 Gemba Advantage
+Copyright (c) 2022 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,22 @@ package git
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os/exec"
 	"strings"
+
+	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
+)
+
+// SCM is used for identifying the source code management tool used by the current
+// git repository
+type SCM string
+
+const (
+	GitHub       SCM = "GitHub"
+	GitLab       SCM = "GitLab"
+	CodeCommit   SCM = "CodeCommit"
+	Unrecognised SCM = "Unrecognised"
 )
 
 // CommitDetails contains mandatory details about a specific git commit
@@ -49,6 +63,15 @@ type TagEntry struct {
 	Created string
 }
 
+// Repository contains details about a specific repository
+type Repository struct {
+	Provider  SCM
+	Owner     string
+	Name      string
+	CloneURL  string
+	BrowseURL string
+}
+
 // String prints out a user friendly string representation
 func (c CommitDetails) String() string {
 	return fmt.Sprintf("%s <%s>\n%s", c.Author, c.Email, c.Message)
@@ -69,6 +92,82 @@ func Run(args ...string) (string, error) {
 func IsRepo() bool {
 	out, err := Run("rev-parse", "--is-inside-work-tree")
 	return err == nil && strings.TrimSpace(out) == "true"
+}
+
+// Remote retrieves details about the remote origin of a repository
+func Remote() (Repository, error) {
+	remURL, err := Clean(Run("ls-remote", "--get-url"))
+	if err != nil {
+		return Repository{}, errors.New("no remote origin detected")
+	}
+
+	// Strip off any trailing .git suffix
+	rem := strings.TrimRight(remURL, ".git")
+
+	if strings.HasPrefix(rem, "git@") {
+		// Sanitise any SSH based URL to ensure it is parseable
+		rem = strings.TrimPrefix(rem, "git@")
+		rem = strings.Replace(rem, ":", "/", 1)
+	} else if strings.HasPrefix(rem, "https://") {
+		// Sanitise any HTTPS based URL to ensure it is parseable. Handle username@password inclusion
+		rem = rem[strings.LastIndex(rem, ":")+1:]
+		rem = strings.TrimPrefix(rem, "//")
+	}
+
+	// Special use case for CodeCommit as that prefixes SSH URLs with ssh://
+	rem = strings.TrimPrefix(rem, "ssh://")
+
+	u, err := url.Parse(rem)
+	if err != nil {
+		return Repository{}, err
+	}
+
+	// Split into parts
+	p := strings.Split(u.Path, "/")
+	if len(p) < 3 {
+		return Repository{}, fmt.Errorf("malformed repository URL: %s", remURL)
+	}
+	path := "https://" + u.Path
+
+	// For most repositories the URL used to clone or browse the repo are identical
+	browse := path
+
+	owner := p[1]
+	if strings.Contains(p[0], "codecommit") {
+		// No concept of an owner with CodeCommit repositories
+		owner = ""
+
+		// Extract the region from the URL as this is required when constructing the browse URL
+		t, err := translate.RemoteHTTPS(path)
+		if err != nil {
+			return Repository{}, err
+		}
+		browse = fmt.Sprintf("https://%s.console.aws.amazon.com/codesuite/codecommit/repositories/repository", t.Region)
+	}
+
+	return Repository{
+		Provider:  detectSCM(p[0]),
+		Owner:     owner,
+		Name:      p[len(p)-1],
+		CloneURL:  path,
+		BrowseURL: browse,
+	}, nil
+}
+
+func detectSCM(host string) SCM {
+	switch host {
+	case "github.com":
+		return GitHub
+	case "gitlab.com":
+		return GitLab
+	}
+
+	// Handle special case CodeCommit URLs
+	if strings.Contains(host, "codecommit") {
+		return CodeCommit
+	}
+
+	return Unrecognised
 }
 
 // FetchTags retrieves all tags associated with the remote repository
@@ -172,15 +271,6 @@ func Tag(tag string) error {
 		return err
 	}
 
-	// Inspect the repo for an origin. If no origin exists, then skip the push
-	if _, err := Clean(Run("remote", "show", "origin")); err != nil {
-		return nil
-	}
-
-	if _, err := Clean(Run("push", "origin", tag)); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -203,11 +293,11 @@ func AnnotatedTag(tag string, cd CommitDetails) error {
 		return err
 	}
 
-	// Inspect the repo for an origin. If no origin exists, then skip the push
-	if _, err := Clean(Run("remote", "show", "origin")); err != nil {
-		return nil
-	}
+	return nil
+}
 
+// PushTag attempts to push a newly created tag to the configured origin
+func PushTag(tag string) error {
 	if _, err := Clean(Run("push", "origin", tag)); err != nil {
 		return err
 	}

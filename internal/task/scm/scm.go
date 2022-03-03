@@ -20,23 +20,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package currentversion
+package scm
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/apex/log"
+	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
-// Task that identifies the current semantic version of a repository
+// Task that determines the SCM provider of a repository
 type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "current version"
+	return "detect scm"
 }
 
 // Skip is disabled for this task
@@ -46,19 +46,39 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	if !git.IsRepo() {
-		return errors.New("current directory must be a git repo")
+	rem, err := git.Remote()
+	if err != nil {
+		log.Info("failed to identify scm provider of repository")
+		return err
 	}
 
-	tag := git.LatestTag()
-	if tag.Ref == "" {
-		log.Info("repository not tagged with version")
+	ctx.SCM = context.SCM{
+		Provider: rem.Provider,
+		URL:      rem.BrowseURL,
+	}
+
+	if rem.Provider == git.Unrecognised {
+		log.Info("no recognised scm provider detected")
 		return nil
 	}
 
-	// Only a semantic version tag will have been retrieved by this point
-	ctx.CurrentVersion, _ = semver.Parse(tag.Ref)
+	log.WithField("scm", rem.Provider).Info("scm provider identified")
 
-	log.WithField("current", ctx.CurrentVersion).Info("identified version")
+	switch rem.Provider {
+	case git.GitHub:
+		ctx.SCM.TagURL = rem.BrowseURL + "/releases/tag/{{.Ref}}"
+		ctx.SCM.CommitURL = rem.BrowseURL + "/commit/{{.Hash}}"
+	case git.GitLab:
+		ctx.SCM.TagURL = rem.BrowseURL + "/-/tags/{{.Ref}}"
+		ctx.SCM.CommitURL = rem.BrowseURL + "/-/commit/{{.Hash}}"
+	case git.CodeCommit:
+		// CodeCommit URLs are a special case and require a region query parameter to be appended.
+		// Extract the region from the clone URL
+		t, _ := translate.RemoteHTTPS(rem.CloneURL)
+
+		ctx.SCM.TagURL = fmt.Sprintf("%s/browse/refs/tags/{{.Ref}}?region=%s", rem.BrowseURL, t.Region)
+		ctx.SCM.CommitURL = fmt.Sprintf("%s/commit/{{.Hash}}?region=%s", rem.BrowseURL, t.Region)
+	}
+
 	return nil
 }

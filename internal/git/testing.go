@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 Gemba Advantage
+Copyright (c) 2022 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@ package git
 
 import (
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -46,7 +45,27 @@ func InitRepo(t *testing.T) string {
 	_, err := Run("init")
 	require.NoError(t, err)
 
+	// Set a default origin that can be changed if needed
+	RemoteOrigin(t, "http://example.com/project/repository")
+
 	return EmptyCommit(t, InitCommit)
+}
+
+// RemoteOrigin sets the URL of the remote origin associated with the current git repository
+func RemoteOrigin(t *testing.T, url string) {
+	t.Helper()
+
+	// If an origin already exists ensure it is removed first
+	Run("remote", "remove", "origin")
+
+	_, err := Run("remote", "add", "origin", url)
+	require.NoError(t, err)
+
+	_, err = Run("config", "branch.main.remote", "origin")
+	require.NoError(t, err)
+
+	_, err = Run("config", "branch.main.merge", "refs/heads/main")
+	require.NoError(t, err)
 }
 
 // MkTmpDir creates an empty directory that is not a git repository. Once created the
@@ -81,15 +100,14 @@ func EmptyCommit(t *testing.T, commit string) string {
 		commit,
 	}
 
-	out, err := Run(args...)
+	_, err := Run(args...)
 	require.NoError(t, err)
 
-	return abbrevHash(out)
-}
+	// Grab the unabbreviated hash of the newly created commit
+	out, err := Clean(Run("rev-parse", "HEAD"))
+	require.NoError(t, err)
 
-func abbrevHash(m string) string {
-	i := strings.Index(m, "]")
-	return m[i-7 : i]
+	return out
 }
 
 // EmptyCommits will create any number of empty commits without the need for modifying any

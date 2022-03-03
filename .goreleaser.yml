@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Gemba Advantage
+# Copyright (c) 2022 Gemba Advantage
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -101,19 +101,6 @@ scoop:
   homepage: "https://github.com/gembaadvantage/uplift"
   description: "Semantic versioning the easy way"
   license: MIT
-
-snapcrafts:
-  - name_template: |-
-      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}-{{ .Arch }}
-    summary: "Semantic versioning the easy way"
-    description: |
-      Semantic versioning the easy way. Automatic tagging and version bumping of 
-      files in your repositories based on your commit messages. Powered by 
-      Conventional Commits. Easy to include in your CI.
-    grade: stable
-    confinement: classic
-    publish: true
-    license: MIT
 
 rigs:
   - rig:

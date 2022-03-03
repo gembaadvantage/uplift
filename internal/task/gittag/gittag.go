@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 Gemba Advantage
+Copyright (c) 2022 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -67,9 +67,21 @@ func (t Task) Run(ctx *context.Context) error {
 
 	if ctx.Config.AnnotatedTags {
 		log.Info("tagged repository with annotated tag")
-		return git.AnnotatedTag(ctx.NextVersion.Raw, ctx.CommitDetails)
+		if err := git.AnnotatedTag(ctx.NextVersion.Raw, ctx.CommitDetails); err != nil {
+			return err
+		}
+	} else {
+		log.Info("tagged repository with standard tag")
+		if err := git.Tag(ctx.NextVersion.Raw); err != nil {
+			return err
+		}
 	}
 
-	log.Info("tagged repository with standard tag")
-	return git.Tag(ctx.NextVersion.Raw)
+	if ctx.NoPush {
+		log.Info("skipping push of tag to remote")
+		return nil
+	}
+
+	log.Info("pushing tag to remote")
+	return git.PushTag(ctx.NextVersion.Raw)
 }

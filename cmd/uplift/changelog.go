@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 Gemba Advantage
+Copyright (c) 2022 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,9 +33,10 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
-	"github.com/gembaadvantage/uplift/internal/task/gitpush"
+	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
+	"github.com/gembaadvantage/uplift/internal/task/scm"
 	"github.com/spf13/cobra"
 )
 
@@ -104,8 +105,9 @@ func writeChangelog(opts changelogOptions, out io.Writer) error {
 	tsks := []task.Runner{
 		lastcommit.Task{},
 		nextcommit.Task{},
+		scm.Task{},
 		changelog.Task{},
-		gitpush.Task{},
+		gitcommit.Task{},
 	}
 
 	for _, tsk := range tsks {

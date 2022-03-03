@@ -20,45 +20,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package currentversion
+package context
 
 import (
-	"errors"
+	"os"
+	"testing"
 
-	"github.com/apex/log"
-	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/stretchr/testify/assert"
 )
 
-// Task that identifies the current semantic version of a repository
-type Task struct{}
+func TestNew_DefaultSCMToUnrecognised(t *testing.T) {
+	ctx := New(config.Uplift{}, os.Stdout)
 
-// String generates a string representation of the task
-func (t Task) String() string {
-	return "current version"
-}
-
-// Skip is disabled for this task
-func (t Task) Skip(ctx *context.Context) bool {
-	return false
-}
-
-// Run the task
-func (t Task) Run(ctx *context.Context) error {
-	if !git.IsRepo() {
-		return errors.New("current directory must be a git repo")
-	}
-
-	tag := git.LatestTag()
-	if tag.Ref == "" {
-		log.Info("repository not tagged with version")
-		return nil
-	}
-
-	// Only a semantic version tag will have been retrieved by this point
-	ctx.CurrentVersion, _ = semver.Parse(tag.Ref)
-
-	log.WithField("current", ctx.CurrentVersion).Info("identified version")
-	return nil
+	assert.Equal(t, git.Unrecognised, ctx.SCM.Provider)
 }

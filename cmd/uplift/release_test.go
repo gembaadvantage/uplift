@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 Gemba Advantage
+Copyright (c) 2022 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ func TestRelease(t *testing.T) {
 	git.EmptyCommit(t, "feat: this is a release")
 	data := testFileWithConfig(t, "test.txt", ".uplift.yml")
 
-	relCmd := newReleaseCmd(&globalOptions{}, os.Stdout)
+	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
 
 	err := relCmd.Cmd.Execute()
 	require.NoError(t, err)
@@ -86,7 +86,7 @@ func TestRelease_PrereleaseFlag(t *testing.T) {
 	git.EmptyCommit(t, "feat: this is a release")
 	testFileWithConfig(t, "test.txt", ".uplift.yml")
 
-	relCmd := newReleaseCmd(&globalOptions{}, os.Stdout)
+	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
 	relCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
 
 	err := relCmd.Cmd.Execute()

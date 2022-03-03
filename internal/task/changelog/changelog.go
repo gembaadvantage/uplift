@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 Gemba Advantage
+Copyright (c) 2022 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@ const (
 	// ChangeDate defines a date formatting used when logging a new change
 	ChangeDate = "2006-01-02"
 
-	appendHeader = "## [Unreleased]\n\n"
+	appendHeader = "## Unreleased\n\n"
 )
 
 var (
@@ -58,15 +58,20 @@ var (
 	//go:embed template/diff.tmpl
 	diffTpl string
 
-	newTplBody    = template.Must(template.New("new").Parse(newTpl))
-	appendTplBody = template.Must(template.New("append").Parse(appendTpl))
-	diffTplBody   = template.Must(template.New("diff").Parse(diffTpl))
+	funcs = template.FuncMap{
+		"tpl": execTemplate,
+	}
+
+	newTplBody    = template.Must(template.New("new").Funcs(funcs).Parse(newTpl))
+	appendTplBody = template.Must(template.New("append").Funcs(funcs).Parse(appendTpl))
+	diffTplBody   = template.Must(template.New("diff").Funcs(funcs).Parse(diffTpl))
 
 	// ErrNoAppendHeader is reported if a changelog is missing the expected append header
 	ErrNoAppendHeader = errors.New("changelog missing supported append header")
 )
 
 type release struct {
+	SCM     context.SCM
 	Tag     git.TagEntry
 	Changes []git.LogEntry
 }
@@ -183,6 +188,7 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 
 	return []release{
 		{
+			SCM:     ctx.SCM,
 			Tag:     git.DescribeTag(ctx.NextVersion.Raw),
 			Changes: ents,
 		},
@@ -236,6 +242,7 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 		}
 
 		rels = append(rels, release{
+			SCM:     ctx.SCM,
 			Tag:     tags[i],
 			Changes: ents,
 		})
@@ -292,6 +299,15 @@ func appendChangelog(rels []release) error {
 
 	log.Debug("append to existing changelog in repository")
 	return ioutil.WriteFile(MarkdownFile, []byte(apnd), 0644)
+}
+
+func execTemplate(tmpl string, v interface{}) string {
+	t, _ := template.New("dynamic").Parse(tmpl)
+
+	var buf bytes.Buffer
+	t.Execute(&buf, v)
+
+	return buf.String()
 }
 
 func reverse(ents []git.LogEntry) {
