@@ -140,7 +140,7 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	ctx.Out = out
 
 	// Enable pre-tagging support for generating a changelog
-	ctx.ChangelogPreTag = true
+	ctx.Changelog.PreTag = true
 
 	// Handle prerelease suffix if one is provided
 	if opts.Prerelease != "" {

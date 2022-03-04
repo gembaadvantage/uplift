@@ -34,25 +34,21 @@ import (
 // Context provides a way to share common state across tasks
 type Context struct {
 	ctx.Context
-	Out               io.Writer
-	Config            config.Uplift
-	DryRun            bool
-	Debug             bool
-	CurrentVersion    semver.Version
-	NextVersion       semver.Version
-	Prerelease        string
-	Metadata          string
-	NoVersionChanged  bool
-	CommitDetails     git.CommitDetails
-	FetchTags         bool
-	NextTagOnly       bool
-	NoPush            bool
-	ChangelogDiff     bool
-	ChangelogAll      bool
-	ChangelogExcludes []string
-	ChangelogSort     string
-	ChangelogPreTag   bool
-	SCM               SCM
+	Out              io.Writer
+	Config           config.Uplift
+	DryRun           bool
+	Debug            bool
+	CurrentVersion   semver.Version
+	NextVersion      semver.Version
+	Prerelease       string
+	Metadata         string
+	NoVersionChanged bool
+	CommitDetails    git.CommitDetails
+	FetchTags        bool
+	NextTagOnly      bool
+	NoPush           bool
+	Changelog        Changelog
+	SCM              SCM
 }
 
 // SCM provides details about the SCM provider of a repository
@@ -61,6 +57,16 @@ type SCM struct {
 	URL       string
 	TagURL    string
 	CommitURL string
+}
+
+// Changelog provides details about how the changelog should be managed
+// for the current repository
+type Changelog struct {
+	All      bool
+	DiffOnly bool
+	Exclude  []string
+	Sort     string
+	PreTag   bool
 }
 
 // New constructs a context that captures both runtime configuration and

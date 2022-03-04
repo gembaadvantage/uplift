@@ -210,6 +210,22 @@ func TestChangelog_SortEmptyByDefault(t *testing.T) {
 	assert.Equal(t, "", chglogCmd.Opts.Sort)
 }
 
+func TestChangelog_ExcludesUpliftCommitByDefault(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommitsAndTag(t, "0.1.0", "ci: tweak workflow", "fix: a bug fix", "ci(uplift): a new release")
+
+	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
+	err := chglogCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+
+	chglog := readChangelog(t)
+	assert.NotContains(t, chglog, "ci(uplift): a new release")
+	assert.Contains(t, chglog, "fix: a bug fix")
+	assert.Contains(t, chglog, "ci: tweak workflow")
+}
+
 func changelogExists(t *testing.T) bool {
 	t.Helper()
 

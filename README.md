@@ -263,7 +263,8 @@ changelog:
   sort: asc
 
   # A list of commits to exclude during the creation of a changelog. Provide a list
-  # of conventional commit prefixes to filter on
+  # of conventional commit prefixes to filter on. Auto-generated commits from uplift
+  # will always be excluded
   # Defaults to an empty list
   exclude:
     - chore(deps)
