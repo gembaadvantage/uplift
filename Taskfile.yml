@@ -40,6 +40,7 @@ tasks:
     desc: Lint the code using golangci
     cmds:
       - golangci-lint run --timeout 5m0s
+      - hadolint Dockerfile
 
   clean:
     desc: Remove any built artifacts
