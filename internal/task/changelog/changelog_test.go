@@ -235,8 +235,10 @@ func TestRun_DiffOnly(t *testing.T) {
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
-		Out:           &buf,
-		ChangelogDiff: true,
+		Out: &buf,
+		Changelog: context.Changelog{
+			DiffOnly: true,
+		},
 		CurrentVersion: semver.Version{
 			Raw: "1.0.0",
 		},
@@ -290,9 +292,11 @@ func TestRun_WithExcludes(t *testing.T) {
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
-		Out:               &buf,
-		ChangelogDiff:     true,
-		ChangelogExcludes: []string{"exclude", "ignore"},
+		Out: &buf,
+		Changelog: context.Changelog{
+			DiffOnly: true,
+			Exclude:  []string{"exclude", "ignore"},
+		},
 		CurrentVersion: semver.Version{
 			Raw: "1.0.0",
 		},
@@ -324,8 +328,10 @@ func TestRun_ExcludeAllEntries(t *testing.T) {
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
-		Out:               &buf,
-		ChangelogExcludes: []string{"prefix"},
+		Out: &buf,
+		Changelog: context.Changelog{
+			Exclude: []string{"prefix"},
+		},
 		CurrentVersion: semver.Version{
 			Raw: "1.0.0",
 		},
@@ -348,7 +354,9 @@ func TestRun_AllTags(t *testing.T) {
 	h3 := git.EmptyCommitAndTag(t, "0.3.0", "refactor: use go embed")
 
 	ctx := &context.Context{
-		ChangelogAll: true,
+		Changelog: context.Changelog{
+			All: true,
+		},
 		SCM: context.SCM{
 			Provider: git.Unrecognised,
 		},
@@ -390,9 +398,11 @@ func TestRun_AllTagsDiffOnly(t *testing.T) {
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
-		ChangelogAll:  true,
-		ChangelogDiff: true,
-		Out:           &buf,
+		Changelog: context.Changelog{
+			All:      true,
+			DiffOnly: true,
+		},
+		Out: &buf,
 		SCM: context.SCM{
 			Provider: git.Unrecognised,
 		},
@@ -426,8 +436,10 @@ func TestRun_AllWithExcludes(t *testing.T) {
 	h2 := git.EmptyCommitAndTag(t, "0.3.0", "refactor: use go embed")
 
 	ctx := &context.Context{
-		ChangelogAll:      true,
-		ChangelogExcludes: []string{"fix"},
+		Changelog: context.Changelog{
+			All:     true,
+			Exclude: []string{"fix"},
+		},
 		SCM: context.SCM{
 			Provider: git.Unrecognised,
 		},
@@ -465,8 +477,10 @@ func TestRun_SortCommitsAscending(t *testing.T) {
 	h2 := git.EmptyCommitsAndTag(t, "2.0.0", "ci: tweak scripts", "feat: next feature")
 
 	ctx := &context.Context{
-		ChangelogAll:  true,
-		ChangelogSort: "asc",
+		Changelog: context.Changelog{
+			All:  true,
+			Sort: "asc",
+		},
 		SCM: context.SCM{
 			Provider: git.Unrecognised,
 		},
@@ -512,8 +526,10 @@ func TestRun_IdentifiedSCM(t *testing.T) {
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
-		ChangelogDiff: true,
-		Out:           &buf,
+		Changelog: context.Changelog{
+			DiffOnly: true,
+		},
+		Out: &buf,
 		NextVersion: semver.Version{
 			Raw: "0.1.0",
 		},

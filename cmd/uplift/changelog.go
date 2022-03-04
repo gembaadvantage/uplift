@@ -145,22 +145,25 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	ctx.Debug = opts.Debug
 	ctx.DryRun = opts.DryRun
 	ctx.NoPush = opts.NoPush
-	ctx.ChangelogDiff = opts.DiffOnly
-	ctx.ChangelogAll = opts.All
+	ctx.Changelog.DiffOnly = opts.DiffOnly
+	ctx.Changelog.All = opts.All
 
 	// Sort order provided as a command-line flag takes precedence
-	ctx.ChangelogSort = opts.Sort
-	if ctx.ChangelogSort == "" {
-		ctx.ChangelogSort = cfg.Changelog.Sort
+	ctx.Changelog.Sort = opts.Sort
+	if ctx.Changelog.Sort == "" {
+		ctx.Changelog.Sort = cfg.Changelog.Sort
 	}
 
 	ctx.Out = out
 
 	// Merge config and command line arguments together
-	ctx.ChangelogExcludes = opts.Exclude
-	ctx.ChangelogExcludes = append(ctx.ChangelogExcludes, ctx.Config.Changelog.Exclude...)
+	ctx.Changelog.Exclude = opts.Exclude
+	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, ctx.Config.Changelog.Exclude...)
 
-	if !ctx.ChangelogAll {
+	// By default ensure the ci(uplift): commits are excluded also
+	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, "ci(uplift):")
+
+	if !ctx.Changelog.All {
 		// Attempt to retrieve the latest 2 tags for generating a changelog entry
 		tags := git.AllTags()
 		if len(tags) == 1 {

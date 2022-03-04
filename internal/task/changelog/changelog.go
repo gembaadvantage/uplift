@@ -91,7 +91,7 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	if !ctx.ChangelogAll && ctx.NextVersion.Raw == "" {
+	if !ctx.Changelog.All && ctx.NextVersion.Raw == "" {
 		log.Info("no release detected, skipping changelog")
 		return nil
 	}
@@ -100,7 +100,7 @@ func (t Task) Run(ctx *context.Context) error {
 	// need to be temporarily tagged. After changelog generation, it will be removed to
 	// ensure the release workflow behaves as expected. This will be a transparent operation
 	// that cannot be invoked by the caller
-	if ctx.ChangelogPreTag {
+	if ctx.Changelog.PreTag {
 		log.WithField("tag", ctx.NextVersion.Raw).Info("pre-tagging latest commit for changelog creation")
 		if err := git.Tag(ctx.NextVersion.Raw); err != nil {
 			return err
@@ -110,7 +110,7 @@ func (t Task) Run(ctx *context.Context) error {
 	// Retrieve log entries based on the changelog expectations
 	var rels []release
 	var relErr error
-	if ctx.ChangelogAll {
+	if ctx.Changelog.All {
 		rels, relErr = changelogReleases(ctx)
 	} else {
 		rels, relErr = changelogRelease(ctx)
@@ -129,7 +129,7 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
-	if ctx.ChangelogDiff {
+	if ctx.Changelog.DiffOnly {
 		diff, err := diffChangelog(rels)
 		if err != nil {
 			return err
@@ -139,7 +139,7 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	var chgErr error
-	if noChangelogExists() || ctx.ChangelogAll {
+	if noChangelogExists() || ctx.Changelog.All {
 		chgErr = newChangelog(rels)
 	} else {
 		chgErr = appendChangelog(rels)
@@ -154,7 +154,7 @@ func (t Task) Run(ctx *context.Context) error {
 
 func changelogRelease(ctx *context.Context) ([]release, error) {
 	log.WithField("tag", ctx.NextVersion.Raw).Info("determine changes for release")
-	ents, err := git.LogBetween(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw, ctx.ChangelogExcludes)
+	ents, err := git.LogBetween(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw, ctx.Changelog.Exclude)
 	if err != nil {
 		return []release{}, err
 	}
@@ -182,7 +182,7 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 		}
 	}
 
-	if ctx.ChangelogSort == "asc" {
+	if ctx.Changelog.Sort == "asc" {
 		reverse(ents)
 	}
 
@@ -210,7 +210,7 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 		}
 
 		log.WithField("tag", tags[i].Ref).Info("determine changes for release")
-		ents, err := git.LogBetween(tags[i].Ref, nextTag, ctx.ChangelogExcludes)
+		ents, err := git.LogBetween(tags[i].Ref, nextTag, ctx.Changelog.Exclude)
 		if err != nil {
 			return []release{}, err
 		}
@@ -237,7 +237,7 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 			}
 		}
 
-		if ctx.ChangelogSort == "asc" {
+		if ctx.Changelog.Sort == "asc" {
 			reverse(ents)
 		}
 
