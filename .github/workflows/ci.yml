@@ -48,10 +48,14 @@ jobs:
             ${{ runner.os }}-go-
       - name: Install Task
         uses: arduino/setup-task@v1
-      - name: Lint
+      - name: Lint Code
         uses: golangci/golangci-lint-action@v3.1.0
         with:
           skip-go-installation: true
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v1.6.0
+        with:
+          dockerfile: Dockerfile
       - name: Test
         run: task test
       - name: Code Coverage

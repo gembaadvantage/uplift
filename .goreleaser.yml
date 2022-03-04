@@ -21,7 +21,7 @@
 builds:
   - id: uplift
     main: ./cmd/uplift
-    binary: uplift
+    binary: bin/uplift
     ldflags:
       - -s -w
       - -X github.com/gembaadvantage/uplift/internal/version.version={{.Tag}}
@@ -65,6 +65,26 @@ archives:
 
 signs:
   - artifacts: checksum
+
+dockers:
+  - image_templates:
+      - "gembaadvantage/uplift:{{ .Tag }}"
+      - "gembaadvantage/uplift:latest"
+      - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}"
+      - "ghcr.io/gembaadvantage/uplift:latest"
+    goos: linux
+    goarch: amd64
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.description=Semantic versioning the easy way"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/amd64"
 
 brews:
   - name: uplift
