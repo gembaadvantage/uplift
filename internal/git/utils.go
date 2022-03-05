@@ -104,6 +104,17 @@ func Remote() (Repository, error) {
 	// Strip off any trailing .git suffix
 	rem := strings.TrimRight(remURL, ".git")
 
+	// Special use case for CodeCommit as that prefixes SSH URLs with ssh://
+	rem = strings.TrimPrefix(rem, "ssh://")
+
+	// Detect and translate a CodeCommit GRC URL into its HTTPS counterpart
+	if strings.HasPrefix(rem, "codecommit:") {
+		// Translate a codecommit GRC URL into its HTTPS counterpart
+		if rem, err = translate.FromGRC(rem); err != nil {
+			return Repository{}, err
+		}
+	}
+
 	if strings.HasPrefix(rem, "git@") {
 		// Sanitise any SSH based URL to ensure it is parseable
 		rem = strings.TrimPrefix(rem, "git@")
@@ -113,9 +124,6 @@ func Remote() (Repository, error) {
 		rem = rem[strings.LastIndex(rem, ":")+1:]
 		rem = strings.TrimPrefix(rem, "//")
 	}
-
-	// Special use case for CodeCommit as that prefixes SSH URLs with ssh://
-	rem = strings.TrimPrefix(rem, "ssh://")
 
 	u, err := url.Parse(rem)
 	if err != nil {
