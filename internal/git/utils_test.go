@@ -115,6 +115,15 @@ func TestRemote(t *testing.T) {
 			cloneURL:  "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
 			browseURL: "https://eu-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/repository",
 		},
+		{
+			name:      "CodeCommitGRC",
+			url:       "codecommit::eu-west-1://profile@repository",
+			scm:       CodeCommit,
+			owner:     "",
+			repo:      "repository",
+			cloneURL:  "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
+			browseURL: "https://eu-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/repository",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
