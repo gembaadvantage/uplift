@@ -142,6 +142,8 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	ctx.DryRun = opts.DryRun
 	ctx.NoPush = opts.NoPush
 	ctx.Out = out
+	ctx.SkipChangelog = opts.SkipChangelog
+	ctx.SkipBumps = opts.SkipBumps
 
 	// Enable pre-tagging support for generating a changelog
 	ctx.Changelog.PreTag = true
