@@ -49,6 +49,8 @@ type Context struct {
 	NoPush           bool
 	Changelog        Changelog
 	SCM              SCM
+	SkipChangelog    bool
+	SkipBumps        bool
 }
 
 // SCM provides details about the SCM provider of a repository

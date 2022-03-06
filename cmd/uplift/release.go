@@ -55,9 +55,11 @@ the required semantic version`
 )
 
 type releaseOptions struct {
-	FetchTags  bool
-	Check      bool
-	Prerelease string
+	FetchTags     bool
+	Check         bool
+	Prerelease    string
+	SkipChangelog bool
+	SkipBumps     bool
 	*globalOptions
 }
 
@@ -92,6 +94,8 @@ func newReleaseCmd(gopts *globalOptions, out io.Writer) *releaseCommand {
 	f.BoolVar(&relCmd.Opts.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
 	f.BoolVar(&relCmd.Opts.Check, "check", false, "check if a release will be triggered")
 	f.StringVar(&relCmd.Opts.Prerelease, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
+	f.BoolVar(&relCmd.Opts.SkipChangelog, "skip-changelog", false, "skips the creation or amendment of a changelog")
+	f.BoolVar(&relCmd.Opts.SkipBumps, "skip-bumps", false, "skips the bumping of any files")
 
 	relCmd.Cmd = cmd
 	return relCmd
