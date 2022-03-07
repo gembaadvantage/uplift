@@ -86,7 +86,7 @@ func (t Task) String() string {
 
 // Skip running the task if no changelog is needed
 func (t Task) Skip(ctx *context.Context) bool {
-	return false
+	return ctx.SkipChangelog
 }
 
 // Run the task

@@ -100,3 +100,30 @@ func TestRelease_PrereleaseFlag(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(actual), "version: 0.1.0-beta.1+12345")
 }
+
+func TestRelease_SkipChangelog(t *testing.T) {
+	taggedRepo(t)
+
+	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
+	relCmd.Cmd.SetArgs([]string{"--skip-changelog"})
+
+	err := relCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.False(t, changelogExists(t))
+}
+
+func TestRelease_SkipBumps(t *testing.T) {
+	tagRepoWith(t, []string{"1.0.0"})
+	testFileWithConfig(t, "test.txt", ".uplift.yml")
+
+	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
+	relCmd.Cmd.SetArgs([]string{"--skip-bumps"})
+
+	err := relCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	actual, err := ioutil.ReadFile("test.txt")
+	require.NoError(t, err)
+	assert.NotContains(t, string(actual), "version: 1.0.0")
+}

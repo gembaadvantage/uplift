@@ -56,16 +56,21 @@ jobs:
         uses: hadolint/hadolint-action@v1.6.0
         with:
           dockerfile: Dockerfile
+      - name: misspell
+        uses: reviewdog/action-misspell@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          locale: "UK"
       - name: Test
         run: task test
       - name: Code Coverage
         uses: codecov/codecov-action@v2.0.3
       - name: Build
         run: task build
-      - name: Tag
+      - name: Release
         if: github.ref == 'refs/heads/main'
         uses: gembaadvantage/uplift-action@v2.0.1
         with:
-          args: tag
+          args: release --skip-changelog
         env:
           GITHUB_TOKEN: ${{ secrets.GH_UPLIFT }}

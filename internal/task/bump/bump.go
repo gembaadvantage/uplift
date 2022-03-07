@@ -54,7 +54,7 @@ func (t Task) String() string {
 
 // Skip running the task if no version has changed
 func (t Task) Skip(ctx *context.Context) bool {
-	return ctx.NoVersionChanged
+	return ctx.NoVersionChanged || ctx.SkipBumps
 }
 
 // Run the task bumping the semantic version of any file identified within

@@ -197,6 +197,11 @@ A full semantic release will be carried out. Combining the `bump`, `changelog` a
 uplift release
 ```
 
+Skipping parts of a release can be achieved by specifying one of the following flags:
+
+- `--skip-changelog`: optionally skip the creation or amendment of a changelog
+- `--skip-bumps`: optionally skip the bumping of files
+
 #### Check Release
 
 Check if uplift will carry out a release without running the release workflow:
