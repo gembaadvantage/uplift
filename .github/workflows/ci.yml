@@ -67,7 +67,7 @@ jobs:
         uses: codecov/codecov-action@v2.0.3
       - name: Build
         run: task build
-      - name: Tag
+      - name: Release
         if: github.ref == 'refs/heads/main'
         uses: gembaadvantage/uplift-action@v2.0.1
         with:
