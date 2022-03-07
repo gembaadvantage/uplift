@@ -20,6 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+// TODO: move files to regex_test.go
+
 package bump
 
 import (
@@ -160,9 +162,13 @@ func TestRun(t *testing.T) {
 				Config: config.Uplift{
 					Bumps: []config.Bump{
 						{
-							File:  path,
-							Regex: tt.regex,
-							Count: tt.count,
+							File: path,
+							Regex: []config.RegexBump{
+								{
+									Pattern: tt.regex,
+									Count:   tt.count,
+								},
+							},
 						},
 					},
 				},
@@ -194,9 +200,13 @@ func TestRun_ForceSemanticVersion(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File:   path,
-					Regex:  "version: $VERSION",
-					SemVer: true,
+					File: path,
+					Regex: []config.RegexBump{
+						{
+							Pattern: "version: $VERSION",
+							SemVer:  true,
+						},
+					},
 				},
 			},
 		},
@@ -219,8 +229,12 @@ func TestRun_DryRun(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File:  path,
-					Regex: "version: $VERSION",
+					File: path,
+					Regex: []config.RegexBump{
+						{
+							Pattern: "version: $VERSION",
+						},
+					},
 				},
 			},
 		},
@@ -242,8 +256,12 @@ func TestRun_FileDoesNotExist(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File:  "missing.txt",
-					Regex: "version: $VERSION",
+					File: "missing.txt",
+					Regex: []config.RegexBump{
+						{
+							Pattern: "version: $VERSION",
+						},
+					},
 				},
 			},
 		},
@@ -268,12 +286,20 @@ func TestRun_MultipleFiles(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File:  file1,
-					Regex: "version: $VERSION",
+					File: file1,
+					Regex: []config.RegexBump{
+						{
+							Pattern: "version: $VERSION",
+						},
+					},
 				},
 				{
-					File:  file2,
-					Regex: "version: $VERSION",
+					File: file2,
+					Regex: []config.RegexBump{
+						{
+							Pattern: "version: $VERSION",
+						},
+					},
 				},
 			},
 		},
@@ -301,8 +327,12 @@ func TestRun_NonMatchingRegex(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File:  file,
-					Regex: "noMatch: $VERSION",
+					File: file,
+					Regex: []config.RegexBump{
+						{
+							Pattern: "noMatch: $VERSION",
+						},
+					},
 				},
 			},
 		},
@@ -328,8 +358,12 @@ func TestRun_NotGitRepository(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File:  file,
-					Regex: "version: $VERSION",
+					File: file,
+					Regex: []config.RegexBump{
+						{
+							Pattern: "version: $VERSION",
+						},
+					},
 				},
 			},
 		},
@@ -352,8 +386,12 @@ func TestRun_NextVersionMatchesExistingVersion(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File:  file,
-					Regex: "version: $VERSION",
+					File: file,
+					Regex: []config.RegexBump{
+						{
+							Pattern: "version: $VERSION",
+						},
+					},
 				},
 			},
 		},
@@ -375,8 +413,12 @@ func TestRun_MalformedRegexError(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File:  file,
-					Regex: "[",
+					File: file,
+					Regex: []config.RegexBump{
+						{
+							Pattern: "[",
+						},
+					},
 				},
 			},
 		},
@@ -451,9 +493,13 @@ func TestRun_MavenPom(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File:  file,
-					Regex: `\s{4}<version>$VERSION</version>`,
-					Count: 1,
+					File: file,
+					Regex: []config.RegexBump{
+						{
+							Pattern: `\s{4}<version>$VERSION</version>`,
+							Count:   1,
+						},
+					},
 				},
 			},
 		},
@@ -506,9 +552,13 @@ appVersion: 0.1.0`)
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File:  file,
-					Regex: "version: $VERSION",
-					Count: 1,
+					File: file,
+					Regex: []config.RegexBump{
+						{
+							Pattern: "version: $VERSION",
+							Count:   1,
+						},
+					},
 				},
 			},
 		},
@@ -551,9 +601,13 @@ func TestRun_PackageJson(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File:  file,
-					Regex: `"version": "$VERSION"`,
-					Count: 1,
+					File: file,
+					Regex: []config.RegexBump{
+						{
+							Pattern: `"version": "$VERSION"`,
+							Count:   1,
+						},
+					},
 				},
 			},
 		},

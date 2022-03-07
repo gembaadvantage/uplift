@@ -56,7 +56,8 @@ func testFileWithConfig(t *testing.T, f string, cfg string) []byte {
 	yml := fmt.Sprintf(`
 bumps:
   - file: %s
-    regex: "version: $VERSION"`, f)
+    regex:
+      - pattern: "version: $VERSION"`, f)
 
 	err = ioutil.WriteFile(cfg, []byte(yml), 0644)
 	require.NoError(t, err)

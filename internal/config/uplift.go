@@ -42,10 +42,16 @@ type Uplift struct {
 // Bump defines configuration for bumping individual files based
 // on the new calculated semantic version number
 type Bump struct {
-	File   string `yaml:"file"`
-	Regex  string `yaml:"regex"`
-	Count  int    `yaml:"count"`
-	SemVer bool   `yaml:"semver"`
+	File  string      `yaml:"file"`
+	Regex []RegexBump `yaml:"regex"`
+}
+
+// RegexBump defines configuration for bumping a file based on
+// a given regex pattern
+type RegexBump struct {
+	Pattern string `yaml:"pattern"`
+	Count   int    `yaml:"count"`
+	SemVer  bool   `yaml:"semver"`
 }
 
 // CommitAuthor defines configuration about the author of a git commit
