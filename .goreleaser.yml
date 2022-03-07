@@ -21,7 +21,7 @@
 builds:
   - id: uplift
     main: ./cmd/uplift
-    binary: bin/uplift
+    binary: uplift
     ldflags:
       - -s -w
       - -X github.com/gembaadvantage/uplift/internal/version.version={{.Tag}}
