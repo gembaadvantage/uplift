@@ -249,7 +249,7 @@ bumps:
 
     # A regex matcher should be used when bumping the file. Multiple regex
     # matches are supported. Each will be carried out in the order they are
-    # defined here
+    # defined here. All matches must succeed for the file to be bumped
     # Defaults to no matchers
     regex:
       - # The regex that should be used for matching the version that
@@ -267,6 +267,24 @@ bumps:
 
       - pattern: "appVersion: $VERSION"
         count: 1
+
+   - # The path of the file relative to where uplift is executed
+     file: ./package.json
+
+     # A JSON path matcher should be used when bumping the file. Multiple path
+     # matches are supported. Each will be carried out in the order they are
+     # defined here. All matches must succeed for the file to be bumped.
+     # JSON path syntax is based on https://github.com/tidwall/sjson
+     # Defaults to no matchers
+     json:
+       - # A JSON path that will be used for matching the version that
+         # will be replaced within the file
+         path: "version"
+
+         # If the matched version in the file should be replaced with a semantic version.
+         # This will strip any 'v' prefix if needed
+         # Defaults to false
+         semver: true
 
 # Customise how the changelog is generated
 # Defaults to generating a changelog without any customisations
