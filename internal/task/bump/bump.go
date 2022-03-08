@@ -28,16 +28,6 @@ import (
 	"github.com/gembaadvantage/uplift/internal/git"
 )
 
-// FileBump defines how a version within a file will be matched through a regex
-// and bumped using the provided version
-type FileBump struct {
-	Path    string
-	Regex   string
-	Version string
-	Count   int
-	SemVer  bool
-}
-
 // Task for bumping versions within files
 type Task struct{}
 
@@ -61,12 +51,30 @@ func (t Task) Run(ctx *context.Context) error {
 
 	n := 0
 	for _, bump := range ctx.Config.Bumps {
-		ok, err := regexBump(ctx, bump.File, bump.Regex)
-		if err != nil {
-			return err
+		var bumped bool
+		if len(bump.Regex) > 0 {
+			ok, err := regexBump(ctx, bump.File, bump.Regex)
+			if err != nil {
+				return err
+			}
+
+			if ok {
+				bumped = ok
+			}
 		}
 
-		if ok {
+		if len(bump.JSON) > 0 {
+			ok, err := jsonBump(ctx, bump.File, bump.JSON)
+			if err != nil {
+				return err
+			}
+
+			if ok {
+				bumped = ok
+			}
+		}
+
+		if bumped {
 			// Attempt to stage the changed file, if this isn't a dry run
 			if !ctx.DryRun {
 				if err := git.Stage(bump.File); err != nil {

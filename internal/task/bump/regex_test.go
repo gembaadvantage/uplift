@@ -44,7 +44,7 @@ var (
 	}
 )
 
-func TestRun(t *testing.T) {
+func TestRun_Regex(t *testing.T) {
 	tests := []struct {
 		name     string
 		nextVer  string
@@ -186,7 +186,7 @@ func TestRun(t *testing.T) {
 	}
 }
 
-func TestRun_ForceSemanticVersion(t *testing.T) {
+func TestRun_RegexForceSemanticVersion(t *testing.T) {
 	git.InitRepo(t)
 	path := WriteFile(t, "version: 0.1.0")
 
@@ -217,7 +217,7 @@ func TestRun_ForceSemanticVersion(t *testing.T) {
 	assert.Equal(t, "version: 0.2.0", actual)
 }
 
-func TestRun_DryRun(t *testing.T) {
+func TestRun_RegexDryRun(t *testing.T) {
 	path := WriteFile(t, "version: 0.1.0")
 
 	ctx := &context.Context{
@@ -246,7 +246,7 @@ func TestRun_DryRun(t *testing.T) {
 	assert.Equal(t, "version: 0.1.0", actual)
 }
 
-func TestRun_FileDoesNotExist(t *testing.T) {
+func TestRun_RegexFileDoesNotExist(t *testing.T) {
 	ctx := &context.Context{
 		NextVersion: semver.Version{
 			Raw: "0.2.0",
@@ -269,7 +269,39 @@ func TestRun_FileDoesNotExist(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestRun_MultipleFiles(t *testing.T) {
+func TestRun_RegexNotAllPathsMatch(t *testing.T) {
+	git.InitRepo(t)
+	path := WriteFile(t, "version: 0.1.0")
+
+	ctx := &context.Context{
+		NextVersion: semver.Version{
+			Raw: "0.2.0",
+		},
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File: path,
+					Regex: []config.RegexBump{
+						{
+							Pattern: "version: $VERSION",
+						},
+						{
+							Pattern: "nomatch: $VERSION",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.Error(t, err)
+
+	actual := ReadFile(t, path)
+	assert.Equal(t, "version: 0.1.0", actual)
+}
+
+func TestRun_RegexMultipleFiles(t *testing.T) {
 	git.InitRepo(t)
 
 	contents := "version: 0.1.0"
@@ -314,7 +346,7 @@ func TestRun_MultipleFiles(t *testing.T) {
 	assert.Equal(t, expected, actual2)
 }
 
-func TestRun_NonMatchingRegex(t *testing.T) {
+func TestRun_RegexNonMatchingRegex(t *testing.T) {
 	git.InitRepo(t)
 	file := WriteFile(t, "version: 0.1.0")
 
@@ -340,38 +372,7 @@ func TestRun_NonMatchingRegex(t *testing.T) {
 	assert.EqualError(t, err, "no version matched in file")
 }
 
-func TestRun_NoBumpConfig(t *testing.T) {
-	err := Task{}.Run(&context.Context{})
-	assert.NoError(t, err)
-}
-
-func TestRun_NotGitRepository(t *testing.T) {
-	git.MkTmpDir(t)
-	file := WriteFile(t, "version: 0.1.0")
-
-	ctx := &context.Context{
-		NextVersion: semver.Version{
-			Raw: "0.1.1",
-		},
-		Config: config.Uplift{
-			Bumps: []config.Bump{
-				{
-					File: file,
-					Regex: []config.RegexBump{
-						{
-							Pattern: "version: $VERSION",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	err := Task{}.Run(ctx)
-	assert.EqualError(t, err, "fatal: not a git repository (or any of the parent directories): .git")
-}
-
-func TestRun_NextVersionMatchesExistingVersion(t *testing.T) {
+func TestRun_RegexNextVersionMatchesExistingVersion(t *testing.T) {
 	git.InitRepo(t)
 	file := WriteFile(t, "version: 0.1.0")
 
@@ -403,7 +404,7 @@ func TestRun_NextVersionMatchesExistingVersion(t *testing.T) {
 	assert.Equal(t, efi.ModTime(), afi.ModTime())
 }
 
-func TestRun_MalformedRegexError(t *testing.T) {
+func TestRun_RegexMalformedRegexError(t *testing.T) {
 	git.MkTmpDir(t)
 	file := WriteFile(t, "version: 0.1.0")
 
@@ -455,7 +456,7 @@ func ReadFile(t *testing.T, path string) string {
 	return string(b)
 }
 
-func TestRun_MavenPom(t *testing.T) {
+func TestRun_RegexMavenPom(t *testing.T) {
 	git.InitRepo(t)
 
 	file := WriteFile(t, `<?xml version="1.0" encoding="UTF-8"?>
@@ -533,7 +534,7 @@ func TestRun_MavenPom(t *testing.T) {
 </project>`, actual)
 }
 
-func TestRun_HelmChart(t *testing.T) {
+func TestRun_RegexHelmChart(t *testing.T) {
 	git.InitRepo(t)
 
 	file := WriteFile(t, `apiVersion: v2
@@ -576,62 +577,4 @@ name: test-chart
 description: This is a test chart
 version: 0.1.1
 appVersion: v0.1.1`, actual)
-}
-
-func TestRun_PackageJson(t *testing.T) {
-	git.InitRepo(t)
-
-	file := WriteFile(t, `{
-  "name": "test",
-  "version": "0.1.0",
-  "bin": {
-    "test": "bin/test.js"
-  },
-  "scripts": {
-    "build": "tsc",
-  },
-  "devDependencies": {
-    "typescript": "~3.7.2"
-  },
-  "dependencies": {}
-}`)
-
-	ctx := &context.Context{
-		NextVersion: semver.Version{
-			Raw: "1.0.0",
-		},
-		CommitDetails: commit,
-		Config: config.Uplift{
-			Bumps: []config.Bump{
-				{
-					File: file,
-					Regex: []config.RegexBump{
-						{
-							Pattern: `"version": "$VERSION"`,
-							Count:   1,
-						},
-					},
-				},
-			},
-		},
-	}
-
-	err := Task{}.Run(ctx)
-	require.NoError(t, err)
-
-	actual := ReadFile(t, file)
-	assert.Equal(t, `{
-  "name": "test",
-  "version": "1.0.0",
-  "bin": {
-    "test": "bin/test.js"
-  },
-  "scripts": {
-    "build": "tsc",
-  },
-  "devDependencies": {
-    "typescript": "~3.7.2"
-  },
-  "dependencies": {}
-}`, actual)
 }
