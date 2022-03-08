@@ -44,6 +44,7 @@ type Uplift struct {
 type Bump struct {
 	File  string      `yaml:"file"`
 	Regex []RegexBump `yaml:"regex"`
+	JSON  []JSONBump  `yaml:"json"`
 }
 
 // RegexBump defines configuration for bumping a file based on
@@ -52,6 +53,14 @@ type RegexBump struct {
 	Pattern string `yaml:"pattern"`
 	Count   int    `yaml:"count"`
 	SemVer  bool   `yaml:"semver"`
+}
+
+// JSONBump defines configuration for bumping a file based on a
+// given JSON path. Path syntax is based on the github.com/tidwall/sjson
+// library
+type JSONBump struct {
+	Path   string `yaml:"path"`
+	SemVer bool   `yaml:"semver"`
 }
 
 // CommitAuthor defines configuration about the author of a git commit
