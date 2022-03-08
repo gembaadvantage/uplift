@@ -34,7 +34,7 @@ import (
 
 func TestBump(t *testing.T) {
 	taggedRepo(t)
-	data := testFileWithConfig(t, "test.txt", ".uplift.yml")
+	testFileWithConfig(t, "test.txt", ".uplift.yml")
 
 	bmpCmd := newBumpCmd(noChangesPushed(), os.Stdout)
 
@@ -43,20 +43,24 @@ func TestBump(t *testing.T) {
 
 	actual, err := ioutil.ReadFile("test.txt")
 	require.NoError(t, err)
-	assert.NotEqual(t, string(data), string(actual))
+	assert.Equal(t, `version: 1.1.0
+appVersion: 1.1.0`, string(actual))
 }
 
 func testFileWithConfig(t *testing.T, f string, cfg string) []byte {
 	t.Helper()
 
-	c := []byte("version: 0.0.0")
+	c := []byte(`version: 0.0.0
+appVersion: 0.0.0`)
 	err := ioutil.WriteFile(f, c, 0644)
 	require.NoError(t, err)
 
 	yml := fmt.Sprintf(`
 bumps:
   - file: %s
-    regex: "version: $VERSION"`, f)
+    regex:
+      - pattern: "version: $VERSION"
+      - pattern: "appVersion: $VERSION"`, f)
 
 	err = ioutil.WriteFile(cfg, []byte(yml), 0644)
 	require.NoError(t, err)
@@ -76,5 +80,6 @@ func TestBump_PrereleaseFlag(t *testing.T) {
 
 	actual, err := ioutil.ReadFile("test.txt")
 	require.NoError(t, err)
-	assert.Equal(t, "version: 0.1.0-beta.1+12345", string(actual))
+	assert.Equal(t, `version: 0.1.0-beta.1+12345
+appVersion: 0.1.0-beta.1+12345`, string(actual))
 }

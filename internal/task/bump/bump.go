@@ -23,15 +23,9 @@ SOFTWARE.
 package bump
 
 import (
-	"errors"
-	"io/ioutil"
-	"regexp"
-	"strings"
-
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
 // FileBump defines how a version within a file will be matched through a regex
@@ -67,15 +61,7 @@ func (t Task) Run(ctx *context.Context) error {
 
 	n := 0
 	for _, bump := range ctx.Config.Bumps {
-		fb := FileBump{
-			Path:    bump.File,
-			Regex:   bump.Regex,
-			Version: ctx.NextVersion.Raw,
-			Count:   bump.Count,
-			SemVer:  bump.SemVer,
-		}
-
-		ok, err := bumpFile(ctx, fb)
+		ok, err := regexBump(ctx, bump.File, bump.Regex)
 		if err != nil {
 			return err
 		}
@@ -97,63 +83,4 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	return nil
-}
-
-func bumpFile(ctx *context.Context, bump FileBump) (bool, error) {
-	data, err := ioutil.ReadFile(bump.Path)
-	if err != nil {
-		return false, err
-	}
-
-	// Ensure the supplied regex is valid, replacing the $VERSION token
-	verRgx := strings.Replace(bump.Regex, semver.Token, semver.Pattern, 1)
-
-	rgx, err := regexp.Compile(verRgx)
-	if err != nil {
-		return false, err
-	}
-
-	m := rgx.Find(data)
-	if m == nil {
-		return false, errors.New("no version matched in file")
-	}
-	mstr := string(m)
-
-	if strings.Contains(mstr, bump.Version) {
-		log.WithFields(log.Fields{
-			"file":    bump.Path,
-			"current": ctx.CurrentVersion.Raw,
-			"next":    ctx.NextVersion.Raw,
-		}).Info("skipping bump")
-		return false, nil
-	}
-
-	// Use strings replace to ensure the replacement count is honoured
-	n := -1
-	if bump.Count > 0 {
-		n = bump.Count
-	}
-
-	// Strip any 'v' prefix if this must be a semantic version
-	v := bump.Version
-	if bump.SemVer && v[0] == 'v' {
-		v = v[1:]
-	}
-
-	verRpl := semver.Regex.ReplaceAllString(mstr, v)
-	str := strings.Replace(string(data), mstr, verRpl, n)
-
-	log.WithFields(log.Fields{
-		"file":    bump.Path,
-		"current": ctx.CurrentVersion.Raw,
-		"next":    ctx.NextVersion.Raw,
-	}).Info("file bumped")
-
-	// Don't make any file changes if part of a dry-run
-	if ctx.DryRun {
-		log.Info("file not modified in dry run mode")
-		return false, nil
-	}
-
-	return true, ioutil.WriteFile(bump.Path, []byte(str), 0644)
 }

@@ -241,23 +241,32 @@ commitAuthor:
   email: "joe.bloggs@gmail.com"
 
 # A list of files whose version numbers should be bumped and kept in sync with the
-# latest calculated repository tag.
+# latest calculated semantic version
 # Defaults to an empty list
 bumps:
   - # The path of the file relative to where uplift is executed
     file: ./chart/my-chart/Chart.yaml
 
-    # A regex for matching a version within the file
-    regex: "version: $VERSION"
+    # A regex matcher should be used when bumping the file. Multiple regex
+    # matches are supported. Each will be carried out in the order they are
+    # defined here
+    # Defaults to no matchers
+    regex:
+      - # The regex that should be used for matching the version that
+        # will be replaced within the file
+        pattern: "version: $VERSION"
 
-    # If the matched version in the file should be replaced with a semantic version.
-    # This will strip any 'v' prefix if needed
-    # Defaults to false
-    semver: true
+        # If the matched version in the file should be replaced with a semantic version.
+        # This will strip any 'v' prefix if needed
+        # Defaults to false
+        semver: true
 
-    # The number of times any matched version should be replaced
-    # Defaults to 0, which replaces all matches
-    count: 1
+        # The number of times any matched version should be replaced
+        # Defaults to 0, which replaces all matches
+        count: 1
+
+      - pattern: "appVersion: $VERSION"
+        count: 1
 
 # Customise how the changelog is generated
 # Defaults to generating a changelog without any customisations
