@@ -34,51 +34,51 @@ import (
 	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
-// TODO: support iterating over slice and bump using all regex patterns
-
 func regexBump(ctx *context.Context, path string, bumps []config.RegexBump) (bool, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return false, err
 	}
 
-	// Ensure the supplied regex is valid, replacing the $VERSION token
-	verRgx := strings.Replace(bumps[0].Pattern, semver.Token, semver.Pattern, 1)
+	str := string(data)
 
-	rgx, err := regexp.Compile(verRgx)
-	if err != nil {
-		return false, err
-	}
-
-	m := rgx.Find(data)
-	if m == nil {
-		return false, errors.New("no version matched in file")
-	}
-	mstr := string(m)
-
-	if strings.Contains(mstr, ctx.NextVersion.Raw) {
+	for _, bump := range bumps {
 		log.WithFields(log.Fields{
-			"file":    path,
-			"current": ctx.CurrentVersion.Raw,
-			"next":    ctx.NextVersion.Raw,
-		}).Info("skipping bump")
-		return false, nil
-	}
+			"file":   path,
+			"regex":  bump.Pattern,
+			"count":  bump.Count,
+			"semver": bump.SemVer,
+		}).Debug("attempting file bump")
 
-	// Use strings replace to ensure the replacement count is honoured
-	n := -1
-	if bumps[0].Count > 0 {
-		n = bumps[0].Count
-	}
+		mstr, err := match(bump.Pattern, str)
+		if err != nil {
+			return false, err
+		}
 
-	// Strip any 'v' prefix if this must be a semantic version
-	v := ctx.NextVersion.Raw
-	if bumps[0].SemVer && v[0] == 'v' {
-		v = v[1:]
-	}
+		if strings.Contains(mstr, ctx.NextVersion.Raw) {
+			log.WithFields(log.Fields{
+				"file":    path,
+				"current": ctx.CurrentVersion.Raw,
+				"next":    ctx.NextVersion.Raw,
+			}).Info("skipping bump")
+			return false, nil
+		}
 
-	verRpl := semver.Regex.ReplaceAllString(mstr, v)
-	str := strings.Replace(string(data), mstr, verRpl, n)
+		// Use strings replace to ensure the replacement count is honoured
+		n := -1
+		if bump.Count > 0 {
+			n = bump.Count
+		}
+
+		// Strip any 'v' prefix if this must be a semantic version
+		v := ctx.NextVersion.Raw
+		if bump.SemVer {
+			v = strictSemVer(v)
+		}
+
+		verRpl := semver.Regex.ReplaceAllString(mstr, v)
+		str = strings.Replace(str, mstr, verRpl, n)
+	}
 
 	log.WithFields(log.Fields{
 		"file":    path,
@@ -93,4 +93,28 @@ func regexBump(ctx *context.Context, path string, bumps []config.RegexBump) (boo
 	}
 
 	return true, ioutil.WriteFile(path, []byte(str), 0644)
+}
+
+func match(pattern string, data string) (string, error) {
+	verRgx := strings.Replace(pattern, semver.Token, semver.Pattern, 1)
+
+	rgx, err := regexp.Compile(verRgx)
+	if err != nil {
+		return "", err
+	}
+
+	m := rgx.FindString(data)
+	if m == "" {
+		return "", errors.New("no version matched in file")
+	}
+
+	return string(m), nil
+}
+
+func strictSemVer(v string) string {
+	if v[0] == 'v' {
+		log.Debug("trimming 'v' prefix from version")
+		v = v[1:]
+	}
+	return v
 }

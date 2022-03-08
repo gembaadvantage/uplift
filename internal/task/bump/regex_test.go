@@ -540,11 +540,11 @@ func TestRun_HelmChart(t *testing.T) {
 name: test-chart
 description: This is a test chart
 version: 0.1.0
-appVersion: 0.1.0`)
+appVersion: v0.1.0`)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
-			Raw: "0.1.1",
+			Raw: "v0.1.1",
 		},
 		CommitDetails: commit,
 		Config: config.Uplift{
@@ -554,6 +554,11 @@ appVersion: 0.1.0`)
 					Regex: []config.RegexBump{
 						{
 							Pattern: "version: $VERSION",
+							SemVer:  true,
+							Count:   1,
+						},
+						{
+							Pattern: "appVersion: $VERSION",
 							Count:   1,
 						},
 					},
@@ -570,7 +575,7 @@ appVersion: 0.1.0`)
 name: test-chart
 description: This is a test chart
 version: 0.1.1
-appVersion: 0.1.0`, actual)
+appVersion: v0.1.1`, actual)
 }
 
 func TestRun_PackageJson(t *testing.T) {
