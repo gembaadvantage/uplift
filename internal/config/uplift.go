@@ -54,6 +54,12 @@ type RegexBump struct {
 	SemVer  bool   `yaml:"semver"`
 }
 
+// JSONBump ...
+type JSONBump struct {
+	Path   string `yaml:"path"`
+	SemVer bool   `yaml"semver"`
+}
+
 // CommitAuthor defines configuration about the author of a git commit
 type CommitAuthor struct {
 	Name  string `yaml:"name"`
