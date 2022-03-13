@@ -7,7 +7,7 @@ require (
 	github.com/apex/log v1.9.0
 	github.com/gembaadvantage/codecommit-sign v1.3.1
 	github.com/go-yaml/yaml v2.1.0+incompatible
-	github.com/spf13/cobra v1.3.0
+	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.14.0
 	github.com/tidwall/sjson v1.2.4
