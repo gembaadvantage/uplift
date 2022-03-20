@@ -52,6 +52,10 @@ chmod 700 install
 ./install
 ```
 
+### Oh My Zsh
+
+Install the custom [`uplift`](https://github.com/gembaadvantage/uplift-oh-my-zsh) plugin for full autocompletion support.
+
 ## Quick Start
 
 Uplift can carry out different semantic versioning operations on your repository. All operations support the following global flags:
