@@ -53,7 +53,7 @@ jobs:
         with:
           skip-go-installation: true
       - name: Lint Dockerfile
-        uses: hadolint/hadolint-action@v1.6.0
+        uses: hadolint/hadolint-action@v1.7.0
         with:
           dockerfile: Dockerfile
       - name: misspell
