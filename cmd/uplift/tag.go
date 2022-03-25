@@ -45,6 +45,25 @@ const (
 is based on the conventional commit message from the last commit.`
 )
 
+var (
+	tagRepoPipeline = []task.Runner{
+		fetchtag.Task{},
+		lastcommit.Task{},
+		currentversion.Task{},
+		nextversion.Task{},
+		nextcommit.Task{},
+		gittag.Task{},
+	}
+
+	nextTagPipeline = []task.Runner{
+		fetchtag.Task{},
+		lastcommit.Task{},
+		currentversion.Task{},
+		nextversion.Task{},
+		gittag.Task{},
+	}
+)
+
 type tagOptions struct {
 	FetchTags   bool
 	NextTagOnly bool
@@ -89,13 +108,11 @@ func tagRepo(opts tagOptions, out io.Writer) error {
 		return err
 	}
 
-	tsks := []task.Runner{
-		fetchtag.Task{},
-		lastcommit.Task{},
-		currentversion.Task{},
-		nextversion.Task{},
-		nextcommit.Task{},
-		gittag.Task{},
+	tsks := tagRepoPipeline
+
+	// Switch pipeline if only the next tag needs to be calculated
+	if ctx.NextTagOnly {
+		tsks = nextTagPipeline
 	}
 
 	for _, tsk := range tsks {
