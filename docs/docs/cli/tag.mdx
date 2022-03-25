@@ -2,11 +2,19 @@
 
 Tags a git repository with the next semantic version. The next tag is calculated using the conventional commit message from the last commit.
 
+```sh
+uplift tag [FLAGS]
+```
+
 ## Flags
 
 ### --fetch-all
 
 Ensure all tags associated with the git repository are fetched before identifying the next tag.
+
+```sh
+uplift tag --fetch-all
+```
 
 ### --next
 
