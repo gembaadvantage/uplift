@@ -1,40 +1,23 @@
 import React from 'react';
-import clsx from 'clsx';
-import Layout from '@theme/Layout';
-import Link from '@docusaurus/Link';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import styles from './index.module.css';
-import HomepageFeatures from '@site/src/components/HomepageFeatures';
+import Head from '@docusaurus/Head';
+import { Redirect } from '@docusaurus/router';
 
-function HomepageHeader() {
-  const {siteConfig} = useDocusaurusContext();
+export default function HomePage(): JSX.Element {
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
-      <div className="container">
-        <h1 className="hero__title">{siteConfig.title}</h1>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="/docs/intro">
-            Docusaurus Tutorial - 5min ⏱️
-          </Link>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-export default function Home(): JSX.Element {
-  const {siteConfig} = useDocusaurusContext();
-  return (
-    <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
-      <HomepageHeader />
-      <main>
-        <HomepageFeatures />
-      </main>
-    </Layout>
+    <>
+      <Head>
+        <meta title="Uplift"/>
+        <meta
+          property="og:description"
+          content="Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
+        />
+        <meta
+          property="description"
+          content="Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
+        />
+        <link rel="canonical" href="https://github.com/gembaadvantage/uplift" />
+      </Head>
+      <Redirect to="/docs/home/introduction" />
+    </>
   );
 }
