@@ -1,0 +1,38 @@
+---
+sidebar_position: 4
+---
+
+# Changelog
+
+TODO: description on changelog creation
+TODO: by default ci(uplift) are excluded from the changelog, preventing uplift from adding noise
+
+## sort
+
+```yaml
+# .uplift.yml
+
+changelog:
+  # Change the sort order of the commits within each changelog entry. Supported
+  # values are asc or desc (case is ignored)
+  #
+  # Defaults to desc to mirror the default behaviour of "git log"
+  sort: asc
+```
+
+## exclude
+
+```yaml
+# .uplift.yml
+
+changelog:
+  # A list of commits to exclude during the creation of a changelog. Provide a list
+  # of conventional commit prefixes to filter on. Auto-generated commits from uplift
+  # will always be excluded
+  #
+  # Defaults to including all commits within the generated changelog
+  exclude:
+    - chore(deps)
+    - docs
+    - ci
+```

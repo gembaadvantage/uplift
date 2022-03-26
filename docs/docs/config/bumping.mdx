@@ -1,0 +1,71 @@
+---
+sidebar_position: 3
+---
+
+# File Bumping
+
+TODO: describe how it can be mixed and matched
+
+## regex
+
+```yaml
+# .uplift.yml
+
+bumps:
+  - # The path of the file relative to where uplift is executed
+    file: ./chart/my-chart/Chart.yaml
+
+    # A regex matcher should be used when bumping the file. Multiple regex
+    # matches are supported. Each will be carried out in the order they are
+    # defined here. All matches must succeed for the file to be bumped
+    #
+    # Defaults to no matchers
+    regex:
+      - # The regex that should be used for matching the version that
+        # will be replaced within the file
+        pattern: "version: $VERSION"
+
+        # If the matched version in the file should be replaced with a semantic version.
+        # This will strip any 'v' prefix if needed
+        #
+        # Defaults to false
+        semver: true
+
+        # The number of times any matched version should be replaced
+        #
+        # Defaults to 0, which replaces all matches
+        count: 1
+```
+
+## json
+
+```yaml
+# .uplift.yml
+
+bumps:
+  - # The path of the file relative to where uplift is executed
+    file: ./package.json
+
+    # A JSON path matcher should be used when bumping the file. Multiple path
+    # matches are supported. Each will be carried out in the order they are
+    # defined here. All matches must succeed for the file to be bumped.
+    # JSON path syntax is based on https://github.com/tidwall/sjson
+    #
+    # Defaults to no matchers
+    json:
+      - # A JSON path that will be used for matching the version that
+        # will be replaced within the file
+        path: "version"
+
+        # If the matched version in the file should be replaced with a semantic version.
+        # This will strip any 'v' prefix if needed
+        #
+        # Defaults to false
+        semver: true
+```
+
+:::tip Need more complicated JSON Paths?
+
+TODO: link to https://github.com/tidwall/sjson
+
+:::

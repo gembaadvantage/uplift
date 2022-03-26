@@ -3,9 +3,14 @@ const sidebars = {
     {
       type: "category",
       label: "Home",
+      collapsible: false,
       items: [
         "home/introduction",
-        { type: "link", label: "Installation", href: "#installation" },
+        {
+          type: "link",
+          label: "Installation",
+          href: "#installation",
+        },
         { type: "link", label: "Quick Start", href: "#quick-start" },
       ],
     },
@@ -18,6 +23,16 @@ const sidebars = {
         "cmd/bump",
         "cmd/changelog",
         "cmd/release",
+      ],
+    },
+    {
+      type: "category",
+      label: "Configuration",
+      items: [
+        "config/about",
+        "config/basics",
+        "config/bumping",
+        "config/changelog",
       ],
     },
   ],
