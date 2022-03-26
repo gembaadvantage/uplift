@@ -125,9 +125,15 @@ func writeChangelogDiff(opts changelogOptions, out io.Writer) error {
 		return err
 	}
 
-	tsk := changelog.Task{}
-	if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
-		return err
+	tsks := []task.Runner{
+		scm.Task{},
+		changelog.Task{},
+	}
+
+	for _, tsk := range tsks {
+		if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
+			return err
+		}
 	}
 
 	return nil

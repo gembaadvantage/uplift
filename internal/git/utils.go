@@ -102,7 +102,7 @@ func Remote() (Repository, error) {
 	}
 
 	// Strip off any trailing .git suffix
-	rem := strings.TrimRight(remURL, ".git")
+	rem := strings.TrimSuffix(remURL, ".git")
 
 	// Special use case for CodeCommit as that prefixes SSH URLs with ssh://
 	rem = strings.TrimPrefix(rem, "ssh://")
