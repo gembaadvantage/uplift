@@ -1,18 +1,14 @@
 const sidebars = {
   docsSidebar: [
     {
-      type: "category",
-      label: "Home",
-      collapsible: false,
-      items: [
-        "home/introduction",
-        {
-          type: "link",
-          label: "Installation",
-          href: "#installation",
-        },
-        { type: "link", label: "Quick Start", href: "#quick-start" },
-      ],
+      type: "doc",
+      id: "home/introduction",
+      label: "Introduction",
+    },
+    {
+      type: "doc",
+      id: "home/install",
+      label: "Install",
     },
     {
       type: "category",
