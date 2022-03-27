@@ -36,7 +36,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: 1.18
       - name: Cache Go
         uses: actions/cache@v3
         with:
@@ -53,7 +53,7 @@ jobs:
         with:
           skip-go-installation: true
       - name: Lint Dockerfile
-        uses: hadolint/hadolint-action@v1.6.0
+        uses: hadolint/hadolint-action@v2.0.0
         with:
           dockerfile: Dockerfile
       - name: misspell

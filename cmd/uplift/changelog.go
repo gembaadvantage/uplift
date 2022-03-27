@@ -125,9 +125,15 @@ func writeChangelogDiff(opts changelogOptions, out io.Writer) error {
 		return err
 	}
 
-	tsk := changelog.Task{}
-	if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
-		return err
+	tsks := []task.Runner{
+		scm.Task{},
+		changelog.Task{},
+	}
+
+	for _, tsk := range tsks {
+		if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -151,7 +157,7 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	// Sort order provided as a command-line flag takes precedence
 	ctx.Changelog.Sort = opts.Sort
 	if ctx.Changelog.Sort == "" {
-		ctx.Changelog.Sort = cfg.Changelog.Sort
+		ctx.Changelog.Sort = strings.ToLower(cfg.Changelog.Sort)
 	}
 
 	ctx.Out = out
