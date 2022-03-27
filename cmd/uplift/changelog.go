@@ -157,7 +157,7 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	// Sort order provided as a command-line flag takes precedence
 	ctx.Changelog.Sort = opts.Sort
 	if ctx.Changelog.Sort == "" {
-		ctx.Changelog.Sort = cfg.Changelog.Sort
+		ctx.Changelog.Sort = strings.ToLower(cfg.Changelog.Sort)
 	}
 
 	ctx.Out = out
