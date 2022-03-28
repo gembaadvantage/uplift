@@ -1,8 +1,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require("prism-react-renderer/themes/github");
-const darkCodeTheme = require("prism-react-renderer/themes/dracula");
+const { tailwindPlugin } = require("./src/plugins");
 
 const config = {
   title: "Uplift",
@@ -15,6 +14,7 @@ const config = {
   favicon: "favicon.ico",
   organizationName: "Gemba Advantage",
   projectName: "uplift",
+  clientModules: [require.resolve("./src/css/tailwind.css")],
 
   presets: [
     [
@@ -27,37 +27,36 @@ const config = {
           breadcrumbs: false,
         },
         blog: false,
-        theme: {
-          customCss: require.resolve("./src/css/custom.css"),
-        },
       },
     ],
   ],
 
-  themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
-    ({
-      navbar: {
-        hideOnScroll: true,
-        title: "Uplift",
-        logo: {
-          alt: "My Site Logo",
-          src: "img/logo.svg",
+  themeConfig: {
+    colorMode: {
+      defaultMode: "dark",
+      disableSwitch: true,
+    },
+    navbar: {
+      hideOnScroll: false,
+      title: "Uplift",
+      logo: {
+        alt: "My Site Logo",
+        src: "img/logo.svg",
+      },
+      items: [
+        {
+          href: "https://github.com/gembaadvantage/uplift",
+          label: "GitHub",
+          position: "right",
         },
-        items: [
-          {
-            href: "https://github.com/gembaadvantage/uplift",
-            label: "GitHub",
-            position: "right",
-          },
-        ],
-      },
-      hideableSidebar: true,
-      prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
-      },
-    }),
+      ],
+    },
+    hideableSidebar: true,
+    prism: {
+      theme: require("prism-react-renderer/themes/vsDark"),
+    },
+  },
+  plugins: [tailwindPlugin],
 };
 
 module.exports = config;
