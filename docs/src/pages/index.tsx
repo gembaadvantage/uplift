@@ -6,7 +6,7 @@ export default function HomePage(): JSX.Element {
   return (
     <>
       <Head>
-        <meta title="Uplift"/>
+        <meta title="Uplift" />
         <meta
           property="og:description"
           content="Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
