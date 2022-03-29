@@ -65,8 +65,8 @@ jobs:
             ./go.mod
             ./go.sum
             *.css
-            docs/yarn.lock
-            docs/tailwind.config.js
+            ./docs/yarn.lock
+            ./docs/tailwind.config.js
       - name: Test
         run: task test
       - name: Code Coverage
