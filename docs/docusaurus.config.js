@@ -25,8 +25,7 @@ const config = {
           sidebarPath: require.resolve('./sidebars.js'),
           sidebarCollapsible: true,
           breadcrumbs: false,
-          editUrl:
-            'https://github.com/gembaadvantage/uplift/edit/main/docs/docs',
+          editUrl: 'https://github.com/gembaadvantage/uplift/edit/main/docs',
         },
         blog: false,
       },
