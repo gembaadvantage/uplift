@@ -61,6 +61,11 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           locale: "UK"
+          exclude: |
+            ./go.mod
+            ./go.sum
+          pattern: |
+            *.css
       - name: Test
         run: task test
       - name: Code Coverage
