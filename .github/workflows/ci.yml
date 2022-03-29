@@ -64,7 +64,6 @@ jobs:
           exclude: |
             ./go.mod
             ./go.sum
-          pattern: |
             *.css
       - name: Test
         run: task test
