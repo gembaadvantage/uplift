@@ -35,7 +35,7 @@ const config = {
   themeConfig: {
     colorMode: {
       defaultMode: 'dark',
-      disableSwitch: true,
+      disableSwitch: false,
     },
     navbar: {
       hideOnScroll: false,
