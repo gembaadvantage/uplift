@@ -68,6 +68,11 @@ type TagEntry struct {
 	SemVer  *semver.Version
 }
 
+type sortableTagEntry struct {
+	Created time.Time
+	SemVer  *semver.Version
+}
+
 // Repository contains details about a specific repository
 type Repository struct {
 	Provider  SCM
@@ -214,7 +219,7 @@ func retrieveTags() []TagEntry {
 	}
 
 	rows := strings.Split(tags, "\n")
-	ents := make([]TagEntry, 0, len(rows))
+	ents := make([]sortableTagEntry, 0, len(rows))
 	for _, r := range rows {
 		p := strings.Split(r, ",")
 
@@ -226,19 +231,26 @@ func retrieveTags() []TagEntry {
 
 		t, _ := time.Parse("Mon Jan 02 15:04:05 2006 -0700", p[0])
 
-		ents = append(ents, TagEntry{
-			Ref:     v.Original(),
+		ents = append(ents, sortableTagEntry{
+			Created: t,
 			SemVer:  v,
-			Created: t.Format("2006-01-02"),
-			Time:    t,
 		})
 	}
 
 	sort.Slice(ents, func(i, j int) bool {
-		return ents[i].Time.After(ents[j].Time) || ents[i].SemVer.GreaterThan(ents[j].SemVer)
+		return ents[i].Created.After(ents[j].Created) || ents[i].SemVer.GreaterThan(ents[j].SemVer)
 	})
 
-	return ents
+	// Convert into the TagEntry format and return
+	st := make([]TagEntry, 0, len(ents))
+	for _, te := range ents {
+		st = append(st, TagEntry{
+			Ref:     te.SemVer.Original(),
+			Created: te.Created.Format("2006-01-02"),
+		})
+	}
+
+	return st
 }
 
 // LatestTag retrieves the latest tag within the repository

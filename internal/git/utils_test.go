@@ -221,6 +221,20 @@ func TestAllTags_CommitWithMultipleTags(t *testing.T) {
 	assert.Equal(t, "1.0.0", tags[2].Ref)
 }
 
+func TestAllTags_TagsOutOfOrder(t *testing.T) {
+	InitRepo(t)
+
+	// This is an extreme edge case and shouldn't really ever happen
+	v1, v2, v3 := "3.0.0", "1.0.0", "2.0.0"
+	TimeBasedTagSeries(t, []string{v1, v2, v3})
+
+	tags := AllTags()
+	require.Len(t, tags, 3)
+	assert.Equal(t, "3.0.0", tags[0].Ref)
+	assert.Equal(t, "2.0.0", tags[1].Ref)
+	assert.Equal(t, "1.0.0", tags[2].Ref)
+}
+
 func TestLatestTag(t *testing.T) {
 	InitRepo(t)
 
