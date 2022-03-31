@@ -23,8 +23,10 @@ SOFTWARE.
 package git
 
 import (
+	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -144,4 +146,64 @@ func EmptyCommitsAndTag(t *testing.T, tag string, msgs ...string) []string {
 	require.NoError(t, err)
 
 	return hs
+}
+
+// TimeBasedTagSeries is a specialised utility function for generating a series of tags
+// that are spaced apart by a day. This is important for any tests that require
+// time based filtering of tags. If all tags are created at the same time, filtering
+// can produce inconsistent ordering. Commits are auto-generated with the following
+// format:
+//
+// feat: <COMMIT_INDEX>
+//
+// e.g. []tags{"1.0.0", "2.0.0"} => feat: 1, feat: 2
+func TimeBasedTagSeries(t *testing.T, tags []string) []string {
+	// Ensure the GIT_COMMITTER_DATE is always reset
+	defer func() {
+		os.Unsetenv("GIT_COMMITTER_DATE")
+	}()
+
+	h := make([]string, 0, len(tags))
+
+	// Calculate the max days in the past
+	max := len(tags)
+
+	now := time.Now().UTC()
+	for i, c := 0, 1; i < len(tags); i, c = i+1, c+1 {
+		dt := now.AddDate(0, 0, -(max - i)).Format(time.RFC3339)
+
+		fmt.Println(dt)
+
+		// Based on the git spec, this env var should be set when manipulating dates
+		// of tags and commits
+		os.Setenv("GIT_COMMITTER_DATE", dt)
+
+		args := []string{
+			"-c",
+			"user.name='uplift'",
+			"-c",
+			"user.email='uplift@test.com'",
+			"commit",
+			"--allow-empty",
+			"-m",
+			fmt.Sprintf("feat: %d", c),
+			"--date",
+			dt,
+		}
+
+		_, err := Run(args...)
+		require.NoError(t, err)
+
+		// Grab the unabbreviated hash of the newly created commit
+		out, err := Clean(Run("rev-parse", "HEAD"))
+		require.NoError(t, err)
+
+		h = append(h, out)
+
+		// Ensure the tag is generated with the same date
+		err = Tag(tags[i])
+		require.NoError(t, err)
+	}
+
+	return h
 }

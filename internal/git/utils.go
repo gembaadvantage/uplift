@@ -27,8 +27,11 @@ import (
 	"fmt"
 	"net/url"
 	"os/exec"
+	"sort"
 	"strings"
+	"time"
 
+	"github.com/Masterminds/semver"
 	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
 )
 
@@ -61,6 +64,8 @@ type LogEntry struct {
 type TagEntry struct {
 	Ref     string
 	Created string
+	Time    time.Time
+	SemVer  *semver.Version
 }
 
 // Repository contains details about a specific repository
@@ -189,16 +194,15 @@ func FetchTags() error {
 
 // AllTags retrieves all tags within the repository from newest to oldest
 func AllTags() []TagEntry {
-	return retrieveTags(0)
+	return retrieveTags()
 }
 
-func retrieveTags(n int) []TagEntry {
+func retrieveTags() []TagEntry {
+	// Git can only perform basic pattern matching, so attempt a crude filtering for
+	// semantic versions using the pattern *.*.* (major.minor.patch)
 	tags, err := Clean(Run("for-each-ref",
-		"refs/tags/v*.*.*",
 		"refs/tags/*.*.*",
-		"--sort=-v:refname",
-		`--format='%(creatordate:short),%(refname:short)'`,
-		fmt.Sprintf("--count=%d", n),
+		`--format='%(creatordate),%(refname:short)'`,
 	))
 	if err != nil {
 		return []TagEntry{}
@@ -213,18 +217,33 @@ func retrieveTags(n int) []TagEntry {
 	ents := make([]TagEntry, 0, len(rows))
 	for _, r := range rows {
 		p := strings.Split(r, ",")
+
+		// Parse the ref to ensure it is a semantic version. If not, omit it from the identified tags
+		v, err := semver.NewVersion(p[1])
+		if err != nil {
+			continue
+		}
+
+		t, _ := time.Parse("Mon Jan 02 15:04:05 2006 -0700", p[0])
+
 		ents = append(ents, TagEntry{
-			Ref:     p[1],
-			Created: p[0],
+			Ref:     v.Original(),
+			SemVer:  v,
+			Created: t.Format("2006-01-02"),
+			Time:    t,
 		})
 	}
+
+	sort.Slice(ents, func(i, j int) bool {
+		return ents[i].Time.After(ents[j].Time) || ents[i].SemVer.GreaterThan(ents[j].SemVer)
+	})
 
 	return ents
 }
 
 // LatestTag retrieves the latest tag within the repository
 func LatestTag() TagEntry {
-	tags := retrieveTags(1)
+	tags := retrieveTags()
 	if len(tags) == 0 {
 		return TagEntry{}
 	}
@@ -244,6 +263,7 @@ func DescribeTag(ref string) TagEntry {
 	}
 
 	p := strings.Split(tag, ",")
+
 	return TagEntry{
 		Ref:     p[1],
 		Created: p[0],

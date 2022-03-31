@@ -36,16 +36,22 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	tag := "1.1.0"
 	git.InitRepo(t)
-	git.EmptyCommitAndTag(t, "1.0.0", "commit")
+	git.TimeBasedTagSeries(t, []string{"1.0.0"})
+	git.EmptyCommit(t, "second commit")
 
+	// EmptyCommitAndTag > yesterday
+	// Empty Commit > today
+	tag := "1.1.0"
 	ctx := &context.Context{
 		NextVersion: semver.Version{
 			Raw: tag,
 		},
 		NoPush: true,
 	}
+
+	out, _ := git.Run("log")
+	fmt.Println(out)
 
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)

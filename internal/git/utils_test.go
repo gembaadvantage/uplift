@@ -171,27 +171,61 @@ func TestRemote_Unrecognised(t *testing.T) {
 func TestAllTags(t *testing.T) {
 	InitRepo(t)
 
-	v1 := "v1.0.0"
-	EmptyCommitAndTag(t, v1, "first commit")
-	v2 := "v2.0.0"
-	EmptyCommitAndTag(t, v2, "second commit")
-	v3 := "v3.0.0"
-	EmptyCommitAndTag(t, v3, "third commit")
+	v1, v2, v3 := "v1.0.0", "v2.0.0", "v3.0.0"
+	TimeBasedTagSeries(t, []string{v1, v2, v3})
 
 	tags := AllTags()
-	assert.Len(t, tags, 3)
+	require.Len(t, tags, 3)
 	assert.Equal(t, "v3.0.0", tags[0].Ref)
 	assert.Equal(t, "v2.0.0", tags[1].Ref)
 	assert.Equal(t, "v1.0.0", tags[2].Ref)
 }
 
+func TestAllTags_MixedTagConventions(t *testing.T) {
+	InitRepo(t)
+
+	v1, v2, v3 := "1.0.0", "v2.0.0", "3.0.0"
+	TimeBasedTagSeries(t, []string{v1, v2, v3})
+
+	tags := AllTags()
+	require.Len(t, tags, 3)
+	assert.Equal(t, "3.0.0", tags[0].Ref)
+	assert.Equal(t, "v2.0.0", tags[1].Ref)
+	assert.Equal(t, "1.0.0", tags[2].Ref)
+}
+
+func TestAllTags_FiltersNonSemanticTags(t *testing.T) {
+	InitRepo(t)
+
+	t1, t2, t3, t4 := "v1", "1.1.0", "in.va.lid", "1.2.0"
+	TimeBasedTagSeries(t, []string{t1, t2, t3, t4})
+
+	tags := AllTags()
+	require.Len(t, tags, 2)
+	assert.Equal(t, "1.2.0", tags[0].Ref)
+	assert.Equal(t, "1.1.0", tags[1].Ref)
+}
+
+func TestAllTags_CommitWithMultipleTags(t *testing.T) {
+	InitRepo(t)
+
+	EmptyCommit(t, "commit")
+	Tag("1.0.0")
+	Tag("2.0.0")
+	Tag("3.0.0")
+
+	tags := AllTags()
+	require.Len(t, tags, 3)
+	assert.Equal(t, "3.0.0", tags[0].Ref)
+	assert.Equal(t, "2.0.0", tags[1].Ref)
+	assert.Equal(t, "1.0.0", tags[2].Ref)
+}
+
 func TestLatestTag(t *testing.T) {
 	InitRepo(t)
 
-	v1 := "v1.0.0"
-	Run("tag", v1)
-	v2 := "v2.0.0"
-	EmptyCommitAndTag(t, v2, "more work")
+	v1, v2 := "v1.0.0", "v2.0.0"
+	TimeBasedTagSeries(t, []string{v1, v2})
 
 	tag := LatestTag()
 	assert.Equal(t, v2, tag.Ref)
@@ -214,6 +248,16 @@ func TestLatestTag_NoSemanticTags(t *testing.T) {
 
 	tag := LatestTag()
 	assert.Equal(t, "", tag.Ref)
+}
+
+func TestLatestTag_MixedTagConventions(t *testing.T) {
+	InitRepo(t)
+
+	v1, v2, v3 := "v1.0.0", "2.0.0", "v3.0.0"
+	TimeBasedTagSeries(t, []string{v1, v2, v3})
+
+	tag := LatestTag()
+	assert.Equal(t, "v3.0.0", tag.Ref)
 }
 
 func TestDescribeTag(t *testing.T) {
