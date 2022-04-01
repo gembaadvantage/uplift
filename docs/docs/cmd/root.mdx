@@ -6,6 +6,10 @@ sidebar_position: 1
 
 Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI.
 
+```sh
+uplift [COMMAND]
+```
+
 ## Global Flags
 
 ### --config-dir
