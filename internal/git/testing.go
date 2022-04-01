@@ -23,8 +23,10 @@ SOFTWARE.
 package git
 
 import (
+	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -144,4 +146,91 @@ func EmptyCommitsAndTag(t *testing.T, tag string, msgs ...string) []string {
 	require.NoError(t, err)
 
 	return hs
+}
+
+// EmptyCommitAndTags will create an empty commit and associate it with a series of tags.
+// No existing files will be modified within the repository
+func EmptyCommitAndTags(t *testing.T, msg string, tags ...string) string {
+	t.Helper()
+
+	h := EmptyCommit(t, msg)
+	for _, tag := range tags {
+		err := Tag(tag)
+		require.NoError(t, err)
+	}
+
+	return h
+}
+
+// TimedTag represents a tag that was created at a specific point in time
+type TimedTag struct {
+	Ref         string
+	CreatorDate string
+	CommitHash  string
+}
+
+// TimeBasedTagSeries is a specialised utility function for generating a series of tags
+// that are spaced apart by a day. This is important for any tests that require
+// time based filtering of tags. If all tags are created at the same time, filtering
+// can produce inconsistent ordering. Commits are auto-generated with the following
+// format:
+//
+// feat: <COMMIT_INDEX>
+//
+// e.g. []tags{"1.0.0", "2.0.0"} => feat: 1, feat: 2
+//
+// All commits will be finish before todays date, so it is safe to manually add
+// commits to your repository after calling this
+func TimeBasedTagSeries(t *testing.T, tags []string) []TimedTag {
+	// Ensure the GIT_COMMITTER_DATE is always reset
+	defer func() {
+		os.Unsetenv("GIT_COMMITTER_DATE")
+	}()
+
+	tt := make([]TimedTag, 0, len(tags))
+
+	// Calculate the max days in the past
+	max := len(tags)
+
+	now := time.Now().UTC()
+	for i, c := 0, 1; i < len(tags); i, c = i+1, c+1 {
+		dt := now.AddDate(0, 0, -(max - i))
+		dtf := dt.Format(time.RFC3339)
+
+		// Based on the git spec, this env var should be set when manipulating dates
+		// of tags and commits
+		os.Setenv("GIT_COMMITTER_DATE", dtf)
+
+		args := []string{
+			"-c",
+			"user.name='uplift'",
+			"-c",
+			"user.email='uplift@test.com'",
+			"commit",
+			"--allow-empty",
+			"-m",
+			fmt.Sprintf("feat: %d", c),
+			"--date",
+			dtf,
+		}
+
+		_, err := Run(args...)
+		require.NoError(t, err)
+
+		// Grab the unabbreviated hash of the newly created commit
+		out, err := Clean(Run("rev-parse", "HEAD"))
+		require.NoError(t, err)
+
+		// Ensure the tag is generated with the same date
+		err = Tag(tags[i])
+		require.NoError(t, err)
+
+		tt = append(tt, TimedTag{
+			Ref:         tags[i],
+			CreatorDate: dt.Format("2006-01-02"),
+			CommitHash:  out,
+		})
+	}
+
+	return tt
 }

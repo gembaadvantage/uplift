@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
+	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
 // SCM is used for identifying the source code management tool used by the current
@@ -189,17 +190,20 @@ func FetchTags() error {
 
 // AllTags retrieves all tags within the repository from newest to oldest
 func AllTags() []TagEntry {
-	return retrieveTags(0)
+	return retrieveTags([]string{"--sort=-creatordate"})
 }
 
-func retrieveTags(n int) []TagEntry {
-	tags, err := Clean(Run("for-each-ref",
-		"refs/tags/v*.*.*",
+func retrieveTags(sort []string) []TagEntry {
+	// Git can only perform basic pattern matching, so attempt a crude filtering for
+	// semantic versions using the pattern *.*.* (major.minor.patch)
+	args := []string{
+		"for-each-ref",
 		"refs/tags/*.*.*",
-		"--sort=-v:refname",
 		`--format='%(creatordate:short),%(refname:short)'`,
-		fmt.Sprintf("--count=%d", n),
-	))
+	}
+	args = append(args, sort...)
+
+	tags, err := Clean(Run(args...))
 	if err != nil {
 		return []TagEntry{}
 	}
@@ -213,9 +217,16 @@ func retrieveTags(n int) []TagEntry {
 	ents := make([]TagEntry, 0, len(rows))
 	for _, r := range rows {
 		p := strings.Split(r, ",")
+
+		// Parse the ref to ensure it is a semantic version. If not, omit it from the identified tags
+		v, err := semver.Parse(p[1])
+		if err != nil {
+			continue
+		}
+
 		ents = append(ents, TagEntry{
-			Ref:     p[1],
 			Created: p[0],
+			Ref:     v.Raw,
 		})
 	}
 
@@ -224,7 +235,7 @@ func retrieveTags(n int) []TagEntry {
 
 // LatestTag retrieves the latest tag within the repository
 func LatestTag() TagEntry {
-	tags := retrieveTags(1)
+	tags := retrieveTags([]string{"--sort=-creatordate", "--sort=-refname"})
 	if len(tags) == 0 {
 		return TagEntry{}
 	}
@@ -244,6 +255,7 @@ func DescribeTag(ref string) TagEntry {
 	}
 
 	p := strings.Split(tag, ",")
+
 	return TagEntry{
 		Ref:     p[1],
 		Created: p[0],
