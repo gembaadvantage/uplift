@@ -349,9 +349,7 @@ func TestRun_ExcludeAllEntries(t *testing.T) {
 
 func TestRun_AllTags(t *testing.T) {
 	ih := git.InitRepo(t)
-	h1 := git.EmptyCommitAndTag(t, "0.1.0", "feat: first feature")
-	h2 := git.EmptyCommitAndTag(t, "0.2.0", "fix: first bug")
-	h3 := git.EmptyCommitAndTag(t, "0.3.0", "refactor: use go embed")
+	th := git.TimeBasedTagSeries(t, []string{"0.1.0", "0.2.0", "0.3.0"})
 
 	ctx := &context.Context{
 		Changelog: context.Changelog{
@@ -373,28 +371,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
-## 0.3.0 - %[1]s
+## 0.3.0 - %s
 
-- %[2]s refactor: use go embed
+- %s feat: 3
 
-## 0.2.0 - %[1]s
+## 0.2.0 - %s
 
-- %[3]s fix: first bug
+- %s feat: 2
 
-## 0.1.0 - %[1]s
+## 0.1.0 - %s
 
-- %[4]s feat: first feature
-- %[5]s %[6]s
-`, changelogDate(t), abbrevHash(t, h3), abbrevHash(t, h2), abbrevHash(t, h1), abbrevHash(t, ih), git.InitCommit)
+- %s feat: 1
+- %s %s
+`, th[2].CreatorDate, abbrevHash(t, th[2].CommitHash), th[1].CreatorDate, abbrevHash(t, th[1].CommitHash), th[0].CreatorDate,
+		abbrevHash(t, th[0].CommitHash), abbrevHash(t, ih), git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
 
 func TestRun_AllTagsDiffOnly(t *testing.T) {
 	ih := git.InitRepo(t)
-	h1 := git.EmptyCommitAndTag(t, "0.1.0", "feat: first feature")
-	h2 := git.EmptyCommitAndTag(t, "0.2.0", "fix: first bug")
-	h3 := git.EmptyCommitAndTag(t, "0.3.0", "refactor: use go embed")
+	th := git.TimeBasedTagSeries(t, []string{"0.1.0", "0.2.0", "0.3.0"})
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
@@ -411,19 +408,20 @@ func TestRun_AllTagsDiffOnly(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	expected := fmt.Sprintf(`## 0.3.0 - %[1]s
+	expected := fmt.Sprintf(`## 0.3.0 - %s
 
-- %[2]s refactor: use go embed
+- %s feat: 3
 
-## 0.2.0 - %[1]s
+## 0.2.0 - %s
 
-- %[3]s fix: first bug
+- %s feat: 2
 
-## 0.1.0 - %[1]s
+## 0.1.0 - %s
 
-- %[4]s feat: first feature
-- %[5]s %[6]s
-`, changelogDate(t), abbrevHash(t, h3), abbrevHash(t, h2), abbrevHash(t, h1), abbrevHash(t, ih), git.InitCommit)
+- %s feat: 1
+- %s %s
+`, th[2].CreatorDate, abbrevHash(t, th[2].CommitHash), th[1].CreatorDate, abbrevHash(t, th[1].CommitHash), th[0].CreatorDate,
+		abbrevHash(t, th[0].CommitHash), abbrevHash(t, ih), git.InitCommit)
 
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
@@ -431,14 +429,15 @@ func TestRun_AllTagsDiffOnly(t *testing.T) {
 
 func TestRun_AllWithExcludes(t *testing.T) {
 	ih := git.InitRepo(t)
-	h1 := git.EmptyCommitAndTag(t, "0.1.0", "feat: first feature")
-	git.EmptyCommitAndTag(t, "0.2.0", "fix: first bug")
-	h2 := git.EmptyCommitAndTag(t, "0.3.0", "refactor: use go embed")
+	th := git.TimeBasedTagSeries(t, []string{"0.1.0", "0.2.0"})
+
+	// Commit that will be excluded
+	git.EmptyCommitAndTag(t, "0.3.0", "refactor: use go embed")
 
 	ctx := &context.Context{
 		Changelog: context.Changelog{
 			All:     true,
-			Exclude: []string{"fix"},
+			Exclude: []string{"refactor"},
 		},
 		SCM: context.SCM{
 			Provider: git.Unrecognised,
@@ -456,25 +455,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
-## 0.3.0 - %[1]s
+## 0.3.0 - %s
 
-- %[2]s refactor: use go embed
+## 0.2.0 - %s
 
-## 0.2.0 - %[1]s
+- %s feat: 2
 
-## 0.1.0 - %[1]s
+## 0.1.0 - %s
 
-- %[3]s feat: first feature
-- %[4]s %[5]s
-`, changelogDate(t), abbrevHash(t, h2), abbrevHash(t, h1), abbrevHash(t, ih), git.InitCommit)
+- %s feat: 1
+- %s %s
+`, changelogDate(t), th[1].CreatorDate, abbrevHash(t, th[1].CommitHash), th[0].CreatorDate, abbrevHash(t, th[0].CommitHash),
+		abbrevHash(t, ih), git.InitCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
 
 func TestRun_SortCommitsAscending(t *testing.T) {
 	ih := git.InitRepo(t)
-	h1 := git.EmptyCommitsAndTag(t, "1.0.0", "docs: update to docs", "fix: first bug", "feat: first feature")
-	h2 := git.EmptyCommitsAndTag(t, "2.0.0", "ci: tweak scripts", "feat: next feature")
+	th := git.TimeBasedTagSeries(t, []string{"1.0.0"})
+	hs := git.EmptyCommitsAndTag(t, "2.0.0", "docs: update to docs", "fix: first bug", "feat: first feature")
 
 	ctx := &context.Context{
 		Changelog: context.Changelog{
@@ -497,25 +497,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
-## 2.0.0 - %[1]s
+## 2.0.0 - %s
 
-- %[2]s ci: tweak scripts
-- %[3]s feat: next feature
+- %s docs: update to docs
+- %s fix: first bug
+- %s feat: first feature
 
-## 1.0.0 - %[1]s
+## 1.0.0 - %s
 
-- %[4]s %[5]s
-- %[6]s docs: update to docs
-- %[7]s fix: first bug
-- %[8]s feat: first feature
-`, changelogDate(t),
-		abbrevHash(t, h2[0]),
-		abbrevHash(t, h2[1]),
-		abbrevHash(t, ih),
-		git.InitCommit,
-		abbrevHash(t, h1[0]),
-		abbrevHash(t, h1[1]),
-		abbrevHash(t, h1[2]))
+- %s %s
+- %s feat: 1
+`, changelogDate(t), abbrevHash(t, hs[0]), abbrevHash(t, hs[1]), abbrevHash(t, hs[2]), th[0].CreatorDate, abbrevHash(t, ih),
+		git.InitCommit, abbrevHash(t, th[0].CommitHash))
 
 	assert.Equal(t, expected, readChangelog(t))
 }
