@@ -209,29 +209,14 @@ func TestAllTags_FiltersNonSemanticTags(t *testing.T) {
 func TestAllTags_CommitWithMultipleTags(t *testing.T) {
 	InitRepo(t)
 
-	EmptyCommit(t, "commit")
-	Tag("1.0.0")
-	Tag("2.0.0")
-	Tag("3.0.0")
+	t1, t2 := "1.0.0", "1.1.0"
+	TimeBasedTagSeries(t, []string{t1, t2})
+	EmptyCommitAndTags(t, "another commit", "v1", "1.2.0")
 
 	tags := AllTags()
 	require.Len(t, tags, 3)
-	assert.Equal(t, "3.0.0", tags[0].Ref)
-	assert.Equal(t, "2.0.0", tags[1].Ref)
-	assert.Equal(t, "1.0.0", tags[2].Ref)
-}
-
-func TestAllTags_TagsOutOfOrder(t *testing.T) {
-	InitRepo(t)
-
-	// This is an extreme edge case and shouldn't really ever happen
-	v1, v2, v3 := "3.0.0", "1.0.0", "2.0.0"
-	TimeBasedTagSeries(t, []string{v1, v2, v3})
-
-	tags := AllTags()
-	require.Len(t, tags, 3)
-	assert.Equal(t, "3.0.0", tags[0].Ref)
-	assert.Equal(t, "2.0.0", tags[1].Ref)
+	assert.Equal(t, "1.2.0", tags[0].Ref)
+	assert.Equal(t, "1.1.0", tags[1].Ref)
 	assert.Equal(t, "1.0.0", tags[2].Ref)
 }
 
@@ -272,6 +257,15 @@ func TestLatestTag_MixedTagConventions(t *testing.T) {
 
 	tag := LatestTag()
 	assert.Equal(t, "v3.0.0", tag.Ref)
+}
+
+func TestLatestTag_CommitWithMixedTags(t *testing.T) {
+	InitRepo(t)
+
+	EmptyCommitAndTags(t, "commit", "v1", "prod", "1.0.0")
+
+	tag := LatestTag()
+	assert.Equal(t, "1.0.0", tag.Ref)
 }
 
 func TestDescribeTag(t *testing.T) {

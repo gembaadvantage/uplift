@@ -27,12 +27,10 @@ import (
 	"fmt"
 	"net/url"
 	"os/exec"
-	"sort"
 	"strings"
-	"time"
 
-	"github.com/Masterminds/semver"
 	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
+	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
 // SCM is used for identifying the source code management tool used by the current
@@ -64,13 +62,6 @@ type LogEntry struct {
 type TagEntry struct {
 	Ref     string
 	Created string
-	Time    time.Time
-	SemVer  *semver.Version
-}
-
-type sortableTagEntry struct {
-	Created time.Time
-	SemVer  *semver.Version
 }
 
 // Repository contains details about a specific repository
@@ -199,16 +190,20 @@ func FetchTags() error {
 
 // AllTags retrieves all tags within the repository from newest to oldest
 func AllTags() []TagEntry {
-	return retrieveTags()
+	return retrieveTags([]string{"--sort=-creatordate"})
 }
 
-func retrieveTags() []TagEntry {
+func retrieveTags(sort []string) []TagEntry {
 	// Git can only perform basic pattern matching, so attempt a crude filtering for
 	// semantic versions using the pattern *.*.* (major.minor.patch)
-	tags, err := Clean(Run("for-each-ref",
+	args := []string{
+		"for-each-ref",
 		"refs/tags/*.*.*",
-		`--format='%(creatordate),%(refname:short)'`,
-	))
+		`--format='%(creatordate:short),%(refname:short)'`,
+	}
+	args = append(args, sort...)
+
+	tags, err := Clean(Run(args...))
 	if err != nil {
 		return []TagEntry{}
 	}
@@ -219,43 +214,28 @@ func retrieveTags() []TagEntry {
 	}
 
 	rows := strings.Split(tags, "\n")
-	ents := make([]sortableTagEntry, 0, len(rows))
+	ents := make([]TagEntry, 0, len(rows))
 	for _, r := range rows {
 		p := strings.Split(r, ",")
 
 		// Parse the ref to ensure it is a semantic version. If not, omit it from the identified tags
-		v, err := semver.NewVersion(p[1])
+		v, err := semver.Parse(p[1])
 		if err != nil {
 			continue
 		}
 
-		t, _ := time.Parse("Mon Jan 02 15:04:05 2006 -0700", p[0])
-
-		ents = append(ents, sortableTagEntry{
-			Created: t,
-			SemVer:  v,
+		ents = append(ents, TagEntry{
+			Created: p[0],
+			Ref:     v.Raw,
 		})
 	}
 
-	sort.Slice(ents, func(i, j int) bool {
-		return ents[i].Created.After(ents[j].Created) || ents[i].SemVer.GreaterThan(ents[j].SemVer)
-	})
-
-	// Convert into the TagEntry format and return
-	st := make([]TagEntry, 0, len(ents))
-	for _, te := range ents {
-		st = append(st, TagEntry{
-			Ref:     te.SemVer.Original(),
-			Created: te.Created.Format("2006-01-02"),
-		})
-	}
-
-	return st
+	return ents
 }
 
 // LatestTag retrieves the latest tag within the repository
 func LatestTag() TagEntry {
-	tags := retrieveTags()
+	tags := retrieveTags([]string{"--sort=-creatordate", "--sort=-refname"})
 	if len(tags) == 0 {
 		return TagEntry{}
 	}
