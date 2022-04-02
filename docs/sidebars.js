@@ -19,6 +19,7 @@ const sidebars = {
         'cmd/bump',
         'cmd/changelog',
         'cmd/release',
+        'cmd/completion',
       ],
     },
     {
