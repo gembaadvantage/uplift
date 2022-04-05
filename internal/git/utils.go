@@ -151,7 +151,7 @@ func Remote() (Repository, error) {
 		if err != nil {
 			return Repository{}, err
 		}
-		browse = fmt.Sprintf("https://%s.console.aws.amazon.com/codesuite/codecommit/repositories/repository", t.Region)
+		browse = fmt.Sprintf("https://%s.console.aws.amazon.com/codesuite/codecommit/repositories/%s", t.Region, t.Repository)
 	}
 
 	return Repository{
