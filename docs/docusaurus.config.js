@@ -12,7 +12,7 @@ const config = {
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'favicon.ico',
-  organizationName: 'Gemba Advantage',
+  organizationName: 'gembaadvantage',
   projectName: 'uplift',
   clientModules: [require.resolve('./src/css/tailwind.css')],
 
@@ -34,7 +34,7 @@ const config = {
 
   themeConfig: {
     colorMode: {
-      defaultMode: 'dark',
+      defaultMode: 'light',
       disableSwitch: false,
     },
     navbar: {
@@ -53,9 +53,6 @@ const config = {
       ],
     },
     hideableSidebar: false,
-    footer: {
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
-    },
     prism: {
       theme: require('prism-react-renderer/themes/vsDark'),
     },
