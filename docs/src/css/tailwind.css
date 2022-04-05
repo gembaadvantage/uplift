@@ -41,12 +41,12 @@
     --font-prose: var(--font-ui);
 
     --ifm-heading-font-family: var(--font-ui);
-
     --ifm-background-color: #ffffff;
-
     --ifm-toc-border-color: var(--docs-color-border);
 
     --doc-sidebar-width: 300px !important;
+
+    --docs-color-border: #dadde1;
   }
 
   [data-theme='dark'] {
@@ -57,6 +57,8 @@
     --ifm-color-primary-light: #29d5b0;
     --ifm-color-primary-lighter: #32d8b4;
     --ifm-color-primary-lightest: #4fddbf;
+
+    --docs-color-border: #2e2e2e;
   }
 }
 
