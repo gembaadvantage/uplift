@@ -13,17 +13,17 @@ export default function Footer() : JSX.Element {
   const { siteConfig } = useDocusaurusContext();
   return (
     <footer className="bg-background-100 py-6 lg:px-12">
-      <div className="mx-auto flex flex-row md:px-12">
+      <div className="mx-auto flex w-full max-w-6xl flex-row px-8 items-start">
         <div className="basis-3/4">
           <p className="text-sm leading-none">
-            Uplift is built and maintained by the folk at <Link href={`https://github.com/${siteConfig.organizationName}`}><img src={require('@site/static/img/ga_icon_small.png').default} /></Link>
+            Uplift is built and maintained by the folk at <Link href={`https://github.com/${siteConfig.organizationName}`}><img className="relative top-1" src={require('@site/static/img/ga_icon_small.png').default} /></Link>
           </p>
           <p className="text-sm leading-none">
             Made with ❤️ using Docusaurus
           </p>
         </div>
         <div className="basis-1/4">
-          <div className="flex flex-row-reverse py-4 w-full">
+          <div className="flex flex-row-reverse align-middle">
             <Link
               href={`https://github.com/${siteConfig.organizationName}/${siteConfig.projectName}`}
               className="inline-flex text-current"
