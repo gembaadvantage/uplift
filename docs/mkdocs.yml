@@ -24,3 +24,8 @@ nav:
       - Basics: config/basics.md
       - File Bumping: config/bumping.md
       - Changelog: config/changelog.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences

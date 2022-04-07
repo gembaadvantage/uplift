@@ -31,7 +31,7 @@ firstVersion: v1.0.0
 # has been bumped.
 #
 # Defaults to ci(uplift): uplifted for version <LATEST_TAG>
-commitMessage: 'chore: a custom commit message'
+commitMessage: "chore: a custom commit message"
 ```
 
 ## commitAuthor
@@ -49,12 +49,12 @@ commitAuthor:
   # Name of the author
   #
   # Defaults to the author name within the last commit
-  name: 'joe.bloggs'
+  name: "joe.bloggs"
 
   # Email of the author
   #
   # Defaults to the author email within the last commit
-  email: 'joe.bloggs@gmail.com'
+  email: "joe.bloggs@gmail.com"
 ```
 
 ## annotatedTags
@@ -71,8 +71,6 @@ commitAuthor:
 annotatedTags: true
 ```
 
-:::tip What are Annotated Tags?
+!!!info "What are Annotated Tags?"
 
-To find out more about annotated tags I recommend reading the official [Git](https://git-scm.com/book/en/v2/Git-Basics-Tagging) documentation
-
-:::
+    To find out more about annotated tags I recommend reading the official [Git](https://git-scm.com/book/en/v2/Git-Basics-Tagging) documentation

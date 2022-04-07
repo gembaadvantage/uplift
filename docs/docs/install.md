@@ -66,8 +66,6 @@ And check that everything works:
 ./bin/uplift version
 ```
 
-:::tip Fancy Contributing?
+!!!tip "Fancy Contributing?"
 
-Since you have the code checked out and locally built, you are only one step away from contributing. Take a peek at the [Contributing Guide](https://github.com/gembaadvantage/uplift/blob/main/CONTRIBUTING.md)
-
-:::
+    Since you have the code checked out and locally built, you are only one step away from contributing. Take a peek at the [Contributing Guide](https://github.com/gembaadvantage/uplift/blob/main/CONTRIBUTING.md)

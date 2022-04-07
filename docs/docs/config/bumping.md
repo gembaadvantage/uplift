@@ -23,7 +23,7 @@ bumps:
     regex:
       - # The regex that should be used for matching the version that
         # will be replaced within the file
-        pattern: 'version: $VERSION'
+        pattern: "version: $VERSION"
 
         # If the matched version in the file should be replaced with a semantic version.
         # This will strip any 'v' prefix if needed
@@ -55,7 +55,7 @@ bumps:
     json:
       - # A JSON path that will be used for matching the version that
         # will be replaced within the file
-        path: 'version'
+        path: "version"
 
         # If the matched version in the file should be replaced with a semantic version.
         # This will strip any 'v' prefix if needed
@@ -64,8 +64,6 @@ bumps:
         semver: true
 ```
 
-:::tip Need more complicated JSON Paths?
+!!!tip "Need more complicated JSON Paths?"
 
-Uplift uses [SJSON](https://github.com/tidwall/sjson) for setting values through JSON paths. If you need to write more complex JSON paths, don't forget to look at their documentation
-
-:::
+    Uplift uses [SJSON](https://github.com/tidwall/sjson) for setting values through JSON paths. If you need to write more complex JSON paths, don't forget to look at their documentation
