@@ -38,7 +38,7 @@ const config = {
       disableSwitch: false,
     },
     navbar: {
-      hideOnScroll: false,
+      hideOnScroll: true,
       title: 'Uplift',
       logo: {
         alt: 'My Site Logo',
