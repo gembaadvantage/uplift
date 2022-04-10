@@ -25,6 +25,8 @@ on:
       - main
     paths:
       - docs/*
+  # Allow the workflow to be triggered manually
+  workflow_dispatch:
 jobs:
   docs:
     runs-on: ubuntu-latest
