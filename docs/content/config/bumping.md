@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # File Bumping
 
-TODO: describe how it can be mixed and matched
+Uplift can bump the semantic version within any file in your repository using the currently supported schemes. Even though these configs are shown separately, you are free to mix and match within your uplift configuration file.
 
 ## regex
 
@@ -64,8 +64,6 @@ bumps:
         semver: true
 ```
 
-:::tip Need more complicated JSON Paths?
+!!!tip "Need more complicated JSON Paths?"
 
-TODO: link to https://github.com/tidwall/sjson
-
-:::
+    Uplift uses [SJSON](https://github.com/tidwall/sjson) for setting values through JSON paths. If you need to write more complex JSON paths, don't forget to look at their documentation

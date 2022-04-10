@@ -4,8 +4,7 @@ sidebar_position: 4
 
 # Changelog
 
-TODO: description on changelog creation
-TODO: by default ci(uplift) are excluded from the changelog, preventing uplift from adding noise
+Uplift can generate and maintain a changelog within your repository for you. We believe that in most situations, these values will never need to be set as uplift uses sensible defaults.
 
 ## sort
 
@@ -16,7 +15,7 @@ changelog:
   # Change the sort order of the commits within each changelog entry. Supported
   # values are asc or desc (case is ignored)
   #
-  # Defaults to desc to mirror the default behaviour of "git log"
+  # Defaults to desc (descending order) to mirror the default behaviour of "git log"
   sort: asc
 ```
 
@@ -28,7 +27,7 @@ changelog:
 changelog:
   # A list of commits to exclude during the creation of a changelog. Provide a list
   # of conventional commit prefixes to filter on. Auto-generated commits from uplift
-  # will always be excluded
+  # (with the prefix ci(uplift)) will always be excluded
   #
   # Defaults to including all commits within the generated changelog
   exclude:

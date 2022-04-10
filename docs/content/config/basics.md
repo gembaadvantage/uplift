@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Basics
 
-TODO: the idea is that none of these values should ever need to be set as uplift uses sensible defaults
+Ideally none of these values should need to be set as uplift will always use what we believe to be sensible default values.
 
 ## firstVersion
 
@@ -71,8 +71,6 @@ commitAuthor:
 annotatedTags: true
 ```
 
-:::tip What are Annotated Tags?
+!!!info "What are Annotated Tags?"
 
-To find out more about annotated tags I recommend reading the official [Git](https://git-scm.com/book/en/v2/Git-Basics-Tagging) documentation
-
-:::
+    To find out more about annotated tags I recommend reading the official [Git](https://git-scm.com/book/en/v2/Git-Basics-Tagging) documentation
