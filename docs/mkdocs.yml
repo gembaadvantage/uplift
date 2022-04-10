@@ -4,7 +4,7 @@ site_description: Semantic versioning the easy way. Powered by Conventional Comm
 copyright: Uplift is built and maintained by the folk at Gemba Advantage
 repo_name: gembaadvantage/uplift
 repo_url: https://github.com/gembaadvantage/uplift
-edit_uri: edit/main/docs/
+edit_uri: edit/main/docs/content
 docs_dir: content
 
 theme:
