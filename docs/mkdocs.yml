@@ -1,13 +1,16 @@
 site_name: Uplift
 site_url: https://upliftci.dev
 site_description: Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI
-copyright: Uplift is built and maintained by the folk at GA
+copyright: Uplift is built and maintained by the folk at Gemba Advantage
 repo_name: gembaadvantage/uplift
 repo_url: https://github.com/gembaadvantage/uplift
 edit_uri: edit/main/docs/
+docs_dir: content
 
 theme:
   name: material
+  icon:
+    repo: fontawesome/brands/github
 
 nav:
   - Home: introduction.md
@@ -25,7 +28,18 @@ nav:
       - File Bumping: config/bumping.md
       - Changelog: config/changelog.md
 
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/gembaadvantage
+      name: Gemba Advantage on GitHub
+
+plugins:
+  - search
+
 markdown_extensions:
   - admonition
-  - pymdownx.details
-  - pymdownx.superfences
+  - codehilite
+  - meta
+  - toc:
+      permalink: true
