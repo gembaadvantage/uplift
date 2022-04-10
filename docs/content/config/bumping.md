@@ -8,7 +8,7 @@ Uplift can bump the semantic version within any file in your repository using th
 
 ## regex
 
-```yaml
+```yaml linenums="1"
 # .uplift.yml
 
 bumps:
@@ -39,7 +39,7 @@ bumps:
 
 ## json
 
-```yaml
+```yaml linenums="1"
 # .uplift.yml
 
 bumps:

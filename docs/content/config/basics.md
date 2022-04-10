@@ -8,7 +8,7 @@ Ideally none of these values should need to be set as uplift will always use wha
 
 ## firstVersion
 
-```yaml
+```yaml linenums="1"
 # .uplift.yml
 
 # An initial version that will be used as the first tag within your repository.
@@ -22,7 +22,7 @@ firstVersion: v1.0.0
 
 ## commitMessage
 
-```yaml
+```yaml linenums="1"
 # .uplift.yml
 
 # Changes the default commit message used by uplift when committing any staged
@@ -36,7 +36,7 @@ commitMessage: "chore: a custom commit message"
 
 ## commitAuthor
 
-```yaml
+```yaml linenums="1"
 # .uplift.yml
 
 # Changes the commit author used by uplift when committing any staged changes.
@@ -59,7 +59,7 @@ commitAuthor:
 
 ## annotatedTags
 
-```yaml
+```yaml linenums="1"
 # .uplift.yml
 
 # Use annotated tags instead of lightweight tags when tagging a new semantic

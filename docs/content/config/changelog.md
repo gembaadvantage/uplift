@@ -8,7 +8,7 @@ Uplift can generate and maintain a changelog within your repository for you. We 
 
 ## sort
 
-```yaml
+```yaml linenums="1"
 # .uplift.yml
 
 changelog:
@@ -21,7 +21,7 @@ changelog:
 
 ## exclude
 
-```yaml
+```yaml linenums="1"
 # .uplift.yml
 
 changelog:
