@@ -49,6 +49,10 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@main
+      - name: Download Syft
+        uses: anchore/sbom-action/download-syft@v0
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - name: DockerHub Login
