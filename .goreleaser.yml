@@ -119,13 +119,13 @@ docker_manifests:
       - "gembaadvantage/uplift:{{ .Tag }}"
   - name_template: "gembaadvantage/uplift:latest"
     image_templates:
-      - "gembaadvantage/uplift:{{ .Tag }}"
+      - "gembaadvantage/uplift:latest"
   - name_template: "ghcr.io/gembaadvantage/uplift:{{ .Tag }}"
     image_templates:
       - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}"
   - name_template: "ghcr.io/gembaadvantage/uplift:latest"
     image_templates:
-      - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}"
+      - "ghcr.io/gembaadvantage/uplift:latest"
 
 brews:
   - name: uplift
