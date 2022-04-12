@@ -13,7 +13,6 @@ theme:
     repo: fontawesome/brands/github
 
 nav:
-  - Home: introduction.md
   - install.md
   - Command Line Usage:
       - uplift: cmd/root.md
