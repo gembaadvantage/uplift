@@ -113,6 +113,20 @@ dockers:
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--platform=linux/amd64"
 
+docker_manifests:
+  - name_template: "gembaadvantage/uplift:{{ .Tag }}"
+    image_templates:
+      - "gembaadvantage/uplift:{{ .Tag }}"
+  - name_template: "gembaadvantage/uplift:latest"
+    image_templates:
+      - "gembaadvantage/uplift:latest"
+  - name_template: "ghcr.io/gembaadvantage/uplift:{{ .Tag }}"
+    image_templates:
+      - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}"
+  - name_template: "ghcr.io/gembaadvantage/uplift:latest"
+    image_templates:
+      - "ghcr.io/gembaadvantage/uplift:latest"
+
 brews:
   - name: uplift
     tap:
