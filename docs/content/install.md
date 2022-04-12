@@ -69,3 +69,17 @@ And check that everything works:
 !!!tip "Fancy Contributing?"
 
     Since you have the code checked out and locally built, you are only one step away from contributing. Take a peek at the [Contributing Guide](https://github.com/gembaadvantage/uplift/blob/main/CONTRIBUTING.md)
+
+## Verifying Artifacts
+
+All verification is carried out using cosign and it must be [installed](https://docs.sigstore.dev/cosign/installation) before proceeding.
+
+### Binaries
+
+### Docker
+
+From version `v2.5.0` all Docker images are signed using cosign. Verification is carried out using the experimental keyless approach:
+
+```sh
+COSIGN_EXPERIMENTAL=1 cosign verify gembaadvantage/uplift
+```
