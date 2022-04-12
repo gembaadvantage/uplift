@@ -63,8 +63,35 @@ archives:
       - README.md
       - LICENSE
 
+checksum:
+  name_template: "checksums.txt"
+
+sboms:
+  - artifacts: archive
+
+# Use Keyless experimental signing with cosign, see: https://github.com/sigstore/cosign/blob/main/KEYLESS.md
 signs:
-  - artifacts: checksum
+  - cmd: cosign
+    env:
+      - COSIGN_EXPERIMENTAL=1
+    certificate: "${artifact}.pem"
+    output: true
+    artifacts: checksum
+    args:
+      - sign-blob
+      - "--output-certificate=${certificate}"
+      - "--output-signature=${signature}"
+      - "${artifact}"
+
+docker_signs:
+  - cmd: cosign
+    env:
+      - COSIGN_EXPERIMENTAL=1
+    artifacts: manifests
+    output: true
+    args:
+      - "sign"
+      - "${artifact}"
 
 dockers:
   - image_templates:
