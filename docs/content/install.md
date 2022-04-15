@@ -76,7 +76,7 @@ All verification is carried out using cosign and it must be [installed](https://
 
 ### Binaries
 
-All binaries are checksummed, with the checksum file signed using cosign.
+All binaries can be verified using the checksum file, which has been signed using cosign.
 
 1. Download the checksum files that need to be verified:
 
@@ -98,7 +98,7 @@ All binaries are checksummed, with the checksum file signed using cosign.
     sha256sum --ignore-missing -c checksums.txt
     ```
 
-!!!tip "Don't mix artefacts"
+!!!tip "Don't mix versions"
 
     For checksum verification to work, all artefacts must be downloaded from the same release
 
