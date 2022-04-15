@@ -69,3 +69,53 @@ And check that everything works:
 !!!tip "Fancy Contributing?"
 
     Since you have the code checked out and locally built, you are only one step away from contributing. Take a peek at the [Contributing Guide](https://github.com/gembaadvantage/uplift/blob/main/CONTRIBUTING.md)
+
+## Verifying Artefacts
+
+All verification is carried out using cosign and it must be [installed](https://docs.sigstore.dev/cosign/installation) before proceeding.
+
+### Binaries
+
+All binaries can be verified using the checksum file, which has been signed using cosign.
+
+1. Download the checksum files that need to be verified:
+
+    ```sh
+    curl -sL https://github.com/gembaadvantage/uplift/releases/download/v2.5.0/checksums.txt -O
+    curl -sL https://github.com/gembaadvantage/uplift/releases/download/v2.5.0/checksums.txt.sig -O
+    curl -sL https://github.com/gembaadvantage/uplift/releases/download/v2.5.0/checksums.txt.pem -O
+    ```
+
+1. Verify the signature of the checksum file:
+
+    ```sh
+    cosign verify-blob --cert checksums.txt.pem --signature checksums.txt.sig checksums.txt
+    ```
+
+1. Download any release artefact and verify its SHA256 signature matches the entry within the checksum file:
+
+    ```sh
+    sha256sum --ignore-missing -c checksums.txt
+    ```
+
+!!!tip "Don't mix versions"
+
+    For checksum verification to work, all artefacts must be downloaded from the same release
+
+### Docker
+
+Docker images can be verified using cosign directly, as the signature will be embedded within the docker manifest.
+
+!!!note "Cosign Verification"
+
+    Cosign verification was introduced to all docker images from version `v2.5.0`
+
+=== "DockerHub"
+    ```sh
+    COSIGN_EXPERIMENTAL=1 cosign verify gembaadvantage/uplift
+    ```
+
+=== "GHCR"
+    ```sh
+    COSIGN_EXPERIMENTAL=1 cosign verify ghcr.io/gembaadvantage/uplift
+    ```
