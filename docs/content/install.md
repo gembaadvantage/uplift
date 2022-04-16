@@ -120,7 +120,6 @@ Docker images can be verified using cosign directly, as the signature will be em
     COSIGN_EXPERIMENTAL=1 cosign verify ghcr.io/gembaadvantage/uplift
     ```
 
-
 ## Running with Docker
 
 You can run uplift directly from a docker image. Depending on how you have cloned the repository, you may need to tweak the following command to work for your setup.
@@ -138,3 +137,7 @@ You can run uplift directly from a docker image. Depending on how you have clone
 !!!warning "Issue with SSH Cloned Repositories"
 
     Outstanding issue with pushing changes back to a cloned SSH repository, see: [#148](https://github.com/gembaadvantage/uplift/issues/148)
+
+## Oh My Zsh
+
+Install the custom uplift [plugin](https://github.com/gembaadvantage/uplift-oh-my-zsh) for full autocompletion support.

@@ -22,7 +22,3 @@ Append a prerelease suffix to the next calculated semantic version and use it as
 ```sh
 uplift bump --prerelease beta.1
 ```
-
-### $VERSION
-
-**`$VERSION`** is a placeholder and will match any semantic version, including a version with an optional `v` prefix.
