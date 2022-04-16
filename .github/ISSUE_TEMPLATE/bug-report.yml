@@ -47,7 +47,6 @@ body:
         2.
         3.
         ...
-      render: shell
     validations:
       required: true
   - type: textarea
@@ -56,7 +55,7 @@ body:
       label: Your uplift configuration
       description: If it is an issue related to your configuration file, please paste it here.
       placeholder: Your uplift configuration
-      render: yaml
+      render: YAML
     validations:
       required: false
   - type: input
@@ -84,7 +83,6 @@ body:
     attributes:
       label: Optional debug output
       description: Please provide optional debug output if you think it will help. `uplift bump --debug`
-      render: shell
     validations:
       required: false
   - type: checkboxes
