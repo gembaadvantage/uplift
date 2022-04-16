@@ -106,7 +106,7 @@ All binaries can be verified using the checksum file, which has been signed usin
 
 Docker images can be verified using cosign directly, as the signature will be embedded within the docker manifest.
 
-!!!note "Cosign Verification"
+!!!info "Cosign Verification"
 
     Cosign verification was introduced to all docker images from version `v2.5.0`
 
@@ -119,3 +119,22 @@ Docker images can be verified using cosign directly, as the signature will be em
     ```sh
     COSIGN_EXPERIMENTAL=1 cosign verify ghcr.io/gembaadvantage/uplift
     ```
+
+
+## Running with Docker
+
+You can run uplift directly from a docker image. Depending on how you have cloned the repository, you may need to tweak the following command to work for your setup.
+
+=== "DockerHub"
+    ```sh
+    docker run --rm -v $PWD:/tmp -w /tmp gembaadvantage/uplift release
+    ```
+
+=== "GHCR"
+    ```sh
+    docker run --rm -v $PWD:/tmp -w /tmp ghcr.io/gembaadvantage/uplift release
+    ```
+
+!!!warning "Issue with SSH Cloned Repositories"
+
+    Outstanding issue with pushing changes back to a cloned SSH repository, see: [#148](https://github.com/gembaadvantage/uplift/issues/148)
