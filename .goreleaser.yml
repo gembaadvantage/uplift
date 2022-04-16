@@ -95,10 +95,8 @@ docker_signs:
 
 dockers:
   - image_templates:
-      - "gembaadvantage/uplift:{{ .Tag }}"
-      - "gembaadvantage/uplift:latest"
-      - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}"
-      - "ghcr.io/gembaadvantage/uplift:latest"
+      - "gembaadvantage/uplift:{{ .Tag }}-amd64"
+      - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}-amd64"
     goos: linux
     goarch: amd64
     dockerfile: Dockerfile
@@ -106,26 +104,48 @@ dockers:
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.licenses=MIT"
-      - "--label=org.opencontainers.image.description=Semantic versioning the easy way"
+      - "--label=org.opencontainers.image.description=Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
       - "--platform=linux/amd64"
+  - image_templates:
+      - "gembaadvantage/uplift:{{ .Tag }}-arm64"
+      - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}-arm64"
+    goos: linux
+    goarch: arm64
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.description=Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/arm64"
 
 docker_manifests:
   - name_template: "gembaadvantage/uplift:{{ .Tag }}"
     image_templates:
-      - "gembaadvantage/uplift:{{ .Tag }}"
+      - "gembaadvantage/uplift:{{ .Tag }}-amd64"
+      - "gembaadvantage/uplift:{{ .Tag }}-arm64"
   - name_template: "gembaadvantage/uplift:latest"
     image_templates:
-      - "gembaadvantage/uplift:latest"
+      - "gembaadvantage/uplift:{{ .Tag }}-amd64"
+      - "gembaadvantage/uplift:{{ .Tag }}-arm64"
   - name_template: "ghcr.io/gembaadvantage/uplift:{{ .Tag }}"
     image_templates:
-      - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}"
+      - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}-amd64"
+      - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}-arm64"
   - name_template: "ghcr.io/gembaadvantage/uplift:latest"
     image_templates:
-      - "ghcr.io/gembaadvantage/uplift:latest"
+      - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}-amd64"
+      - "ghcr.io/gembaadvantage/uplift:{{ .Tag }}-arm64"
 
 brews:
   - name: uplift
@@ -134,7 +154,7 @@ brews:
       name: homebrew-tap
     folder: Formula
     homepage: "https://github.com/gembaadvantage/uplift"
-    description: "Semantic versioning the easy way"
+    description: "Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
     license: MIT
     install: |
       bin.install "uplift"
@@ -160,7 +180,7 @@ scoop:
     owner: gembaadvantage
     name: scoops
   homepage: "https://github.com/gembaadvantage/uplift"
-  description: "Semantic versioning the easy way"
+  description: "Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
   license: MIT
 
 rigs:
@@ -168,5 +188,5 @@ rigs:
       owner: gembaadvantage
       name: fish-food
     homepage: "https://github.com/gembaadvantage/uplift"
-    description: "Semantic versioning the easy way"
+    description: "Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
     license: MIT
