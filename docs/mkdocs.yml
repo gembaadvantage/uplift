@@ -9,10 +9,13 @@ docs_dir: content
 
 theme:
   name: material
+  features:
+    - content.code.annotate
   icon:
     repo: fontawesome/brands/github
 
 nav:
+  - Home: index.md
   - install.md
   - Command Line Usage:
       - uplift: cmd/root.md
@@ -26,6 +29,8 @@ nav:
       - Basics: config/basics.md
       - File Bumping: config/bumping.md
       - Changelog: config/changelog.md
+  - Continuous Integration:
+      - CircleCI: ci/circleci.md
 
 extra:
   social:
@@ -38,6 +43,7 @@ plugins:
 
 markdown_extensions:
   - admonition
+  - footnotes
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
