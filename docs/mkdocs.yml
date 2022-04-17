@@ -31,6 +31,7 @@ nav:
       - Changelog: config/changelog.md
   - Continuous Integration:
       - CircleCI: ci/circleci.md
+      - GitHub Action: ci/github.md
 
 extra:
   social:
