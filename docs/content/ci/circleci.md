@@ -25,6 +25,7 @@ jobs:
           fingerprints:
             - "3b:c7:44:c9:34:ab:a4:fd:6c:33:4e:a7:7a:97:79:55" # (1)
       - checkout
+      # Additional actions specified here
       - run: |
           curl https://raw.githubusercontent.com/gembaadvantage/uplift/master/scripts/install > install
           chmod 700 install
