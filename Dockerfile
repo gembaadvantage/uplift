@@ -5,7 +5,7 @@ RUN apk add --no-cache \
     git=2.34.2-r0 \
     tini=0.19.0-r0
 
-COPY uplift /
+COPY uplift /usr/local/bin
 
-ENTRYPOINT ["/sbin/tini", "--", "/uplift"]
+ENTRYPOINT ["/sbin/tini", "--", "uplift"]
 CMD ["--help"]
