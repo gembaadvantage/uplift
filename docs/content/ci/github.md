@@ -19,6 +19,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # (1)
+      # Additional steps specified here
       - name: Release
         if: github.ref == 'refs/heads/main'
         uses: gembaadvantage/uplift-action@v2.0.1
@@ -35,7 +36,7 @@ jobs:
 
 To ensure uplift triggers another workflow run when tagging the repository, a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) should be created and stored as a [secret](https://docs.github.com/en/actions/security-guides/encrypted-secrets). This will then replace the default `GITHUB_TOKEN` as follows:
 
-```{ .yaml .annotate linenums="1" hl_lines="23" }
+```{ .yaml .annotate linenums="1" hl_lines="24" }
 # .github/workflows/ci.yml
 
 name: ci
@@ -52,6 +53,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      # Additional steps specified here
       - name: Release
         if: github.ref == 'refs/heads/main'
         uses: gembaadvantage/uplift-action@v2.0.1

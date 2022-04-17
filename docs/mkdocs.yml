@@ -32,6 +32,7 @@ nav:
   - Continuous Integration:
       - CircleCI: ci/circleci.md
       - GitHub Action: ci/github.md
+      - Semaphore: ci/semaphore.md
 
 extra:
   social:
