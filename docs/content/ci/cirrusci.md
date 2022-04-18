@@ -25,7 +25,7 @@ task:
 
 Uplift publishes docker images that support both amd64 and arm64 architectures, Cirrus CI can be configured to use [arm64](https://cirrus-ci.org/guide/linux/#linux-containers):
 
-```{ .yaml .annotate linenums="1" hl_lines="8" }
+```{ .yaml .annotate linenums="1" hl_lines="7" }
 # .cirrus.yml
 
 task:
