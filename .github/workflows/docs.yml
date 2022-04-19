@@ -42,7 +42,9 @@ jobs:
         uses: octokit/request-action@v2.x
         with:
           route: PUT /repos/{owner}/{repo}/pages
+          mediaType: application/vnd.github.v3+json
           owner: gembaadvantage
           repo: uplift
+          cname: upliftci.dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
