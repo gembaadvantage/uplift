@@ -33,6 +33,7 @@ nav:
       - CircleCI: ci/circleci.md
       - Cirrus CI: ci/cirrusci.md
       - GitHub Action: ci/github.md
+      - GitLab: ci/gitlab.md
       - Semaphore: ci/semaphore.md
 
 extra:
