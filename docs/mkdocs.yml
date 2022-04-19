@@ -34,6 +34,7 @@ nav:
       - Cirrus CI: ci/cirrusci.md
       - GitHub Action: ci/github.md
       - Semaphore: ci/semaphore.md
+      - Travis CI: ci/travisci.md
 
 extra:
   social:
