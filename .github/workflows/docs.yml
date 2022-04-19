@@ -38,11 +38,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CONFIG_FILE: docs/mkdocs.yml
-      - name: Custom Domain
+      - name: Set Custom Domain
         uses: octokit/request-action@v2.x
+        id: pages_domain
         with:
           route: PUT /repos/{owner}/{repo}/pages
-          mediaType: application/vnd.github.v3+json
           owner: gembaadvantage
           repo: uplift
           cname: upliftci.dev
