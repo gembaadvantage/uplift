@@ -24,7 +24,7 @@ on:
     branches:
       - main
     paths:
-      - docs/*
+      - "docs/**"
   # Allow the workflow to be triggered manually
   workflow_dispatch:
 jobs:
@@ -38,4 +38,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CONFIG_FILE: docs/mkdocs.yml
-          CUSTOM_DOMAIN: "upliftci.dev"
+      - name: Custom Domain
+        uses: octokit/request-action@v2.x
+        with:
+          route: PUT /repos/{owner}/{repo}/pages
+          owner: gembaadvantage
+          repo: uplift
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
