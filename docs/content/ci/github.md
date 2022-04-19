@@ -1,6 +1,6 @@
 # GitHub Action
 
-The official [GitHub Action](https://github.com/gembaadvantage/uplift-action) can be used to configure uplift within your workflow. As uplift is designed to push changes back to your repository, you will need to provide it with an access token. This is by [design](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow).
+The official [GitHub Action](https://github.com/gembaadvantage/uplift-action) can be used to configure uplift within your workflow. As uplift is designed to push changes back to your repository, you will need to provide it with an access token[^1]. This is by [design](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow).
 
 ```{ .yaml .annotate linenums="1" }
 # .github/workflows/ci.yml
@@ -62,3 +62,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_UPLIFT }}
 ```
+
+[^1]: It is best security practice to create an access token with the shortest possible expiration date.
