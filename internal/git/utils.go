@@ -121,9 +121,13 @@ func Remote() (Repository, error) {
 		rem = strings.TrimPrefix(rem, "git@")
 		rem = strings.Replace(rem, ":", "/", 1)
 	} else if strings.HasPrefix(rem, "https://") {
-		// Sanitise any HTTPS based URL to ensure it is parseable. Handle username@password inclusion
-		rem = rem[strings.LastIndex(rem, ":")+1:]
-		rem = strings.TrimPrefix(rem, "//")
+		// Sanitise any HTTPS based URL to ensure it is parseable
+		if tkn := strings.Index(rem, "@"); tkn > -1 {
+			// Strip credentials from URL
+			rem = rem[tkn+1:]
+		} else {
+			rem = strings.TrimPrefix(rem, "https://")
+		}
 	}
 
 	u, err := url.Parse(rem)
