@@ -239,7 +239,7 @@ func retrieveTags(sort []string) []TagEntry {
 
 // LatestTag retrieves the latest tag within the repository
 func LatestTag() TagEntry {
-	tags := retrieveTags([]string{"--sort=-creatordate", "--sort=-refname"})
+	tags := retrieveTags([]string{"--sort=-creatordate", "--sort=-v:refname"})
 	if len(tags) == 0 {
 		return TagEntry{}
 	}

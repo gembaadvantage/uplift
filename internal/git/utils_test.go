@@ -237,6 +237,54 @@ func TestAllTags_CommitWithMultipleTags(t *testing.T) {
 	assert.Equal(t, "1.0.0", tags[2].Ref)
 }
 
+func TestAllTags_LargeHistory(t *testing.T) {
+	InitRepo(t)
+
+	TimeBasedTagSeries(t, []string{
+		"0.1.11",
+		"0.1.123",
+		"0.9.0",
+		"0.10.0",
+		"0.12.0",
+		"0.123.0",
+		"1.0.0",
+		"v1",
+		"1.1.1",
+		"1.1.10",
+		"1.10.0",
+		"1.11.0",
+		"2.0.0",
+		"v2",
+		"10.1.10",
+		"10.11.10",
+		"11.0.0",
+		"prod"})
+
+	tags := AllTags()
+	require.Len(t, tags, 15)
+
+	exp := []string{
+		"11.0.0",
+		"10.11.10",
+		"10.1.10",
+		"2.0.0",
+		"1.11.0",
+		"1.10.0",
+		"1.1.10",
+		"1.1.1",
+		"1.0.0",
+		"0.123.0",
+		"0.12.0",
+		"0.10.0",
+		"0.9.0",
+		"0.1.123",
+		"0.1.11"}
+
+	for i, tag := range tags {
+		assert.Equal(t, exp[i], tag.Ref)
+	}
+}
+
 func TestLatestTag(t *testing.T) {
 	InitRepo(t)
 
@@ -245,6 +293,28 @@ func TestLatestTag(t *testing.T) {
 
 	tag := LatestTag()
 	assert.Equal(t, v2, tag.Ref)
+}
+
+func TestLatestTag_LargeHistory(t *testing.T) {
+	InitRepo(t)
+
+	TimeBasedTagSeries(t, []string{
+		"0.1.0",
+		"0.2.0",
+		"0.9.0",
+		"0.10.0",
+		"0.11.0",
+		"0.29.0",
+		"1.0.0",
+		"v1",
+		"1.9.0",
+		"1.10.0",
+		"1.11.1",
+		"2.0.0",
+		"v2"})
+
+	tag := LatestTag()
+	assert.Equal(t, "2.0.0", tag.Ref)
 }
 
 func TestLatestTag_NoTagsExist(t *testing.T) {
