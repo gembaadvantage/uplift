@@ -35,6 +35,7 @@ nav:
       - GitHub Action: ci/github.md
       - GitLab: ci/gitlab.md
       - Semaphore: ci/semaphore.md
+      - Travis CI: ci/travisci.md
 
 extra:
   social:

@@ -16,6 +16,9 @@ release:
   before_script:
     - PROJECT_URL=${CI_PROJECT_URL#"https://"}
     - git remote set-url origin "https://oauth2:${GL_UPLIFT}@${PROJECT_URL}.git"
+  variables:
+    # Disable shallow cloning of repository
+    GIT_DEPTH: 0
   script:
     # GitLab by default checks out a detached HEAD
     - git checkout $CI_COMMIT_REF_NAME
