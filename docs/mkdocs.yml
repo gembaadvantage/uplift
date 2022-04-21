@@ -9,6 +9,8 @@ docs_dir: content
 
 theme:
   name: material
+  logo: static/logo.png
+  favicon: static/favicon.ico
   features:
     - content.code.annotate
   icon:

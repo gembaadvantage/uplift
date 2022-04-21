@@ -19,3 +19,6 @@ bin/
 
 # GoReleaser build output
 dist/
+
+# Mkdocs generated site
+docs/site
