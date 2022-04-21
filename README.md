@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://upliftci.dev" alt="Uplift">
-    <img src="docs/static/logo.png" width="120px" />
+    <img src="docs/content/static/logo.png" width="120px" />
   </a>
   <h1>Uplift</h1>
 </div>
