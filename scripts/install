@@ -22,6 +22,9 @@
 
 # Install script is heavily based on: https://github.com/Masterminds/glide.sh/blob/master/get
 
+: ${USE_SUDO:="true"}
+: ${UPLIFT_INSTALL_DIR:="/usr/local/bin"}
+
 HAS_CURL="$(type "curl" &> /dev/null && echo true || echo false)"
 HAS_WGET="$(type "wget" &> /dev/null && echo true || echo false)"
 
@@ -96,9 +99,17 @@ install() {
   local extract_dir="$DOWNLOAD_DIR/uplift-$VERSION"
   mkdir -p $extract_dir
   tar xf "$UPLIFT_FILE" -C "${extract_dir}"
-  cp "${extract_dir}/uplift" "/usr/local/bin/uplift"
+  runAsRoot cp "${extract_dir}/uplift" "${UPLIFT_INSTALL_DIR}/uplift"
 
-  echo "Installed uplift to /usr/local/bin"
+  echo "Installed uplift to ${UPLIFT_INSTALL_DIR}"
+}
+
+runAsRoot() {
+  if [ $EUID -ne 0 -a "$USE_SUDO" = "true" ]; then
+    sudo "${@}"
+  else
+    "${@}"
+  fi
 }
 
 tidy() {
@@ -111,14 +122,14 @@ verify() {
   set +e
   UPLIFT="$(command -v uplift)"
   if [ "$?" = "1" ]; then
-    echo "Uplift not found. Is $UPLIFT_INSTALL_DIR on your "'$PATH?'
+    echo "Uplift not found. Is ${UPLIFT_INSTALL_DIR} on your "'$PATH?'
     exit 1
   fi
 
   # Test version
   INSTALLED_VERSION="$(uplift version --short)"
   if [ "${INSTALLED_VERSION}" != "v${VERSION}" ]; then
-    echo "Found version $INSTALLED_VERSION of uplift and not expected installed version of $VERSION"
+    echo "Found version ${INSTALLED_VERSION} of uplift and not expected installed version of $VERSION"
     exit 1
   fi
   set -e
@@ -133,8 +144,45 @@ bye() {
 	exit $result
 }
 
+help () {
+  echo "Uplift Installer"
+  echo
+  echo "Flags:"
+  echo -e "  -h, --help     print help for the uplift installer"
+  echo -e "  -v, --version  download and install a specific version of uplift (default 'latest')"
+  echo -e "      --no-sudo  install uplift without using sudo"
+}
+
 trap "bye" EXIT
 set -e
+
+# Parsing input arguments (if any)
+export INPUT_ARGUMENTS="${@}"
+set -u
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    '--version'|-v)
+       shift
+       if [[ $# -ne 0 ]]; then
+           export DESIRED_VERSION="${1}"
+       else
+           echo -e "Please provide the desired version. e.g. --version v2.6.0 or -v v2.6.0"
+           exit 0
+       fi
+       ;;
+    '--no-sudo')
+       USE_SUDO="false"
+       ;;
+    '--help'|-h)
+       help
+       exit 0
+       ;;
+    *) exit 1
+       ;;
+  esac
+  shift
+done
+set +u
 
 initArch
 initOS
