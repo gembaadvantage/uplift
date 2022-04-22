@@ -23,9 +23,6 @@ before:
     - go mod tidy
     - ./scripts/completions.sh
 
-gomod:
-  proxy: true
-
 builds:
   - id: uplift
     main: ./cmd/uplift
