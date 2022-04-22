@@ -33,6 +33,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
+	"github.com/gembaadvantage/uplift/internal/task/gitdetect"
 	"github.com/gembaadvantage/uplift/internal/task/gittag"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
@@ -47,6 +48,7 @@ is based on the conventional commit message from the last commit.`
 
 var (
 	tagRepoPipeline = []task.Runner{
+		gitdetect.Task{},
 		fetchtag.Task{},
 		lastcommit.Task{},
 		currentversion.Task{},
@@ -56,6 +58,7 @@ var (
 	}
 
 	nextTagPipeline = []task.Runner{
+		gitdetect.Task{},
 		fetchtag.Task{},
 		lastcommit.Task{},
 		currentversion.Task{},
