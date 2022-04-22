@@ -211,7 +211,7 @@ nfpms:
         dst: /usr/share/zsh/vendor-completions/_uplift
         file_info:
           mode: 0644
-      - src: ./LICENSE.md
+      - src: ./LICENSE
         dst: /usr/share/doc/uplift/copyright
         file_info:
           mode: 0644
