@@ -32,8 +32,10 @@ nav:
       - File Bumping: config/bumping.md
       - Changelog: config/changelog.md
   - Continuous Integration:
+      - About: ci/about.md
       - CircleCI: ci/circleci.md
       - Cirrus CI: ci/cirrusci.md
+      - Codefresh: ci/codefresh.md
       - GitHub Action: ci/github.md
       - GitLab: ci/gitlab.md
       - Semaphore: ci/semaphore.md
