@@ -236,3 +236,11 @@ nfpms:
       lintian_overrides:
         - statically-linked-binary
         - changelog-file-missing-in-native-package
+
+publishers:
+  - name: fury.io
+    ids:
+      - packages
+    env:
+      - "FURY_TOKEN={{ .Env.FURY_TOKEN }}"
+    cmd: ./scripts/fury-upload.sh {{ .ArtifactName }}
