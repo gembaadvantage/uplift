@@ -191,14 +191,6 @@ scoop:
   description: "Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
   license: MIT
 
-rigs:
-  - rig:
-      owner: gembaadvantage
-      name: fish-food
-    homepage: "https://upliftci.dev"
-    description: "Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
-    license: MIT
-
 nfpms:
   - file_name_template: "{{ .ConventionalFileName }}"
     id: packages

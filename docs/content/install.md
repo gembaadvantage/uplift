@@ -12,15 +12,6 @@ To use [Homebrew](https://brew.sh/):
 brew install gembaadvantage/tap/uplift
 ```
 
-### GoFish
-
-To use [GoFish](https://gofi.sh/):
-
-```sh
-gofish rig add https://github.com/gembaadvantage/fish-food
-gofish install github.com/gembaadvantage/fish-food/uplift
-```
-
 ### Scoop
 
 To use [Scoop](https://scoop.sh/):
