@@ -18,6 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+before:
+  hooks:
+    - go mod tidy
+
+gomod:
+  proxy: true
+
 builds:
   - id: uplift
     main: ./cmd/uplift
