@@ -67,27 +67,31 @@ canDownload() {
 }
 
 download() {
-  if [ "${HAS_CURL}" == "true" ]; then
-    VERSION="$(curl -s https://api.github.com/repos/gembaadvantage/uplift/releases/latest | grep "tag_name" | cut -d'v' -f2 | cut -d'"' -f1)"
-  elif [ "${HAS_WGET}" == "true" ]; then
-    VERSION="$(wget -q https://api.github.com/repos/gembaadvantage/uplift/releases/latest -O - 2>&1 | grep "tag_name" | cut -d'v' -f2 | cut -d'"' -f1)"
+  if [ -z "$DESIRED_VERSION" ]; then
+    if [ "${HAS_CURL}" == "true" ]; then
+      TAG="v$(curl -s https://api.github.com/repos/gembaadvantage/uplift/releases/latest | grep "tag_name" | cut -d'v' -f2 | cut -d'"' -f1)"
+    elif [ "${HAS_WGET}" == "true" ]; then
+      TAG="v$(wget -q https://api.github.com/repos/gembaadvantage/uplift/releases/latest -O - 2>&1 | grep "tag_name" | cut -d'v' -f2 | cut -d'"' -f1)"
+    fi
+  else
+    TAG=${DESIRED_VERSION}
   fi
 
-  echo "Attempting to download uplift v${VERSION}..."
+  echo "Attempting to download uplift ${TAG}..."
 
   PACKAGE_TYPE="tar.gz"
   if [ "${OS}" == "windows" ]; then
     PACKAGE_TYPE="zip"
   fi
 
-  local archive="uplift_${VERSION}_${OS}-${ARCH}.${PACKAGE_TYPE}"
+  local archive="uplift_${TAG#v}_${OS}-${ARCH}.${PACKAGE_TYPE}"
 
-  DOWNLOAD_URL="https://github.com/gembaadvantage/uplift/releases/download/v${VERSION}/${archive}"
+  DOWNLOAD_URL="https://github.com/gembaadvantage/uplift/releases/download/${TAG}/${archive}"
   DOWNLOAD_DIR="$(mktemp -dt uplift-install-XXXXXXX)"
   UPLIFT_FILE="${DOWNLOAD_DIR}/${archive}"
 
   if [ "${HAS_CURL}" == "true" ]; then
-    curl -SsL "$DOWNLOAD_URL" -o "$UPLIFT_FILE"
+    curl -L "$DOWNLOAD_URL" -o "$UPLIFT_FILE"
   elif [ "${HAS_WGET}" == "true" ]; then
     wget -q -O "$UPLIFT_FILE" "$DOWNLOAD_URL"
   fi
@@ -96,7 +100,7 @@ download() {
 install() {
   echo "Installing uplift..."
 
-  local extract_dir="$DOWNLOAD_DIR/uplift-$VERSION"
+  local extract_dir="$DOWNLOAD_DIR/uplift-$TAG"
   mkdir -p $extract_dir
   tar xf "$UPLIFT_FILE" -C "${extract_dir}"
   runAsRoot cp "${extract_dir}/uplift" "${UPLIFT_INSTALL_DIR}/uplift"
@@ -113,6 +117,7 @@ runAsRoot() {
 }
 
 tidy() {
+
   if [[ -d "${DOWNLOAD_DIR:-}" ]]; then
     rm -rf "$DOWNLOAD_DIR"
   fi
@@ -128,8 +133,8 @@ verify() {
 
   # Test version
   INSTALLED_VERSION="$(uplift version --short)"
-  if [ "${INSTALLED_VERSION}" != "v${VERSION}" ]; then
-    echo "Found version ${INSTALLED_VERSION} of uplift and not expected installed version of $VERSION"
+  if [ "${INSTALLED_VERSION}" != "${TAG}" ]; then
+    echo "Found version ${INSTALLED_VERSION} of uplift and not expected installed version of $TAG"
     exit 1
   fi
   set -e
@@ -166,7 +171,7 @@ while [[ $# -gt 0 ]]; do
        if [[ $# -ne 0 ]]; then
            export DESIRED_VERSION="${1}"
        else
-           echo -e "Please provide the desired version. e.g. --version v2.6.0 or -v v2.6.0"
+           echo -e "Please provide a valid version: e.g. --version v2.6.0 or -v v2.6.0"
            exit 0
        fi
        ;;
