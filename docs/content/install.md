@@ -31,12 +31,16 @@ scoop install uplift
 
 ### Bash Script
 
-To install using a bash script:
+To install the latest version using a bash script:
 
 ```sh
-curl https://raw.githubusercontent.com/gembaadvantage/uplift/main/scripts/install > install
-chmod 700 install
-./install
+curl https://raw.githubusercontent.com/gembaadvantage/uplift/main/scripts/install | bash
+```
+
+A specific version can be downloaded by using the `-v` flag. By default the script uses `sudo`, which can be turned off by using the `--no-sudo` flag.
+
+```sh
+curl https://raw.githubusercontent.com/gembaadvantage/uplift/main/scripts/install | bash -s -- -v v2.6.3 --no-sudo
 ```
 
 ### Manually

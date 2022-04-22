@@ -50,10 +50,7 @@ blocks:
       jobs:
         - name: uplift
           commands:
-            - |
-              curl https://raw.githubusercontent.com/gembaadvantage/uplift/master/scripts/install > install
-              chmod 700 install
-              sudo ./install
+            - curl https://raw.githubusercontent.com/gembaadvantage/uplift/main/scripts/install | bash
             - uplift release # (1)
 ```
 
