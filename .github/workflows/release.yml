@@ -26,6 +26,10 @@ on:
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v3
