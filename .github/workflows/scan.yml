@@ -18,43 +18,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-name: "CodeQL"
-
+name: Scan vulnerabilities
 on:
-  push:
-    branches: [main]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [main]
   schedule:
-    - cron: "36 4 * * 6"
+    - cron: "0 0 * * *"
+  workflow_dispatch:
 
 jobs:
-  analyze:
-    name: Analyze
+  scan:
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ["go"]
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
 
-      # Initializes the CodeQL tools for scanning.
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v1
+      - name: Trivy Scan
+        uses: knqyf263/trivy-issue-action@v0.0.3
         with:
-          languages: ${{ matrix.language }}
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v1
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v1
+          assignee: ga-paul-t
+          severity: CRITICAL
+          label: vulnerability
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
