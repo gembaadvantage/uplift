@@ -87,7 +87,7 @@ download() {
   local archive="uplift_${TAG#v}_${OS}-${ARCH}.${PACKAGE_TYPE}"
 
   DOWNLOAD_URL="https://github.com/gembaadvantage/uplift/releases/download/${TAG}/${archive}"
-  DOWNLOAD_DIR="$(mktemp -dt uplift-install)"
+  DOWNLOAD_DIR="$(mktemp -dt uplift-install.XXXXXXX)"
   UPLIFT_FILE="${DOWNLOAD_DIR}/${archive}"
 
   if [ "${HAS_CURL}" == "true" ]; then
