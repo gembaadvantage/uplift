@@ -20,39 +20,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package currentversion
+package gitdetect
 
 import (
-	"github.com/apex/log"
+	"errors"
+
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
-// Task that identifies the current semantic version of a repository
+// Task for detecting if uplift is being run within a recognised
+// git repository
 type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "current version"
+	return "git detect"
 }
 
-// Skip is disabled for this task
+// Skip running the task
 func (t Task) Skip(ctx *context.Context) bool {
 	return false
 }
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	tag := git.LatestTag()
-	if tag.Ref == "" {
-		log.Info("repository not tagged with version")
-		return nil
+	if !git.IsRepo() {
+		return errors.New("current working directory must be a git repository")
 	}
 
-	// Only a semantic version tag will have been retrieved by this point
-	ctx.CurrentVersion, _ = semver.Parse(tag.Ref)
-
-	log.WithField("current", ctx.CurrentVersion).Info("identified version")
 	return nil
 }

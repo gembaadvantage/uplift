@@ -40,6 +40,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
+	"github.com/gembaadvantage/uplift/internal/task/gitdetect"
 	"github.com/gembaadvantage/uplift/internal/task/gittag"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
@@ -108,6 +109,7 @@ func release(opts releaseOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
+		gitdetect.Task{},
 		fetchtag.Task{},
 		lastcommit.Task{},
 		currentversion.Task{},
