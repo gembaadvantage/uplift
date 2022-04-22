@@ -12,10 +12,7 @@ git:
   depth: false
 
 before_install:
-  - |
-    curl https://raw.githubusercontent.com/gembaadvantage/uplift/master/scripts/install > install
-    chmod 700 install
-    sudo ./install
+  - curl https://raw.githubusercontent.com/gembaadvantage/uplift/main/scripts/install | bash
 
 script:
   - git remote set-url origin https://${GH_UPLIFT}@github.com/${TRAVIS_REPO_SLUG}.git
