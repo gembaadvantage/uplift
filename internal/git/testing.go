@@ -53,6 +53,19 @@ func InitRepo(t *testing.T) string {
 	return EmptyCommit(t, InitCommit)
 }
 
+// InitShallowRepo creates an empty git repository within a temporary directory. It simulates
+// a shallow clone by adding an empty shallow file within the .git folder. Once created the
+// current testing context will operate from within that directory until the calling test
+// has completed
+func InitShallowRepo(t *testing.T) string {
+	t.Helper()
+
+	h := InitRepo(t)
+	TouchFiles(t, ".git/shallow")
+
+	return h
+}
+
 // RemoteOrigin sets the URL of the remote origin associated with the current git repository
 func RemoteOrigin(t *testing.T, url string) {
 	t.Helper()
@@ -233,4 +246,15 @@ func TimeBasedTagSeries(t *testing.T, tags []string) []TimedTag {
 	}
 
 	return tt
+}
+
+// TouchFiles will create any number of empty files within the current test
+// working directory
+func TouchFiles(t *testing.T, fs ...string) {
+	t.Helper()
+
+	for _, f := range fs {
+		_, err := os.Create(f)
+		require.NoError(t, err)
+	}
 }

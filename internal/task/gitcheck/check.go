@@ -20,30 +20,64 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package gitdetect
+package gitcheck
 
 import (
-	"testing"
+	"os"
 
+	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/stretchr/testify/assert"
 )
 
-func Test_Run(t *testing.T) {
-	git.InitRepo(t)
+// Task for detecting if uplift is being run within a recognised
+// git repository
+type Task struct{}
 
-	err := Task{}.Run(&context.Context{})
-	assert.NoError(t, err)
+// String generates a string representation of the task
+func (t Task) String() string {
+	return "checking git"
 }
 
-func Test_RunOutsideGit(t *testing.T) {
-	git.MkTmpDir(t)
-
-	err := Task{}.Run(&context.Context{})
-	assert.EqualError(t, err, "current working directory must be a git repository")
+// Skip running the task
+func (t Task) Skip(ctx *context.Context) bool {
+	return false
 }
 
-func Test_Skip(t *testing.T) {
-	assert.False(t, Task{}.Skip(&context.Context{}))
+// Run the task
+func (t Task) Run(ctx *context.Context) error {
+	log.Debug("checking if git is installed")
+	if !git.IsInstalled() {
+		return ErrGitMissing
+	}
+
+	cwd, _ := os.Getwd()
+	log.WithField("cwd", cwd).Debug("checking for git repo")
+	if !git.IsRepo() {
+		return ErrNoRepository
+	}
+
+	log.Debug("checking if repository is dirty")
+	out, err := git.CheckDirty()
+	if err != nil {
+		return err
+	}
+
+	if out != "" {
+		return ErrDirty{status: out}
+	}
+
+	log.Debug("checking for detached head")
+	if git.IsDetached() {
+		log.Warn("detached HEAD detected. This may impact certain operations within uplift")
+		return ErrDetachedHead{}
+	}
+
+	log.Debug("checking if shallow clone used")
+	if git.IsShallow() {
+		log.Warn("shallow clone detected. This may impact certain operations within uplift")
+		return ErrShallowClone{}
+	}
+
+	return nil
 }

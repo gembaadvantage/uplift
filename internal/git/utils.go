@@ -88,11 +88,39 @@ func Run(args ...string) (string, error) {
 	return string(out), nil
 }
 
+// IsInstalled identifies whether git is installed under the current $PATH
+func IsInstalled() bool {
+	_, err := Run("--version")
+	return err == nil
+}
+
 // IsRepo identifies whether the current working directory is a recognised
 // git repository
 func IsRepo() bool {
 	out, err := Run("rev-parse", "--is-inside-work-tree")
 	return err == nil && strings.TrimSpace(out) == "true"
+}
+
+// IsShallow identifies if the current repository was created through a shallow clone
+func IsShallow() bool {
+	out, err := Run("rev-parse", "--is-shallow-repository")
+	return err == nil && strings.TrimSpace(out) == "true"
+}
+
+// CheckDirty identifies if the current repository is dirty through the presence of
+// un-committed and/or un-staged changes and returns a list of those files
+func CheckDirty() (string, error) {
+	out, err := Clean(Run("status", "--porcelain"))
+	if out != "" || err != nil {
+		return out, err
+	}
+	return "", nil
+}
+
+// IsDeatched identifies if the current repository is detached from its HEAD
+func IsDetached() bool {
+	out, err := Run("branch", "--show-current")
+	return err == nil && strings.TrimSpace(out) == ""
 }
 
 // Remote retrieves details about the remote origin of a repository
