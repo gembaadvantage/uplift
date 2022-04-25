@@ -34,8 +34,8 @@ import (
 
 func TestRelease(t *testing.T) {
 	git.InitRepo(t)
-	git.EmptyCommit(t, "feat: this is a release")
 	data := testFileWithConfig(t, "test.txt", ".uplift.yml")
+	git.EmptyCommit(t, "feat: this is a release")
 
 	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
 
@@ -83,8 +83,8 @@ func TestRelease_CheckFlagNoRelease(t *testing.T) {
 
 func TestRelease_PrereleaseFlag(t *testing.T) {
 	git.InitRepo(t)
-	git.EmptyCommit(t, "feat: this is a release")
 	testFileWithConfig(t, "test.txt", ".uplift.yml")
+	git.EmptyCommit(t, "feat: this is a new feature")
 
 	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
 	relCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
