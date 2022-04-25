@@ -83,7 +83,9 @@ func TestRun_IgnoreDetachedHead(t *testing.T) {
 	// Checkout the returned hash to force a detached HEAD
 	git.Run("checkout", h)
 
-	err := Task{}.Run(&context.Context{})
+	err := Task{}.Run(&context.Context{
+		IgnoreDetached: true,
+	})
 	assert.NoError(t, err)
 }
 
@@ -102,7 +104,9 @@ For further details visit: https://upliftci.dev/faq/git-shallow
 func TestRun_IgnoreShallowClone(t *testing.T) {
 	git.InitShallowRepo(t)
 
-	err := Task{}.Run(&context.Context{})
+	err := Task{}.Run(&context.Context{
+		IgnoreShallow: true,
+	})
 	assert.NoError(t, err)
 }
 

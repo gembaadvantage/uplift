@@ -69,14 +69,20 @@ func (t Task) Run(ctx *context.Context) error {
 
 	log.Debug("checking for detached head")
 	if git.IsDetached() {
-		log.Warn("detached HEAD detected. This may impact certain operations within uplift")
-		return ErrDetachedHead{}
+		if ctx.IgnoreDetached {
+			log.Warn("detached HEAD detected. This may impact certain operations within uplift")
+		} else {
+			return ErrDetachedHead{}
+		}
 	}
 
 	log.Debug("checking if shallow clone used")
 	if git.IsShallow() {
-		log.Warn("shallow clone detected. This may impact certain operations within uplift")
-		return ErrShallowClone{}
+		if ctx.IgnoreShallow {
+			log.Warn("shallow clone detected. This may impact certain operations within uplift")
+		} else {
+			return ErrShallowClone{}
+		}
 	}
 
 	return nil

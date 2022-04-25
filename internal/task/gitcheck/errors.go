@@ -70,13 +70,6 @@ For further details visit: https://upliftci.dev/faq/git-shallow
 `
 }
 
-// TODO: global git settings within uplift
-/*
-git:
-  ignoreDetached: true
-  ignoreShallow: true
-*/
-
 var (
 	// ErrGitMissing is raised if git is not detected on the current $PATH
 	ErrGitMissing = errors.New("git is not currently installed under $PATH")
