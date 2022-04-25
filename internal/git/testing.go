@@ -25,6 +25,7 @@ package git
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -255,6 +256,53 @@ func TouchFiles(t *testing.T, fs ...string) {
 
 	for _, f := range fs {
 		_, err := os.Create(f)
+		require.NoError(t, err)
+	}
+}
+
+// CommitFiles will add the specified files to the git repository under a single commit
+func CommitFiles(t *testing.T, fs ...string) {
+	t.Helper()
+
+	for _, f := range fs {
+		err := Stage(f)
+		require.NoError(t, err)
+	}
+
+	err := Commit(CommitDetails{
+		Author:  "uplift",
+		Email:   "uplift@test.com",
+		Message: "chore: add .gitignore",
+	})
+	require.NoError(t, err)
+}
+
+// Ignore will generate and commit a .gitignore file to the repository. This will
+// prevent a git repository from being in a dirty state during a test
+func Ignore(t *testing.T, fs ...string) {
+	t.Helper()
+
+	out := make([]string, 0, len(fs))
+	for _, f := range fs {
+		out = append(out, f)
+	}
+
+	if len(out) > 0 {
+		// Ensure git doesn't complain
+		_, err := Run("config", "advice.addIgnoredFile", "true")
+		require.NoError(t, err)
+
+		err = os.WriteFile(".gitignore", []byte(strings.Join(out, "\n")), 0644)
+		require.NoError(t, err)
+
+		err = Stage(".gitignore")
+		require.NoError(t, err)
+
+		err = Commit(CommitDetails{
+			Author:  "uplift",
+			Email:   "uplift@test.com",
+			Message: "chore: add .gitignore",
+		})
 		require.NoError(t, err)
 	}
 }

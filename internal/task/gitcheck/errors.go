@@ -36,9 +36,9 @@ type ErrDirty struct {
 func (e ErrDirty) Error() string {
 	return fmt.Sprintf(`uplift cannot reliably run if the repository is in a dirty state. Changes detected:
 %s
-Please check and resolve the status of these files before retrying.
 
-For further details visit: https://upliftci.dev/faq/git-dirty
+Please check and resolve the status of these files before retrying. For further 
+details visit: https://upliftci.dev/faq/git-dirty
 `, e.status)
 }
 

@@ -117,8 +117,8 @@ func TestRun_Dirty(t *testing.T) {
 	err := Task{}.Run(&context.Context{})
 	assert.EqualError(t, err, `uplift cannot reliably run if the repository is in a dirty state. Changes detected:
 ?? testing.go
-Please check and resolve the status of these files before retrying.
 
-For further details visit: https://upliftci.dev/faq/git-dirty
+Please check and resolve the status of these files before retrying. For further 
+details visit: https://upliftci.dev/faq/git-dirty
 `)
 }
