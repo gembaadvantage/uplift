@@ -9,6 +9,7 @@ docs_dir: content
 
 theme:
   name: material
+  custom_dir: overrides
   logo: static/logo.png
   favicon: static/favicon.ico
   features:
