@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # About
 
 Uplift can be customised through a configuration file. In fact, uplift supports multiple default naming conventions. So take your pick!

@@ -1,7 +1,3 @@
----
-sidebar_position: 2
----
-
 # Basics
 
 Ideally none of these values should need to be set as uplift will always use what we believe to be sensible default values.
