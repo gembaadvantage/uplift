@@ -38,7 +38,7 @@ func (e ErrDirty) Error() string {
 %s
 
 Please check and resolve the status of these files before retrying. For further 
-details visit: https://upliftci.dev/faq/git-dirty
+details visit: https://upliftci.dev/faq/gitdirty
 `, e.status)
 }
 
@@ -52,7 +52,7 @@ func (e ErrDetachedHead) Error() string {
 will not run as expected. To suppress this error, use the '--ignore-detached' flag, or 
 set the required config.
 
-For further details visit: https://upliftci.dev/faq/git-detached
+For further details visit: https://upliftci.dev/faq/gitdetached
 `
 }
 
@@ -66,7 +66,7 @@ func (e ErrShallowClone) Error() string {
 work as expected. To suppress this error, use the '--ignore-shallow' flag, or set the 
 required config.
 
-For further details visit: https://upliftci.dev/faq/git-shallow
+For further details visit: https://upliftci.dev/faq/gitshallow
 `
 }
 
