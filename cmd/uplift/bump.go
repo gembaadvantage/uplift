@@ -129,10 +129,12 @@ func setupBumpContext(opts bumpOptions, out io.Writer) (*context.Context, error)
 	}
 
 	// Handle git config. Command line flag takes precedences
+	ctx.IgnoreDetached = opts.IgnoreDetached
 	if !ctx.IgnoreDetached {
 		ctx.IgnoreDetached = ctx.Config.Git.IgnoreDetached
 	}
 
+	ctx.IgnoreShallow = opts.IgnoreShallow
 	if !ctx.IgnoreShallow {
 		ctx.IgnoreShallow = ctx.Config.Git.IgnoreShallow
 	}

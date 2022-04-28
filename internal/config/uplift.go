@@ -43,7 +43,7 @@ type Uplift struct {
 // Git defines configuration for how uplift interacts with git
 type Git struct {
 	IgnoreDetached bool `yaml:"ignoreDetached"`
-	IgnoreShallow  bool `yaml:"ignoredShallow"`
+	IgnoreShallow  bool `yaml:"ignoreShallow"`
 }
 
 // Bump defines configuration for bumping individual files based
