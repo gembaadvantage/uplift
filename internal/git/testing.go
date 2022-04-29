@@ -255,7 +255,10 @@ func TouchFiles(t *testing.T, fs ...string) {
 	t.Helper()
 
 	for _, f := range fs {
-		_, err := os.Create(f)
+		fi, err := os.Create(f)
+		// Close file handle immediately after creation
+		fi.Close()
+
 		require.NoError(t, err)
 	}
 }
