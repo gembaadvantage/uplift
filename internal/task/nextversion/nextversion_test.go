@@ -33,6 +33,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestString(t *testing.T) {
+	assert.Equal(t, "next semantic version", Task{}.String())
+}
+
+func TestSkip(t *testing.T) {
+	assert.False(t, Task{}.Skip(&context.Context{}))
+}
+
 func TestRun(t *testing.T) {
 	tests := []struct {
 		name       string

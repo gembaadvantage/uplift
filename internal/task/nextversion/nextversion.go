@@ -40,7 +40,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "next version"
+	return "next semantic version"
 }
 
 // Skip is disabled for this task
@@ -54,7 +54,7 @@ func (t Task) Run(ctx *context.Context) error {
 	if inc == semver.NoIncrement {
 		ctx.NextVersion = ctx.CurrentVersion
 		ctx.NoVersionChanged = true
-		log.WithField("commit", ctx.CommitDetails.Message).Info("no change in version needed")
+		log.WithField("commit", ctx.CommitDetails.Message).Warn("commit doesn't trigger change in semantic version")
 		return nil
 	}
 
@@ -63,11 +63,7 @@ func (t Task) Run(ctx *context.Context) error {
 	// If this is the first tag, use the required default
 	if ctx.CurrentVersion.Raw == "" {
 		ctx.NextVersion, _ = semver.Parse(firstVersion(ctx))
-		log.WithFields(log.Fields{
-			"current": ctx.CurrentVersion.Raw,
-			"next":    ctx.NextVersion.Raw,
-			"commit":  ctx.CommitDetails.Message,
-		}).Info("identified first version")
+		log.WithField("version", ctx.NextVersion.Raw).Info("repository not tagged, using first version")
 		return nil
 	}
 
@@ -92,7 +88,7 @@ func (t Task) Run(ctx *context.Context) error {
 		log.WithFields(log.Fields{
 			"prerelease": ctx.Prerelease,
 			"metadata":   ctx.Metadata,
-		}).Info("prerelease version detected")
+		}).Info("appending prerelease version")
 	}
 
 	ctx.NextVersion = semver.Version{
@@ -105,18 +101,16 @@ func (t Task) Run(ctx *context.Context) error {
 		Raw:        nxt.Original(),
 	}
 
-	log.WithFields(log.Fields{
-		"current": ctx.CurrentVersion.Raw,
-		"next":    ctx.NextVersion.Raw,
-		"commit":  ctx.CommitDetails.Message,
-	}).Info("identified next version")
+	log.WithField("next", ctx.NextVersion.Raw).Info("identified next semantic version")
 	return nil
 }
 
 func firstVersion(ctx *context.Context) string {
 	fv := defaultVersion
+
 	if ctx.Config.FirstVersion != "" {
 		fv = ctx.Config.FirstVersion
+		log.WithField("version", fv).Debug("setting first version based on config")
 	}
 
 	// Append any semantic prerelease suffix if needed

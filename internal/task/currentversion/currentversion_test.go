@@ -27,7 +27,16 @@ import (
 
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestString(t *testing.T) {
+	assert.Equal(t, "identifying current version", Task{}.String())
+}
+
+func TestSkip(t *testing.T) {
+	assert.False(t, Task{}.Skip(&context.Context{}))
+}
 
 func TestRun(t *testing.T) {
 	tests := []struct {

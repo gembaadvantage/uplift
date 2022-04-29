@@ -35,7 +35,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "git tag"
+	return "tagging repository"
 }
 
 // Skip running the task if no version has changed
@@ -50,7 +50,7 @@ func (t Task) Run(ctx *context.Context) error {
 		log.WithFields(log.Fields{
 			"current": ctx.CurrentVersion.Raw,
 			"next":    ctx.NextVersion.Raw,
-		}).Info("no version change detected")
+		}).Warn("no version change detected")
 		return nil
 	}
 
@@ -65,20 +65,21 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
+	log.Debug("attempting to tag repository")
 	if ctx.Config.AnnotatedTags {
-		log.Info("tagged repository with annotated tag")
 		if err := git.AnnotatedTag(ctx.NextVersion.Raw, ctx.CommitDetails); err != nil {
 			return err
 		}
+		log.Info("tagged repository with annotated tag")
 	} else {
-		log.Info("tagged repository with standard tag")
 		if err := git.Tag(ctx.NextVersion.Raw); err != nil {
 			return err
 		}
+		log.Info("tagged repository with standard tag")
 	}
 
 	if ctx.NoPush {
-		log.Info("skipping push of tag to remote")
+		log.Warn("skipping push of tag to remote")
 		return nil
 	}
 

@@ -33,7 +33,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "bump"
+	return "bumping files"
 }
 
 // Skip running the task if no version has changed

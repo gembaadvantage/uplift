@@ -20,41 +20,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package lastcommit
+package fetchtag
 
 import (
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestString(t *testing.T) {
-	assert.Equal(t, "inspect latest commit", Task{}.String())
+	assert.Equal(t, "fetching all tags", Task{}.String())
 }
 
 func TestSkip(t *testing.T) {
-	assert.False(t, Task{}.Skip(&context.Context{}))
-}
-
-func TestRun(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommit(t, "test commit")
-
-	ctx := &context.Context{}
-	err := Task{}.Run(ctx)
-
-	require.NoError(t, err)
-	assert.Equal(t, "uplift", ctx.CommitDetails.Author)
-	assert.Equal(t, "uplift@test.com", ctx.CommitDetails.Email)
-	assert.Equal(t, "test commit", ctx.CommitDetails.Message)
-}
-
-func TestRun_NoGitRepository(t *testing.T) {
-	git.MkTmpDir(t)
-
-	err := Task{}.Run(&context.Context{})
-	require.Error(t, err)
+	assert.True(t, Task{}.Skip(&context.Context{
+		FetchTags: false,
+	}))
 }

@@ -32,6 +32,35 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestString(t *testing.T) {
+	assert.Equal(t, "committing changes", Task{}.String())
+}
+
+func TestSkip(t *testing.T) {
+	tests := []struct {
+		name string
+		ctx  *context.Context
+	}{
+		{
+			name: "DryRun",
+			ctx: &context.Context{
+				DryRun: true,
+			},
+		},
+		{
+			name: "NoVersionChanged",
+			ctx: &context.Context{
+				NoVersionChanged: true,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.True(t, Task{}.Skip(tt.ctx))
+		})
+	}
+}
+
 func TestRun(t *testing.T) {
 	git.InitRepo(t)
 	trackFile(t, "test.txt")

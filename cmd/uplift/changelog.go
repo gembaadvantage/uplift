@@ -105,9 +105,9 @@ func writeChangelog(opts changelogOptions, out io.Writer) error {
 
 	tsks := []task.Runner{
 		gitdetect.Task{},
+		scm.Task{},
 		lastcommit.Task{},
 		nextcommit.Task{},
-		scm.Task{},
 		changelog.Task{},
 		gitcommit.Task{},
 	}
