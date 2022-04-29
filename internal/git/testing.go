@@ -25,6 +25,7 @@ package git
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -51,6 +52,19 @@ func InitRepo(t *testing.T) string {
 	RemoteOrigin(t, "http://example.com/project/repository")
 
 	return EmptyCommit(t, InitCommit)
+}
+
+// InitShallowRepo creates an empty git repository within a temporary directory. It simulates
+// a shallow clone by adding an empty shallow file within the .git folder. Once created the
+// current testing context will operate from within that directory until the calling test
+// has completed
+func InitShallowRepo(t *testing.T) string {
+	t.Helper()
+
+	h := InitRepo(t)
+	TouchFiles(t, ".git/shallow")
+
+	return h
 }
 
 // RemoteOrigin sets the URL of the remote origin associated with the current git repository
@@ -233,4 +247,65 @@ func TimeBasedTagSeries(t *testing.T, tags []string) []TimedTag {
 	}
 
 	return tt
+}
+
+// TouchFiles will create any number of empty files within the current test
+// working directory
+func TouchFiles(t *testing.T, fs ...string) {
+	t.Helper()
+
+	for _, f := range fs {
+		fi, err := os.Create(f)
+		// Close file handle immediately after creation
+		fi.Close()
+
+		require.NoError(t, err)
+	}
+}
+
+// CommitFiles will add the specified files to the git repository under a single commit
+func CommitFiles(t *testing.T, fs ...string) {
+	t.Helper()
+
+	for _, f := range fs {
+		err := Stage(f)
+		require.NoError(t, err)
+	}
+
+	err := Commit(CommitDetails{
+		Author:  "uplift",
+		Email:   "uplift@test.com",
+		Message: "chore: add .gitignore",
+	})
+	require.NoError(t, err)
+}
+
+// Ignore will generate and commit a .gitignore file to the repository. This will
+// prevent a git repository from being in a dirty state during a test
+func Ignore(t *testing.T, fs ...string) {
+	t.Helper()
+
+	out := make([]string, 0, len(fs))
+	for _, f := range fs {
+		out = append(out, f)
+	}
+
+	if len(out) > 0 {
+		// Ensure git doesn't complain
+		_, err := Run("config", "advice.addIgnoredFile", "true")
+		require.NoError(t, err)
+
+		err = os.WriteFile(".gitignore", []byte(strings.Join(out, "\n")), 0644)
+		require.NoError(t, err)
+
+		err = Stage(".gitignore")
+		require.NoError(t, err)
+
+		err = Commit(CommitDetails{
+			Author:  "uplift",
+			Email:   "uplift@test.com",
+			Message: "chore: add .gitignore",
+		})
+		require.NoError(t, err)
+	}
 }

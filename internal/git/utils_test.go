@@ -32,6 +32,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestIsInstalled(t *testing.T) {
+	assert.True(t, IsInstalled())
+}
+
+func TestIsInstalled_NotOnPath(t *testing.T) {
+	// Temporarily blast the PATH variable within this test
+	t.Setenv("PATH", "")
+
+	assert.False(t, IsInstalled())
+}
+
 func TestIsRepo(t *testing.T) {
 	InitRepo(t)
 	assert.True(t, IsRepo())
@@ -40,6 +51,72 @@ func TestIsRepo(t *testing.T) {
 func TestIsRepo_DetectsNonGitRepo(t *testing.T) {
 	MkTmpDir(t)
 	assert.False(t, IsRepo())
+}
+
+func TestIsShallow(t *testing.T) {
+	InitShallowRepo(t)
+
+	assert.True(t, IsShallow())
+}
+
+func TestIsShallow_FullHistory(t *testing.T) {
+	InitRepo(t)
+
+	assert.False(t, IsShallow())
+}
+
+func TestIsDetached(t *testing.T) {
+	InitRepo(t)
+	h := EmptyCommit(t, "this is a test")
+
+	_, err := Run("checkout", h)
+	require.NoError(t, err)
+
+	assert.True(t, IsDetached())
+}
+
+func TestIsDetached_OnBranch(t *testing.T) {
+	InitRepo(t)
+
+	assert.False(t, IsDetached())
+}
+
+func TestCheckDirty(t *testing.T) {
+	InitRepo(t)
+	EmptyCommit(t, "this is a test")
+
+	out, err := CheckDirty()
+	require.NoError(t, err)
+	assert.Empty(t, out)
+}
+
+func TestCheckDirty_UnCommitted(t *testing.T) {
+	InitRepo(t)
+
+	TouchFiles(t, "main.go", "testing.go")
+	Stage("main.go")
+	Stage("testing.go")
+
+	out, err := CheckDirty()
+	require.NoError(t, err)
+
+	exp := `A  main.go
+A  testing.go`
+	assert.Equal(t, exp, out)
+}
+
+func TestCheckDirty_UnStaged(t *testing.T) {
+	InitRepo(t)
+
+	// Add an empty file
+	TouchFiles(t, "main.go", "testing.go")
+
+	out, err := CheckDirty()
+	require.NoError(t, err)
+
+	exp := `?? main.go
+?? testing.go`
+	assert.Equal(t, exp, out)
 }
 
 func TestRemote(t *testing.T) {

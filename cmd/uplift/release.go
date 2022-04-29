@@ -39,8 +39,8 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
+	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
-	"github.com/gembaadvantage/uplift/internal/task/gitdetect"
 	"github.com/gembaadvantage/uplift/internal/task/gittag"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
@@ -109,7 +109,7 @@ func release(opts releaseOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		gitdetect.Task{},
+		gitcheck.Task{},
 		scm.Task{},
 		fetchtag.Task{},
 		lastcommit.Task{},
@@ -157,6 +157,17 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 		if ctx.Prerelease, ctx.Metadata, err = semver.ParsePrerelease(opts.Prerelease); err != nil {
 			return nil, err
 		}
+	}
+
+	// Handle git config. Command line flag takes precedences
+	ctx.IgnoreDetached = opts.IgnoreDetached
+	if !ctx.IgnoreDetached {
+		ctx.IgnoreDetached = ctx.Config.Git.IgnoreDetached
+	}
+
+	ctx.IgnoreShallow = opts.IgnoreShallow
+	if !ctx.IgnoreShallow {
+		ctx.IgnoreShallow = ctx.Config.Git.IgnoreShallow
 	}
 
 	return ctx, nil

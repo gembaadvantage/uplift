@@ -55,6 +55,7 @@ func tagRepoWith(t *testing.T, tags []string) {
 func upliftConfigFile(t *testing.T, name string) {
 	t.Helper()
 
+	// Ensure .uplift.yml file is committed to repository
 	yml := "firstVersion: 1.0.0"
 
 	err := ioutil.WriteFile(name, []byte(yml), 0644)

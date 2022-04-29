@@ -28,13 +28,15 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBump(t *testing.T) {
-	taggedRepo(t)
+	git.InitRepo(t)
 	testFileWithConfig(t, "test.txt", ".uplift.yml")
+	git.EmptyCommitAndTag(t, "1.0.0", "feat: this is a new feature")
 
 	bmpCmd := newBumpCmd(noChangesPushed(), os.Stdout)
 
@@ -65,12 +67,15 @@ bumps:
 	err = ioutil.WriteFile(cfg, []byte(yml), 0644)
 	require.NoError(t, err)
 
+	// Ensure files are committed to prevent dirty repository
+	git.CommitFiles(t, f, cfg)
 	return c
 }
 
 func TestBump_PrereleaseFlag(t *testing.T) {
-	untaggedRepo(t)
+	git.InitRepo(t)
 	testFileWithConfig(t, "test.txt", ".uplift.yml")
+	git.EmptyCommit(t, "feat: this is a new feature")
 
 	bmpCmd := newBumpCmd(&globalOptions{}, os.Stdout)
 	bmpCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})

@@ -37,7 +37,7 @@ func TestRoot_DryRunFlag(t *testing.T) {
 	err := rootCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	assert.Equal(t, true, rootCmd.Opts.DryRun)
+	assert.True(t, rootCmd.Opts.DryRun)
 }
 
 func TestRoot_DebugFlag(t *testing.T) {
@@ -47,7 +47,7 @@ func TestRoot_DebugFlag(t *testing.T) {
 	err := rootCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	assert.Equal(t, true, rootCmd.Opts.Debug)
+	assert.True(t, rootCmd.Opts.Debug)
 }
 
 func TestRoot_NoPushFlag(t *testing.T) {
@@ -57,7 +57,7 @@ func TestRoot_NoPushFlag(t *testing.T) {
 	err := rootCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	assert.Equal(t, true, rootCmd.Opts.NoPush)
+	assert.True(t, rootCmd.Opts.NoPush)
 }
 
 func TestRoot_ConfigDir(t *testing.T) {
@@ -68,4 +68,24 @@ func TestRoot_ConfigDir(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, "custom", rootCmd.Opts.ConfigDir)
+}
+
+func TestRoot_IgnoreDetachedFlag(t *testing.T) {
+	rootCmd := newRootCmd(os.Stdout)
+
+	rootCmd.Cmd.SetArgs([]string{"--ignore-detached"})
+	err := rootCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, rootCmd.Opts.IgnoreDetached)
+}
+
+func TestRoot_IgnoreShallowFlag(t *testing.T) {
+	rootCmd := newRootCmd(os.Stdout)
+
+	rootCmd.Cmd.SetArgs([]string{"--ignore-shallow"})
+	err := rootCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, rootCmd.Opts.IgnoreShallow)
 }

@@ -51,6 +51,8 @@ type Context struct {
 	SCM              SCM
 	SkipChangelog    bool
 	SkipBumps        bool
+	IgnoreDetached   bool
+	IgnoreShallow    bool
 }
 
 // SCM provides details about the SCM provider of a repository

@@ -1,7 +1,3 @@
----
-sidebar_position: 4
----
-
 # Changelog
 
 Uplift can generate and maintain a changelog within your repository for you. We believe that in most situations, these values will never need to be set as uplift uses sensible defaults.

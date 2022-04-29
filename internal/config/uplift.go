@@ -31,12 +31,19 @@ import (
 
 // Uplift defines the root configuration of the application
 type Uplift struct {
+	Git           Git          `yaml:"git"`
 	FirstVersion  string       `yaml:"firstVersion"`
 	Bumps         []Bump       `yaml:"bumps"`
 	CommitMessage string       `yaml:"commitMessage"`
 	CommitAuthor  CommitAuthor `yaml:"commitAuthor"`
 	AnnotatedTags bool         `yaml:"annotatedTags"`
 	Changelog     Changelog    `yaml:"changelog"`
+}
+
+// Git defines configuration for how uplift interacts with git
+type Git struct {
+	IgnoreDetached bool `yaml:"ignoreDetached"`
+	IgnoreShallow  bool `yaml:"ignoreShallow"`
 }
 
 // Bump defines configuration for bumping individual files based

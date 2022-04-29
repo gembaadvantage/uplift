@@ -33,8 +33,8 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
+	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
-	"github.com/gembaadvantage/uplift/internal/task/gitdetect"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/scm"
@@ -104,7 +104,7 @@ func writeChangelog(opts changelogOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		gitdetect.Task{},
+		gitcheck.Task{},
 		scm.Task{},
 		lastcommit.Task{},
 		nextcommit.Task{},
@@ -128,7 +128,7 @@ func writeChangelogDiff(opts changelogOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		gitdetect.Task{},
+		gitcheck.Task{},
 		scm.Task{},
 		changelog.Task{},
 	}
@@ -149,6 +149,7 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 		return nil, err
 	}
 	ctx := context.New(cfg, out)
+	ctx.Out = out
 
 	// Set all values within the context
 	ctx.Debug = opts.Debug
@@ -162,8 +163,6 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	if ctx.Changelog.Sort == "" {
 		ctx.Changelog.Sort = strings.ToLower(cfg.Changelog.Sort)
 	}
-
-	ctx.Out = out
 
 	// Merge config and command line arguments together
 	ctx.Changelog.Exclude = opts.Exclude
@@ -181,6 +180,17 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 			ctx.NextVersion.Raw = tags[0].Ref
 			ctx.CurrentVersion.Raw = tags[1].Ref
 		}
+	}
+
+	// Handle git config. Command line flag takes precedences
+	ctx.IgnoreDetached = opts.IgnoreDetached
+	if !ctx.IgnoreDetached {
+		ctx.IgnoreDetached = ctx.Config.Git.IgnoreDetached
+	}
+
+	ctx.IgnoreShallow = opts.IgnoreShallow
+	if !ctx.IgnoreShallow {
+		ctx.IgnoreShallow = ctx.Config.Git.IgnoreShallow
 	}
 
 	return ctx, nil

@@ -31,3 +31,11 @@ Prevents uplift from pushing any changes back to your git remote. Any changes ma
 ### --silent
 
 Peace and quiet! Stops uplift from logging anything. A great option when combining uplift with any custom shell scripts.
+
+### --ignore-detached
+
+Suppress the git detached HEAD check within uplift. I have it all under control.
+
+### --ignore-shallow
+
+Suppress the git shallow clone check within uplift. I have it all under control.

@@ -1,10 +1,7 @@
----
-sidebar_position: 3
----
-
 # File Bumping
 
 Uplift can bump the semantic version within any file in your repository using the currently supported schemes. Even though these configs are shown separately, you are free to mix and match within your uplift configuration file.
+
 ## regex
 
 ```yaml linenums="1"

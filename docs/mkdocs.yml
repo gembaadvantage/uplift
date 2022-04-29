@@ -30,8 +30,9 @@ nav:
   - Configuration:
       - About: config/about.md
       - Basics: config/basics.md
-      - File Bumping: config/bumping.md
       - Changelog: config/changelog.md
+      - File Bumping: config/bumping.md
+      - Git: config/git.md
   - Continuous Integration:
       - About: ci/about.md
       - CircleCI: ci/circleci.md
@@ -41,6 +42,10 @@ nav:
       - GitLab: ci/gitlab.md
       - Semaphore: ci/semaphore.md
       - Travis CI: ci/travisci.md
+  - Frequently Asked Questions:
+      - Git Repository is in a Dirty State: faq/gitdirty.md
+      - Git Repository has a Detached HEAD: faq/gitdetached.md
+      - Git Repository contains a Shallow Clone: faq/gitshallow.md
 
 extra:
   social:

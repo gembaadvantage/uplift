@@ -33,8 +33,8 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
+	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
-	"github.com/gembaadvantage/uplift/internal/task/gitdetect"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
@@ -88,7 +88,7 @@ func bumpFiles(opts bumpOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		gitdetect.Task{},
+		gitcheck.Task{},
 		lastcommit.Task{},
 		currentversion.Task{},
 		nextversion.Task{},
@@ -126,6 +126,17 @@ func setupBumpContext(opts bumpOptions, out io.Writer) (*context.Context, error)
 		if ctx.Prerelease, ctx.Metadata, err = semver.ParsePrerelease(opts.Prerelease); err != nil {
 			return nil, err
 		}
+	}
+
+	// Handle git config. Command line flag takes precedences
+	ctx.IgnoreDetached = opts.IgnoreDetached
+	if !ctx.IgnoreDetached {
+		ctx.IgnoreDetached = ctx.Config.Git.IgnoreDetached
+	}
+
+	ctx.IgnoreShallow = opts.IgnoreShallow
+	if !ctx.IgnoreShallow {
+		ctx.IgnoreShallow = ctx.Config.Git.IgnoreShallow
 	}
 
 	return ctx, nil
