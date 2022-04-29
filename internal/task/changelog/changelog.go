@@ -81,12 +81,12 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "changelog"
+	return "generating changelog"
 }
 
 // Skip running the task if no changelog is needed
 func (t Task) Skip(ctx *context.Context) bool {
-	return ctx.SkipChangelog
+	return ctx.SkipChangelog || ctx.NoVersionChanged
 }
 
 // Run the task

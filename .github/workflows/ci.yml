@@ -68,6 +68,7 @@ jobs:
             ./docs/yarn.lock
             ./docs/tailwind.config.js
             ./.goreleaser.yml
+            ./.github/**
       - name: Test
         run: task test
       - name: Code Coverage

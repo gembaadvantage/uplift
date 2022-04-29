@@ -34,7 +34,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "current version"
+	return "identifying current version"
 }
 
 // Skip is disabled for this task

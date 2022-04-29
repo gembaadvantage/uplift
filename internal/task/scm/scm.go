@@ -36,7 +36,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "detect scm"
+	return "detecting scm provider"
 }
 
 // Skip is disabled for this task
@@ -48,7 +48,7 @@ func (t Task) Skip(ctx *context.Context) bool {
 func (t Task) Run(ctx *context.Context) error {
 	rem, err := git.Remote()
 	if err != nil {
-		log.Info("failed to identify scm provider of repository")
+		log.Error("failed to identify scm provider of repository")
 		return err
 	}
 
@@ -58,7 +58,7 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	if rem.Provider == git.Unrecognised {
-		log.Info("no recognised scm provider detected")
+		log.Warn("no recognised scm provider detected")
 		return nil
 	}
 

@@ -32,7 +32,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "fetch tags"
+	return "fetching all tags"
 }
 
 // Skip running the task if no flag has been provided

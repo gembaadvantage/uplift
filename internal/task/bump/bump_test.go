@@ -32,6 +32,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestString(t *testing.T) {
+	assert.Equal(t, "bumping files", Task{}.String())
+}
+
 func TestRun_NoBumpConfig(t *testing.T) {
 	err := Task{}.Run(&context.Context{})
 	assert.NoError(t, err)

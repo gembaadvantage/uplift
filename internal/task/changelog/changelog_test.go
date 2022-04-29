@@ -38,6 +38,35 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestString(t *testing.T) {
+	assert.Equal(t, "generating changelog", Task{}.String())
+}
+
+func TestSkip(t *testing.T) {
+	tests := []struct {
+		name string
+		ctx  *context.Context
+	}{
+		{
+			name: "NoVersionChanged",
+			ctx: &context.Context{
+				NoVersionChanged: true,
+			},
+		},
+		{
+			name: "SkipChangelog",
+			ctx: &context.Context{
+				SkipChangelog: true,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.True(t, Task{}.Skip(tt.ctx))
+		})
+	}
+}
+
 func TestRun_NoNextTag(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommits(t, "first commit", "second commit", "third commit")

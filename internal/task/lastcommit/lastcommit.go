@@ -33,7 +33,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "latest commit"
+	return "inspect latest commit"
 }
 
 // Skip is disabled for this task
@@ -45,13 +45,14 @@ func (t Task) Skip(ctx *context.Context) bool {
 func (t Task) Run(ctx *context.Context) error {
 	commit, err := git.LatestCommit()
 	if err != nil {
+		log.Error("failed to retrieve latest commit")
 		return err
 	}
 	log.WithFields(log.Fields{
 		"author":  commit.Author,
 		"email":   commit.Email,
 		"message": commit.Message,
-	}).Info("retrieved latest commit")
+	}).Debug("retrieved latest commit")
 
 	ctx.CommitDetails = commit
 	return nil
