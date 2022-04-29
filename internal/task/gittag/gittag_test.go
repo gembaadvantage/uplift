@@ -35,6 +35,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestString(t *testing.T) {
+	assert.Equal(t, "tagging repository", Task{}.String())
+}
+
+func TestSkip(t *testing.T) {
+	assert.True(t, Task{}.Skip(&context.Context{
+		NoVersionChanged: true,
+	}))
+}
+
 func TestRun(t *testing.T) {
 	tag := "1.1.0"
 	git.InitRepo(t)

@@ -34,7 +34,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "git commit"
+	return "committing changes"
 }
 
 // Skip running the task
@@ -54,13 +54,14 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
-	log.Info("commit outstanding changes")
+	log.Debug("attempting to commit changes")
 	if err := git.Commit(ctx.CommitDetails); err != nil {
 		return err
 	}
+	log.Info("staged changes committed")
 
 	if ctx.NoPush {
-		log.Info("skipping push of commit to remote")
+		log.Warn("skipping push of commit to remote")
 		return nil
 	}
 

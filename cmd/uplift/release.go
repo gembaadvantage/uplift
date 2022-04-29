@@ -110,12 +110,12 @@ func release(opts releaseOptions, out io.Writer) error {
 
 	tsks := []task.Runner{
 		gitdetect.Task{},
+		scm.Task{},
 		fetchtag.Task{},
 		lastcommit.Task{},
 		currentversion.Task{},
 		nextversion.Task{},
 		nextcommit.Task{},
-		scm.Task{},
 		bump.Task{},
 		changelog.Task{},
 		gitcommit.Task{},

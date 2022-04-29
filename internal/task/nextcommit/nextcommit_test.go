@@ -33,6 +33,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestString(t *testing.T) {
+	assert.Equal(t, "building next commit", Task{}.String())
+}
+
+func TestSkip(t *testing.T) {
+	assert.True(t, Task{}.Skip(&context.Context{
+		NoVersionChanged: true,
+	}))
+}
+
 func TestRun_DefaultCommitMessage(t *testing.T) {
 	ctx := &context.Context{
 		NextVersion: semver.Version{
