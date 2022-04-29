@@ -314,6 +314,22 @@ func TestAllTags_CommitWithMultipleTags(t *testing.T) {
 	assert.Equal(t, "1.0.0", tags[2].Ref)
 }
 
+func TestAllTags_WithPrerelease(t *testing.T) {
+	InitRepo(t)
+
+	t1, t2, t3, t4, t5 := "0.1.0-alpha+0001", "0.1.0-beta+0001", "0.1.0-beta+0002", "0.1.0", "0.1.1-beta+0001"
+	TimeBasedTagSeries(t, []string{t1, t2, t3, t4, t5})
+
+	tags := AllTags()
+	require.Len(t, tags, 5)
+
+	assert.Equal(t, "0.1.1-beta+0001", tags[0].Ref)
+	assert.Equal(t, "0.1.0", tags[1].Ref)
+	assert.Equal(t, "0.1.0-beta+0002", tags[2].Ref)
+	assert.Equal(t, "0.1.0-beta+0001", tags[3].Ref)
+	assert.Equal(t, "0.1.0-alpha+0001", tags[4].Ref)
+}
+
 func TestAllTags_LargeHistory(t *testing.T) {
 	InitRepo(t)
 
@@ -430,6 +446,17 @@ func TestLatestTag_CommitWithMixedTags(t *testing.T) {
 
 	tag := LatestTag()
 	assert.Equal(t, "1.0.0", tag.Ref)
+}
+
+func TestLatestTag_WithPrerelease(t *testing.T) {
+	InitRepo(t)
+
+	t1, t2, t3, t4, t5 := "0.1.0-alpha+0001", "0.1.0-beta+0001", "0.1.0-beta+0002", "0.1.0", "0.1.1-beta+0001"
+	TimeBasedTagSeries(t, []string{t1, t2, t3, t4, t5})
+
+	tag := LatestTag()
+
+	assert.Equal(t, "0.1.1-beta+0001", tag.Ref)
 }
 
 func TestDescribeTag(t *testing.T) {
