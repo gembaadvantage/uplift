@@ -24,12 +24,18 @@ package scm
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/apex/log"
 	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 )
+
+/*
+cloneURL:  "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing8",
+browseURL: "https://eu-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/testing8",
+*/
 
 // Task that determines the SCM provider of a repository
 type Task struct{}
@@ -46,39 +52,92 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
+	log.Debug("parsing repository remote")
 	rem, err := git.Remote()
 	if err != nil {
-		log.Error("failed to identify scm provider of repository")
+		log.Error("failed to parse repository remote")
 		return err
 	}
 
-	ctx.SCM = context.SCM{
-		Provider: rem.Provider,
-		URL:      rem.BrowseURL,
-	}
-
-	if rem.Provider == git.Unrecognised {
+	scm := detectSCM(rem.Host, ctx)
+	if scm == git.Unrecognised {
 		log.Warn("no recognised scm provider detected")
+
+		ctx.SCM = context.SCM{
+			Provider: scm,
+		}
 		return nil
 	}
 
-	log.WithField("scm", rem.Provider).Info("scm provider identified")
+	log.WithField("scm", scm).Info("scm provider identified")
 
-	switch rem.Provider {
+	switch scm {
 	case git.GitHub:
-		ctx.SCM.TagURL = rem.BrowseURL + "/releases/tag/{{.Ref}}"
-		ctx.SCM.CommitURL = rem.BrowseURL + "/commit/{{.Hash}}"
+		ctx.SCM = github(rem)
 	case git.GitLab:
-		ctx.SCM.TagURL = rem.BrowseURL + "/-/tags/{{.Ref}}"
-		ctx.SCM.CommitURL = rem.BrowseURL + "/-/commit/{{.Hash}}"
+		ctx.SCM = gitlab(rem)
 	case git.CodeCommit:
-		// CodeCommit URLs are a special case and require a region query parameter to be appended.
-		// Extract the region from the clone URL
-		t, _ := translate.RemoteHTTPS(rem.CloneURL)
-
-		ctx.SCM.TagURL = fmt.Sprintf("%s/browse/refs/tags/{{.Ref}}?region=%s", rem.BrowseURL, t.Region)
-		ctx.SCM.CommitURL = fmt.Sprintf("%s/commit/{{.Hash}}?region=%s", rem.BrowseURL, t.Region)
+		ctx.SCM = codecommit(rem)
+	case git.Gitea:
+		ctx.SCM = gitea(rem)
 	}
 
 	return nil
+}
+
+func detectSCM(host string, ctx *context.Context) git.SCM {
+	switch host {
+	case "github.com":
+		return git.GitHub
+	case "gitlab.com":
+		return git.GitLab
+	case ctx.Config.Gitea.Host:
+		return git.Gitea
+	}
+
+	// Handle special case CodeCommit URLs
+	if strings.Contains(host, "codecommit") {
+		return git.CodeCommit
+	}
+
+	return git.Unrecognised
+}
+
+func github(r git.Repository) context.SCM {
+	return context.SCM{
+		Provider:  git.GitHub,
+		TagURL:    r.URL + "/releases/tag/{{.Ref}}",
+		CommitURL: r.URL + "/commit/{{.Hash}}",
+	}
+}
+
+func gitlab(r git.Repository) context.SCM {
+	return context.SCM{
+		Provider:  git.GitLab,
+		TagURL:    r.URL + "/-/tags/{{.Ref}}",
+		CommitURL: r.URL + "/-/commit/{{.Hash}}",
+	}
+}
+
+func codecommit(r git.Repository) context.SCM {
+	// CodeCommit URLs are a special case and require a region query parameter to be appended.
+	// Extract the region from the clone URL
+	t, _ := translate.RemoteHTTPS(r.URL)
+
+	// CodeCommit uses a different URL when browsing the repository
+	browseURL := fmt.Sprintf("https://%s.console.aws.amazon.com/codesuite/codecommit/repositories/%s", t.Region, r.Name)
+
+	return context.SCM{
+		Provider:  git.CodeCommit,
+		TagURL:    fmt.Sprintf("%s/browse/refs/tags/{{.Ref}}?region=%s", browseURL, t.Region),
+		CommitURL: fmt.Sprintf("%s/commit/{{.Hash}}?region=%s", browseURL, t.Region),
+	}
+}
+
+func gitea(r git.Repository) context.SCM {
+	return context.SCM{
+		Provider:  git.Gitea,
+		TagURL:    r.URL + "/releases/tag/{{.Ref}}",
+		CommitURL: r.URL + "/commit/{{.Hash}}",
+	}
 }

@@ -121,117 +121,106 @@ func TestCheckDirty_UnStaged(t *testing.T) {
 
 func TestRemote(t *testing.T) {
 	tests := []struct {
-		name      string
-		url       string
-		scm       SCM
-		owner     string
-		repo      string
-		cloneURL  string
-		browseURL string
+		name     string
+		cloneURL string
+		url      string
+		host     string
+		owner    string
+		repo     string
 	}{
 		{
-			name:      "GitHubSSH",
-			url:       "git@github.com:owner/testing1.git",
-			scm:       GitHub,
-			owner:     "owner",
-			repo:      "testing1",
-			cloneURL:  "https://github.com/owner/testing1",
-			browseURL: "https://github.com/owner/testing1",
+			name:     "GitHubSSH",
+			cloneURL: "git@github.com:owner/testing1.git",
+			url:      "https://github.com/owner/testing1",
+			host:     "github.com",
+			owner:    "owner",
+			repo:     "testing1",
 		},
 		{
-			name:      "GitHubHTTPS",
-			url:       "https://github.com/owner/testing2.git",
-			scm:       GitHub,
-			owner:     "owner",
-			repo:      "testing2",
-			cloneURL:  "https://github.com/owner/testing2",
-			browseURL: "https://github.com/owner/testing2",
+			name:     "GitHubHTTPS",
+			cloneURL: "https://github.com/owner/testing2.git",
+			url:      "https://github.com/owner/testing2",
+			host:     "github.com",
+			owner:    "owner",
+			repo:     "testing2",
 		},
 		{
-			name:      "GitHubHTTPSWithAccessToken",
-			url:       "https://token@github.com/owner/testing3.git",
-			scm:       GitHub,
-			owner:     "owner",
-			repo:      "testing3",
-			cloneURL:  "https://github.com/owner/testing3",
-			browseURL: "https://github.com/owner/testing3"},
-		{
-			name:      "GitLabSSH",
-			url:       "git@gitlab.com:owner/testing4.git",
-			scm:       GitLab,
-			owner:     "owner",
-			repo:      "testing4",
-			cloneURL:  "https://gitlab.com/owner/testing4",
-			browseURL: "https://gitlab.com/owner/testing4",
+			name:     "GitHubHTTPSWithAccessToken",
+			cloneURL: "https://token@github.com/owner/testing3.git",
+			url:      "https://github.com/owner/testing3",
+			host:     "github.com",
+			owner:    "owner",
+			repo:     "testing3",
 		},
 		{
-			name:      "GitLabHTTPS",
-			url:       "https://gitlab.com/owner/testing5.git",
-			scm:       GitLab,
-			owner:     "owner",
-			repo:      "testing5",
-			cloneURL:  "https://gitlab.com/owner/testing5",
-			browseURL: "https://gitlab.com/owner/testing5",
+			name:     "GitLabSSH",
+			cloneURL: "git@gitlab.com:owner/testing4.git",
+			url:      "https://gitlab.com/owner/testing4",
+			host:     "gitlab.com",
+			owner:    "owner",
+			repo:     "testing4",
 		},
 		{
-			name:      "GitLabHTTPSWithAccessToken",
-			url:       "https://oauth:token@gitlab.com/owner/testing6.git",
-			scm:       GitLab,
-			owner:     "owner",
-			repo:      "testing6",
-			cloneURL:  "https://gitlab.com/owner/testing6",
-			browseURL: "https://gitlab.com/owner/testing6",
+			name:     "GitLabHTTPS",
+			cloneURL: "https://gitlab.com/owner/testing5.git",
+			url:      "https://gitlab.com/owner/testing5",
+			host:     "gitlab.com",
+			owner:    "owner",
+			repo:     "testing5",
 		},
 		{
-			name:      "GitLabUsernamePasswordHTTPS",
-			url:       "https://username:password@gitlab.com/owner/testing7.git",
-			scm:       GitLab,
-			owner:     "owner",
-			repo:      "testing7",
-			cloneURL:  "https://gitlab.com/owner/testing7",
-			browseURL: "https://gitlab.com/owner/testing7",
+			name:     "GitLabHTTPSWithAccessToken",
+			cloneURL: "https://oauth:token@gitlab.com/owner/testing6.git",
+			url:      "https://gitlab.com/owner/testing6",
+			host:     "gitlab.com",
+			owner:    "owner",
+			repo:     "testing6",
 		},
 		{
-			name:      "CodeCommitSSH",
-			url:       "ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing8",
-			scm:       CodeCommit,
-			owner:     "",
-			repo:      "testing8",
-			cloneURL:  "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing8",
-			browseURL: "https://eu-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/testing8",
+			name:     "GitLabUsernamePasswordHTTPS",
+			cloneURL: "https://username:password@gitlab.com/owner/testing7.git",
+			url:      "https://gitlab.com/owner/testing7",
+			host:     "gitlab.com",
+			owner:    "owner",
+			repo:     "testing7",
 		},
 		{
-			name:      "CodeCommitHTTPS",
-			url:       "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing9",
-			scm:       CodeCommit,
-			owner:     "",
-			repo:      "testing9",
-			cloneURL:  "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing9",
-			browseURL: "https://eu-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/testing9",
+			name:     "CodeCommitSSH",
+			cloneURL: "ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing8",
+			url:      "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing8",
+			host:     "git-codecommit.eu-west-1.amazonaws.com",
+			owner:    "",
+			repo:     "testing8",
 		},
 		{
-			name:      "CodeCommitGRC",
-			url:       "codecommit::eu-west-1://profile@testing10",
-			scm:       CodeCommit,
-			owner:     "",
-			repo:      "testing10",
-			cloneURL:  "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing10",
-			browseURL: "https://eu-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/testing10",
+			name:     "CodeCommitHTTPS",
+			cloneURL: "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing9",
+			url:      "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing9",
+			host:     "git-codecommit.eu-west-1.amazonaws.com",
+			owner:    "",
+			repo:     "testing9",
+		},
+		{
+			name:     "CodeCommitGRC",
+			cloneURL: "codecommit::eu-west-1://profile@testing10",
+			url:      "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing10",
+			host:     "git-codecommit.eu-west-1.amazonaws.com",
+			owner:    "",
+			repo:     "testing10",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			InitRepo(t)
-			RemoteOrigin(t, tt.url)
+			RemoteOrigin(t, tt.cloneURL)
 
 			repo, err := Remote()
 
 			require.NoError(t, err)
-			require.Equal(t, tt.scm, repo.Provider)
+			require.Equal(t, tt.url, tt.url)
+			require.Equal(t, tt.host, repo.Host)
 			require.Equal(t, tt.owner, repo.Owner)
 			require.Equal(t, tt.repo, repo.Name)
-			require.Equal(t, tt.cloneURL, repo.CloneURL)
-			require.Equal(t, tt.browseURL, repo.BrowseURL)
 		})
 	}
 }
@@ -250,16 +239,6 @@ func TestRemote_MalformedURL(t *testing.T) {
 
 	_, err := Remote()
 	require.EqualError(t, err, "malformed repository URL: whizzbang.com/repository")
-}
-
-func TestRemote_Unrecognised(t *testing.T) {
-	InitRepo(t)
-	RemoteOrigin(t, "https://whizzbang.com/owner/repository")
-
-	repo, err := Remote()
-
-	require.NoError(t, err)
-	assert.Equal(t, Unrecognised, repo.Provider)
 }
 
 func TestAllTags(t *testing.T) {
