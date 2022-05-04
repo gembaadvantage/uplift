@@ -88,12 +88,12 @@ func TestRun(t *testing.T) {
 
 func TestRun_GiteaSelfHosted(t *testing.T) {
 	git.InitRepo(t)
-	git.RemoteOrigin(t, "https://gitea.com/owner/repository.git")
+	git.RemoteOrigin(t, "https://my.gitea.com/owner/repository.git")
 
 	ctx := &context.Context{
 		Config: config.Uplift{
 			Gitea: config.Gitea{
-				URL: "https://gitea.com",
+				URL: "https://my.gitea.com",
 			},
 		},
 	}
@@ -101,8 +101,8 @@ func TestRun_GiteaSelfHosted(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, ctx.SCM.Provider, git.Gitea)
-	assert.Equal(t, ctx.SCM.TagURL, "https://gitea.com/owner/repository/releases/tag/{{.Ref}}")
-	assert.Equal(t, ctx.SCM.CommitURL, "https://gitea.com/owner/repository/commit/{{.Hash}}")
+	assert.Equal(t, ctx.SCM.TagURL, "https://my.gitea.com/owner/repository/releases/tag/{{.Ref}}")
+	assert.Equal(t, ctx.SCM.CommitURL, "https://my.gitea.com/owner/repository/commit/{{.Hash}}")
 }
 
 func TestRun_NoRemoteSet(t *testing.T) {

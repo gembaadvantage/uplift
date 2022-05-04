@@ -42,6 +42,9 @@ nav:
       - GitLab: ci/gitlab.md
       - Semaphore: ci/semaphore.md
       - Travis CI: ci/travisci.md
+  - SCM Detection:
+      - About: scm/about.md
+      - Gitea: scm/gitea.md
   - Frequently Asked Questions:
       - Git Repository is in a Dirty State: faq/gitdirty.md
       - Git Repository has a Detached HEAD: faq/gitdetached.md
