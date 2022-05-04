@@ -38,6 +38,7 @@ type Uplift struct {
 	CommitAuthor  CommitAuthor `yaml:"commitAuthor"`
 	AnnotatedTags bool         `yaml:"annotatedTags"`
 	Changelog     Changelog    `yaml:"changelog"`
+	Gitea         Gitea        `yaml:"gitea"`
 }
 
 // Git defines configuration for how uplift interacts with git
@@ -81,6 +82,11 @@ type CommitAuthor struct {
 type Changelog struct {
 	Sort    string   `yaml:"sort"`
 	Exclude []string `yaml:"exclude"`
+}
+
+// Gitea defines custom configuration for accessing a Gitea instance
+type Gitea struct {
+	URL string `yaml:"url"`
 }
 
 // Load the YAML config file

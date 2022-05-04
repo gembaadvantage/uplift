@@ -41,6 +41,7 @@ const (
 	GitHub       SCM = "GitHub"
 	GitLab       SCM = "GitLab"
 	CodeCommit   SCM = "CodeCommit"
+	Gitea        SCM = "Gitea"
 	Unrecognised SCM = "Unrecognised"
 )
 
@@ -66,11 +67,10 @@ type TagEntry struct {
 
 // Repository contains details about a specific repository
 type Repository struct {
-	Provider  SCM
-	Owner     string
-	Name      string
-	CloneURL  string
-	BrowseURL string
+	Origin string
+	Owner  string
+	Name   string
+	Host   string
 }
 
 // String prints out a user friendly string representation
@@ -130,6 +130,8 @@ func Remote() (Repository, error) {
 		return Repository{}, errors.New("no remote origin detected")
 	}
 
+	origin := remURL
+
 	// Strip off any trailing .git suffix
 	rem := strings.TrimSuffix(remURL, ".git")
 
@@ -142,19 +144,20 @@ func Remote() (Repository, error) {
 		if rem, err = translate.FromGRC(rem); err != nil {
 			return Repository{}, err
 		}
+
+		origin = rem
 	}
 
 	if strings.HasPrefix(rem, "git@") {
 		// Sanitise any SSH based URL to ensure it is parseable
 		rem = strings.TrimPrefix(rem, "git@")
 		rem = strings.Replace(rem, ":", "/", 1)
-	} else if strings.HasPrefix(rem, "https://") {
-		// Sanitise any HTTPS based URL to ensure it is parseable
+	} else if strings.HasPrefix(rem, "http") {
+		// Strip any credentials from the URL to ensure it is parseable
 		if tkn := strings.Index(rem, "@"); tkn > -1 {
-			// Strip credentials from URL
 			rem = rem[tkn+1:]
 		} else {
-			rem = strings.TrimPrefix(rem, "https://")
+			rem = rem[strings.Index(rem, "//")+2:]
 		}
 	}
 
@@ -168,47 +171,20 @@ func Remote() (Repository, error) {
 	if len(p) < 3 {
 		return Repository{}, fmt.Errorf("malformed repository URL: %s", remURL)
 	}
-	path := "https://" + u.Path
-
-	// For most repositories the URL used to clone or browse the repo are identical
-	browse := path
-
+	host := p[0]
 	owner := p[1]
+
 	if strings.Contains(p[0], "codecommit") {
 		// No concept of an owner with CodeCommit repositories
 		owner = ""
-
-		// Extract the region from the URL as this is required when constructing the browse URL
-		t, err := translate.RemoteHTTPS(path)
-		if err != nil {
-			return Repository{}, err
-		}
-		browse = fmt.Sprintf("https://%s.console.aws.amazon.com/codesuite/codecommit/repositories/%s", t.Region, t.Repository)
 	}
 
 	return Repository{
-		Provider:  detectSCM(p[0]),
-		Owner:     owner,
-		Name:      p[len(p)-1],
-		CloneURL:  path,
-		BrowseURL: browse,
+		Origin: origin,
+		Owner:  owner,
+		Name:   p[len(p)-1],
+		Host:   host,
 	}, nil
-}
-
-func detectSCM(host string) SCM {
-	switch host {
-	case "github.com":
-		return GitHub
-	case "gitlab.com":
-		return GitLab
-	}
-
-	// Handle special case CodeCommit URLs
-	if strings.Contains(host, "codecommit") {
-		return CodeCommit
-	}
-
-	return Unrecognised
 }
 
 // FetchTags retrieves all tags associated with the remote repository
