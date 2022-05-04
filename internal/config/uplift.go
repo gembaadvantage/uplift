@@ -86,7 +86,7 @@ type Changelog struct {
 
 // Gitea defines custom configuration for accessing a Gitea instance
 type Gitea struct {
-	Host string `yaml:"host"`
+	URL string `yaml:"url"`
 }
 
 // Load the YAML config file

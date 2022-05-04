@@ -93,7 +93,7 @@ func TestRun_GiteaSelfHosted(t *testing.T) {
 	ctx := &context.Context{
 		Config: config.Uplift{
 			Gitea: config.Gitea{
-				Host: "gitea.com",
+				URL: "https://gitea.com",
 			},
 		},
 	}

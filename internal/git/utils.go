@@ -67,10 +67,10 @@ type TagEntry struct {
 
 // Repository contains details about a specific repository
 type Repository struct {
-	URL   string
-	Owner string
-	Name  string
-	Host  string
+	Origin string
+	Owner  string
+	Name   string
+	Host   string
 }
 
 // String prints out a user friendly string representation
@@ -130,6 +130,8 @@ func Remote() (Repository, error) {
 		return Repository{}, errors.New("no remote origin detected")
 	}
 
+	origin := remURL
+
 	// Strip off any trailing .git suffix
 	rem := strings.TrimSuffix(remURL, ".git")
 
@@ -142,19 +144,20 @@ func Remote() (Repository, error) {
 		if rem, err = translate.FromGRC(rem); err != nil {
 			return Repository{}, err
 		}
+
+		origin = rem
 	}
 
 	if strings.HasPrefix(rem, "git@") {
 		// Sanitise any SSH based URL to ensure it is parseable
 		rem = strings.TrimPrefix(rem, "git@")
 		rem = strings.Replace(rem, ":", "/", 1)
-	} else if strings.HasPrefix(rem, "https://") {
-		// Sanitise any HTTPS based URL to ensure it is parseable
+	} else if strings.HasPrefix(rem, "http") {
+		// Strip any credentials from the URL to ensure it is parseable
 		if tkn := strings.Index(rem, "@"); tkn > -1 {
-			// Strip credentials from URL
 			rem = rem[tkn+1:]
 		} else {
-			rem = strings.TrimPrefix(rem, "https://")
+			rem = rem[strings.Index(rem, "//")+2:]
 		}
 	}
 
@@ -177,10 +180,10 @@ func Remote() (Repository, error) {
 	}
 
 	return Repository{
-		URL:   "https://" + u.Path,
-		Owner: owner,
-		Name:  p[len(p)-1],
-		Host:  host,
+		Origin: origin,
+		Owner:  owner,
+		Name:   p[len(p)-1],
+		Host:   host,
 	}, nil
 }
 

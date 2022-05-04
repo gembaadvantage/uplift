@@ -123,7 +123,6 @@ func TestRemote(t *testing.T) {
 	tests := []struct {
 		name     string
 		cloneURL string
-		url      string
 		host     string
 		owner    string
 		repo     string
@@ -131,7 +130,6 @@ func TestRemote(t *testing.T) {
 		{
 			name:     "GitHubSSH",
 			cloneURL: "git@github.com:owner/testing1.git",
-			url:      "https://github.com/owner/testing1",
 			host:     "github.com",
 			owner:    "owner",
 			repo:     "testing1",
@@ -139,7 +137,6 @@ func TestRemote(t *testing.T) {
 		{
 			name:     "GitHubHTTPS",
 			cloneURL: "https://github.com/owner/testing2.git",
-			url:      "https://github.com/owner/testing2",
 			host:     "github.com",
 			owner:    "owner",
 			repo:     "testing2",
@@ -147,7 +144,6 @@ func TestRemote(t *testing.T) {
 		{
 			name:     "GitHubHTTPSWithAccessToken",
 			cloneURL: "https://token@github.com/owner/testing3.git",
-			url:      "https://github.com/owner/testing3",
 			host:     "github.com",
 			owner:    "owner",
 			repo:     "testing3",
@@ -155,7 +151,6 @@ func TestRemote(t *testing.T) {
 		{
 			name:     "GitLabSSH",
 			cloneURL: "git@gitlab.com:owner/testing4.git",
-			url:      "https://gitlab.com/owner/testing4",
 			host:     "gitlab.com",
 			owner:    "owner",
 			repo:     "testing4",
@@ -163,7 +158,6 @@ func TestRemote(t *testing.T) {
 		{
 			name:     "GitLabHTTPS",
 			cloneURL: "https://gitlab.com/owner/testing5.git",
-			url:      "https://gitlab.com/owner/testing5",
 			host:     "gitlab.com",
 			owner:    "owner",
 			repo:     "testing5",
@@ -171,7 +165,6 @@ func TestRemote(t *testing.T) {
 		{
 			name:     "GitLabHTTPSWithAccessToken",
 			cloneURL: "https://oauth:token@gitlab.com/owner/testing6.git",
-			url:      "https://gitlab.com/owner/testing6",
 			host:     "gitlab.com",
 			owner:    "owner",
 			repo:     "testing6",
@@ -179,7 +172,6 @@ func TestRemote(t *testing.T) {
 		{
 			name:     "GitLabUsernamePasswordHTTPS",
 			cloneURL: "https://username:password@gitlab.com/owner/testing7.git",
-			url:      "https://gitlab.com/owner/testing7",
 			host:     "gitlab.com",
 			owner:    "owner",
 			repo:     "testing7",
@@ -187,7 +179,6 @@ func TestRemote(t *testing.T) {
 		{
 			name:     "CodeCommitSSH",
 			cloneURL: "ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing8",
-			url:      "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing8",
 			host:     "git-codecommit.eu-west-1.amazonaws.com",
 			owner:    "",
 			repo:     "testing8",
@@ -195,18 +186,9 @@ func TestRemote(t *testing.T) {
 		{
 			name:     "CodeCommitHTTPS",
 			cloneURL: "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing9",
-			url:      "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing9",
 			host:     "git-codecommit.eu-west-1.amazonaws.com",
 			owner:    "",
 			repo:     "testing9",
-		},
-		{
-			name:     "CodeCommitGRC",
-			cloneURL: "codecommit::eu-west-1://profile@testing10",
-			url:      "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing10",
-			host:     "git-codecommit.eu-west-1.amazonaws.com",
-			owner:    "",
-			repo:     "testing10",
 		},
 	}
 	for _, tt := range tests {
@@ -217,12 +199,38 @@ func TestRemote(t *testing.T) {
 			repo, err := Remote()
 
 			require.NoError(t, err)
-			require.Equal(t, tt.url, tt.url)
+			require.Equal(t, tt.cloneURL, repo.Origin)
 			require.Equal(t, tt.host, repo.Host)
 			require.Equal(t, tt.owner, repo.Owner)
 			require.Equal(t, tt.repo, repo.Name)
 		})
 	}
+}
+
+func TestRemote_CodeCommitGRC(t *testing.T) {
+	InitRepo(t)
+	RemoteOrigin(t, "codecommit::eu-west-1://profile@repository")
+
+	repo, err := Remote()
+
+	require.NoError(t, err)
+	require.Equal(t, "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository", repo.Origin)
+	require.Equal(t, "git-codecommit.eu-west-1.amazonaws.com", repo.Host)
+	require.Equal(t, "", repo.Owner)
+	require.Equal(t, "repository", repo.Name)
+}
+
+func TestRemote_HTTPOrigin(t *testing.T) {
+	InitRepo(t)
+	RemoteOrigin(t, "http://example.com/owner/repository.git")
+
+	repo, err := Remote()
+
+	require.NoError(t, err)
+	require.Equal(t, "http://example.com/owner/repository.git", repo.Origin)
+	require.Equal(t, "example.com", repo.Host)
+	require.Equal(t, "owner", repo.Owner)
+	require.Equal(t, "repository", repo.Name)
 }
 
 func TestRemote_NoRemoteSet(t *testing.T) {

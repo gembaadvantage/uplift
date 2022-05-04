@@ -24,6 +24,7 @@ package scm
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/apex/log"
@@ -31,11 +32,6 @@ import (
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 )
-
-/*
-cloneURL:  "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing8",
-browseURL: "https://eu-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/testing8",
-*/
 
 // Task that determines the SCM provider of a repository
 type Task struct{}
@@ -61,8 +57,6 @@ func (t Task) Run(ctx *context.Context) error {
 
 	scm := detectSCM(rem.Host, ctx)
 	if scm == git.Unrecognised {
-		log.Warn("no recognised scm provider detected")
-
 		ctx.SCM = context.SCM{
 			Provider: scm,
 		}
@@ -79,7 +73,7 @@ func (t Task) Run(ctx *context.Context) error {
 	case git.CodeCommit:
 		ctx.SCM = codecommit(rem)
 	case git.Gitea:
-		ctx.SCM = gitea(rem)
+		ctx.SCM = gitea(rem, ctx.Config.Gitea.URL)
 	}
 
 	return nil
@@ -91,38 +85,54 @@ func detectSCM(host string, ctx *context.Context) git.SCM {
 		return git.GitHub
 	case "gitlab.com":
 		return git.GitLab
-	case ctx.Config.Gitea.Host:
-		return git.Gitea
 	}
 
 	// Handle special case CodeCommit URLs
-	if strings.Contains(host, "codecommit") {
+	if strings.HasPrefix(host, "git-codecommit") {
 		return git.CodeCommit
 	}
 
+	// Detect Gitea
+	if ctx.Config.Gitea.URL != "" {
+		u, err := url.Parse(ctx.Config.Gitea.URL)
+		if err != nil {
+			log.WithField("url", ctx.Config.Gitea.URL).Warn("could not parse provided gitea URL")
+			return git.Unrecognised
+		}
+
+		if u.Host == host {
+			return git.Gitea
+		}
+	}
+
+	log.WithField("host", host).Warn("no recognised scm provider detected")
 	return git.Unrecognised
 }
 
 func github(r git.Repository) context.SCM {
+	url := fmt.Sprintf("https://%s/%s/%s", r.Host, r.Owner, r.Name)
+
 	return context.SCM{
 		Provider:  git.GitHub,
-		TagURL:    r.URL + "/releases/tag/{{.Ref}}",
-		CommitURL: r.URL + "/commit/{{.Hash}}",
+		TagURL:    url + "/releases/tag/{{.Ref}}",
+		CommitURL: url + "/commit/{{.Hash}}",
 	}
 }
 
 func gitlab(r git.Repository) context.SCM {
+	url := fmt.Sprintf("https://%s/%s/%s", r.Host, r.Owner, r.Name)
+
 	return context.SCM{
 		Provider:  git.GitLab,
-		TagURL:    r.URL + "/-/tags/{{.Ref}}",
-		CommitURL: r.URL + "/-/commit/{{.Hash}}",
+		TagURL:    url + "/-/tags/{{.Ref}}",
+		CommitURL: url + "/-/commit/{{.Hash}}",
 	}
 }
 
 func codecommit(r git.Repository) context.SCM {
 	// CodeCommit URLs are a special case and require a region query parameter to be appended.
 	// Extract the region from the clone URL
-	t, _ := translate.RemoteHTTPS(r.URL)
+	t, _ := translate.RemoteHTTPS(r.Origin)
 
 	// CodeCommit uses a different URL when browsing the repository
 	browseURL := fmt.Sprintf("https://%s.console.aws.amazon.com/codesuite/codecommit/repositories/%s", t.Region, r.Name)
@@ -134,10 +144,13 @@ func codecommit(r git.Repository) context.SCM {
 	}
 }
 
-func gitea(r git.Repository) context.SCM {
+func gitea(r git.Repository, u string) context.SCM {
+	scheme := u[:strings.Index(u, ":")]
+	url := fmt.Sprintf("%s://%s/%s/%s", scheme, r.Host, r.Owner, r.Name)
+
 	return context.SCM{
 		Provider:  git.Gitea,
-		TagURL:    r.URL + "/releases/tag/{{.Ref}}",
-		CommitURL: r.URL + "/commit/{{.Hash}}",
+		TagURL:    url + "/releases/tag/{{.Ref}}",
+		CommitURL: url + "/commit/{{.Hash}}",
 	}
 }
