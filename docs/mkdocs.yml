@@ -45,6 +45,8 @@ nav:
   - SCM Detection:
       - About: scm/about.md
       - Gitea: scm/gitea.md
+      - GitHub: scm/github.md
+      - GitLab: scm/gitlab.md
   - Frequently Asked Questions:
       - Git Repository is in a Dirty State: faq/gitdirty.md
       - Git Repository has a Detached HEAD: faq/gitdetached.md

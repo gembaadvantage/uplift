@@ -105,6 +105,44 @@ func TestRun_GiteaSelfHosted(t *testing.T) {
 	assert.Equal(t, ctx.SCM.CommitURL, "https://my.gitea.com/owner/repository/commit/{{.Hash}}")
 }
 
+func TestRun_GitHubEnterprise(t *testing.T) {
+	git.InitRepo(t)
+	git.RemoteOrigin(t, "https://my.github.com/owner/repository.git")
+
+	ctx := &context.Context{
+		Config: config.Uplift{
+			GitHub: config.GitHub{
+				URL: "https://my.github.com",
+			},
+		},
+	}
+	err := Task{}.Run(ctx)
+
+	require.NoError(t, err)
+	assert.Equal(t, ctx.SCM.Provider, git.GitHub)
+	assert.Equal(t, ctx.SCM.TagURL, "https://my.github.com/owner/repository/releases/tag/{{.Ref}}")
+	assert.Equal(t, ctx.SCM.CommitURL, "https://my.github.com/owner/repository/commit/{{.Hash}}")
+}
+
+func TestRun_GitLabSelfHosted(t *testing.T) {
+	git.InitRepo(t)
+	git.RemoteOrigin(t, "https://my.gitlab.com/owner/repository.git")
+
+	ctx := &context.Context{
+		Config: config.Uplift{
+			GitLab: config.GitLab{
+				URL: "https://my.gitlab.com",
+			},
+		},
+	}
+	err := Task{}.Run(ctx)
+
+	require.NoError(t, err)
+	assert.Equal(t, ctx.SCM.Provider, git.GitLab)
+	assert.Equal(t, ctx.SCM.TagURL, "https://my.gitlab.com/owner/repository/-/tags/{{.Ref}}")
+	assert.Equal(t, ctx.SCM.CommitURL, "https://my.gitlab.com/owner/repository/-/commit/{{.Hash}}")
+}
+
 func TestRun_NoRemoteSet(t *testing.T) {
 	git.MkTmpDir(t)
 

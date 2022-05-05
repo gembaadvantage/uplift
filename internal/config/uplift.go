@@ -39,6 +39,8 @@ type Uplift struct {
 	AnnotatedTags bool         `yaml:"annotatedTags"`
 	Changelog     Changelog    `yaml:"changelog"`
 	Gitea         Gitea        `yaml:"gitea"`
+	GitHub        GitHub       `yaml:"github"`
+	GitLab        GitLab       `yaml:"gitlab"`
 }
 
 // Git defines configuration for how uplift interacts with git
@@ -84,8 +86,19 @@ type Changelog struct {
 	Exclude []string `yaml:"exclude"`
 }
 
-// Gitea defines custom configuration for accessing a Gitea instance
+// Gitea defines custom configuration for accessing a self-hosted Gitea instance
 type Gitea struct {
+	URL string `yaml:"url"`
+}
+
+// GitHub defines custom configuration for accessing a GitHub enterprise instance
+type GitHub struct {
+	URL string `yaml:"url"`
+}
+
+// GitLab defines custom configuration for accessing a GitLab enterprise or
+// self-hosted instance
+type GitLab struct {
 	URL string `yaml:"url"`
 }
 

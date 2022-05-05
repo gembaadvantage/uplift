@@ -92,15 +92,16 @@ func detectSCM(host string, ctx *context.Context) git.SCM {
 		return git.CodeCommit
 	}
 
-	// Detect Gitea
-	if ctx.Config.Gitea.URL != "" {
-		u, err := url.Parse(ctx.Config.Gitea.URL)
-		if err != nil {
-			log.WithField("url", ctx.Config.Gitea.URL).Warn("could not parse provided gitea URL")
-			return git.Unrecognised
+	if ctx.Config.GitHub.URL != "" {
+		if checkHost(host, ctx.Config.GitHub.URL) {
+			return git.GitHub
 		}
-
-		if u.Host == host {
+	} else if ctx.Config.GitLab.URL != "" {
+		if checkHost(host, ctx.Config.GitLab.URL) {
+			return git.GitLab
+		}
+	} else if ctx.Config.Gitea.URL != "" {
+		if checkHost(host, ctx.Config.Gitea.URL) {
 			return git.Gitea
 		}
 	}
@@ -153,4 +154,14 @@ func gitea(r git.Repository, u string) context.SCM {
 		TagURL:    url + "/releases/tag/{{.Ref}}",
 		CommitURL: url + "/commit/{{.Hash}}",
 	}
+}
+
+func checkHost(host string, in string) bool {
+	u, err := url.Parse(in)
+	if err != nil {
+		log.WithField("url", in).Warn("could not parse provided URL")
+		return false
+	}
+
+	return u.Host == host
 }
