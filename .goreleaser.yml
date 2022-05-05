@@ -233,3 +233,11 @@ publishers:
     env:
       - "FURY_TOKEN={{ .Env.FURY_TOKEN }}"
     cmd: ./scripts/fury-upload.sh {{ .ArtifactName }}
+
+announce:
+  skip: "{{gt .Patch 0}}"
+
+  slack:
+    enabled: true
+    message_template: "Uplift {{ .Tag }} has now been released. Find out details here: https://github.com/gembaadvantage/uplift/releases/tag/{{ .Tag }}"
+    channel: "#topic-uplift-github"
