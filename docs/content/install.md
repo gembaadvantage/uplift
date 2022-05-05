@@ -20,6 +20,51 @@ To use [Scoop](https://scoop.sh/):
 scoop install uplift
 ```
 
+### Apt
+
+To install using the [apt](https://ubuntu.com/server/docs/package-management) package manager:
+
+```sh
+echo 'deb [trusted=yes] https://fury.upliftci.dev/apt/ /' | sudo tee /etc/apt/sources.list.d/uplift.list
+sudo apt update
+sudo apt install -y uplift
+```
+
+You may need to install the `ca-certificates` package if you encounter [trust issues](https://gemfury.com/help/could-not-verify-ssl-certificate/) with regards to the gemfury certificate:
+
+```sh
+sudo apt update && sudo apt install -y ca-certificates
+```
+
+### Yum
+
+To install using the yum package manager:
+
+```sh
+echo '[uplift]
+name=uplift
+baseurl=https://fury.upliftci.dev/yum/
+enabled=1
+gpgcheck=0' | sudo tee /etc/yum.repos.d/uplift.repo
+sudo yum install -y uplift
+```
+
+### Linux Packages
+
+Download and manually install one of the `.deb`, `.rpm` or `.apk` packages from the [Releases](https://github.com/gembaadvantage/uplift/releases) page.
+
+```sh
+sudo apt install uplift_*.deb
+```
+
+```sh
+sudo yum localinstall uplift_*.rpm
+```
+
+```sh
+sudo apk add --no-cache --allow-untrusted uplift_*.apk
+```
+
 ### Bash Script
 
 To install the latest version using a bash script:
