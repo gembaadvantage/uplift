@@ -31,22 +31,17 @@ import (
 
 // Uplift defines the root configuration of the application
 type Uplift struct {
-	Git           Git          `yaml:"git"`
-	FirstVersion  string       `yaml:"firstVersion"`
-	Bumps         []Bump       `yaml:"bumps"`
-	CommitMessage string       `yaml:"commitMessage"`
-	CommitAuthor  CommitAuthor `yaml:"commitAuthor"`
 	AnnotatedTags bool         `yaml:"annotatedTags"`
+	Bumps         []Bump       `yaml:"bumps"`
+	CommitAuthor  CommitAuthor `yaml:"commitAuthor"`
+	CommitMessage string       `yaml:"commitMessage"`
 	Changelog     Changelog    `yaml:"changelog"`
+	FirstVersion  string       `yaml:"firstVersion"`
+	Git           Git          `yaml:"git"`
 	Gitea         Gitea        `yaml:"gitea"`
 	GitHub        GitHub       `yaml:"github"`
 	GitLab        GitLab       `yaml:"gitlab"`
-}
-
-// Git defines configuration for how uplift interacts with git
-type Git struct {
-	IgnoreDetached bool `yaml:"ignoreDetached"`
-	IgnoreShallow  bool `yaml:"ignoreShallow"`
+	Hooks         Hooks        `yaml:"hooks"`
 }
 
 // Bump defines configuration for bumping individual files based
@@ -86,6 +81,12 @@ type Changelog struct {
 	Exclude []string `yaml:"exclude"`
 }
 
+// Git defines configuration for how uplift interacts with git
+type Git struct {
+	IgnoreDetached bool `yaml:"ignoreDetached"`
+	IgnoreShallow  bool `yaml:"ignoreShallow"`
+}
+
 // Gitea defines custom configuration for accessing a self-hosted Gitea instance
 type Gitea struct {
 	URL string `yaml:"url"`
@@ -100,6 +101,13 @@ type GitHub struct {
 // self-hosted instance
 type GitLab struct {
 	URL string `yaml:"url"`
+}
+
+// Hooks define custom configuration for entry points before any uplift
+// workflow. These entry points can be used to execute any custom shell
+// commands or scripts
+type Hooks struct {
+	Before []string `yaml:"before"`
 }
 
 // Load the YAML config file

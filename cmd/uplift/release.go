@@ -35,6 +35,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
+	"github.com/gembaadvantage/uplift/internal/task/beforehook"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
@@ -109,6 +110,7 @@ func release(opts releaseOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
+		beforehook.Task{},
 		gitcheck.Task{},
 		scm.Task{},
 		fetchtag.Task{},

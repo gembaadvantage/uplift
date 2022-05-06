@@ -31,6 +31,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
+	"github.com/gembaadvantage/uplift/internal/task/beforehook"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
@@ -48,6 +49,7 @@ is based on the conventional commit message from the last commit.`
 
 var (
 	tagRepoPipeline = []task.Runner{
+		beforehook.Task{},
 		gitcheck.Task{},
 		fetchtag.Task{},
 		lastcommit.Task{},
@@ -58,6 +60,7 @@ var (
 	}
 
 	nextTagPipeline = []task.Runner{
+		beforehook.Task{},
 		gitcheck.Task{},
 		fetchtag.Task{},
 		lastcommit.Task{},

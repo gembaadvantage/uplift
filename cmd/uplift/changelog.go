@@ -32,6 +32,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/task"
+	"github.com/gembaadvantage/uplift/internal/task/beforehook"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
@@ -104,6 +105,7 @@ func writeChangelog(opts changelogOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
+		beforehook.Task{},
 		gitcheck.Task{},
 		scm.Task{},
 		lastcommit.Task{},
@@ -128,6 +130,7 @@ func writeChangelogDiff(opts changelogOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
+		beforehook.Task{},
 		gitcheck.Task{},
 		scm.Task{},
 		changelog.Task{},
