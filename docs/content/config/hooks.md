@@ -1,6 +1,6 @@
 # Hooks
 
-Provides a mechanism to extend the functionality of uplift through adhoc shell commands and scripts. Any temporary files must be ignored using a `.gitignore` file, otherwise uplift will deem the repository is in a [dirty state](../faq/gitdirty.md) and stop the release.
+Provides a mechanism to extend the functionality of uplift through adhoc shell commands and scripts[^1]. Any temporary files must be ignored using a `.gitignore` file, otherwise uplift will deem the repository is in a [dirty state](../faq/gitdirty.md) and stop the release.
 
 ```yaml linenums="1"
 # .uplift.yml
@@ -16,3 +16,7 @@ hooks:
     - cargo fetch
     - ./my-custom-script.sh
 ```
+
+!!!tip "Need extra output?"
+
+    Use the `--debug` flag to print output from any of the executed shell commands or scripts

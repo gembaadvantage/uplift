@@ -60,7 +60,8 @@ func (t Task) Run(ctx *context.Context) error {
 		// Discard all output from commands and scripts unless in debug mode
 		out := io.Discard
 		if ctx.Debug {
-			out = os.Stdout
+			// Stderr is used by apex for logging, stdout is reserved for capturing output
+			out = os.Stderr
 		}
 
 		r, err := interp.New(
