@@ -75,19 +75,21 @@ func TestRun_ShellCommands(t *testing.T) {
 }
 
 func TestRun_ShellScripts(t *testing.T) {
-	git.MkTmpDir(t)
+	git.InitRepo(t)
 
 	// Generate a shell script
 	sh := `#!/bin/bash
-echo -n $NAME > out.txt`
-	ioutil.WriteFile("to-file.sh", []byte(sh), 0755)
+git checkout -b $BRANCH
+CURRENT=$(git branch --show-current)
+echo -n $CURRENT > out.txt`
+	ioutil.WriteFile("switch-branch.sh", []byte(sh), 0755)
 
 	tctx := &context.Context{
 		Context: ctx.Background(),
 		Config: config.Uplift{
 			Hooks: config.Hooks{
 				Before: []string{
-					"NAME=JohnDoe ./to-file.sh",
+					"BRANCH=testing ./switch-branch.sh",
 				},
 			},
 		},
@@ -99,5 +101,5 @@ echo -n $NAME > out.txt`
 	data, err := ioutil.ReadFile("out.txt")
 	require.NoError(t, err)
 
-	assert.Equal(t, "JohnDoe", string(data))
+	assert.Equal(t, "testing", string(data))
 }
