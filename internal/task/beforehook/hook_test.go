@@ -35,7 +35,7 @@ import (
 )
 
 func TestString(t *testing.T) {
-	assert.Equal(t, "running before hooks", Task{}.String())
+	assert.Equal(t, "before hooks", Task{}.String())
 }
 
 func TestSkip(t *testing.T) {
