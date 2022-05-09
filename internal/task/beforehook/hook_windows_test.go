@@ -22,26 +22,6 @@ SOFTWARE.
 
 package beforehook
 
-import (
-	"testing"
-
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/stretchr/testify/assert"
-)
-
-func TestString(t *testing.T) {
-	assert.Equal(t, "before hooks", Task{}.String())
-}
-
-func TestSkip(t *testing.T) {
-	noHooks := []string{}
-
-	assert.True(t, Task{}.Skip(&context.Context{
-		Config: config.Uplift{
-			Hooks: config.Hooks{
-				Before: noHooks,
-			},
-		},
-	}))
+func TestWindows(t *testing.T) {
+	assert.Equal(t, "1", "2")
 }

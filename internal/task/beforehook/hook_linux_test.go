@@ -22,26 +22,56 @@ SOFTWARE.
 
 package beforehook
 
-import (
-	"testing"
+func TestRun_ShellCommands(t *testing.T) {
+	git.MkTmpDir(t)
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/stretchr/testify/assert"
-)
-
-func TestString(t *testing.T) {
-	assert.Equal(t, "before hooks", Task{}.String())
-}
-
-func TestSkip(t *testing.T) {
-	noHooks := []string{}
-
-	assert.True(t, Task{}.Skip(&context.Context{
+	tctx := &context.Context{
+		Context: ctx.Background(),
 		Config: config.Uplift{
 			Hooks: config.Hooks{
-				Before: noHooks,
+				Before: []string{
+					"echo -n 'JohnDoe' > out.txt",
+					"sed -i '' 's/Doe/Smith/g' out.txt",
+				},
 			},
 		},
-	}))
+	}
+
+	err := Task{}.Run(tctx)
+	require.NoError(t, err)
+
+	data, err := ioutil.ReadFile("out.txt")
+	require.NoError(t, err)
+
+	assert.Equal(t, "JohnSmith", string(data))
 }
+
+// func TestRun_ShellScripts(t *testing.T) {
+// 	git.InitRepo(t)
+
+// 	// Generate a shell script
+// 	sh := `#!/bin/bash
+// git checkout -b $BRANCH
+// CURRENT=$(git branch --show-current)
+// echo -n $CURRENT > out.txt`
+// 	ioutil.WriteFile("switch-branch.sh", []byte(sh), 0755)
+
+// 	tctx := &context.Context{
+// 		Context: ctx.Background(),
+// 		Config: config.Uplift{
+// 			Hooks: config.Hooks{
+// 				Before: []string{
+// 					"BRANCH=testing ./switch-branch.sh",
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	err := Task{}.Run(tctx)
+// 	require.NoError(t, err)
+
+// 	data, err := ioutil.ReadFile("out.txt")
+// 	require.NoError(t, err)
+
+// 	assert.Equal(t, "testing", string(data))
+// }
