@@ -22,6 +22,18 @@ SOFTWARE.
 
 package beforehook
 
+import (
+	ctx "context"
+	"io/ioutil"
+	"testing"
+
+	"github.com/gembaadvantage/uplift/internal/config"
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
 func TestRun_ShellCommands(t *testing.T) {
 	git.MkTmpDir(t)
 
