@@ -286,9 +286,7 @@ func Ignore(t *testing.T, fs ...string) {
 	t.Helper()
 
 	out := make([]string, 0, len(fs))
-	for _, f := range fs {
-		out = append(out, f)
-	}
+	out = append(out, fs...)
 
 	if len(out) > 0 {
 		// Ensure git doesn't complain

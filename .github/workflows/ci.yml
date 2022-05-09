@@ -26,8 +26,16 @@ on:
   pull_request:
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
+      - name: Set Git Line Endings
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+        if: matrix.os == 'windows-latest'
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -48,15 +56,26 @@ jobs:
             ${{ runner.os }}-go-
       - name: Install Task
         uses: arduino/setup-task@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test
+        run: task test
+      - name: Build
+        run: task build
+      # All static checks from this point should run on linux as it is the
+      # fastest platform
       - name: Lint Code
+        if: matrix.os == 'ubuntu-latest'
         uses: golangci/golangci-lint-action@v3.1.0
         with:
           skip-go-installation: true
       - name: Lint Dockerfile
+        if: matrix.os == 'ubuntu-latest'
         uses: hadolint/hadolint-action@v2.1.0
         with:
           dockerfile: Dockerfile
       - name: misspell
+        if: matrix.os == 'ubuntu-latest'
         uses: reviewdog/action-misspell@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -69,12 +88,16 @@ jobs:
             ./docs/tailwind.config.js
             ./.goreleaser.yml
             ./.github/**
-      - name: Test
-        run: task test
       - name: Code Coverage
+        if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v3
-      - name: Build
-        run: task build
+
+  # Only run if the ci job is successful
+  release:
+    needs: ci
+    if: always() && (needs.ci.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
       - name: Release
         if: github.ref == 'refs/heads/main'
         uses: gembaadvantage/uplift-action@v2.0.1

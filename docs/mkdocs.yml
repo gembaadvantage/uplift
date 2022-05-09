@@ -33,6 +33,7 @@ nav:
       - Changelog: config/changelog.md
       - File Bumping: config/bumping.md
       - Git: config/git.md
+      - Hooks: config/hooks.md
   - Continuous Integration:
       - About: ci/about.md
       - CircleCI: ci/circleci.md
