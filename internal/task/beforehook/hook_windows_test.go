@@ -25,6 +25,7 @@ package beforehook
 import (
 	ctx "context"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/config"
