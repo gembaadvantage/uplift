@@ -79,3 +79,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_GORELEASER }}
           FURY_TOKEN: ${{ secrets.GH_FURY_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.GH_SLACK_WEBHOOK }}
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.GA_DOCKER_USERNAME }}
+          password: ${{ secrets.GA_DOCKER_PASSWORD }}
+          short-description: "Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
+          readme-filepath: ./README.md
