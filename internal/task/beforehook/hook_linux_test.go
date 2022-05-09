@@ -58,32 +58,32 @@ func TestRun_ShellCommands(t *testing.T) {
 	assert.Equal(t, "JohnSmith", string(data))
 }
 
-// func TestRun_ShellScripts(t *testing.T) {
-// 	git.InitRepo(t)
+func TestRun_ShellScripts(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommitAndTag(t, "1.0.0", "feat: first release")
 
-// 	// Generate a shell script
-// 	sh := `#!/bin/bash
-// git checkout -b $BRANCH
-// CURRENT=$(git branch --show-current)
-// echo -n $CURRENT > out.txt`
-// 	ioutil.WriteFile("switch-branch.sh", []byte(sh), 0755)
+	// Generate a shell script
+	sh := `#!/bin/bash
+LATEST_TAG=$(git for-each-ref "refs/tags/*.*.*" --sort=-v:creatordate --format='%(refname:short)')
+echo -n $LATEST_TAG > out.txt`
+	ioutil.WriteFile("latest-tag.sh", []byte(sh), 0755)
 
-// 	tctx := &context.Context{
-// 		Context: ctx.Background(),
-// 		Config: config.Uplift{
-// 			Hooks: config.Hooks{
-// 				Before: []string{
-// 					"BRANCH=testing ./switch-branch.sh",
-// 				},
-// 			},
-// 		},
-// 	}
+	tctx := &context.Context{
+		Context: ctx.Background(),
+		Config: config.Uplift{
+			Hooks: config.Hooks{
+				Before: []string{
+					"./latest-tag.sh",
+				},
+			},
+		},
+	}
 
-// 	err := Task{}.Run(tctx)
-// 	require.NoError(t, err)
+	err := Task{}.Run(tctx)
+	require.NoError(t, err)
 
-// 	data, err := ioutil.ReadFile("out.txt")
-// 	require.NoError(t, err)
+	data, err := ioutil.ReadFile("out.txt")
+	require.NoError(t, err)
 
-// 	assert.Equal(t, "testing", string(data))
-// }
+	assert.Equal(t, "1.0.0", string(data))
+}
