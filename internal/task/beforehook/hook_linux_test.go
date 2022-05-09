@@ -43,7 +43,7 @@ func TestRun_ShellCommands(t *testing.T) {
 			Hooks: config.Hooks{
 				Before: []string{
 					"echo -n 'JohnDoe' > out.txt",
-					"sed -i '' 's/Doe/Smith/g' out.txt",
+					"sed -i 's/Doe/Smith/g' out.txt",
 				},
 			},
 		},

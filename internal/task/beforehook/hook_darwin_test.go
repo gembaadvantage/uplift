@@ -37,6 +37,7 @@ import (
 func TestRun_ShellCommands(t *testing.T) {
 	git.MkTmpDir(t)
 
+	// For in place sed substitution darwin requires -i '' argument
 	tctx := &context.Context{
 		Context: ctx.Background(),
 		Config: config.Uplift{
