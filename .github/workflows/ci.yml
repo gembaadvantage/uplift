@@ -90,7 +90,10 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v3
 
+  # Only run if the ci job is successful
   release:
+    needs: ci
+    if: always() && (needs.ci.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Release
