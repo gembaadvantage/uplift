@@ -89,8 +89,12 @@ jobs:
       - name: Code Coverage
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v3
+
+  release:
+    runs-on: ubuntu-latest
+    steps:
       - name: Release
-        if: matrix.os == 'ubuntu-latest' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'
         uses: gembaadvantage/uplift-action@v2.0.1
         with:
           args: release --skip-changelog
