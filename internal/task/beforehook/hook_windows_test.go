@@ -23,11 +23,39 @@ SOFTWARE.
 package beforehook
 
 import (
+	ctx "context"
+	"io/ioutil"
 	"testing"
+
+	"github.com/gembaadvantage/uplift/internal/config"
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRun_ShellCommands(t *testing.T) {
-	// TODO: write test
+	git.MkTmpDir(t)
+
+	tctx := &context.Context{
+		Context: ctx.Background(),
+		Config: config.Uplift{
+			Hooks: config.Hooks{
+				Before: []string{
+					"echo -n 'JohnDoe' > out.txt",
+					"sed -i 's/Doe/Smith/g' out.txt",
+				},
+			},
+		},
+	}
+
+	err := Task{}.Run(tctx)
+	require.NoError(t, err)
+
+	data, err := ioutil.ReadFile("out.txt")
+	require.NoError(t, err)
+
+	assert.Equal(t, "JohnSmith", string(data))
 }
 
 func TestRun_ShellScripts(t *testing.T) {
