@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Trivy Scan
-        uses: knqyf263/trivy-issue-action@v0.0.3
+        uses: knqyf263/trivy-issue-action@v0.0.4
         with:
           assignee: ga-paul-t
           severity: CRITICAL
