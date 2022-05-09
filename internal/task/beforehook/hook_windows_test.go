@@ -59,5 +59,30 @@ func TestRun_ShellCommands(t *testing.T) {
 }
 
 func TestRun_ShellScripts(t *testing.T) {
-	// TODO: write test
+	git.InitRepo(t)
+
+	// Generate a shell script
+	sh := `#!/bin/bash
+LAST_COMMIT=$(git log -1 --pretty=format:'%B')
+echo -n $LAST_COMMIT > out.txt`
+	ioutil.WriteFile("last-commit.sh", []byte(sh), 0755)
+
+	tctx := &context.Context{
+		Context: ctx.Background(),
+		Config: config.Uplift{
+			Hooks: config.Hooks{
+				Before: []string{
+					"./last-commit.sh",
+				},
+			},
+		},
+	}
+
+	err := Task{}.Run(tctx)
+	require.NoError(t, err)
+
+	data, err := ioutil.ReadFile("out.txt")
+	require.NoError(t, err)
+
+	assert.Equal(t, "initialise repo", string(data))
 }
