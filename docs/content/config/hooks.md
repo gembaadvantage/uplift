@@ -2,7 +2,7 @@
 
 Provides a mechanism to extend the functionality of uplift through adhoc shell commands and scripts[^1]. Any temporary files must be ignored using a `.gitignore` file, otherwise uplift will deem the repository is in a [dirty state](../faq/gitdirty.md) and stop the release.
 
-```yaml linenums="1"
+```{ .yaml .annotate linenums="1" }
 # .uplift.yml
 
 hooks:
@@ -15,7 +15,10 @@ hooks:
     - go mod tidy
     - cargo fetch
     - ENV=VALUE ./my-custom-script.sh
+    - bash path//to//my-custom-script.sh # (1)
 ```
+
+1. An example of using POSIX based windows commands through the [mvdan/sh](https://github.com/mvdan/sh) GitHub library. Pay special attention to the use of `//` when specifying a path
 
 !!!tip "Need extra output?"
 
