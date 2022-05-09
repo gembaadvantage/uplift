@@ -14,9 +14,11 @@ hooks:
     - npm install
     - go mod tidy
     - cargo fetch
-    - ./my-custom-script.sh
+    - ENV=VALUE ./my-custom-script.sh
 ```
 
 !!!tip "Need extra output?"
 
     Use the `--debug` flag to print output from any of the executed shell commands or scripts
+
+[^1]: Interpretation and execution of shell commands and scripts is carried out through the [mvdan/sh](https://github.com/mvdan/sh) GitHub library.

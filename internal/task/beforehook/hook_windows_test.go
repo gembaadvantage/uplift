@@ -72,7 +72,7 @@ echo -n $LAST_COMMIT > out.txt`
 		Config: config.Uplift{
 			Hooks: config.Hooks{
 				Before: []string{
-					"bash last-commit.sh",
+					"last-commit.sh",
 				},
 			},
 		},
