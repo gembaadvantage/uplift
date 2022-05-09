@@ -24,10 +24,12 @@ package beforehook
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestWindows(t *testing.T) {
-	assert.Equal(t, "1", "2")
+func TestRun_ShellCommands(t *testing.T) {
+	// TODO: write test
+}
+
+func TestRun_ShellScripts(t *testing.T) {
+	// TODO: write test
 }
