@@ -65,14 +65,15 @@ func TestRun_ShellScripts(t *testing.T) {
 	sh := `#!/bin/bash
 LAST_COMMIT=$(git log -1 --pretty=format:'%B')
 echo -n $LAST_COMMIT > out.txt`
-	ioutil.WriteFile("last-commit.sh", []byte(sh), 0755)
+	os.Mkdir("subfolder", 0755)
+	ioutil.WriteFile("subfolder/last-commit.sh", []byte(sh), 0755)
 
 	tctx := &context.Context{
 		Context: ctx.Background(),
 		Config: config.Uplift{
 			Hooks: config.Hooks{
 				Before: []string{
-					"last-commit.sh",
+					"bash subfolder\\last-commit.sh",
 				},
 			},
 		},
