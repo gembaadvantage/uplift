@@ -74,7 +74,7 @@ echo -n $LAST_COMMIT > out.txt`
 		Config: config.Uplift{
 			Hooks: config.Hooks{
 				Before: []string{
-					"bash subfolder\\last-commit.sh",
+					"bash subfolder//last-commit.sh",
 				},
 			},
 		},
