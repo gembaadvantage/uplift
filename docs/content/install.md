@@ -49,6 +49,14 @@ gpgcheck=0' | sudo tee /etc/yum.repos.d/uplift.repo
 sudo yum install -y uplift
 ```
 
+### Aur
+
+To install from the [aur](https://archlinux.org/) using [yay](https://github.com/Jguer/yay):
+
+```sh
+yay -S uplift-bin
+```
+
 ### Linux Packages
 
 Download and manually install one of the `.deb`, `.rpm` or `.apk` packages from the [Releases](https://github.com/gembaadvantage/uplift/releases) page.
