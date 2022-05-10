@@ -270,6 +270,47 @@ func DescribeTag(ref string) TagEntry {
 	}
 }
 
+// LatestCommits retrieves all commits from a specific tag in the repositories
+// history. If no tag is provided, the log will be generated from HEAD
+func LatestCommits(tag string) ([]CommitDetails, error) {
+	if tag == "" {
+		return commitLog("HEAD")
+	}
+
+	return commitLog(fmt.Sprintf("tags/%s..HEAD", tag))
+}
+
+func commitLog(srch string) ([]CommitDetails, error) {
+	out, err := Clean(Run("log", `--pretty=format:'Commit: %H%nAuthor: %an%nEmail: %ae%nMessage: %B'`, srch))
+	if err != nil {
+		return []CommitDetails{}, err
+	}
+
+	lines := strings.Split(out, "Commit: ")
+	if len(lines) < 1 {
+		return []CommitDetails{}, nil
+	}
+
+	cd := make([]CommitDetails, 0, len(lines)-1)
+	for i := 1; i < len(lines); i++ {
+		p := strings.SplitN(lines[i], "\n", 4)
+
+		// Expected format:
+		// commit
+		// author
+		// email
+		// message
+
+		cd = append(cd, CommitDetails{
+			Author:  strings.TrimPrefix(p[1], "Author: "),
+			Email:   strings.TrimPrefix(p[2], "Email: "),
+			Message: strings.TrimPrefix(p[3], "Message: "),
+		})
+	}
+
+	return cd, nil
+}
+
 // LatestCommit retrieves the latest commit within the repository
 func LatestCommit() (CommitDetails, error) {
 	out, err := Clean(Run("log", "-1", `--pretty=format:'"%an","%ae","%B"'`))
