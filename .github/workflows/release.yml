@@ -80,7 +80,7 @@ jobs:
           FURY_TOKEN: ${{ secrets.GH_FURY_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.GH_SLACK_WEBHOOK }}
       - name: Trivy Vulnerability Scan
-        uses: aquasecurity/trivy-action@0.2.5
+        uses: aquasecurity/trivy-action@0.3.0
         with:
           image-ref: ghcr.io/gembaadvantage/uplift:latest
           format: template
