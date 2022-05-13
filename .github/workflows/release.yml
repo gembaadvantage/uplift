@@ -94,10 +94,3 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: trivy-results.sarif
-      - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          username: ${{ secrets.GA_DOCKER_USERNAME }}
-          password: ${{ secrets.GA_DOCKER_PASSWORD }}
-          short-description: "Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
-          readme-filepath: ./README.md
