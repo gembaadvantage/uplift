@@ -27,9 +27,11 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     permissions:
+      actions: read
+      contents: read
       id-token: write
       packages: write
-      contents: read
+      security-events: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -79,8 +81,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_GORELEASER }}
           FURY_TOKEN: ${{ secrets.GH_FURY_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.GH_SLACK_WEBHOOK }}
+          AUR_KEY: ${{ secrets.GH_AUR_KEY }}
       - name: Trivy Vulnerability Scan
-        uses: aquasecurity/trivy-action@0.3.0
+        uses: aquasecurity/trivy-action@0.2.5
         with:
           image-ref: ghcr.io/gembaadvantage/uplift:latest
           format: template

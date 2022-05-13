@@ -38,9 +38,6 @@ jobs:
         if: matrix.os == 'windows-latest'
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GH_UPLIFT }}
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
@@ -95,7 +92,7 @@ jobs:
   # Only run if the ci job is successful
   release:
     needs: ci
-    if: always() && (needs.ci.result == 'success')
+    if: github.ref == 'refs/heads/main' && always() && (needs.ci.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -104,7 +101,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GH_UPLIFT }}
       - name: Release
-        if: github.ref == 'refs/heads/main'
         uses: gembaadvantage/uplift-action@v2.0.1
         with:
           args: release --skip-changelog

@@ -23,11 +23,14 @@ SOFTWARE.
 package beforehook
 
 import (
+	ctx "context"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestString(t *testing.T) {
@@ -44,4 +47,24 @@ func TestSkip(t *testing.T) {
 			},
 		},
 	}))
+}
+
+func TestRun_DryRun(t *testing.T) {
+	git.MkTmpDir(t)
+
+	tctx := &context.Context{
+		Context: ctx.Background(),
+		Config: config.Uplift{
+			Hooks: config.Hooks{
+				Before: []string{
+					"touch out.txt",
+				},
+			},
+		},
+		DryRun: true,
+	}
+
+	err := Task{}.Run(tctx)
+	require.NoError(t, err)
+	assert.NoFileExists(t, "out.txt")
 }
