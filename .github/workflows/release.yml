@@ -82,6 +82,10 @@ jobs:
           FURY_TOKEN: ${{ secrets.GH_FURY_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.GH_SLACK_WEBHOOK }}
           AUR_KEY: ${{ secrets.GH_AUR_KEY }}
+          TWITTER_CONSUMER_KEY: ${{ secrets.GH_TWITTER_CONSUMER_KEY }}
+          TWITTER_CONSUMER_SECRET: ${{ secrets.GH_TWITTER_CONSUMER_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.GH_TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.GH_TWITTER_ACCESS_TOKEN_SECRET }}
       - name: Trivy Vulnerability Scan
         uses: aquasecurity/trivy-action@0.2.5
         with:
