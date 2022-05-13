@@ -52,6 +52,10 @@ func (t Task) Skip(ctx *context.Context) bool {
 func (t Task) Run(ctx *context.Context) error {
 	for _, c := range ctx.Config.Hooks.Before {
 		log.WithField("hook", c).Info("running")
+		if ctx.DryRun {
+			continue
+		}
+
 		p, err := syntax.NewParser().Parse(strings.NewReader(c), "")
 		if err != nil {
 			return err
