@@ -32,7 +32,7 @@ import (
 )
 
 func TestString(t *testing.T) {
-	assert.Equal(t, "inspect latest commit", Task{}.String())
+	assert.Equal(t, "inspect latest conventional commit", Task{}.String())
 }
 
 func TestSkip(t *testing.T) {

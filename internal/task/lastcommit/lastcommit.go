@@ -33,7 +33,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "inspect latest commit"
+	return "inspect latest conventional commit"
 }
 
 // Skip is disabled for this task
@@ -43,6 +43,16 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
+	// TODO: retrieve commit log between latest tag
+	// TODO: scan messages trying to identify latest conventional commit
+	// TODO: if none found, use latest commit
+
+	cs, err := git.LatestCommits(ctx.CurrentVersion.Raw)
+	if err != nil {
+		log.Error("failed to retrieve latest commits")
+		return err
+	}
+
 	commit, err := git.LatestCommit()
 	if err != nil {
 		log.Error("failed to retrieve latest commit")
