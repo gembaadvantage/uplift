@@ -734,6 +734,33 @@ func TestLogBetween_All(t *testing.T) {
 	assert.Equal(t, log[3].Message, InitCommit)
 }
 
+func TestLogBetween_AllMultilineCommits(t *testing.T) {
+	c1 := `first commit
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+	c2 := `second commit
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+	c3 := `third commit
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+
+	InitRepo(t)
+	EmptyCommits(t, c1, c2, c3)
+
+	log, err := LogBetween("", "", []string{})
+	require.NoError(t, err)
+
+	require.Len(t, log, 4)
+	assert.Equal(t, log[0].Message, "third commit")
+	assert.Equal(t, log[1].Message, "second commit")
+	assert.Equal(t, log[2].Message, "first commit")
+	assert.Equal(t, log[3].Message, InitCommit)
+}
+
 func TestLogBetween_ErrorInvalidRevision(t *testing.T) {
 	InitRepo(t)
 
