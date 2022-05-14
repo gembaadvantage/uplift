@@ -58,6 +58,9 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/gembaadvantage
       name: Gemba Advantage on GitHub
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/GA_Uplift
+      name: Uplift on Twitter
 
 plugins:
   - search
