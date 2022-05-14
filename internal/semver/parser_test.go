@@ -24,6 +24,9 @@ package semver
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseCommit(t *testing.T) {
@@ -158,9 +161,72 @@ BREAKING CHANGE: Lorem ipsum dolor sit amet`,
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			inc := ParseCommit(tt.commit)
-			if inc != tt.inc {
-				t.Errorf("Expected %s but received %s", tt.inc, inc)
-			}
+			require.Equal(t, tt.inc, inc)
 		})
 	}
+}
+
+func TestIsConventionalCommit(t *testing.T) {
+	tests := []struct {
+		name   string
+		commit string
+	}{
+		{
+			name:   "Build",
+			commit: "feat: Lorem ipsum dolor sit amet",
+		},
+		{
+			name:   "Chore",
+			commit: "fix: Lorem ipsum dolor sit amet",
+		},
+		{
+			name:   "CI",
+			commit: "build: Lorem ipsum dolor sit amet",
+		},
+		{
+			name:   "Docs",
+			commit: "chore: Lorem ipsum dolor sit amet",
+		},
+		{
+			name:   "Feat",
+			commit: "ci: Lorem ipsum dolor sit amet",
+		},
+		{
+			name:   "Fix",
+			commit: "docs: Lorem ipsum dolor sit amet",
+		},
+		{
+			name:   "Perf",
+			commit: "perf: Lorem ipsum dolor sit amet",
+		},
+		{
+			name:   "Refactor",
+			commit: "refactor: Lorem ipsum dolor sit amet",
+		},
+		{
+			name:   "Revert",
+			commit: "revert: Lorem ipsum dolor sit amet",
+		},
+		{
+			name:   "Style",
+			commit: "style: Lorem ipsum dolor sit amet",
+		},
+		{
+			name:   "Test",
+			commit: "test: Lorem ipsum dolor sit amet",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require.True(t, IsConventionalCommit(tt.commit))
+		})
+	}
+}
+
+func TestIsConventionalCommit_UnrecognisedPrefix(t *testing.T) {
+	assert.False(t, IsConventionalCommit("unrecognised: Lorem ipsum dolor sit amet"))
+}
+
+func TestIsConventionalCommit_NoPrefix(t *testing.T) {
+	assert.False(t, IsConventionalCommit("Lorem ipsum dolor sit amet"))
 }

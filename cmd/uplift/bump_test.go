@@ -36,7 +36,8 @@ import (
 func TestBump(t *testing.T) {
 	git.InitRepo(t)
 	testFileWithConfig(t, "test.txt", ".uplift.yml")
-	git.EmptyCommitAndTag(t, "1.0.0", "feat: this is a new feature")
+	git.EmptyCommitAndTag(t, "1.0.0", "feat: this was the last feature")
+	git.EmptyCommit(t, "feat: a new feature")
 
 	bmpCmd := newBumpCmd(noChangesPushed(), os.Stdout)
 

@@ -23,9 +23,12 @@ SOFTWARE.
 package lastcommit
 
 import (
+	"strings"
+
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
 // Task for reading the last commit message
@@ -33,7 +36,7 @@ type Task struct{}
 
 // String generates a string representation of the task
 func (t Task) String() string {
-	return "inspect latest commit"
+	return "scanning for conventional commit"
 }
 
 // Skip is disabled for this task
@@ -43,17 +46,36 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	commit, err := git.LatestCommit()
+	lc, err := git.LatestCommits(ctx.CurrentVersion.Raw)
 	if err != nil {
-		log.Error("failed to retrieve latest commit")
+		log.Error("failed to retrieve latest commits")
 		return err
 	}
-	log.WithFields(log.Fields{
-		"author":  commit.Author,
-		"email":   commit.Email,
-		"message": commit.Message,
-	}).Debug("retrieved latest commit")
 
-	ctx.CommitDetails = commit
+	if len(lc) == 0 {
+		log.Warn("no commits to scan, skipping...")
+		return nil
+	}
+
+	// Default to the latest commit. If no other conventional commit
+	// is found, this commit will be used by the remaining workflow
+	ctx.CommitDetails = lc[0]
+
+	for _, c := range lc {
+		// Break as soon as a conventional commit is detected
+		if semver.IsConventionalCommit(c.Message) {
+			log.WithFields(log.Fields{
+				"author":  c.Author,
+				"email":   c.Email,
+				"message": strings.TrimPrefix(c.Message, "\n"),
+			}).Info("found commit")
+
+			ctx.CommitDetails = c
+			break
+		}
+
+		log.WithField("message", strings.TrimPrefix(c.Message, "\n")).Debug("skipping commit")
+	}
+
 	return nil
 }

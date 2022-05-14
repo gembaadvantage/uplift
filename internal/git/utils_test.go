@@ -456,6 +456,61 @@ func TestDescribeTag(t *testing.T) {
 	assert.Equal(t, time.Now().Format("2006-01-02"), desc.Created)
 }
 
+func TestLatestCommits_NoTag(t *testing.T) {
+	InitRepo(t)
+
+	EmptyCommits(t,
+		`feat: this is a brand new feature`,
+		`chore(deps): bump knqyf263/trivy-issue-action from 0.0.3 to 0.0.4
+
+Bumps [knqyf263/trivy-issue-action](https://github.com/knqyf263/trivy-issue-action) from 0.0.3 to 0.0.4.
+- [Release notes](https://github.com/knqyf263/trivy-issue-action/releases)
+- [Commits](https://github.com/knqyf263/trivy-issue-action/compare/v0.0.3...v0.0.4)`,
+		`ci: major change to the github workflow
+
+Some extra detail about the workflow`)
+
+	cs, err := LatestCommits("")
+	require.NoError(t, err)
+
+	require.Len(t, cs, 4)
+	assert.Equal(t, cs[0].Author, "uplift")
+	assert.Equal(t, cs[0].Email, "uplift@test.com")
+	assert.Equal(t, cs[0].Message, `ci: major change to the github workflow
+
+Some extra detail about the workflow`)
+
+	assert.Equal(t, cs[1].Author, "uplift")
+	assert.Equal(t, cs[1].Email, "uplift@test.com")
+	assert.Equal(t, cs[1].Message, `chore(deps): bump knqyf263/trivy-issue-action from 0.0.3 to 0.0.4
+
+Bumps [knqyf263/trivy-issue-action](https://github.com/knqyf263/trivy-issue-action) from 0.0.3 to 0.0.4.
+- [Release notes](https://github.com/knqyf263/trivy-issue-action/releases)
+- [Commits](https://github.com/knqyf263/trivy-issue-action/compare/v0.0.3...v0.0.4)`)
+
+	assert.Equal(t, cs[2].Author, "uplift")
+	assert.Equal(t, cs[2].Email, "uplift@test.com")
+	assert.Equal(t, cs[2].Message, "feat: this is a brand new feature")
+
+	assert.Equal(t, cs[3].Author, "uplift")
+	assert.Equal(t, cs[3].Email, "uplift@test.com")
+	assert.Equal(t, cs[3].Message, "initialise repo")
+}
+
+func TestLatestCommits_ToTag(t *testing.T) {
+	InitRepo(t)
+	EmptyCommitAndTag(t, "1.0.0", "feat: first feature")
+	EmptyCommits(t, "ci: first commit", "docs: second commit", "feat: third commit")
+
+	cs, err := LatestCommits("1.0.0")
+	require.NoError(t, err)
+
+	require.Len(t, cs, 3)
+	assert.Equal(t, cs[0].Message, "feat: third commit")
+	assert.Equal(t, cs[1].Message, "docs: second commit")
+	assert.Equal(t, cs[2].Message, "ci: first commit")
+}
+
 func TestLatestCommit(t *testing.T) {
 	InitRepo(t)
 
@@ -668,6 +723,33 @@ func TestLogBetween_ToSpecificTag(t *testing.T) {
 func TestLogBetween_All(t *testing.T) {
 	InitRepo(t)
 	EmptyCommits(t, "first commit", "second commit", "third commit")
+
+	log, err := LogBetween("", "", []string{})
+	require.NoError(t, err)
+
+	require.Len(t, log, 4)
+	assert.Equal(t, log[0].Message, "third commit")
+	assert.Equal(t, log[1].Message, "second commit")
+	assert.Equal(t, log[2].Message, "first commit")
+	assert.Equal(t, log[3].Message, InitCommit)
+}
+
+func TestLogBetween_AllMultilineCommits(t *testing.T) {
+	c1 := `first commit
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+	c2 := `second commit
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+	c3 := `third commit
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+
+	InitRepo(t)
+	EmptyCommits(t, c1, c2, c3)
 
 	log, err := LogBetween("", "", []string{})
 	require.NoError(t, err)

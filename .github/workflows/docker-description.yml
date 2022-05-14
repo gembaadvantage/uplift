@@ -18,24 +18,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-name: vulnerability-scan
+name: docker-description
 on:
-  schedule:
-    - cron: "0 0 * * *"
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  scan:
+  goreleaser:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Trivy Scan
-        uses: knqyf263/trivy-issue-action@v0.0.4
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
         with:
-          assignee: ga-paul-t
-          severity: CRITICAL
-          label: vulnerability
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.GA_DOCKER_USERNAME }}
+          password: ${{ secrets.GA_DOCKER_PASSWORD }}
+          repository: "gembaadvantage/uplift"
+          short-description: "Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
+          readme-filepath: ./README.md
