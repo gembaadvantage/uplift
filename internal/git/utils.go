@@ -295,16 +295,10 @@ func commitLog(srch string) ([]CommitDetails, error) {
 	for i := 1; i < len(lines); i++ {
 		p := strings.SplitN(lines[i], "\n", 4)
 
-		// Expected format:
-		// commit
-		// author
-		// email
-		// message
-
 		cd = append(cd, CommitDetails{
 			Author:  strings.TrimPrefix(p[1], "Author: "),
 			Email:   strings.TrimPrefix(p[2], "Email: "),
-			Message: strings.TrimPrefix(p[3], "Message: "),
+			Message: strings.TrimPrefix(strings.TrimRight(p[3], "\n"), "Message: "),
 		})
 	}
 

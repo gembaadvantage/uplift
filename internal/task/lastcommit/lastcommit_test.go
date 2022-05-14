@@ -40,8 +40,6 @@ func TestSkip(t *testing.T) {
 	assert.False(t, Task{}.Skip(&context.Context{}))
 }
 
-// TODO: do we need to trim additional newlines from end of commit?? in git package
-
 func TestRun(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommits(t, "feat: brand new feature", "Merge branch 'main' of https://github.com/org/repo")

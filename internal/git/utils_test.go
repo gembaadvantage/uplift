@@ -476,13 +476,13 @@ Some extra detail about the workflow`)
 	require.Len(t, cs, 4)
 	assert.Equal(t, cs[0].Author, "uplift")
 	assert.Equal(t, cs[0].Email, "uplift@test.com")
-	assert.Contains(t, cs[0].Message, `ci: major change to the github workflow
+	assert.Equal(t, cs[0].Message, `ci: major change to the github workflow
 
 Some extra detail about the workflow`)
 
 	assert.Equal(t, cs[1].Author, "uplift")
 	assert.Equal(t, cs[1].Email, "uplift@test.com")
-	assert.Contains(t, cs[1].Message, `chore(deps): bump knqyf263/trivy-issue-action from 0.0.3 to 0.0.4
+	assert.Equal(t, cs[1].Message, `chore(deps): bump knqyf263/trivy-issue-action from 0.0.3 to 0.0.4
 
 Bumps [knqyf263/trivy-issue-action](https://github.com/knqyf263/trivy-issue-action) from 0.0.3 to 0.0.4.
 - [Release notes](https://github.com/knqyf263/trivy-issue-action/releases)
@@ -490,11 +490,11 @@ Bumps [knqyf263/trivy-issue-action](https://github.com/knqyf263/trivy-issue-acti
 
 	assert.Equal(t, cs[2].Author, "uplift")
 	assert.Equal(t, cs[2].Email, "uplift@test.com")
-	assert.Contains(t, cs[2].Message, "feat: this is a brand new feature")
+	assert.Equal(t, cs[2].Message, "feat: this is a brand new feature")
 
 	assert.Equal(t, cs[3].Author, "uplift")
 	assert.Equal(t, cs[3].Email, "uplift@test.com")
-	assert.Contains(t, cs[3].Message, "initialise repo")
+	assert.Equal(t, cs[3].Message, "initialise repo")
 }
 
 func TestLatestCommits_ToTag(t *testing.T) {
@@ -506,9 +506,9 @@ func TestLatestCommits_ToTag(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Len(t, cs, 3)
-	assert.Contains(t, cs[0].Message, "feat: third commit")
-	assert.Contains(t, cs[1].Message, "docs: second commit")
-	assert.Contains(t, cs[2].Message, "ci: first commit")
+	assert.Equal(t, cs[0].Message, "feat: third commit")
+	assert.Equal(t, cs[1].Message, "docs: second commit")
+	assert.Equal(t, cs[2].Message, "ci: first commit")
 }
 
 func TestLatestCommit(t *testing.T) {
