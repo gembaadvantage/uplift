@@ -50,22 +50,29 @@ var (
 // ParseCommit will identify the type of increment to perform by parsing the commit
 // message against the conventional commit standards defined, @see:
 // https://www.conventionalcommits.org/en/v1.0.0/
-func ParseCommit(commit string) Increment {
-	if !convCommit.MatchString(commit) {
+func ParseCommit(c string) Increment {
+	if !convCommit.MatchString(c) {
 		return NoIncrement
 	}
 
-	if breakingBang.MatchString(commit) || breaking.MatchString(commit) {
+	if breakingBang.MatchString(c) || breaking.MatchString(c) {
 		return MajorIncrement
 	}
 
-	if feature.MatchString(commit) {
+	if feature.MatchString(c) {
 		return MinorIncrement
 	}
 
-	if fix.MatchString(commit) {
+	if fix.MatchString(c) {
 		return PatchIncrement
 	}
 
 	return NoIncrement
+}
+
+// IsConventionalCommit will detect if the given commit message contains a
+// conventional commit prefix, as required by the the specification, @see:
+// https://www.conventionalcommits.org/en/v1.0.0/
+func IsConventionalCommit(c string) bool {
+	return convCommit.MatchString(c)
 }

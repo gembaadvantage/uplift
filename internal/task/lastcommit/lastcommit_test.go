@@ -27,29 +27,75 @@ import (
 
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestString(t *testing.T) {
-	assert.Equal(t, "inspect latest conventional commit", Task{}.String())
+	assert.Equal(t, "scanning for conventional commit", Task{}.String())
 }
 
 func TestSkip(t *testing.T) {
 	assert.False(t, Task{}.Skip(&context.Context{}))
 }
 
+// TODO: do we need to trim additional newlines from end of commit?? in git package
+
 func TestRun(t *testing.T) {
 	git.InitRepo(t)
-	git.EmptyCommit(t, "test commit")
+	git.EmptyCommits(t, "feat: brand new feature", "Merge branch 'main' of https://github.com/org/repo")
 
-	ctx := &context.Context{}
+	ctx := &context.Context{
+		CurrentVersion: semver.Version{
+			Raw: "",
+		},
+	}
 	err := Task{}.Run(ctx)
 
 	require.NoError(t, err)
 	assert.Equal(t, "uplift", ctx.CommitDetails.Author)
 	assert.Equal(t, "uplift@test.com", ctx.CommitDetails.Email)
-	assert.Equal(t, "test commit", ctx.CommitDetails.Message)
+	assert.Equal(t, "feat: brand new feature", ctx.CommitDetails.Message)
+}
+
+func TestRun_FromTag(t *testing.T) {
+	c := `feat: brand new feature
+
+with some additional commit details`
+
+	git.InitRepo(t)
+	git.EmptyCommitsAndTag(t, "1.0.0", "feat: first new feature")
+	git.EmptyCommits(t, c, "Merge branch 'main' of https://github.com/org/repo")
+
+	ctx := &context.Context{
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+	}
+	err := Task{}.Run(ctx)
+
+	require.NoError(t, err)
+	assert.Equal(t, "uplift", ctx.CommitDetails.Author)
+	assert.Equal(t, "uplift@test.com", ctx.CommitDetails.Email)
+	assert.Equal(t, c, ctx.CommitDetails.Message)
+}
+
+func TestRun_NoConventionalCommits(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommits(t, "first commit", "second commit", "third commit")
+
+	ctx := &context.Context{
+		CurrentVersion: semver.Version{
+			Raw: "",
+		},
+	}
+	err := Task{}.Run(ctx)
+
+	require.NoError(t, err)
+	assert.Equal(t, "uplift", ctx.CommitDetails.Author)
+	assert.Equal(t, "uplift@test.com", ctx.CommitDetails.Email)
+	assert.Equal(t, "third commit", ctx.CommitDetails.Message)
 }
 
 func TestRun_NoGitRepository(t *testing.T) {
