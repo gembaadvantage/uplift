@@ -82,6 +82,13 @@ func TestRun(t *testing.T) {
 			metadata:   "12345",
 			expected:   "v0.2.0-beta.1+12345",
 		},
+		{
+			name: "BreakingChangeFooter",
+			commit: `refactor: changed the cli
+BREAKING CHANGE: no backwards compatibility support`,
+			curVer:   "v0.9.2",
+			expected: "v1.0.0",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
