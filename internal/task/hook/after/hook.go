@@ -21,3 +21,19 @@ SOFTWARE.
 */
 
 package after
+
+import "github.com/gembaadvantage/uplift/internal/context"
+
+// Task for executing any custom shell commands or scripts
+// after uplift runs it release workflow
+type Task struct{}
+
+// String generates a string representation of the task
+func (t Task) String() string {
+	return "after hooks"
+}
+
+// Skip running the task
+func (t Task) Skip(ctx *context.Context) bool {
+	return len(ctx.Config.Hooks.Before) == 0
+}
