@@ -20,37 +20,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package beforehook
+package hook
 
 import (
-	ctx "context"
 	"io/ioutil"
-	"os"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestRun_ShellCommands(t *testing.T) {
+func TestExec_ShellCommands(t *testing.T) {
 	git.MkTmpDir(t)
 
-	tctx := &context.Context{
-		Context: ctx.Background(),
-		Config: config.Uplift{
-			Hooks: config.Hooks{
-				Before: []string{
-					"echo -n 'JohnDoe' > out.txt",
-					"sed --posix -i 's/Doe/Smith/g' out.txt",
-				},
-			},
+	cmds := []Command{
+		{
+			Operation: "echo -n 'JohnDoe' > out.txt",
+		},
+		{
+			Operation: "sed -i 's/Doe/Smith/g' out.txt",
 		},
 	}
 
-	err := Task{}.Run(tctx)
+	err := Exec(cmds)
 	require.NoError(t, err)
 
 	data, err := ioutil.ReadFile("out.txt")
@@ -59,32 +52,27 @@ func TestRun_ShellCommands(t *testing.T) {
 	assert.Equal(t, "JohnSmith", string(data))
 }
 
-func TestRun_ShellScripts(t *testing.T) {
+func TestExec_ShellScripts(t *testing.T) {
 	git.InitRepo(t)
+	git.EmptyCommitAndTag(t, "1.0.0", "feat: first release")
 
 	// Generate a shell script
 	sh := `#!/bin/bash
-LAST_COMMIT=$(git log -1 --pretty=format:'%B')
-echo -n $LAST_COMMIT > out.txt`
-	os.Mkdir("subfolder", 0755)
-	ioutil.WriteFile("subfolder/last-commit.sh", []byte(sh), 0755)
+LATEST_TAG=$(git for-each-ref "refs/tags/*.*.*" --sort=-v:creatordate --format='%(refname:short)')
+echo -n $LATEST_TAG > out.txt`
+	ioutil.WriteFile("latest-tag.sh", []byte(sh), 0755)
 
-	tctx := &context.Context{
-		Context: ctx.Background(),
-		Config: config.Uplift{
-			Hooks: config.Hooks{
-				Before: []string{
-					"bash subfolder//last-commit.sh",
-				},
-			},
+	cmds := []Command{
+		{
+			Operation: "./latest-tag.sh",
 		},
 	}
 
-	err := Task{}.Run(tctx)
+	err := Exec(cmds)
 	require.NoError(t, err)
 
 	data, err := ioutil.ReadFile("out.txt")
 	require.NoError(t, err)
 
-	assert.Equal(t, "initialise repo", string(data))
+	assert.Equal(t, "1.0.0", string(data))
 }

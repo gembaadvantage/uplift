@@ -20,37 +20,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package beforehook
+package hook
 
 import (
-	ctx "context"
 	"io/ioutil"
+	"os"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestRun_ShellCommands(t *testing.T) {
+func TestExec_ShellCommands(t *testing.T) {
 	git.MkTmpDir(t)
 
-	// For in place sed substitution darwin requires -i '' argument
-	tctx := &context.Context{
-		Context: ctx.Background(),
-		Config: config.Uplift{
-			Hooks: config.Hooks{
-				Before: []string{
-					"echo -n 'JohnDoe' > out.txt",
-					"sed -i '' 's/Doe/Smith/g' out.txt",
-				},
-			},
+	cmds := []Command{
+		{
+			Operation: "echo -n 'JohnDoe' > out.txt",
+		},
+		{
+			Operation: "sed --posix -i 's/Doe/Smith/g' out.txt",
 		},
 	}
 
-	err := Task{}.Run(tctx)
+	err := Exec(cmds)
 	require.NoError(t, err)
 
 	data, err := ioutil.ReadFile("out.txt")
@@ -59,32 +53,27 @@ func TestRun_ShellCommands(t *testing.T) {
 	assert.Equal(t, "JohnSmith", string(data))
 }
 
-func TestRun_ShellScripts(t *testing.T) {
+func TestExec_ShellScripts(t *testing.T) {
 	git.InitRepo(t)
 
 	// Generate a shell script
 	sh := `#!/bin/bash
-git checkout -b $BRANCH
-CURRENT=$(git branch --show-current)
-echo -n $CURRENT > out.txt`
-	ioutil.WriteFile("switch-branch.sh", []byte(sh), 0755)
+LAST_COMMIT=$(git log -1 --pretty=format:'%B')
+echo -n $LAST_COMMIT > out.txt`
+	os.Mkdir("subfolder", 0755)
+	ioutil.WriteFile("subfolder/last-commit.sh", []byte(sh), 0755)
 
-	tctx := &context.Context{
-		Context: ctx.Background(),
-		Config: config.Uplift{
-			Hooks: config.Hooks{
-				Before: []string{
-					"BRANCH=testing ./switch-branch.sh",
-				},
-			},
+	cmds := []Command{
+		{
+			Operation: "bash subfolder//last-commit.sh",
 		},
 	}
 
-	err := Task{}.Run(tctx)
+	err := Exec(cmds)
 	require.NoError(t, err)
 
 	data, err := ioutil.ReadFile("out.txt")
 	require.NoError(t, err)
 
-	assert.Equal(t, "testing", string(data))
+	assert.Equal(t, "initialise repo", string(data))
 }
