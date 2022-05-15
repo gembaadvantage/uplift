@@ -31,11 +31,12 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
-	"github.com/gembaadvantage/uplift/internal/task/beforehook"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
+	"github.com/gembaadvantage/uplift/internal/task/hook/after"
+	"github.com/gembaadvantage/uplift/internal/task/hook/before"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
@@ -89,7 +90,7 @@ func bumpFiles(opts bumpOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		beforehook.Task{},
+		before.Task{},
 		gitcheck.Task{},
 		currentversion.Task{},
 		lastcommit.Task{},
@@ -97,6 +98,7 @@ func bumpFiles(opts bumpOptions, out io.Writer) error {
 		nextcommit.Task{},
 		bump.Task{},
 		gitcommit.Task{},
+		after.Task{},
 	}
 
 	for _, tsk := range tsks {

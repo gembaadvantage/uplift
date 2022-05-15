@@ -22,23 +22,24 @@ SOFTWARE.
 
 package beforebump
 
-import "github.com/gembaadvantage/uplift/internal/context"
+import (
+	"testing"
 
-// Task for executing any custom shell commands or scripts
-// before file bumping within the release workflow
-type Task struct{}
+	"github.com/gembaadvantage/uplift/internal/config"
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/stretchr/testify/assert"
+)
 
-// String generates a string representation of the task
-func (t Task) String() string {
-	return "before bumping files"
+func TestString(t *testing.T) {
+	assert.Equal(t, "before bumping files", Task{}.String())
 }
 
-// Skip running the task
-func (t Task) Skip(ctx *context.Context) bool {
-	return len(ctx.Config.Hooks.BeforeBump) == 0
-}
-
-// Run the task
-func (t Task) Run(ctx *context.Context) error {
-	return nil
+func TestSkip(t *testing.T) {
+	assert.True(t, Task{}.Skip(&context.Context{
+		Config: config.Uplift{
+			Hooks: config.Hooks{
+				BeforeBump: []string{},
+			},
+		},
+	}))
 }

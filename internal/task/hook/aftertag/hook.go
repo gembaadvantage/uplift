@@ -25,7 +25,7 @@ package aftertag
 import "github.com/gembaadvantage/uplift/internal/context"
 
 // Task for executing any custom shell commands or scripts
-// before uplift runs it release workflow
+// after tagging within the release workflow
 type Task struct{}
 
 // String generates a string representation of the task
@@ -35,5 +35,10 @@ func (t Task) String() string {
 
 // Skip running the task
 func (t Task) Skip(ctx *context.Context) bool {
-	return len(ctx.Config.Hooks.Before) == 0
+	return len(ctx.Config.Hooks.AfterTag) == 0
+}
+
+// Run the task
+func (t Task) Run(ctx *context.Context) error {
+	return nil
 }

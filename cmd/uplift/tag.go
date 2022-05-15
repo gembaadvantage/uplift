@@ -31,11 +31,12 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
-	"github.com/gembaadvantage/uplift/internal/task/beforehook"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gittag"
+	"github.com/gembaadvantage/uplift/internal/task/hook/after"
+	"github.com/gembaadvantage/uplift/internal/task/hook/before"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
@@ -49,7 +50,7 @@ is based on the conventional commit message from the last commit.`
 
 var (
 	tagRepoPipeline = []task.Runner{
-		beforehook.Task{},
+		before.Task{},
 		gitcheck.Task{},
 		fetchtag.Task{},
 		currentversion.Task{},
@@ -57,16 +58,18 @@ var (
 		nextversion.Task{},
 		nextcommit.Task{},
 		gittag.Task{},
+		after.Task{},
 	}
 
 	nextTagPipeline = []task.Runner{
-		beforehook.Task{},
+		before.Task{},
 		gitcheck.Task{},
 		fetchtag.Task{},
 		currentversion.Task{},
 		lastcommit.Task{},
 		nextversion.Task{},
 		gittag.Task{},
+		after.Task{},
 	}
 )
 

@@ -35,7 +35,6 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
-	"github.com/gembaadvantage/uplift/internal/task/beforehook"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
 	"github.com/gembaadvantage/uplift/internal/task/currentversion"
@@ -43,6 +42,8 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
 	"github.com/gembaadvantage/uplift/internal/task/gittag"
+	"github.com/gembaadvantage/uplift/internal/task/hook/after"
+	"github.com/gembaadvantage/uplift/internal/task/hook/before"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
@@ -110,7 +111,7 @@ func release(opts releaseOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		beforehook.Task{},
+		before.Task{},
 		gitcheck.Task{},
 		scm.Task{},
 		fetchtag.Task{},
@@ -122,6 +123,7 @@ func release(opts releaseOptions, out io.Writer) error {
 		changelog.Task{},
 		gitcommit.Task{},
 		gittag.Task{},
+		after.Task{},
 	}
 
 	for _, tsk := range tsks {
