@@ -23,6 +23,7 @@ SOFTWARE.
 package hook
 
 import (
+	"context"
 	"io/ioutil"
 	"testing"
 
@@ -35,15 +36,11 @@ func TestExec_ShellCommands(t *testing.T) {
 	git.MkTmpDir(t)
 
 	cmds := []Command{
-		{
-			Operation: "echo -n 'JohnDoe' > out.txt",
-		},
-		{
-			Operation: "sed -i 's/Doe/Smith/g' out.txt",
-		},
+		"echo -n 'JohnDoe' > out.txt",
+		"sed -i 's/Doe/Smith/g' out.txt",
 	}
 
-	err := Exec(cmds)
+	err := Exec(context.Background(), cmds, ExecOptions{})
 	require.NoError(t, err)
 
 	data, err := ioutil.ReadFile("out.txt")
@@ -62,13 +59,7 @@ LATEST_TAG=$(git for-each-ref "refs/tags/*.*.*" --sort=-v:creatordate --format='
 echo -n $LATEST_TAG > out.txt`
 	ioutil.WriteFile("latest-tag.sh", []byte(sh), 0755)
 
-	cmds := []Command{
-		{
-			Operation: "./latest-tag.sh",
-		},
-	}
-
-	err := Exec(cmds)
+	err := Exec(context.Background(), []string{"./latest-tag.sh"}, ExecOptions{})
 	require.NoError(t, err)
 
 	data, err := ioutil.ReadFile("out.txt")

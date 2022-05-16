@@ -89,3 +89,17 @@ func TestBump_PrereleaseFlag(t *testing.T) {
 	assert.Equal(t, `version: 0.1.0-beta.1+12345
 appVersion: 0.1.0-beta.1+12345`, string(actual))
 }
+
+func TestBump_Hooks(t *testing.T) {
+	git.InitRepo(t)
+	configWithHooks(t)
+	git.EmptyCommit(t, "feat: this is a new feature")
+
+	bmpCmd := newBumpCmd(&globalOptions{}, os.Stdout)
+	err := bmpCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	require.Equal(t, 2, numHooksExecuted(t))
+	assert.FileExists(t, BeforeFile)
+	assert.FileExists(t, AfterFile)
+}

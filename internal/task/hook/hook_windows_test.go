@@ -23,6 +23,7 @@ SOFTWARE.
 package hook
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -36,15 +37,11 @@ func TestExec_ShellCommands(t *testing.T) {
 	git.MkTmpDir(t)
 
 	cmds := []Command{
-		{
-			Operation: "echo -n 'JohnDoe' > out.txt",
-		},
-		{
-			Operation: "sed --posix -i 's/Doe/Smith/g' out.txt",
-		},
+		"echo -n 'JohnDoe' > out.txt",
+		"sed --posix -i 's/Doe/Smith/g' out.txt",
 	}
 
-	err := Exec(cmds)
+	err := Exec(context.Background(), cmds, ExecOptions{})
 	require.NoError(t, err)
 
 	data, err := ioutil.ReadFile("out.txt")
@@ -63,13 +60,7 @@ echo -n $LAST_COMMIT > out.txt`
 	os.Mkdir("subfolder", 0755)
 	ioutil.WriteFile("subfolder/last-commit.sh", []byte(sh), 0755)
 
-	cmds := []Command{
-		{
-			Operation: "bash subfolder//last-commit.sh",
-		},
-	}
-
-	err := Exec(cmds)
+	err := Exec(context.Background(), []string{"bash subfolder//last-commit.sh"}, ExecOptions{})
 	require.NoError(t, err)
 
 	data, err := ioutil.ReadFile("out.txt")

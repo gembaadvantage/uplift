@@ -33,29 +33,28 @@ import (
 	"mvdan.cc/sh/v3/syntax"
 )
 
-// Command ...
-type Command struct {
-	Operation string
-	Debug     bool
-	DryRun    bool
+// ExecOptions provides a way of customising the execution of commands
+type ExecOptions struct {
+	Debug  bool
+	DryRun bool
 }
 
-// Exec ...
-func Exec(cmds []Command) error {
+// Exec will execute a series of shell commands or scripts
+func Exec(ctx context.Context, cmds []string, opts ExecOptions) error {
 	for _, c := range cmds {
 		log.WithField("hook", c).Info("running")
-		if c.DryRun {
+		if opts.DryRun {
 			continue
 		}
 
-		p, err := syntax.NewParser().Parse(strings.NewReader(c.Operation), "")
+		p, err := syntax.NewParser().Parse(strings.NewReader(c), "")
 		if err != nil {
 			return err
 		}
 
 		// Discard all output from commands and scripts unless in debug mode
 		out := io.Discard
-		if c.Debug {
+		if opts.Debug {
 			// Stderr is used by apex for logging, stdout is reserved for capturing output
 			out = os.Stderr
 		}

@@ -73,3 +73,17 @@ func TestTag_PrereleaseFlag(t *testing.T) {
 	assert.Len(t, tags, 1)
 	assert.Equal(t, "0.1.0-beta.1+12345", tags[0].Ref)
 }
+
+func TestTag_Hooks(t *testing.T) {
+	git.InitRepo(t)
+	configWithHooks(t)
+	git.EmptyCommit(t, "feat: this is a new feature")
+
+	tagCmd := newTagCmd(noChangesPushed(), os.Stdout)
+	err := tagCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	require.Equal(t, 2, numHooksExecuted(t))
+	assert.FileExists(t, BeforeFile)
+	assert.FileExists(t, AfterFile)
+}

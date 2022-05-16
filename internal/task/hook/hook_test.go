@@ -23,6 +23,7 @@ SOFTWARE.
 package hook
 
 import (
+	"context"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -33,14 +34,7 @@ import (
 func TestExec_DryRun(t *testing.T) {
 	git.MkTmpDir(t)
 
-	cmds := []Command{
-		{
-			Operation: "touch out.txt",
-			DryRun:    true,
-		},
-	}
-
-	err := Exec(cmds)
+	err := Exec(context.Background(), []string{"touch out.txt"}, ExecOptions{DryRun: true})
 	require.NoError(t, err)
 
 	assert.NoFileExists(t, "out.txt")

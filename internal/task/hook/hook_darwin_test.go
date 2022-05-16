@@ -23,6 +23,7 @@ SOFTWARE.
 package hook
 
 import (
+	"context"
 	"io/ioutil"
 	"testing"
 
@@ -34,16 +35,12 @@ import (
 func TestExec_ShellCommands(t *testing.T) {
 	git.MkTmpDir(t)
 
-	cmds := []Command{
-		{
-			Operation: "echo -n 'JohnDoe' > out.txt",
-		},
-		{
-			Operation: "sed -i '' 's/Doe/Smith/g' out.txt",
-		},
+	cmds := []string{
+		"echo -n 'JohnDoe' > out.txt",
+		"sed -i '' 's/Doe/Smith/g' out.txt",
 	}
 
-	err := Exec(cmds)
+	err := Exec(context.Background(), cmds, ExecOptions{})
 	require.NoError(t, err)
 
 	data, err := ioutil.ReadFile("out.txt")
@@ -62,13 +59,7 @@ CURRENT=$(git branch --show-current)
 echo -n $CURRENT > out.txt`
 	ioutil.WriteFile("switch-branch.sh", []byte(sh), 0755)
 
-	cmds := []Command{
-		{
-			Operation: "BRANCH=testing ./switch-branch.sh",
-		},
-	}
-
-	err := Exec(cmds)
+	err := Exec(context.Background(), []string{"BRANCH=testing ./switch-branch.sh"}, ExecOptions{})
 	require.NoError(t, err)
 
 	data, err := ioutil.ReadFile("out.txt")

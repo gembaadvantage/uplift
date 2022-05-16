@@ -22,7 +22,10 @@ SOFTWARE.
 
 package beforebump
 
-import "github.com/gembaadvantage/uplift/internal/context"
+import (
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/task/hook"
+)
 
 // Task for executing any custom shell commands or scripts
 // before file bumping within the release workflow
@@ -40,5 +43,8 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	return nil
+	return hook.Exec(ctx.Context, ctx.Config.Hooks.BeforeBump, hook.ExecOptions{
+		DryRun: ctx.DryRun,
+		Debug:  ctx.Debug,
+	})
 }

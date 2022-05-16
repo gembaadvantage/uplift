@@ -27,7 +27,9 @@ import (
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestString(t *testing.T) {
@@ -35,11 +37,34 @@ func TestString(t *testing.T) {
 }
 
 func TestSkip(t *testing.T) {
+	cmd := []string{"echo 'HELLO'"}
+
 	assert.True(t, Task{}.Skip(&context.Context{
 		Config: config.Uplift{
 			Hooks: config.Hooks{
+				Before:          cmd,
+				BeforeBump:      cmd,
+				BeforeTag:       cmd,
 				BeforeChangelog: []string{},
+				After:           cmd,
+				AfterBump:       cmd,
+				AfterTag:        cmd,
+				AfterChangelog:  cmd,
 			},
 		},
 	}))
+}
+
+func TestRun(t *testing.T) {
+	git.MkTmpDir(t)
+
+	err := Task{}.Run(&context.Context{
+		Config: config.Uplift{
+			Hooks: config.Hooks{
+				BeforeChangelog: []string{"touch a.out"},
+			},
+		},
+	})
+	require.NoError(t, err)
+	assert.FileExists(t, "a.out")
 }

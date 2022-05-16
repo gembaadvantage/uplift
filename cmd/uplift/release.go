@@ -26,11 +26,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strings"
 
-	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
@@ -86,7 +83,7 @@ func newReleaseCmd(gopts *globalOptions, out io.Writer) *releaseCommand {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Just check if uplift would trigger a release
 			if relCmd.Opts.Check {
-				return checkRelease()
+				return checkRelease(relCmd.Opts, out)
 			}
 
 			return release(relCmd.Opts, out)
@@ -177,22 +174,27 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	return ctx, nil
 }
 
-func checkRelease() error {
-	return logging.Log("check release", func(ctx *context.Context) error {
-		cd, err := git.LatestCommit()
-		if err != nil {
+func checkRelease(opts releaseOptions, out io.Writer) error {
+	ctx, err := setupReleaseContext(opts, out)
+	if err != nil {
+		return err
+	}
+
+	tsks := []task.Runner{
+		currentversion.Task{},
+		lastcommit.Task{},
+		nextversion.Task{},
+	}
+
+	for _, tsk := range tsks {
+		if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
 			return err
 		}
+	}
 
-		log.WithField("message", cd.Message).Info("retrieved latest commit")
+	if ctx.NoVersionChanged {
+		return errors.New("no release detected")
+	}
 
-		inc := semver.ParseCommit(cd.Message)
-		if inc == semver.NoIncrement {
-			log.Info("nothing to release")
-			return errors.New("no release would be triggered for this commit")
-		}
-
-		log.WithField("increment", strings.ToLower(string(inc))).Info("detected releasable commit")
-		return nil
-	})(&context.Context{})
+	return nil
 }
