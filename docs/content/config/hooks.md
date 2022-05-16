@@ -1,6 +1,6 @@
 # Hooks
 
-Provides a mechanism to extend the functionality of uplift through adhoc shell commands and scripts[^1]. Only the `before` hook precedes the git checks within uplift. All temporary files must therefore be ignored using a `.gitignore` file, otherwise the repository will be deemed in a [dirty state](../faq/gitdirty.md) and the release will stop.
+Provides a mechanism to extend the functionality of uplift through adhoc shell commands and scripts[^1]. Only the `before` hook precedes the git checks within uplift. All temporary files must therefore be ignored using a `.gitignore` file, otherwise the repository will be deemed in a [dirty state](../faq/gitdirty.md) and the release will stop. Hooks tied to either of the `bump`, `changelog` or `tag` operations will be skipped along with its counterpart when needed by uplift.
 
 ```{ .yaml .annotate linenums="1" }
 # .uplift.yml
