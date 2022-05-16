@@ -40,7 +40,13 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
 	"github.com/gembaadvantage/uplift/internal/task/gittag"
 	"github.com/gembaadvantage/uplift/internal/task/hook/after"
+	"github.com/gembaadvantage/uplift/internal/task/hook/afterbump"
+	"github.com/gembaadvantage/uplift/internal/task/hook/afterchangelog"
+	"github.com/gembaadvantage/uplift/internal/task/hook/aftertag"
 	"github.com/gembaadvantage/uplift/internal/task/hook/before"
+	"github.com/gembaadvantage/uplift/internal/task/hook/beforebump"
+	"github.com/gembaadvantage/uplift/internal/task/hook/beforechangelog"
+	"github.com/gembaadvantage/uplift/internal/task/hook/beforetag"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
@@ -116,10 +122,16 @@ func release(opts releaseOptions, out io.Writer) error {
 		lastcommit.Task{},
 		nextversion.Task{},
 		nextcommit.Task{},
+		beforebump.Task{},
 		bump.Task{},
+		afterbump.Task{},
+		beforechangelog.Task{},
 		changelog.Task{},
+		afterchangelog.Task{},
 		gitcommit.Task{},
+		beforetag.Task{},
 		gittag.Task{},
+		aftertag.Task{},
 		after.Task{},
 	}
 

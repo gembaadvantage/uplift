@@ -83,7 +83,9 @@ func TestTag_Hooks(t *testing.T) {
 	err := tagCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	require.Equal(t, 2, numHooksExecuted(t))
+	require.Equal(t, 4, numHooksExecuted(t))
 	assert.FileExists(t, BeforeFile)
+	assert.FileExists(t, BeforeTagFile)
+	assert.FileExists(t, AfterTagFile)
 	assert.FileExists(t, AfterFile)
 }

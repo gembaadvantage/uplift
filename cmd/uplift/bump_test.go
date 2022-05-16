@@ -99,7 +99,9 @@ func TestBump_Hooks(t *testing.T) {
 	err := bmpCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	require.Equal(t, 2, numHooksExecuted(t))
+	require.Equal(t, 4, numHooksExecuted(t))
 	assert.FileExists(t, BeforeFile)
+	assert.FileExists(t, BeforeBumpFile)
+	assert.FileExists(t, AfterBumpFile)
 	assert.FileExists(t, AfterFile)
 }

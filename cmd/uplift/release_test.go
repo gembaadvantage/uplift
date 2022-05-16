@@ -137,7 +137,13 @@ func TestRelease_Hooks(t *testing.T) {
 	err := relCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	require.Equal(t, 2, numHooksExecuted(t))
+	require.Equal(t, 8, numHooksExecuted(t))
 	assert.FileExists(t, BeforeFile)
+	assert.FileExists(t, BeforeBumpFile)
+	assert.FileExists(t, AfterBumpFile)
+	assert.FileExists(t, BeforeChangelogFile)
+	assert.FileExists(t, AfterChangelogFile)
+	assert.FileExists(t, BeforeTagFile)
+	assert.FileExists(t, AfterTagFile)
 	assert.FileExists(t, AfterFile)
 }

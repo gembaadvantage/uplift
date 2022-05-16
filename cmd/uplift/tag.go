@@ -36,7 +36,9 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gittag"
 	"github.com/gembaadvantage/uplift/internal/task/hook/after"
+	"github.com/gembaadvantage/uplift/internal/task/hook/aftertag"
 	"github.com/gembaadvantage/uplift/internal/task/hook/before"
+	"github.com/gembaadvantage/uplift/internal/task/hook/beforetag"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextversion"
@@ -57,7 +59,9 @@ var (
 		lastcommit.Task{},
 		nextversion.Task{},
 		nextcommit.Task{},
+		beforetag.Task{},
 		gittag.Task{},
+		aftertag.Task{},
 		after.Task{},
 	}
 
@@ -68,7 +72,9 @@ var (
 		currentversion.Task{},
 		lastcommit.Task{},
 		nextversion.Task{},
+		beforetag.Task{},
 		gittag.Task{},
+		aftertag.Task{},
 		after.Task{},
 	}
 )
