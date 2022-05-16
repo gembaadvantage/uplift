@@ -36,7 +36,7 @@ import (
 func TestExec_ShellCommands(t *testing.T) {
 	git.MkTmpDir(t)
 
-	cmds := []Command{
+	cmds := []string{
 		"echo -n 'JohnDoe' > out.txt",
 		"sed --posix -i 's/Doe/Smith/g' out.txt",
 	}
