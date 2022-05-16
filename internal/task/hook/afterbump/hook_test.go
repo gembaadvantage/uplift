@@ -55,6 +55,18 @@ func TestSkip(t *testing.T) {
 	}))
 }
 
+func TestSkip_NoVersionChanged(t *testing.T) {
+	assert.True(t, Task{}.Skip(&context.Context{
+		NoVersionChanged: true,
+	}))
+}
+
+func TestSkip_SkipBumps(t *testing.T) {
+	assert.True(t, Task{}.Skip(&context.Context{
+		SkipBumps: true,
+	}))
+}
+
 func TestRun(t *testing.T) {
 	git.MkTmpDir(t)
 
