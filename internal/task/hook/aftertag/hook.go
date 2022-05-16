@@ -20,51 +20,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package beforehook
+package aftertag
 
 import (
-	ctx "context"
-	"testing"
-
-	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/gembaadvantage/uplift/internal/task/hook"
 )
 
-func TestString(t *testing.T) {
-	assert.Equal(t, "before hooks", Task{}.String())
+// Task for executing any custom shell commands or scripts
+// after tagging within the release workflow
+type Task struct{}
+
+// String generates a string representation of the task
+func (t Task) String() string {
+	return "after tagging repository"
 }
 
-func TestSkip(t *testing.T) {
-	noHooks := []string{}
-
-	assert.True(t, Task{}.Skip(&context.Context{
-		Config: config.Uplift{
-			Hooks: config.Hooks{
-				Before: noHooks,
-			},
-		},
-	}))
+// Skip running the task
+func (t Task) Skip(ctx *context.Context) bool {
+	return len(ctx.Config.Hooks.AfterTag) == 0 || ctx.NoVersionChanged
 }
 
-func TestRun_DryRun(t *testing.T) {
-	git.MkTmpDir(t)
-
-	tctx := &context.Context{
-		Context: ctx.Background(),
-		Config: config.Uplift{
-			Hooks: config.Hooks{
-				Before: []string{
-					"touch out.txt",
-				},
-			},
-		},
-		DryRun: true,
-	}
-
-	err := Task{}.Run(tctx)
-	require.NoError(t, err)
-	assert.NoFileExists(t, "out.txt")
+// Run the task
+func (t Task) Run(ctx *context.Context) error {
+	return hook.Exec(ctx.Context, ctx.Config.Hooks.AfterTag, hook.ExecOptions{
+		DryRun: ctx.DryRun,
+		Debug:  ctx.Debug,
+	})
 }

@@ -20,11 +20,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package hook
 
 import (
-	"bytes"
-	"os"
+	"context"
+	"io/ioutil"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -32,60 +32,38 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTag(t *testing.T) {
-	untaggedRepo(t)
+func TestExec_ShellCommands(t *testing.T) {
+	git.MkTmpDir(t)
 
-	tagCmd := newTagCmd(noChangesPushed(), os.Stdout)
+	cmds := []string{
+		"echo -n 'JohnDoe' > out.txt",
+		"sed -i 's/Doe/Smith/g' out.txt",
+	}
 
-	err := tagCmd.Cmd.Execute()
+	err := Exec(context.Background(), cmds, ExecOptions{})
 	require.NoError(t, err)
 
-	tags := git.AllTags()
-	assert.Len(t, tags, 1)
-}
-
-func TestTag_NextFlag(t *testing.T) {
-	untaggedRepo(t)
-
-	var buf bytes.Buffer
-	tagCmd := newTagCmd(noChangesPushed(), &buf)
-	tagCmd.Cmd.SetArgs([]string{"--next"})
-
-	err := tagCmd.Cmd.Execute()
+	data, err := ioutil.ReadFile("out.txt")
 	require.NoError(t, err)
 
-	tags := git.AllTags()
-	assert.Len(t, tags, 0)
-	assert.NotEmpty(t, buf.String())
+	assert.Equal(t, "JohnSmith", string(data))
 }
 
-func TestTag_PrereleaseFlag(t *testing.T) {
+func TestExec_ShellScripts(t *testing.T) {
 	git.InitRepo(t)
-	git.EmptyCommit(t, "feat: a new feature")
+	git.EmptyCommitAndTag(t, "1.0.0", "feat: first release")
 
-	tagCmd := newTagCmd(noChangesPushed(), os.Stdout)
-	tagCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
+	// Generate a shell script
+	sh := `#!/bin/bash
+LATEST_TAG=$(git for-each-ref "refs/tags/*.*.*" --sort=-v:creatordate --format='%(refname:short)')
+echo -n $LATEST_TAG > out.txt`
+	ioutil.WriteFile("latest-tag.sh", []byte(sh), 0755)
 
-	err := tagCmd.Cmd.Execute()
+	err := Exec(context.Background(), []string{"./latest-tag.sh"}, ExecOptions{})
 	require.NoError(t, err)
 
-	tags := git.AllTags()
-	assert.Len(t, tags, 1)
-	assert.Equal(t, "0.1.0-beta.1+12345", tags[0].Ref)
-}
-
-func TestTag_Hooks(t *testing.T) {
-	git.InitRepo(t)
-	configWithHooks(t)
-	git.EmptyCommit(t, "feat: this is a new feature")
-
-	tagCmd := newTagCmd(noChangesPushed(), os.Stdout)
-	err := tagCmd.Cmd.Execute()
+	data, err := ioutil.ReadFile("out.txt")
 	require.NoError(t, err)
 
-	require.Equal(t, 4, numHooksExecuted(t))
-	assert.FileExists(t, BeforeFile)
-	assert.FileExists(t, BeforeTagFile)
-	assert.FileExists(t, AfterTagFile)
-	assert.FileExists(t, AfterFile)
+	assert.Equal(t, "1.0.0", string(data))
 }

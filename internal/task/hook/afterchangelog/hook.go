@@ -20,22 +20,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package beforehook
+package afterchangelog
 
-import "io"
+import (
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/task/hook"
+)
 
-// DevNull simulates the writing to /dev/null within a Linux OS,
-// pinched from https://github.com/go-task/task/blob/master/internal/execext/devnull.go
-type DevNull struct{}
+// Task for executing any custom shell commands or scripts
+// after changelog generation within the release workflow
+type Task struct{}
 
-func (DevNull) Read(p []byte) (int, error) {
-	return 0, io.EOF
+// String generates a string representation of the task
+func (t Task) String() string {
+	return "after generating changelog"
 }
 
-func (DevNull) Write(p []byte) (int, error) {
-	return len(p), nil
+// Skip running the task
+func (t Task) Skip(ctx *context.Context) bool {
+	return len(ctx.Config.Hooks.AfterChangelog) == 0 || ctx.SkipChangelog || ctx.NoVersionChanged
 }
 
-func (DevNull) Close() error {
-	return nil
+// Run the task
+func (t Task) Run(ctx *context.Context) error {
+	return hook.Exec(ctx.Context, ctx.Config.Hooks.AfterChangelog, hook.ExecOptions{
+		DryRun: ctx.DryRun,
+		Debug:  ctx.Debug,
+	})
 }

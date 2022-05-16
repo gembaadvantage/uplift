@@ -61,7 +61,7 @@ func TestRelease(t *testing.T) {
 
 func TestRelease_CheckFlag(t *testing.T) {
 	git.InitRepo(t)
-	git.EmptyCommit(t, "feat: this is a release")
+	git.EmptyCommits(t, "feat: this is a release", "Merge branch 'main' of https://github.com/test/repo")
 
 	relCmd := newReleaseCmd(&globalOptions{}, os.Stdout)
 	relCmd.Cmd.SetArgs([]string{"--check"})
@@ -78,7 +78,7 @@ func TestRelease_CheckFlagNoRelease(t *testing.T) {
 	relCmd.Cmd.SetArgs([]string{"--check"})
 
 	err := relCmd.Cmd.Execute()
-	require.Error(t, err)
+	require.EqualError(t, err, "no release detected")
 }
 
 func TestRelease_PrereleaseFlag(t *testing.T) {
@@ -126,4 +126,24 @@ func TestRelease_SkipBumps(t *testing.T) {
 	actual, err := ioutil.ReadFile("test.txt")
 	require.NoError(t, err)
 	assert.NotContains(t, string(actual), "version: 1.0.0")
+}
+
+func TestRelease_Hooks(t *testing.T) {
+	git.InitRepo(t)
+	configWithHooks(t)
+	git.EmptyCommit(t, "feat: this is a new feature")
+
+	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
+	err := relCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	require.Equal(t, 8, numHooksExecuted(t))
+	assert.FileExists(t, BeforeFile)
+	assert.FileExists(t, BeforeBumpFile)
+	assert.FileExists(t, AfterBumpFile)
+	assert.FileExists(t, BeforeChangelogFile)
+	assert.FileExists(t, AfterChangelogFile)
+	assert.FileExists(t, BeforeTagFile)
+	assert.FileExists(t, AfterTagFile)
+	assert.FileExists(t, AfterFile)
 }

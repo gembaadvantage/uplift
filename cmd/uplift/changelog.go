@@ -32,10 +32,13 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/task"
-	"github.com/gembaadvantage/uplift/internal/task/beforehook"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
+	"github.com/gembaadvantage/uplift/internal/task/hook/after"
+	"github.com/gembaadvantage/uplift/internal/task/hook/afterchangelog"
+	"github.com/gembaadvantage/uplift/internal/task/hook/before"
+	"github.com/gembaadvantage/uplift/internal/task/hook/beforechangelog"
 	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/scm"
@@ -105,13 +108,16 @@ func writeChangelog(opts changelogOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		beforehook.Task{},
+		before.Task{},
 		gitcheck.Task{},
 		scm.Task{},
 		lastcommit.Task{},
 		nextcommit.Task{},
+		beforechangelog.Task{},
 		changelog.Task{},
+		afterchangelog.Task{},
 		gitcommit.Task{},
+		after.Task{},
 	}
 
 	for _, tsk := range tsks {
@@ -130,10 +136,11 @@ func writeChangelogDiff(opts changelogOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		beforehook.Task{},
+		before.Task{},
 		gitcheck.Task{},
 		scm.Task{},
 		changelog.Task{},
+		after.Task{},
 	}
 
 	for _, tsk := range tsks {

@@ -250,3 +250,19 @@ func readChangelog(t *testing.T) string {
 
 	return string(data)
 }
+
+func TestChangelog_Hooks(t *testing.T) {
+	git.InitRepo(t)
+	configWithHooks(t)
+	git.EmptyCommit(t, "feat: this is a new feature")
+
+	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
+	err := chglogCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	require.Equal(t, 4, numHooksExecuted(t))
+	assert.FileExists(t, BeforeFile)
+	assert.FileExists(t, BeforeChangelogFile)
+	assert.FileExists(t, AfterChangelogFile)
+	assert.FileExists(t, AfterFile)
+}

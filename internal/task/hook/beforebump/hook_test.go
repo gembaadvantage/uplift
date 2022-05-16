@@ -20,12 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package beforehook
+package beforebump
 
 import (
-	ctx "context"
-	"io/ioutil"
-	"os"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/config"
@@ -35,56 +32,51 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRun_ShellCommands(t *testing.T) {
-	git.MkTmpDir(t)
-
-	tctx := &context.Context{
-		Context: ctx.Background(),
-		Config: config.Uplift{
-			Hooks: config.Hooks{
-				Before: []string{
-					"echo -n 'JohnDoe' > out.txt",
-					"sed --posix -i 's/Doe/Smith/g' out.txt",
-				},
-			},
-		},
-	}
-
-	err := Task{}.Run(tctx)
-	require.NoError(t, err)
-
-	data, err := ioutil.ReadFile("out.txt")
-	require.NoError(t, err)
-
-	assert.Equal(t, "JohnSmith", string(data))
+func TestString(t *testing.T) {
+	assert.Equal(t, "before bumping files", Task{}.String())
 }
 
-func TestRun_ShellScripts(t *testing.T) {
-	git.InitRepo(t)
+func TestSkip(t *testing.T) {
+	cmd := []string{"echo 'HELLO'"}
 
-	// Generate a shell script
-	sh := `#!/bin/bash
-LAST_COMMIT=$(git log -1 --pretty=format:'%B')
-echo -n $LAST_COMMIT > out.txt`
-	os.Mkdir("subfolder", 0755)
-	ioutil.WriteFile("subfolder/last-commit.sh", []byte(sh), 0755)
-
-	tctx := &context.Context{
-		Context: ctx.Background(),
+	assert.True(t, Task{}.Skip(&context.Context{
 		Config: config.Uplift{
 			Hooks: config.Hooks{
-				Before: []string{
-					"bash subfolder//last-commit.sh",
-				},
+				Before:          cmd,
+				BeforeBump:      []string{},
+				BeforeTag:       cmd,
+				BeforeChangelog: cmd,
+				After:           cmd,
+				AfterBump:       cmd,
+				AfterTag:        cmd,
+				AfterChangelog:  cmd,
 			},
 		},
-	}
+	}))
+}
 
-	err := Task{}.Run(tctx)
+func TestSkip_NoVersionChanged(t *testing.T) {
+	assert.True(t, Task{}.Skip(&context.Context{
+		NoVersionChanged: true,
+	}))
+}
+
+func TestSkip_SkipBumps(t *testing.T) {
+	assert.True(t, Task{}.Skip(&context.Context{
+		SkipBumps: true,
+	}))
+}
+
+func TestRun(t *testing.T) {
+	git.MkTmpDir(t)
+
+	err := Task{}.Run(&context.Context{
+		Config: config.Uplift{
+			Hooks: config.Hooks{
+				BeforeBump: []string{"touch a.out"},
+			},
+		},
+	})
 	require.NoError(t, err)
-
-	data, err := ioutil.ReadFile("out.txt")
-	require.NoError(t, err)
-
-	assert.Equal(t, "initialise repo", string(data))
+	assert.FileExists(t, "a.out")
 }

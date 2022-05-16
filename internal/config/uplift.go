@@ -107,7 +107,14 @@ type GitLab struct {
 // workflow. These entry points can be used to execute any custom shell
 // commands or scripts
 type Hooks struct {
-	Before []string `yaml:"before"`
+	Before          []string `yaml:"before"`
+	BeforeBump      []string `yaml:"beforeBump"`
+	BeforeTag       []string `yaml:"beforeTag"`
+	BeforeChangelog []string `yaml:"beforeChangelog"`
+	After           []string `yaml:"after"`
+	AfterBump       []string `yaml:"afterBump"`
+	AfterTag        []string `yaml:"afterTag"`
+	AfterChangelog  []string `yaml:"afterChangelog"`
 }
 
 // Load the YAML config file

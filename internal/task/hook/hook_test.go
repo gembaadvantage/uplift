@@ -20,70 +20,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package beforehook
+package hook
 
 import (
-	ctx "context"
-	"io/ioutil"
+	"context"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestRun_ShellCommands(t *testing.T) {
+func TestExec_DryRun(t *testing.T) {
 	git.MkTmpDir(t)
 
-	tctx := &context.Context{
-		Context: ctx.Background(),
-		Config: config.Uplift{
-			Hooks: config.Hooks{
-				Before: []string{
-					"echo -n 'JohnDoe' > out.txt",
-					"sed -i 's/Doe/Smith/g' out.txt",
-				},
-			},
-		},
-	}
-
-	err := Task{}.Run(tctx)
+	err := Exec(context.Background(), []string{"touch out.txt"}, ExecOptions{DryRun: true})
 	require.NoError(t, err)
 
-	data, err := ioutil.ReadFile("out.txt")
-	require.NoError(t, err)
-
-	assert.Equal(t, "JohnSmith", string(data))
-}
-
-func TestRun_ShellScripts(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommitAndTag(t, "1.0.0", "feat: first release")
-
-	// Generate a shell script
-	sh := `#!/bin/bash
-LATEST_TAG=$(git for-each-ref "refs/tags/*.*.*" --sort=-v:creatordate --format='%(refname:short)')
-echo -n $LATEST_TAG > out.txt`
-	ioutil.WriteFile("latest-tag.sh", []byte(sh), 0755)
-
-	tctx := &context.Context{
-		Context: ctx.Background(),
-		Config: config.Uplift{
-			Hooks: config.Hooks{
-				Before: []string{
-					"./latest-tag.sh",
-				},
-			},
-		},
-	}
-
-	err := Task{}.Run(tctx)
-	require.NoError(t, err)
-
-	data, err := ioutil.ReadFile("out.txt")
-	require.NoError(t, err)
-
-	assert.Equal(t, "1.0.0", string(data))
+	assert.NoFileExists(t, "out.txt")
 }

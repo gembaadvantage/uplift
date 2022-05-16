@@ -20,18 +20,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package beforehook
+package before
 
 import (
-	ctx "context"
-	"io"
-	"os"
-	"strings"
-
-	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"mvdan.cc/sh/v3/interp"
-	"mvdan.cc/sh/v3/syntax"
+	"github.com/gembaadvantage/uplift/internal/task/hook"
 )
 
 // Task for executing any custom shell commands or scripts
@@ -48,46 +41,10 @@ func (t Task) Skip(ctx *context.Context) bool {
 	return len(ctx.Config.Hooks.Before) == 0
 }
 
-// Run the task, executing any provided shell scripts or commands
+// Run the task
 func (t Task) Run(ctx *context.Context) error {
-	for _, c := range ctx.Config.Hooks.Before {
-		log.WithField("hook", c).Info("running")
-		if ctx.DryRun {
-			continue
-		}
-
-		p, err := syntax.NewParser().Parse(strings.NewReader(c), "")
-		if err != nil {
-			return err
-		}
-
-		// Discard all output from commands and scripts unless in debug mode
-		out := io.Discard
-		if ctx.Debug {
-			// Stderr is used by apex for logging, stdout is reserved for capturing output
-			out = os.Stderr
-		}
-
-		r, err := interp.New(
-			interp.StdIO(os.Stdin, out, os.Stderr),
-			interp.OpenHandler(openHandler),
-		)
-		if err != nil {
-			return err
-		}
-
-		if err := r.Run(ctx.Context, p); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func openHandler(c ctx.Context, path string, flag int, perm os.FileMode) (io.ReadWriteCloser, error) {
-	if path == "/dev/null" {
-		return DevNull{}, nil
-	}
-
-	return interp.DefaultOpenHandler()(c, path, flag, perm)
+	return hook.Exec(ctx.Context, ctx.Config.Hooks.Before, hook.ExecOptions{
+		DryRun: ctx.DryRun,
+		Debug:  ctx.Debug,
+	})
 }
