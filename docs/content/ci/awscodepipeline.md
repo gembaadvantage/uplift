@@ -64,7 +64,7 @@ The buildspec will change depending on the CodeBuild project base image.
 
 #### Default Amazon Images
 
-Tested against the Amazon Linux, Ubuntu and Windows variants.
+Tested against the Amazon Linux 2, Ubuntu and Windows variants.
 
 ```{ .yaml .annotate linenums="1" hl_lines="5" }
 # buildspec.yml

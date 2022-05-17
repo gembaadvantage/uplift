@@ -40,7 +40,7 @@ The buildspec can change depending on the base image used by the CodeBuild proje
 
 ### Amazon Images
 
-Tested against the Amazon Linux, Ubuntu and Windows variants.
+Tested against the Amazon Linux 2, Ubuntu and Windows variants.
 
 ```{ .yaml .annotate linenums="1" hl_lines="5" }
 # buildspec.yml
@@ -85,5 +85,9 @@ phases:
     commands:
       - uplift release
 ```
+
+## Clone Depth
+
+While configuring a CodeBuild project, the clone depth can be specified. For simplicity, a full clone should be used. If a shallow clone is preferred, you may need to fetch all tags by using the `--fetch-all` flag.
 
 [^1]: A preferred approach for generating an AWS CodePipeline would be to either write a CloudFormation [template](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codepipeline-pipeline.html) manually or use the [AWS CDK](https://github.com/aws/aws-cdk) tooling. This is known as Infrastructure as Code (IaC), and wasn't included in the documentation to avoid unnecessary complexity.
