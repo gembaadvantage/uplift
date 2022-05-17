@@ -1,6 +1,6 @@
 # AWS CodePipeline
 
-AWS provides two developer services for building code through CI, `AWS CodePipeline` and `AWS CodeBuild`. The former being an orchestration tool, while the later executes each stage using a [buildspec](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html) file. This guide assumes both were configured manually through the AWS Console and only focuses on the gotchas[^1].
+AWS provides two developer services for building code, `AWS CodePipeline` and `AWS CodeBuild`. The former being an orchestration tool, while the later executes each stage using a [buildspec](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html) file. This guide assumes both were configured manually through the AWS Console and only focuses on the gotchas[^1].
 
 ## CodePipeline
 
@@ -24,7 +24,7 @@ Additional permissions are needed to pull and push code within AWS CodeBuild. Th
 
 #### CodeCommit
 
-Both the `codecommit:GitPull` and `codecommit:GitPush` IAM permissions are needed.
+Both the `codecommit:GitPull` and `codecommit:GitPush` IAM permissions are needed and should be added to the CodeBuild service role.
 
 ```{ .json .annotate linenums="1" hl_lines="8" }
 {
@@ -42,6 +42,8 @@ Both the `codecommit:GitPull` and `codecommit:GitPush` IAM permissions are neede
 
 #### GitHub
 
+The `codestar-connections:UseConnection` IAM permission is needed when interacting with GitHub through an AWS CodeStar [connection](https://docs.aws.amazon.com/dtconsole/latest/userguide/connections-create-github.html).
+
 ```{ .json .annotate linenums="1" hl_lines="8" }
 {
   "Version": "2012-10-17",
@@ -58,9 +60,9 @@ Both the `codecommit:GitPull` and `codecommit:GitPush` IAM permissions are neede
 
 ### Buildspec
 
-The buildspec can change depending on the base image used by the CodeBuild project.
+The buildspec will change depending on the CodeBuild project base image.
 
-#### Amazon Images
+#### Default Amazon Images
 
 Tested against the Amazon Linux, Ubuntu and Windows variants.
 
@@ -85,7 +87,9 @@ phases:
 1. Without this uplift will lack any [credentials](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env.git-credential-helper) when attempting to push code back to the source SCM.
 2. The `BRANCH_NAME` environment variable can be referenced directly within the buildspec, once mapped.
 
-#### Uplift Image
+#### Official Uplift Image
+
+Tested against the public `gembaadvantage/uplift` image.
 
 !!!attention "Dealing with DockerHub Rate Limits"
 
