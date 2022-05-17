@@ -17,6 +17,7 @@
 # Built dependencies
 bin/
 completions/
+manpages/
 
 # GoReleaser build output
 dist/
