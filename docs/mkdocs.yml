@@ -36,7 +36,7 @@ nav:
       - Hooks: config/hooks.md
   - Continuous Integration:
       - About: ci/about.md
-      - AWS CodeBuild: ci/awscodebuild.md
+      - AWS CodePipeline: ci/awscodepipeline.md
       - CircleCI: ci/circleci.md
       - Cirrus CI: ci/cirrusci.md
       - Codefresh: ci/codefresh.md
