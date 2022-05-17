@@ -83,7 +83,9 @@ func newRootCmd(out io.Writer) *rootCommand {
 		newBumpCmd(rootCmd.Opts, out).Cmd,
 		newTagCmd(rootCmd.Opts, out).Cmd,
 		newReleaseCmd(rootCmd.Opts, out).Cmd,
-		newChangelogCmd(rootCmd.Opts, out).Cmd)
+		newChangelogCmd(rootCmd.Opts, out).Cmd,
+		newManPageCmd(out).Cmd,
+	)
 
 	rootCmd.Cmd = cmd
 	return rootCmd
