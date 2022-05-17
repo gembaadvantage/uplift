@@ -14,6 +14,9 @@ theme:
   favicon: static/favicon.ico
   features:
     - content.code.annotate
+    - search.suggest
+    - search.highlight
+    - search.share
   icon:
     repo: fontawesome/brands/github
 
@@ -67,6 +70,8 @@ extra:
 
 plugins:
   - search
+  - minify:
+      minify_html: true
 
 markdown_extensions:
   - admonition

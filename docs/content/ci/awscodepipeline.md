@@ -6,7 +6,7 @@ AWS provides two developer services for building code, `AWS CodePipeline` and `A
 
 By default, CodePipeline clones a repository to S3 without the `.git` metadata folder. A [full clone](https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-codecommit-gitclone.html)[^2] is needed for uplift to run.
 
-![CodePipeline Artifact Format](../static/codepipeline-fullclone.png){ align=left }
+![CodePipeline Artefact Format](../static/codepipeline-fullclone.png){ align=left }
 
 ## CodeBuild
 
