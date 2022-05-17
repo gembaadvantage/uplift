@@ -58,7 +58,11 @@ Both the `codecommit:GitPull` and `codecommit:GitPush` IAM permissions are neede
 
 ### Buildspec
 
-Tested with the Amazon Linux and Ubuntu images provided by AWS.
+The buildspec can change depending on the base image used by the CodeBuild project.
+
+#### Amazon Images
+
+Tested against the Amazon Linux, Ubuntu and Windows variants.
 
 ```{ .yaml .annotate linenums="1" hl_lines="5" }
 # buildspec.yml
@@ -80,6 +84,27 @@ phases:
 
 1. Without this uplift will lack any [credentials](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env.git-credential-helper) when attempting to push code back to the source SCM.
 2. The `BRANCH_NAME` environment variable can be referenced directly within the buildspec, once mapped.
+
+#### Uplift Image
+
+!!!attention "Dealing with DockerHub Rate Limits"
+
+    There are known issues with accessing public DockerHub repositories from AWS services, documented [here](https://aws.amazon.com/blogs/containers/advice-for-customers-dealing-with-docker-hub-rate-limits-and-a-coming-soon-announcement/).
+
+```{ .yaml .annotate linenums="1" hl_lines="5" }
+# buildspec.yml
+
+version: 0.2
+env:
+  git-credential-helper: yes
+phases:
+  pre_build:
+    commands:
+      - git checkout $BRANCH_NAME
+  build:
+    commands:
+      - uplift release
+```
 
 [^1]: A preferred approach for generating an AWS CodePipeline would be to either write a CloudFormation [template](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codepipeline-pipeline.html) manually or use the [AWS CDK](https://github.com/aws/aws-cdk) tooling. This is known as Infrastructure as Code (IaC), and wasn't included in the documentation to avoid unnecessary complexity.
 [^2]: This strategy works for all [supported](https://docs.aws.amazon.com/codepipeline/latest/userguide/integrations-action-type.html#integrations-source) SCM providers.
