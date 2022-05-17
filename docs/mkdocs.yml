@@ -36,6 +36,7 @@ nav:
       - Hooks: config/hooks.md
   - Continuous Integration:
       - About: ci/about.md
+      - AWS CodeBuild: ci/awscodebuild.md
       - CircleCI: ci/circleci.md
       - Cirrus CI: ci/cirrusci.md
       - Codefresh: ci/codefresh.md
@@ -68,6 +69,7 @@ plugins:
 
 markdown_extensions:
   - admonition
+  - attr_list
   - footnotes
   - pymdownx.highlight:
       anchor_linenums: true
@@ -76,6 +78,7 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+  - md_in_html
   - meta
   - toc:
       permalink: true
