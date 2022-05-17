@@ -1,4 +1,6 @@
 #!/bin/sh
+
+# Borrowed from: https://raw.githubusercontent.com/goreleaser/goreleaser/main/scripts/completions.sh
 set -e
 rm -rf completions
 mkdir completions
