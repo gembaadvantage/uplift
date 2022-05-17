@@ -22,5 +22,6 @@ manpages/
 # GoReleaser build output
 dist/
 
-# Mkdocs generated site
+# Mkdocs related
 docs/site
+.DS_store

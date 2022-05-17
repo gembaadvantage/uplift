@@ -14,6 +14,9 @@ theme:
   favicon: static/favicon.ico
   features:
     - content.code.annotate
+    - search.suggest
+    - search.highlight
+    - search.share
   icon:
     repo: fontawesome/brands/github
 
@@ -36,6 +39,8 @@ nav:
       - Hooks: config/hooks.md
   - Continuous Integration:
       - About: ci/about.md
+      - AWS CodeBuild: ci/awscodebuild.md
+      - AWS CodePipeline: ci/awscodepipeline.md
       - CircleCI: ci/circleci.md
       - Cirrus CI: ci/cirrusci.md
       - Codefresh: ci/codefresh.md
@@ -65,9 +70,12 @@ extra:
 
 plugins:
   - search
+  - minify:
+      minify_html: true
 
 markdown_extensions:
   - admonition
+  - attr_list
   - footnotes
   - pymdownx.highlight:
       anchor_linenums: true
@@ -76,6 +84,7 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+  - md_in_html
   - meta
   - toc:
       permalink: true
