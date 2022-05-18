@@ -49,8 +49,8 @@ func (t Task) Skip(ctx *context.Context) bool {
 // from the last commit or by generating a user defined commit
 func (t Task) Run(ctx *context.Context) error {
 	c := git.CommitDetails{
-		Author:  ctx.CommitDetails.Author,
-		Email:   ctx.CommitDetails.Email,
+		Author:  "uplift-bot",
+		Email:   "uplift@gembaadvantage.com",
 		Message: fmt.Sprintf("ci(uplift): uplifted for version %s", ctx.NextVersion.Raw),
 	}
 
