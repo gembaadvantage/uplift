@@ -36,11 +36,8 @@ commitMessage: "chore: a custom commit message"
 # .uplift.yml
 
 # Changes the commit author used by uplift when committing any staged changes.
-# Useful if you want uplift to be treated as a bot and own its commits.
 #
-# Defaults to the author who last committed to the repository and effectively
-# triggered uplift. Uplift likes to give credit to the author that is releasing
-# a new feature or fixing that bug they found.
+# Defaults to the Uplift Bot: uplift-bot <uplift@gembaadvantage.com>
 commitAuthor:
   # Name of the author
   #
