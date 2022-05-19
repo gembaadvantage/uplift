@@ -270,7 +270,7 @@ announce:
   skip: "{{gt .Patch 0}}"
 
   slack:
-    enabled: true
+    enabled: false
     message_template: "Uplift {{ .Tag }} has been released. Find out details here: https://github.com/gembaadvantage/uplift/releases/tag/{{ .Tag }}"
     channel: "#topic-uplift-github"
     username: "Uplift"
