@@ -281,20 +281,6 @@ func Log(tag string) (string, error) {
 	return commitLog(fmt.Sprintf("tags/%s..HEAD", tag))
 }
 
-// TODO: remove LatestCommits method > replaced by Log
-
-// LatestCommits retrieves all commits from a specific tag in the repositories
-// history. If no tag is provided, the log will be generated from HEAD
-func LatestCommits(tag string) ([]CommitDetails, error) {
-	// if tag == "" {
-	// 	return commitLog("HEAD")
-	// }
-
-	// return commitLog(fmt.Sprintf("tags/%s..HEAD", tag))
-
-	return []CommitDetails{}, nil
-}
-
 func commitLog(srch string) (string, error) {
 	out, err := Clean(Run("log", "--no-decorate", "--no-color", srch))
 	if err != nil {
