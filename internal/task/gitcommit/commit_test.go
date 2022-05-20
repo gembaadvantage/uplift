@@ -74,10 +74,18 @@ func TestRun(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	c, _ := git.LatestCommit()
-	assert.Equal(t, "uplift", c.Author)
-	assert.Equal(t, "uplift@test.com", c.Email)
-	assert.Equal(t, "test commit", c.Message)
+	lc := LastCommit(t)
+	assert.Equal(t, "uplift,uplift@test.com,test commit", lc)
+}
+
+// LastCommit returns the latest log in the following format: author,email,message
+func LastCommit(t *testing.T) string {
+	t.Helper()
+
+	out, err := git.Clean(git.Run("log", "-1", `--pretty=format:'%an,%ae,%B'`))
+	require.NoError(t, err)
+
+	return out
 }
 
 func trackFile(t *testing.T, name string) {
@@ -100,8 +108,8 @@ func TestRun_NoStagedFiles(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	c, _ := git.LatestCommit()
-	assert.Equal(t, git.InitCommit, c.Message)
+	lc := LastCommit(t)
+	assert.NotContains(t, "test commit", lc)
 }
 
 func TestRun_NoGitRepository(t *testing.T) {

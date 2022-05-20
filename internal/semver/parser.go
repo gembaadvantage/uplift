@@ -46,8 +46,6 @@ var (
 	fix          = regexp.MustCompile(`(?im).*fix(\(.*\))?:.*`)
 )
 
-// TODO: return line that triggered the increment
-
 // ParseLog will identify the maximum semantic increment by parsing the commit
 // log against the conventional commit standards defined, @see:
 // https://www.conventionalcommits.org/en/v1.0.0/

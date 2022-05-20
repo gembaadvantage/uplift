@@ -290,31 +290,6 @@ func commitLog(srch string) (string, error) {
 	return out, nil
 }
 
-// TODO: remove LatestCommit method > replaced by Log
-
-// LatestCommit retrieves the latest commit within the repository
-func LatestCommit() (CommitDetails, error) {
-	out, err := Clean(Run("log", "-1", `--pretty=format:'"%an","%ae","%B"'`))
-	if err != nil {
-		return CommitDetails{}, err
-	}
-
-	// Split the formatted string into its component parts
-	p := strings.Split(out, ",")
-
-	// Strip quotes from around each part
-	author := p[0][1 : len(p[0])-1]
-	email := p[1][1 : len(p[1])-1]
-	msg := p[2][1 : len(p[2])-1]
-
-	return CommitDetails{
-		Author: author,
-		Email:  email,
-		// Strip trailing newline
-		Message: strings.TrimRight(msg, "\n"),
-	}, nil
-}
-
 // Tag will create a lightweight tag against the repository and push it to the origin
 func Tag(tag string) error {
 	if _, err := Clean(Run("tag", "-f", tag)); err != nil {
