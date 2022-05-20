@@ -85,6 +85,7 @@ jobs:
             ./docs/tailwind.config.js
             ./.goreleaser.yml
             ./.github/**
+            ./internal/git/utils.go
       - name: Code Coverage
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v3

@@ -111,6 +111,7 @@ func writeChangelog(opts changelogOptions, out io.Writer) error {
 		before.Task{},
 		gitcheck.Task{},
 		scm.Task{},
+		// TODO: why is last commit used here?
 		lastcommit.Task{},
 		nextcommit.Task{},
 		beforechangelog.Task{},
