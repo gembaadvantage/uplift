@@ -100,6 +100,20 @@ BREAKING CHANGE: no backwards compatibility support`,
 	}
 }
 
+func TestRun_ExistingVersionNoPrefix(t *testing.T) {
+	git.InitRepo(t)
+	git.Tag("v1.0.0")
+	git.EmptyCommit(t, "fix: a new bug fix")
+
+	ctx := &context.Context{
+		NoPrefix: true,
+	}
+	err := Task{}.Run(ctx)
+
+	require.NoError(t, err)
+	require.Equal(t, "1.0.1", ctx.NextVersion.Raw)
+}
+
 func TestRun_NoSemanticBump(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommit(t, "docs: started writing docs")
@@ -110,8 +124,6 @@ func TestRun_NoSemanticBump(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, ctx.NoVersionChanged)
 }
-
-// TODO: test that prefix can be stripped from first version only
 
 func TestRun_FirstVersion(t *testing.T) {
 	tests := []struct {
@@ -125,30 +137,30 @@ func TestRun_FirstVersion(t *testing.T) {
 		{
 			name:     "PatchIncrement",
 			commit:   "fix: a new fix",
-			expected: "0.0.1",
+			expected: "v0.0.1",
 		},
 		{
 			name:     "MinorIncrement",
 			commit:   "feat: a new feature",
-			expected: "0.1.0",
+			expected: "v0.1.0",
 		},
 		{
 			name:     "MajorIncrement",
 			commit:   "feat!: a breaking change",
-			expected: "1.0.0",
+			expected: "v1.0.0",
 		},
 		{
 			name:       "MinorIncrementWithPrerelease",
 			commit:     "feat: a new feature",
 			prerelease: "beta.1",
 			metadata:   "12345",
-			expected:   "0.1.0-beta.1+12345",
+			expected:   "v0.1.0-beta.1+12345",
 		},
 		{
 			name: "BreakingChangeFooter",
 			commit: `refactor: changed the cli
 BREAKING CHANGE: no backwards compatibility support`,
-			expected: "1.0.0",
+			expected: "v1.0.0",
 		},
 	}
 	for _, tt := range tests {
@@ -166,4 +178,17 @@ BREAKING CHANGE: no backwards compatibility support`,
 			require.Equal(t, tt.expected, ctx.NextVersion.Raw)
 		})
 	}
+}
+
+func TestRun_FirstVersionNoPrefix(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommit(t, "feat: a new feature")
+
+	ctx := &context.Context{
+		NoPrefix: true,
+	}
+	err := Task{}.Run(ctx)
+
+	require.NoError(t, err)
+	require.Equal(t, "0.1.0", ctx.NextVersion.Raw)
 }

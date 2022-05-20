@@ -77,6 +77,7 @@ type tagOptions struct {
 	FetchTags   bool
 	NextTagOnly bool
 	Prerelease  string
+	NoPrefix    bool
 	*globalOptions
 }
 
@@ -106,6 +107,7 @@ func newTagCmd(gopts *globalOptions, out io.Writer) *tagCommand {
 	f.BoolVar(&tagCmd.Opts.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
 	f.BoolVar(&tagCmd.Opts.NextTagOnly, "next", false, "output the next tag only")
 	f.StringVar(&tagCmd.Opts.Prerelease, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
+	f.BoolVar(&tagCmd.Opts.NoPrefix, "no-prefix", false, "strip the default 'v' prefix from the next calculated semantic version")
 
 	tagCmd.Cmd = cmd
 	return tagCmd
@@ -148,6 +150,7 @@ func setupTagContext(opts tagOptions, out io.Writer) (*context.Context, error) {
 	ctx.FetchTags = opts.FetchTags
 	ctx.NextTagOnly = opts.NextTagOnly
 	ctx.Out = out
+	ctx.NoPrefix = opts.NoPrefix
 
 	// Handle prerelease suffix if one is provided
 	if opts.Prerelease != "" {

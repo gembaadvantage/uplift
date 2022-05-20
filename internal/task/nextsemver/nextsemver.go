@@ -23,6 +23,8 @@ SOFTWARE.
 package nextsemver
 
 import (
+	"strings"
+
 	semv "github.com/Masterminds/semver"
 	"github.com/apex/log"
 
@@ -51,6 +53,7 @@ func (t Task) Run(ctx *context.Context) error {
 	if tag.Ref == "" {
 		log.Debug("repository not tagged with version")
 	}
+	ctx.CurrentVersion, _ = semver.Parse(tag.Ref)
 
 	cl, err := git.Log(tag.Ref)
 	if err != nil {
@@ -68,8 +71,12 @@ func (t Task) Run(ctx *context.Context) error {
 	log.WithField("increment", string(inc)).Info("largest increment detected from commits")
 
 	if tag.Ref == "" {
-		// TODO: support a --no-prefix flag, that will strip the default 'v' prefix (only on first version)
-		tag.Ref = "0.0.0"
+		tag.Ref = "v0.0.0"
+	}
+
+	// Remove the prefix if needed
+	if ctx.NoPrefix {
+		tag.Ref = strings.TrimPrefix(tag.Ref, "v")
 	}
 
 	pver, _ := semv.NewVersion(tag.Ref)
