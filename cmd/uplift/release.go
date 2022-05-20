@@ -34,7 +34,6 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
-	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
@@ -47,9 +46,8 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforebump"
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforechangelog"
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforetag"
-	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
-	"github.com/gembaadvantage/uplift/internal/task/nextversion"
+	"github.com/gembaadvantage/uplift/internal/task/nextsemver"
 	"github.com/gembaadvantage/uplift/internal/task/scm"
 	"github.com/spf13/cobra"
 )
@@ -118,9 +116,7 @@ func release(opts releaseOptions, out io.Writer) error {
 		gitcheck.Task{},
 		scm.Task{},
 		fetchtag.Task{},
-		currentversion.Task{},
-		lastcommit.Task{},
-		nextversion.Task{},
+		nextsemver.Task{},
 		nextcommit.Task{},
 		beforebump.Task{},
 		bump.Task{},
@@ -193,9 +189,7 @@ func checkRelease(opts releaseOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		currentversion.Task{},
-		lastcommit.Task{},
-		nextversion.Task{},
+		nextsemver.Task{},
 	}
 
 	for _, tsk := range tsks {

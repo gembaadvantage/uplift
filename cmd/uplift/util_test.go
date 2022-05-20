@@ -71,7 +71,7 @@ func upliftConfigFile(t *testing.T, name string) {
 	t.Helper()
 
 	// Ensure .uplift.yml file is committed to repository
-	yml := "firstVersion: 1.0.0"
+	yml := "annotatedTags: true"
 
 	err := ioutil.WriteFile(name, []byte(yml), 0644)
 	require.NoError(t, err)

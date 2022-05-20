@@ -270,9 +270,10 @@ func DescribeTag(ref string) TagEntry {
 	}
 }
 
-// LatestCommits retrieves all commits from a specific tag in the repositories
-// history. If no tag is provided, the log will be generated from HEAD
-func LatestCommits(tag string) ([]CommitDetails, error) {
+// Log retrieves a log containing the commit history of a repository.
+// If a tag is provided, the log will be generated from that tag to
+// the current HEAD of the repository
+func Log(tag string) (string, error) {
 	if tag == "" {
 		return commitLog("HEAD")
 	}
@@ -280,30 +281,30 @@ func LatestCommits(tag string) ([]CommitDetails, error) {
 	return commitLog(fmt.Sprintf("tags/%s..HEAD", tag))
 }
 
-func commitLog(srch string) ([]CommitDetails, error) {
-	out, err := Clean(Run("log", `--pretty=format:'Commit: %H%nAuthor: %an%nEmail: %ae%nMessage: %B'`, srch))
-	if err != nil {
-		return []CommitDetails{}, err
-	}
+// TODO: remove LatestCommits method > replaced by Log
 
-	lines := strings.Split(out, "Commit: ")
-	if len(lines) < 1 {
-		return []CommitDetails{}, nil
-	}
+// LatestCommits retrieves all commits from a specific tag in the repositories
+// history. If no tag is provided, the log will be generated from HEAD
+func LatestCommits(tag string) ([]CommitDetails, error) {
+	// if tag == "" {
+	// 	return commitLog("HEAD")
+	// }
 
-	cd := make([]CommitDetails, 0, len(lines)-1)
-	for i := 1; i < len(lines); i++ {
-		p := strings.SplitN(lines[i], "\n", 4)
+	// return commitLog(fmt.Sprintf("tags/%s..HEAD", tag))
 
-		cd = append(cd, CommitDetails{
-			Author:  strings.TrimPrefix(p[1], "Author: "),
-			Email:   strings.TrimPrefix(p[2], "Email: "),
-			Message: strings.TrimPrefix(strings.TrimRight(p[3], "\n"), "Message: "),
-		})
-	}
-
-	return cd, nil
+	return []CommitDetails{}, nil
 }
+
+func commitLog(srch string) (string, error) {
+	out, err := Clean(Run("log", "--no-decorate", "--no-color", srch))
+	if err != nil {
+		return "", err
+	}
+
+	return out, nil
+}
+
+// TODO: remove LatestCommit method > replaced by Log
 
 // LatestCommit retrieves the latest commit within the repository
 func LatestCommit() (CommitDetails, error) {

@@ -456,6 +456,39 @@ func TestDescribeTag(t *testing.T) {
 	assert.Equal(t, time.Now().Format("2006-01-02"), desc.Created)
 }
 
+// TODO: test utilities should return hash and date associated with commit
+
+func TestLog(t *testing.T) {
+	InitRepo(t)
+
+	EmptyCommits(t,
+		`feat: this is a brand new feature`,
+		`chore(deps): bump knqyf263/trivy-issue-action from 0.0.3 to 0.0.4
+
+Bumps [knqyf263/trivy-issue-action](https://github.com/knqyf263/trivy-issue-action) from 0.0.3 to 0.0.4.
+- [Release notes](https://github.com/knqyf263/trivy-issue-action/releases)
+- [Commits](https://github.com/knqyf263/trivy-issue-action/compare/v0.0.3...v0.0.4)`,
+		`ci: major change to the github workflow
+
+Some extra detail about the workflow`)
+
+	log, err := Log("")
+	require.NoError(t, err)
+
+	assert.Equal(t, "", log)
+}
+
+func TestLog_WithTag(t *testing.T) {
+	InitRepo(t)
+	EmptyCommitsAndTag(t, "1.0.0", "ci: updated existing ci", "docs: new docs", "feat: first feature")
+	EmptyCommit(t, `fix: a new bug fix has been added`)
+
+	log, err := Log("1.0.0")
+	require.NoError(t, err)
+
+	assert.Equal(t, "", log)
+}
+
 func TestLatestCommits_NoTag(t *testing.T) {
 	InitRepo(t)
 

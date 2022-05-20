@@ -23,12 +23,9 @@ SOFTWARE.
 package lastcommit
 
 import (
-	"strings"
-
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
 // Task for reading the last commit message
@@ -61,21 +58,21 @@ func (t Task) Run(ctx *context.Context) error {
 	// is found, this commit will be used by the remaining workflow
 	ctx.CommitDetails = lc[0]
 
-	for _, c := range lc {
-		// Break as soon as a conventional commit is detected
-		if semver.IsConventionalCommit(c.Message) {
-			log.WithFields(log.Fields{
-				"author":  c.Author,
-				"email":   c.Email,
-				"message": strings.TrimPrefix(c.Message, "\n"),
-			}).Info("found commit")
+	// for _, c := range lc {
+	// 	// Break as soon as a conventional commit is detected
+	// 	if semver.IsConventionalCommit(c.Message) {
+	// 		log.WithFields(log.Fields{
+	// 			"author":  c.Author,
+	// 			"email":   c.Email,
+	// 			"message": strings.TrimPrefix(c.Message, "\n"),
+	// 		}).Info("found commit")
 
-			ctx.CommitDetails = c
-			break
-		}
+	// 		ctx.CommitDetails = c
+	// 		break
+	// 	}
 
-		log.WithField("message", strings.TrimPrefix(c.Message, "\n")).Debug("skipping commit")
-	}
+	// 	log.WithField("message", strings.TrimPrefix(c.Message, "\n")).Debug("skipping commit")
+	// }
 
 	return nil
 }

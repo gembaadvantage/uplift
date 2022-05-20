@@ -26,7 +26,6 @@ import (
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,44 +37,44 @@ func TestSkip(t *testing.T) {
 	assert.False(t, Task{}.Skip(&context.Context{}))
 }
 
-func TestRun(t *testing.T) {
-	tests := []struct {
-		name     string
-		repoTag  string
-		expected string
-	}{
-		{
-			name:     "RepositoryTag",
-			repoTag:  "1.1.1",
-			expected: "1.1.1",
-		},
-		{
-			name:     "PrefixedRepositoryTag",
-			repoTag:  "v0.2.1",
-			expected: "v0.2.1",
-		},
-		{
-			name:     "RepositoryNoTag",
-			repoTag:  "",
-			expected: "",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			git.InitRepo(t)
-			if tt.repoTag != "" {
-				git.EmptyCommitAndTag(t, tt.repoTag, "testing")
-			}
+// func TestRun(t *testing.T) {
+// 	tests := []struct {
+// 		name     string
+// 		repoTag  string
+// 		expected string
+// 	}{
+// 		{
+// 			name:     "RepositoryTag",
+// 			repoTag:  "1.1.1",
+// 			expected: "1.1.1",
+// 		},
+// 		{
+// 			name:     "PrefixedRepositoryTag",
+// 			repoTag:  "v0.2.1",
+// 			expected: "v0.2.1",
+// 		},
+// 		{
+// 			name:     "RepositoryNoTag",
+// 			repoTag:  "",
+// 			expected: "",
+// 		},
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			git.InitRepo(t)
+// 			if tt.repoTag != "" {
+// 				git.EmptyCommitAndTag(t, tt.repoTag, "testing")
+// 			}
 
-			ctx := &context.Context{}
-			err := Task{}.Run(ctx)
-			if err != nil {
-				t.Errorf("unexpected error: %s", err)
-			}
+// 			ctx := &context.Context{}
+// 			err := Task{}.Run(ctx)
+// 			if err != nil {
+// 				t.Errorf("unexpected error: %s", err)
+// 			}
 
-			if ctx.CurrentVersion.Raw != tt.expected {
-				t.Errorf("expected tag %s but received tag %s", tt.expected, ctx.CurrentVersion.Raw)
-			}
-		})
-	}
-}
+// 			if ctx.CurrentVersion.Raw != tt.expected {
+// 				t.Errorf("expected tag %s but received tag %s", tt.expected, ctx.CurrentVersion.Raw)
+// 			}
+// 		})
+// 	}
+// }

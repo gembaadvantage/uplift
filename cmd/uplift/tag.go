@@ -31,7 +31,6 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
-	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gittag"
@@ -39,9 +38,8 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/hook/aftertag"
 	"github.com/gembaadvantage/uplift/internal/task/hook/before"
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforetag"
-	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
-	"github.com/gembaadvantage/uplift/internal/task/nextversion"
+	"github.com/gembaadvantage/uplift/internal/task/nextsemver"
 	"github.com/spf13/cobra"
 )
 
@@ -55,9 +53,7 @@ var (
 		before.Task{},
 		gitcheck.Task{},
 		fetchtag.Task{},
-		currentversion.Task{},
-		lastcommit.Task{},
-		nextversion.Task{},
+		nextsemver.Task{},
 		nextcommit.Task{},
 		beforetag.Task{},
 		gittag.Task{},
@@ -69,9 +65,7 @@ var (
 		before.Task{},
 		gitcheck.Task{},
 		fetchtag.Task{},
-		currentversion.Task{},
-		lastcommit.Task{},
-		nextversion.Task{},
+		nextsemver.Task{},
 		beforetag.Task{},
 		gittag.Task{},
 		aftertag.Task{},

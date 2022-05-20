@@ -23,10 +23,7 @@ SOFTWARE.
 package currentversion
 
 import (
-	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
 // Task that identifies the current semantic version of a repository
@@ -44,15 +41,15 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	tag := git.LatestTag()
-	if tag.Ref == "" {
-		log.Info("repository not tagged with version")
-		return nil
-	}
+	// tag := git.LatestTag()
+	// if tag.Ref == "" {
+	// 	log.Info("repository not tagged with version")
+	// 	return nil
+	// }
 
-	// Only a semantic version tag will have been retrieved by this point
-	ctx.CurrentVersion, _ = semver.Parse(tag.Ref)
+	// // Only a semantic version tag will have been retrieved by this point
+	// ctx.CurrentVersion, _ = semver.Parse(tag.Ref)
 
-	log.WithField("current", ctx.CurrentVersion).Info("identified version")
+	// log.WithField("current", ctx.CurrentVersion).Info("identified version")
 	return nil
 }
