@@ -31,6 +31,10 @@ Ensure all tags associated with the git repository are fetched before carrying o
 uplift release --fetch-all
 ```
 
+### --no-prefix
+
+TODO
+
 ### --prerelease
 
 Append a prerelease suffix to the next calculated semantic version and use it as a prerelease tag. Supporting the [Semver 2.0.0](https://semver.org/) specification, additional labels can be provided for both the prerelease and metadata parts:

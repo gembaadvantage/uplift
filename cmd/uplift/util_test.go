@@ -45,19 +45,19 @@ const (
 	AfterChangelogFile  = HookDir + "afterChangelog.out"
 )
 
-func untaggedRepo(t *testing.T) {
+func untaggedRepo(t *testing.T, c ...string) {
 	t.Helper()
 
 	git.InitRepo(t)
-	git.EmptyCommit(t, "feat: a new feature")
+	git.EmptyCommits(t, c...)
 	require.Len(t, git.AllTags(), 0)
 }
 
-func taggedRepo(t *testing.T) {
+func taggedRepo(t *testing.T, tag string, c ...string) {
 	t.Helper()
 
 	git.InitRepo(t)
-	git.EmptyCommitAndTag(t, "1.0.0", "feat: a new feature")
+	git.EmptyCommitsAndTag(t, tag, c...)
 }
 
 func tagRepoWith(t *testing.T, tags []string) {

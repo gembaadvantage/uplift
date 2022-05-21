@@ -34,17 +34,6 @@ import (
 )
 
 func TestChangelog(t *testing.T) {
-	taggedRepo(t)
-
-	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
-
-	err := chglogCmd.Cmd.Execute()
-	require.NoError(t, err)
-
-	assert.True(t, changelogExists(t))
-}
-
-func TestChangelog_DetectsTags(t *testing.T) {
 	tests := []struct {
 		name      string
 		tags      []string
@@ -70,6 +59,7 @@ func TestChangelog_DetectsTags(t *testing.T) {
 			require.NoError(t, err)
 
 			assert.True(t, changelogExists(t))
+
 			chglog := readChangelog(t)
 			assert.Contains(t, chglog, tt.detectTag)
 		})
@@ -77,7 +67,7 @@ func TestChangelog_DetectsTags(t *testing.T) {
 }
 
 func TestChangelog_DiffOnly(t *testing.T) {
-	taggedRepo(t)
+	taggedRepo(t, "v0.1.0", "feat: a new feature")
 
 	var buf bytes.Buffer
 
@@ -88,17 +78,11 @@ func TestChangelog_DiffOnly(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.False(t, changelogExists(t))
-	assert.NotEmpty(t, buf.String())
-	assert.True(t, chglogCmd.Opts.DiffOnly)
+	assert.Contains(t, buf.String(), "## v0.1.0")
 }
 
 func TestChangelog_WithExclude(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommitsAndTag(t, "2.0.0",
-		"feat: a new feat",
-		"fix: a new fix",
-		"ci: a ci task",
-		"docs: some new docs")
+	taggedRepo(t, "2.0.0", "feat: a new feat", "fix: a new fix", "ci: a ci task", "docs: some new docs")
 
 	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 	chglogCmd.Cmd.SetArgs([]string{"--exclude", "ci,docs"})
@@ -107,13 +91,12 @@ func TestChangelog_WithExclude(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.True(t, changelogExists(t))
-	assert.Len(t, chglogCmd.Opts.Exclude, 2)
-	assert.Contains(t, chglogCmd.Opts.Exclude[0], "ci")
-	assert.Contains(t, chglogCmd.Opts.Exclude[1], "docs")
 
-	chglog := readChangelog(t)
-	assert.NotContains(t, chglog, "ci:")
-	assert.NotContains(t, chglog, "docs:")
+	cl := readChangelog(t)
+	assert.Contains(t, cl, "feat: a new feat")
+	assert.Contains(t, cl, "fix: a new fix")
+	assert.NotContains(t, cl, "ci: a ci task")
+	assert.NotContains(t, cl, "docs: some new docs")
 }
 
 func TestChangelog_All(t *testing.T) {
@@ -127,16 +110,16 @@ func TestChangelog_All(t *testing.T) {
 
 	assert.True(t, changelogExists(t))
 
-	chglog := readChangelog(t)
-	assert.Contains(t, chglog, "## 0.1.0")
-	assert.Contains(t, chglog, "## 0.2.0")
-	assert.Contains(t, chglog, "## 0.3.0")
-	assert.Contains(t, chglog, "## 0.4.0")
-	assert.Contains(t, chglog, "## 0.5.0")
+	cl := readChangelog(t)
+	assert.Contains(t, cl, "## 0.1.0")
+	assert.Contains(t, cl, "## 0.2.0")
+	assert.Contains(t, cl, "## 0.3.0")
+	assert.Contains(t, cl, "## 0.4.0")
+	assert.Contains(t, cl, "## 0.5.0")
 }
 
 func TestChangelog_AllAsDiff(t *testing.T) {
-	tagRepoWith(t, []string{"0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0"})
+	tagRepoWith(t, []string{"v0.1.0", "v0.2.0", "v0.3.0", "v0.4.0", "v0.5.0"})
 
 	var buf bytes.Buffer
 
@@ -148,13 +131,15 @@ func TestChangelog_AllAsDiff(t *testing.T) {
 
 	assert.False(t, changelogExists(t))
 
-	chglog := buf.String()
-	assert.Contains(t, chglog, "## 0.1.0")
-	assert.Contains(t, chglog, "## 0.2.0")
-	assert.Contains(t, chglog, "## 0.3.0")
-	assert.Contains(t, chglog, "## 0.4.0")
-	assert.Contains(t, chglog, "## 0.5.0")
+	cl := buf.String()
+	assert.Contains(t, cl, "## v0.1.0")
+	assert.Contains(t, cl, "## v0.2.0")
+	assert.Contains(t, cl, "## v0.3.0")
+	assert.Contains(t, cl, "## v0.4.0")
+	assert.Contains(t, cl, "## v0.5.0")
 }
+
+// TODO: test commits are in the right order?
 
 func TestChangelog_SortOrder(t *testing.T) {
 	tests := []struct {
@@ -185,7 +170,7 @@ func TestChangelog_SortOrder(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			taggedRepo(t)
+			taggedRepo(t, "1.0.0", "feat: a new feature")
 
 			chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 			chglogCmd.Cmd.SetArgs([]string{"--sort", tt.sort})
@@ -199,20 +184,8 @@ func TestChangelog_SortOrder(t *testing.T) {
 	}
 }
 
-func TestChangelog_SortEmptyByDefault(t *testing.T) {
-	taggedRepo(t)
-
-	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
-	err := chglogCmd.Cmd.Execute()
-	require.NoError(t, err)
-
-	assert.True(t, changelogExists(t))
-	assert.Equal(t, "", chglogCmd.Opts.Sort)
-}
-
 func TestChangelog_ExcludesUpliftCommitByDefault(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommitsAndTag(t, "0.1.0", "ci: tweak workflow", "fix: a bug fix", "ci(uplift): a new release")
+	taggedRepo(t, "0.1.0", "ci: tweak workflow", "fix: a bug fix", "ci(uplift): uplifted version 0.1.0")
 
 	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 	err := chglogCmd.Cmd.Execute()
@@ -220,10 +193,10 @@ func TestChangelog_ExcludesUpliftCommitByDefault(t *testing.T) {
 
 	assert.True(t, changelogExists(t))
 
-	chglog := readChangelog(t)
-	assert.NotContains(t, chglog, "ci(uplift): a new release")
-	assert.Contains(t, chglog, "fix: a bug fix")
-	assert.Contains(t, chglog, "ci: tweak workflow")
+	cl := readChangelog(t)
+	assert.NotContains(t, cl, "ci(uplift): uplifted version 0.1.0")
+	assert.Contains(t, cl, "fix: a bug fix")
+	assert.Contains(t, cl, "ci: tweak workflow")
 }
 
 func changelogExists(t *testing.T) bool {

@@ -33,6 +33,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO: review tests
+
 func TestBump(t *testing.T) {
 	git.InitRepo(t)
 	testFileWithConfig(t, "test.txt", ".uplift.yml")

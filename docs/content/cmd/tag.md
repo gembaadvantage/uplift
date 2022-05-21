@@ -45,6 +45,10 @@ Easily capture the tag within an environment variable for use within a custom sc
 NEXT_TAG=$(uplift tag --next --silent)
 ```
 
+### --no-prefix
+
+TODO
+
 ### --prerelease
 
 Append a prerelease suffix to the next calculated semantic version and use it as a prerelease tag. Supporting the [Semver 2.0.0](https://semver.org/) specification, additional labels can be provided for both the prerelease and metadata parts:
