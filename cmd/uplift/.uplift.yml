@@ -1,0 +1,35 @@
+annotatedTags: false
+bumps: []
+commitAuthor:
+  name: ""
+  email: ""
+commitMessage: ""
+changelog:
+  sort: ""
+  exclude: []
+git:
+  ignoreDetached: false
+  ignoreShallow: false
+gitea:
+  url: ""
+github:
+  url: ""
+gitlab:
+  url: ""
+hooks:
+  before:
+  - touch hooks/before.out
+  beforeBump:
+  - touch hooks/beforeBump.out
+  beforeTag:
+  - touch hooks/beforeTag.out
+  beforeChangelog:
+  - touch hooks/beforeChangelog.out
+  after:
+  - touch hooks/after.out
+  afterBump:
+  - touch hooks/afterBump.out
+  afterTag:
+  - touch hooks/afterTag.out
+  afterChangelog:
+  - touch hooks/afterChangelog.out
