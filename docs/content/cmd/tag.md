@@ -53,6 +53,10 @@ Strips the default `v` prefix from the next calculated semantic version.
 uplift release --no-prefix
 ```
 
+!!!tip "Should only need to use this once"
+
+    Once a repository has been tagged with either scheme, e.g. `1.0.0` or `v1.0.0`, uplift will continue using it. This flag is most useful when tagging your repository for the first time.
+
 ### --prerelease
 
 Append a prerelease suffix to the next calculated semantic version and use it as a prerelease tag. Supporting the [Semver 2.0.0](https://semver.org/) specification, additional labels can be provided for both the prerelease and metadata parts:
