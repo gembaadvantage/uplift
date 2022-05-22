@@ -24,8 +24,11 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -139,38 +142,41 @@ func TestChangelog_AllAsDiff(t *testing.T) {
 	assert.Contains(t, cl, "## v0.5.0")
 }
 
-// TODO: test commits are in the right order?
-
 func TestChangelog_SortOrder(t *testing.T) {
 	tests := []struct {
 		name     string
 		sort     string
-		expected string
+		commits  []string
+		expected []string
 	}{
 		{
 			name:     "Ascending",
 			sort:     "asc",
-			expected: "asc",
+			commits:  []string{"feat: one", "feat: two", "feat: three"},
+			expected: []string{"feat: one", "feat: two", "feat: three"},
 		},
 		{
 			name:     "AscendingUpper",
 			sort:     "ASC",
-			expected: "asc",
+			commits:  []string{"feat: one", "feat: two", "feat: three"},
+			expected: []string{"feat: one", "feat: two", "feat: three"},
 		},
 		{
 			name:     "Descending",
 			sort:     "desc",
-			expected: "desc",
+			commits:  []string{"feat: one", "feat: two", "feat: three"},
+			expected: []string{"feat: three", "feat: two", "feat: one"},
 		},
 		{
 			name:     "DescendingUpper",
 			sort:     "DESC",
-			expected: "desc",
+			commits:  []string{"feat: one", "feat: two", "feat: three"},
+			expected: []string{"feat: three", "feat: two", "feat: one"},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			taggedRepo(t, "1.0.0", "feat: a new feature")
+			taggedRepo(t, "1.0.0", tt.commits...)
 
 			chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 			chglogCmd.Cmd.SetArgs([]string{"--sort", tt.sort})
@@ -179,9 +185,28 @@ func TestChangelog_SortOrder(t *testing.T) {
 			require.NoError(t, err)
 
 			assert.True(t, changelogExists(t))
-			assert.Equal(t, tt.expected, chglogCmd.Opts.Sort)
+			cl := readChangelog(t)
+
+			regx := buildChangelogRegex(t, tt.expected)
+			assert.True(t, regx.MatchString(cl))
 		})
 	}
+}
+
+func buildChangelogRegex(t *testing.T, commits []string) *regexp.Regexp {
+	m := strings.Builder{}
+	m.WriteString(fmt.Sprintf("(?im).*%s\n", commits[0]))
+
+	if len(commits) > 1 {
+		for i := 1; i < len(commits); i++ {
+			m.WriteString(fmt.Sprintf(".*%s\n", commits[i]))
+		}
+	}
+
+	regx, err := regexp.Compile(m.String())
+	require.NoError(t, err)
+
+	return regx
 }
 
 func TestChangelog_ExcludesUpliftCommitByDefault(t *testing.T) {

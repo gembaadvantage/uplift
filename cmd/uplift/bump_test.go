@@ -33,13 +33,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: review tests
-
 func TestBump(t *testing.T) {
-	git.InitRepo(t)
+	taggedRepo(t, "0.1.0", "feat: this was the last feature")
 	testFileWithConfig(t, "test.txt", ".uplift.yml")
-	git.EmptyCommitAndTag(t, "1.0.0", "feat: this was the last feature")
-	git.EmptyCommit(t, "feat: a new feature")
+	git.EmptyCommits(t, "ci: update workflow", "docs: update docs", "feat: a new feature", "fix: a bug fix")
 
 	bmpCmd := newBumpCmd(noChangesPushed(), os.Stdout)
 
@@ -48,8 +45,8 @@ func TestBump(t *testing.T) {
 
 	actual, err := ioutil.ReadFile("test.txt")
 	require.NoError(t, err)
-	assert.Equal(t, `version: 1.1.0
-appVersion: 1.1.0`, string(actual))
+	assert.Equal(t, `version: 0.2.0
+appVersion: 0.2.0`, string(actual))
 }
 
 func testFileWithConfig(t *testing.T, f string, cfg string) []byte {
@@ -76,7 +73,7 @@ bumps:
 }
 
 func TestBump_PrereleaseFlag(t *testing.T) {
-	git.InitRepo(t)
+	untaggedRepo(t, "docs: update docs", "fix: fix bug", "feat!: breaking change")
 	testFileWithConfig(t, "test.txt", ".uplift.yml")
 	git.EmptyCommit(t, "feat: this is a new feature")
 
@@ -88,14 +85,13 @@ func TestBump_PrereleaseFlag(t *testing.T) {
 
 	actual, err := ioutil.ReadFile("test.txt")
 	require.NoError(t, err)
-	assert.Equal(t, `version: 0.1.0-beta.1+12345
-appVersion: 0.1.0-beta.1+12345`, string(actual))
+	assert.Equal(t, `version: v1.0.0-beta.1+12345
+appVersion: v1.0.0-beta.1+12345`, string(actual))
 }
 
 func TestBump_Hooks(t *testing.T) {
-	git.InitRepo(t)
+	untaggedRepo(t, "feat: this is a new feature")
 	configWithHooks(t)
-	git.EmptyCommit(t, "feat: this is a new feature")
 
 	bmpCmd := newBumpCmd(&globalOptions{}, os.Stdout)
 	err := bmpCmd.Cmd.Execute()
