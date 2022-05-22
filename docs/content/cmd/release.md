@@ -33,7 +33,11 @@ uplift release --fetch-all
 
 ### --no-prefix
 
-TODO
+Strips the default `v` prefix from the next calculated semantic version.
+
+```sh
+uplift release --no-prefix
+```
 
 ### --prerelease
 

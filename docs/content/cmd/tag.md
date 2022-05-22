@@ -47,7 +47,11 @@ NEXT_TAG=$(uplift tag --next --silent)
 
 ### --no-prefix
 
-TODO
+Strips the default `v` prefix from the next calculated semantic version.
+
+```sh
+uplift release --no-prefix
+```
 
 ### --prerelease
 
