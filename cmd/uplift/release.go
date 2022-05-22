@@ -65,6 +65,8 @@ type releaseOptions struct {
 	SkipChangelog bool
 	SkipBumps     bool
 	NoPrefix      bool
+	Exclude       []string
+	Sort          string
 	*globalOptions
 }
 
@@ -102,6 +104,8 @@ func newReleaseCmd(gopts *globalOptions, out io.Writer) *releaseCommand {
 	f.BoolVar(&relCmd.Opts.SkipChangelog, "skip-changelog", false, "skips the creation or amendment of a changelog")
 	f.BoolVar(&relCmd.Opts.SkipBumps, "skip-bumps", false, "skips the bumping of any files")
 	f.BoolVar(&relCmd.Opts.NoPrefix, "no-prefix", false, "strip the default 'v' prefix from the next calculated semantic version")
+	f.StringSliceVar(&relCmd.Opts.Exclude, "exclude", []string{}, "a list of conventional commit prefixes to exclude")
+	f.StringVar(&relCmd.Opts.Sort, "sort", "", "the sort order of commits within each changelog entry")
 
 	relCmd.Cmd = cmd
 	return relCmd
@@ -162,6 +166,13 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 
 	// Enable pre-tagging support for generating a changelog
 	ctx.Changelog.PreTag = true
+
+	// Merge config and command line arguments together
+	ctx.Changelog.Exclude = opts.Exclude
+	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, ctx.Config.Changelog.Exclude...)
+
+	// By default ensure the ci(uplift): commits are excluded also
+	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, "ci(uplift):")
 
 	// Handle prerelease suffix if one is provided
 	if opts.Prerelease != "" {

@@ -178,3 +178,36 @@ func TestRelease_Hooks(t *testing.T) {
 	assert.FileExists(t, AfterTagFile)
 	assert.FileExists(t, AfterFile)
 }
+
+func TestRelease_ExcludesUpliftCommitByDefault(t *testing.T) {
+	untaggedRepo(t, "ci: tweak workflow", "fix: a bug fix")
+
+	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
+	err := relCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+
+	cl := readChangelog(t)
+	assert.NotContains(t, cl, "ci(uplift): uplifted version")
+	assert.Contains(t, cl, "fix: a bug fix")
+	assert.Contains(t, cl, "ci: tweak workflow")
+}
+
+func TestRelease_WithExclude(t *testing.T) {
+	untaggedRepo(t, "feat: a new feat", "fix: a new fix", "ci: a ci task", "docs: some new docs")
+
+	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
+	relCmd.Cmd.SetArgs([]string{"--exclude", "ci,docs"})
+
+	err := relCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+
+	cl := readChangelog(t)
+	assert.Contains(t, cl, "feat: a new feat")
+	assert.Contains(t, cl, "fix: a new fix")
+	assert.NotContains(t, cl, "ci: a ci task")
+	assert.NotContains(t, cl, "docs: some new docs")
+}
