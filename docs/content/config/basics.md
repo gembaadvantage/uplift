@@ -2,20 +2,6 @@
 
 Ideally none of these values should need to be set as uplift will always use what we believe to be sensible default values.
 
-## firstVersion
-
-```yaml linenums="1"
-# .uplift.yml
-
-# An initial version that will be used as the first tag within your repository.
-# Tags with a 'v' prefix are supported and will be treated as a semantic version
-# by uplift. For existing repositories with a semantic version scheme already in
-# place this setting will be ignored.
-#
-# Defaults to 0.1.0
-firstVersion: v1.0.0
-```
-
 ## commitMessage
 
 ```yaml linenums="1"

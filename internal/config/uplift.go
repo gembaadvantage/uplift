@@ -36,7 +36,6 @@ type Uplift struct {
 	CommitAuthor  CommitAuthor `yaml:"commitAuthor"`
 	CommitMessage string       `yaml:"commitMessage"`
 	Changelog     Changelog    `yaml:"changelog"`
-	FirstVersion  string       `yaml:"firstVersion"`
 	Git           Git          `yaml:"git"`
 	Gitea         Gitea        `yaml:"gitea"`
 	GitHub        GitHub       `yaml:"github"`

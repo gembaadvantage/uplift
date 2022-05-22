@@ -40,39 +40,27 @@ const (
 )
 
 var (
-	convCommit   = regexp.MustCompile(`^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)`)
-	breakingBang = regexp.MustCompile(`^.*(\(.*\))?!:.*`)
-	breaking     = regexp.MustCompile("(?m)BREAKING CHANGE:.*")
-	feature      = regexp.MustCompile(`^feat(\(.*\))?:.*`)
-	fix          = regexp.MustCompile(`^fix(\(.*\))?:.*`)
+	breakingBang = regexp.MustCompile(`(?im).*(\w+)(\(.*\))?!:.*`)
+	breaking     = regexp.MustCompile("(?im).*BREAKING CHANGE:.*")
+	feature      = regexp.MustCompile(`(?im).*feat(\(.*\))?:.*`)
+	fix          = regexp.MustCompile(`(?im).*fix(\(.*\))?:.*`)
 )
 
-// ParseCommit will identify the type of increment to perform by parsing the commit
-// message against the conventional commit standards defined, @see:
+// ParseLog will identify the maximum semantic increment by parsing the commit
+// log against the conventional commit standards defined, @see:
 // https://www.conventionalcommits.org/en/v1.0.0/
-func ParseCommit(c string) Increment {
-	if !convCommit.MatchString(c) {
-		return NoIncrement
-	}
-
-	if breakingBang.MatchString(c) || breaking.MatchString(c) {
+func ParseLog(log string) Increment {
+	if breakingBang.MatchString(log) || breaking.MatchString(log) {
 		return MajorIncrement
 	}
 
-	if feature.MatchString(c) {
+	if feature.MatchString(log) {
 		return MinorIncrement
 	}
 
-	if fix.MatchString(c) {
+	if fix.MatchString(log) {
 		return PatchIncrement
 	}
 
 	return NoIncrement
-}
-
-// IsConventionalCommit will detect if the given commit message contains a
-// conventional commit prefix, as required by the the specification, @see:
-// https://www.conventionalcommits.org/en/v1.0.0/
-func IsConventionalCommit(c string) bool {
-	return convCommit.MatchString(c)
 }

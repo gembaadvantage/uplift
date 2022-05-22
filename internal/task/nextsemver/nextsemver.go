@@ -20,18 +20,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package nextversion
+package nextsemver
 
 import (
+	"strings"
+
 	semv "github.com/Masterminds/semver"
 	"github.com/apex/log"
 
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
-)
-
-const (
-	defaultVersion = "0.1.0"
 )
 
 // Task that determines the next semantic version of a repository
@@ -50,24 +49,37 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	inc := semver.ParseCommit(ctx.CommitDetails.Message)
+	tag := git.LatestTag()
+	if tag.Ref == "" {
+		log.Debug("repository not tagged with version")
+	}
+	ctx.CurrentVersion, _ = semver.Parse(tag.Ref)
+
+	cl, err := git.Log(tag.Ref)
+	if err != nil {
+		return err
+	}
+
+	// Identify any commit that will trigger the largest semantic version bump
+	inc := semver.ParseLog(cl)
 	if inc == semver.NoIncrement {
-		ctx.NextVersion = ctx.CurrentVersion
 		ctx.NoVersionChanged = true
-		log.WithField("commit", ctx.CommitDetails.Message).Warn("commit doesn't trigger change in semantic version")
+
+		log.Warn("no commits trigger a change in semantic version")
 		return nil
 	}
+	log.WithField("increment", string(inc)).Info("largest increment detected from commits")
 
-	log.WithField("increment", string(inc)).Debug("increment detected from commit")
-
-	// If this is the first tag, use the required default
-	if ctx.CurrentVersion.Raw == "" {
-		ctx.NextVersion, _ = semver.Parse(firstVersion(ctx))
-		log.WithField("version", ctx.NextVersion.Raw).Info("repository not tagged, using first version")
-		return nil
+	if tag.Ref == "" {
+		tag.Ref = "v0.0.0"
 	}
 
-	pver, _ := semv.NewVersion(ctx.CurrentVersion.Raw)
+	// Remove the prefix if needed
+	if ctx.NoPrefix {
+		tag.Ref = strings.TrimPrefix(tag.Ref, "v")
+	}
+
+	pver, _ := semv.NewVersion(tag.Ref)
 
 	// Bump the semantic version based on the increment
 	var nxt semv.Version
@@ -88,7 +100,7 @@ func (t Task) Run(ctx *context.Context) error {
 		log.WithFields(log.Fields{
 			"prerelease": ctx.Prerelease,
 			"metadata":   ctx.Metadata,
-		}).Info("appending prerelease version")
+		}).Debug("appending prerelease version")
 	}
 
 	ctx.NextVersion = semver.Version{
@@ -101,22 +113,6 @@ func (t Task) Run(ctx *context.Context) error {
 		Raw:        nxt.Original(),
 	}
 
-	log.WithField("next", ctx.NextVersion.Raw).Info("identified next semantic version")
+	log.WithField("version", ctx.NextVersion.Raw).Info("identified next semantic version")
 	return nil
-}
-
-func firstVersion(ctx *context.Context) string {
-	fv := defaultVersion
-
-	if ctx.Config.FirstVersion != "" {
-		fv = ctx.Config.FirstVersion
-		log.WithField("version", fv).Debug("setting first version based on config")
-	}
-
-	// Append any semantic prerelease suffix if needed
-	v, _ := semv.NewVersion(fv)
-	*v, _ = v.SetPrerelease(ctx.Prerelease)
-	*v, _ = v.SetMetadata(ctx.Metadata)
-
-	return v.Original()
 }

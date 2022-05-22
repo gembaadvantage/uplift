@@ -34,7 +34,6 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
-	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
@@ -47,9 +46,8 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforebump"
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforechangelog"
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforetag"
-	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
-	"github.com/gembaadvantage/uplift/internal/task/nextversion"
+	"github.com/gembaadvantage/uplift/internal/task/nextsemver"
 	"github.com/gembaadvantage/uplift/internal/task/scm"
 	"github.com/spf13/cobra"
 )
@@ -66,6 +64,9 @@ type releaseOptions struct {
 	Prerelease    string
 	SkipChangelog bool
 	SkipBumps     bool
+	NoPrefix      bool
+	Exclude       []string
+	Sort          string
 	*globalOptions
 }
 
@@ -102,6 +103,9 @@ func newReleaseCmd(gopts *globalOptions, out io.Writer) *releaseCommand {
 	f.StringVar(&relCmd.Opts.Prerelease, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
 	f.BoolVar(&relCmd.Opts.SkipChangelog, "skip-changelog", false, "skips the creation or amendment of a changelog")
 	f.BoolVar(&relCmd.Opts.SkipBumps, "skip-bumps", false, "skips the bumping of any files")
+	f.BoolVar(&relCmd.Opts.NoPrefix, "no-prefix", false, "strip the default 'v' prefix from the next calculated semantic version")
+	f.StringSliceVar(&relCmd.Opts.Exclude, "exclude", []string{}, "a list of conventional commit prefixes to exclude from the changelog")
+	f.StringVar(&relCmd.Opts.Sort, "sort", "", "the sort order of commits within each changelog entry")
 
 	relCmd.Cmd = cmd
 	return relCmd
@@ -118,9 +122,7 @@ func release(opts releaseOptions, out io.Writer) error {
 		gitcheck.Task{},
 		scm.Task{},
 		fetchtag.Task{},
-		currentversion.Task{},
-		lastcommit.Task{},
-		nextversion.Task{},
+		nextsemver.Task{},
 		nextcommit.Task{},
 		beforebump.Task{},
 		bump.Task{},
@@ -160,9 +162,17 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	ctx.Out = out
 	ctx.SkipChangelog = opts.SkipChangelog
 	ctx.SkipBumps = opts.SkipBumps
+	ctx.NoPrefix = opts.NoPrefix
 
 	// Enable pre-tagging support for generating a changelog
 	ctx.Changelog.PreTag = true
+
+	// Merge config and command line arguments together
+	ctx.Changelog.Exclude = opts.Exclude
+	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, ctx.Config.Changelog.Exclude...)
+
+	// By default ensure the ci(uplift): commits are excluded also
+	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, "ci(uplift):")
 
 	// Handle prerelease suffix if one is provided
 	if opts.Prerelease != "" {
@@ -193,9 +203,7 @@ func checkRelease(opts releaseOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		currentversion.Task{},
-		lastcommit.Task{},
-		nextversion.Task{},
+		nextsemver.Task{},
 	}
 
 	for _, tsk := range tsks {

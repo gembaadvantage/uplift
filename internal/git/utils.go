@@ -270,9 +270,10 @@ func DescribeTag(ref string) TagEntry {
 	}
 }
 
-// LatestCommits retrieves all commits from a specific tag in the repositories
-// history. If no tag is provided, the log will be generated from HEAD
-func LatestCommits(tag string) ([]CommitDetails, error) {
+// Log retrieves a log containing the commit history of a repository.
+// If a tag is provided, the log will be generated from that tag to
+// the current HEAD of the repository
+func Log(tag string) (string, error) {
 	if tag == "" {
 		return commitLog("HEAD")
 	}
@@ -280,52 +281,13 @@ func LatestCommits(tag string) ([]CommitDetails, error) {
 	return commitLog(fmt.Sprintf("tags/%s..HEAD", tag))
 }
 
-func commitLog(srch string) ([]CommitDetails, error) {
-	out, err := Clean(Run("log", `--pretty=format:'Commit: %H%nAuthor: %an%nEmail: %ae%nMessage: %B'`, srch))
+func commitLog(srch string) (string, error) {
+	out, err := Clean(Run("log", "--no-decorate", "--no-color", srch))
 	if err != nil {
-		return []CommitDetails{}, err
+		return "", err
 	}
 
-	lines := strings.Split(out, "Commit: ")
-	if len(lines) < 1 {
-		return []CommitDetails{}, nil
-	}
-
-	cd := make([]CommitDetails, 0, len(lines)-1)
-	for i := 1; i < len(lines); i++ {
-		p := strings.SplitN(lines[i], "\n", 4)
-
-		cd = append(cd, CommitDetails{
-			Author:  strings.TrimPrefix(p[1], "Author: "),
-			Email:   strings.TrimPrefix(p[2], "Email: "),
-			Message: strings.TrimPrefix(strings.TrimRight(p[3], "\n"), "Message: "),
-		})
-	}
-
-	return cd, nil
-}
-
-// LatestCommit retrieves the latest commit within the repository
-func LatestCommit() (CommitDetails, error) {
-	out, err := Clean(Run("log", "-1", `--pretty=format:'"%an","%ae","%B"'`))
-	if err != nil {
-		return CommitDetails{}, err
-	}
-
-	// Split the formatted string into its component parts
-	p := strings.Split(out, ",")
-
-	// Strip quotes from around each part
-	author := p[0][1 : len(p[0])-1]
-	email := p[1][1 : len(p[1])-1]
-	msg := p[2][1 : len(p[2])-1]
-
-	return CommitDetails{
-		Author: author,
-		Email:  email,
-		// Strip trailing newline
-		Message: strings.TrimRight(msg, "\n"),
-	}, nil
+	return out, nil
 }
 
 // Tag will create a lightweight tag against the repository and push it to the origin

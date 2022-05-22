@@ -62,7 +62,7 @@ func TestLoadConfig(t *testing.T) {
 			cfg, err := loadConfig(currentWorkingDir)
 
 			require.NoError(t, err)
-			require.Equal(t, "1.0.0", cfg.FirstVersion)
+			require.True(t, cfg.AnnotatedTags)
 		})
 	}
 }
@@ -93,5 +93,5 @@ func TestLoadConfig_CustomLocation(t *testing.T) {
 
 	cfg, err := loadConfig("custom")
 	assert.NoError(t, err)
-	require.Equal(t, "1.0.0", cfg.FirstVersion)
+	require.True(t, cfg.AnnotatedTags)
 }

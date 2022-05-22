@@ -32,16 +32,14 @@ import (
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
-	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
 	"github.com/gembaadvantage/uplift/internal/task/hook/after"
 	"github.com/gembaadvantage/uplift/internal/task/hook/afterbump"
 	"github.com/gembaadvantage/uplift/internal/task/hook/before"
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforebump"
-	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
-	"github.com/gembaadvantage/uplift/internal/task/nextversion"
+	"github.com/gembaadvantage/uplift/internal/task/nextsemver"
 	"github.com/spf13/cobra"
 )
 
@@ -94,9 +92,7 @@ func bumpFiles(opts bumpOptions, out io.Writer) error {
 	tsks := []task.Runner{
 		before.Task{},
 		gitcheck.Task{},
-		currentversion.Task{},
-		lastcommit.Task{},
-		nextversion.Task{},
+		nextsemver.Task{},
 		nextcommit.Task{},
 		beforebump.Task{},
 		bump.Task{},

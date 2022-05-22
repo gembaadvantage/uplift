@@ -39,7 +39,6 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/hook/afterchangelog"
 	"github.com/gembaadvantage/uplift/internal/task/hook/before"
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforechangelog"
-	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/scm"
 	"github.com/spf13/cobra"
@@ -111,7 +110,6 @@ func writeChangelog(opts changelogOptions, out io.Writer) error {
 		before.Task{},
 		gitcheck.Task{},
 		scm.Task{},
-		lastcommit.Task{},
 		nextcommit.Task{},
 		beforechangelog.Task{},
 		changelog.Task{},

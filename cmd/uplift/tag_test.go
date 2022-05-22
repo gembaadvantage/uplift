@@ -33,7 +33,7 @@ import (
 )
 
 func TestTag(t *testing.T) {
-	untaggedRepo(t)
+	untaggedRepo(t, "fix: bug fix", "docs: update docs", "ci: update pipeline", "feat: new feature")
 
 	tagCmd := newTagCmd(noChangesPushed(), os.Stdout)
 
@@ -42,10 +42,11 @@ func TestTag(t *testing.T) {
 
 	tags := git.AllTags()
 	assert.Len(t, tags, 1)
+	assert.Equal(t, "v0.1.0", tags[0].Ref)
 }
 
 func TestTag_NextFlag(t *testing.T) {
-	untaggedRepo(t)
+	untaggedRepo(t, "docs: updated docs", "refactor!: breaking cli change", "ci: update pipeline", "fix: bug fix")
 
 	var buf bytes.Buffer
 	tagCmd := newTagCmd(noChangesPushed(), &buf)
@@ -56,7 +57,21 @@ func TestTag_NextFlag(t *testing.T) {
 
 	tags := git.AllTags()
 	assert.Len(t, tags, 0)
-	assert.NotEmpty(t, buf.String())
+	assert.Equal(t, "v1.0.0", buf.String())
+}
+
+func TestTag_NoPrefix(t *testing.T) {
+	untaggedRepo(t, "docs: update docs", "fix: bug fix")
+
+	tagCmd := newTagCmd(noChangesPushed(), os.Stdout)
+	tagCmd.Cmd.SetArgs([]string{"--no-prefix"})
+
+	err := tagCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	tags := git.AllTags()
+	assert.Len(t, tags, 1)
+	assert.Equal(t, "0.0.1", tags[0].Ref)
 }
 
 func TestTag_PrereleaseFlag(t *testing.T) {
@@ -71,7 +86,7 @@ func TestTag_PrereleaseFlag(t *testing.T) {
 
 	tags := git.AllTags()
 	assert.Len(t, tags, 1)
-	assert.Equal(t, "0.1.0-beta.1+12345", tags[0].Ref)
+	assert.Equal(t, "v0.1.0-beta.1+12345", tags[0].Ref)
 }
 
 func TestTag_Hooks(t *testing.T) {

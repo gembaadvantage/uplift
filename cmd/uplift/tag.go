@@ -31,7 +31,6 @@ import (
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
-	"github.com/gembaadvantage/uplift/internal/task/currentversion"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gittag"
@@ -39,9 +38,8 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/hook/aftertag"
 	"github.com/gembaadvantage/uplift/internal/task/hook/before"
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforetag"
-	"github.com/gembaadvantage/uplift/internal/task/lastcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
-	"github.com/gembaadvantage/uplift/internal/task/nextversion"
+	"github.com/gembaadvantage/uplift/internal/task/nextsemver"
 	"github.com/spf13/cobra"
 )
 
@@ -55,9 +53,7 @@ var (
 		before.Task{},
 		gitcheck.Task{},
 		fetchtag.Task{},
-		currentversion.Task{},
-		lastcommit.Task{},
-		nextversion.Task{},
+		nextsemver.Task{},
 		nextcommit.Task{},
 		beforetag.Task{},
 		gittag.Task{},
@@ -69,9 +65,7 @@ var (
 		before.Task{},
 		gitcheck.Task{},
 		fetchtag.Task{},
-		currentversion.Task{},
-		lastcommit.Task{},
-		nextversion.Task{},
+		nextsemver.Task{},
 		beforetag.Task{},
 		gittag.Task{},
 		aftertag.Task{},
@@ -83,6 +77,7 @@ type tagOptions struct {
 	FetchTags   bool
 	NextTagOnly bool
 	Prerelease  string
+	NoPrefix    bool
 	*globalOptions
 }
 
@@ -112,6 +107,7 @@ func newTagCmd(gopts *globalOptions, out io.Writer) *tagCommand {
 	f.BoolVar(&tagCmd.Opts.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
 	f.BoolVar(&tagCmd.Opts.NextTagOnly, "next", false, "output the next tag only")
 	f.StringVar(&tagCmd.Opts.Prerelease, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
+	f.BoolVar(&tagCmd.Opts.NoPrefix, "no-prefix", false, "strip the default 'v' prefix from the next calculated semantic version")
 
 	tagCmd.Cmd = cmd
 	return tagCmd
@@ -154,6 +150,7 @@ func setupTagContext(opts tagOptions, out io.Writer) (*context.Context, error) {
 	ctx.FetchTags = opts.FetchTags
 	ctx.NextTagOnly = opts.NextTagOnly
 	ctx.Out = out
+	ctx.NoPrefix = opts.NoPrefix
 
 	// Handle prerelease suffix if one is provided
 	if opts.Prerelease != "" {
