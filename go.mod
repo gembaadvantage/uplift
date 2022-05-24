@@ -13,7 +13,7 @@ require (
 	github.com/stretchr/testify v1.7.1
 	github.com/tidwall/gjson v1.14.1
 	github.com/tidwall/sjson v1.2.4
-	mvdan.cc/sh/v3 v3.5.0
+	mvdan.cc/sh/v3 v3.5.1
 )
 
 require (
