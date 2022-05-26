@@ -23,10 +23,11 @@ SOFTWARE.
 package config
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 
-	"github.com/go-yaml/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 // Uplift defines the root configuration of the application
@@ -130,7 +131,11 @@ func Load(f string) (Uplift, error) {
 		return Uplift{}, err
 	}
 
+	decoder := yaml.NewDecoder(bytes.NewReader(data))
+	decoder.KnownFields(true)
+
 	var cfg Uplift
-	err = yaml.UnmarshalStrict(data, &cfg)
+	err = decoder.Decode(&cfg)
+
 	return cfg, err
 }
