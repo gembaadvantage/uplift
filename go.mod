@@ -5,11 +5,11 @@ go 1.18
 require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/apex/log v1.9.0
-	github.com/gembaadvantage/codecommit-sign v1.3.1
+	github.com/gembaadvantage/codecommit-sign v1.4.0
 	github.com/muesli/mango-cobra v1.1.0
 	github.com/muesli/roff v0.1.0
 	github.com/spf13/cobra v1.4.0
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.7.2
 	github.com/tidwall/gjson v1.14.1
 	github.com/tidwall/sjson v1.2.4
 	gopkg.in/yaml.v3 v3.0.1
