@@ -41,10 +41,8 @@ const (
 	Token = "$VERSION"
 )
 
-var (
-	// Regex for matching a semantic version
-	Regex = regexp.MustCompile(Pattern)
-)
+// Regex for matching a semantic version
+var Regex = regexp.MustCompile(Pattern)
 
 // Version provides a less strict implementation of a semantic version
 // by supporting an optional use of a 'v' prefix

@@ -338,7 +338,8 @@ func TestAllTags_LargeHistory(t *testing.T) {
 		"10.1.10",
 		"10.11.10",
 		"11.0.0",
-		"prod"})
+		"prod",
+	})
 
 	tags := AllTags()
 	require.Len(t, tags, 15)
@@ -358,7 +359,8 @@ func TestAllTags_LargeHistory(t *testing.T) {
 		"0.10.0",
 		"0.9.0",
 		"0.1.123",
-		"0.1.11"}
+		"0.1.11",
+	}
 
 	for i, tag := range tags {
 		assert.Equal(t, exp[i], tag.Ref)
@@ -391,7 +393,8 @@ func TestLatestTag_LargeHistory(t *testing.T) {
 		"1.10.0",
 		"1.11.1",
 		"2.0.0",
-		"v2"})
+		"v2",
+	})
 
 	tag := LatestTag()
 	assert.Equal(t, "2.0.0", tag.Ref)
@@ -571,7 +574,7 @@ func TestCommit(t *testing.T) {
 func UnstagedFile(t *testing.T) string {
 	t.Helper()
 
-	err := ioutil.WriteFile("dummy.txt", []byte("hello, world!"), 0644)
+	err := ioutil.WriteFile("dummy.txt", []byte("hello, world!"), 0o644)
 	require.NoError(t, err)
 
 	out, err := Clean(Run("status", "--porcelain"))
@@ -772,10 +775,10 @@ func TestLogBetween_ExcludesWildcards(t *testing.T) {
 
 func TestStaged(t *testing.T) {
 	InitRepo(t)
-	ioutil.WriteFile("test1.txt", []byte(`testing`), 0644)
+	ioutil.WriteFile("test1.txt", []byte(`testing`), 0o644)
 	Stage("test1.txt")
 
-	ioutil.WriteFile("test2.txt", []byte(`testing`), 0644)
+	ioutil.WriteFile("test2.txt", []byte(`testing`), 0o644)
 	Stage("test2.txt")
 
 	stg, err := Staged()
@@ -787,7 +790,7 @@ func TestStaged(t *testing.T) {
 
 func TestStaged_NoFilesStaged(t *testing.T) {
 	InitRepo(t)
-	ioutil.WriteFile("test.txt", []byte(`testing`), 0644)
+	ioutil.WriteFile("test.txt", []byte(`testing`), 0o644)
 
 	stg, err := Staged()
 	require.NoError(t, err)

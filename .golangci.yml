@@ -6,7 +6,7 @@ linters:
   enable:
     - deadcode
     - dupl
-    - gofmt
+    - gofumpt
     - goimports
     - gosimple
     - govet
@@ -20,7 +20,5 @@ linters:
     - varcheck
 
 linters-settings:
-  gofmt:
-    simplify: true
   dupl:
     threshold: 400

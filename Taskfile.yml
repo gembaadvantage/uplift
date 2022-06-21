@@ -25,6 +25,7 @@ tasks:
       - task: lint
       - task: test
       - task: build
+      - task: fmt
 
   build:
     desc: Build the uplift binary
@@ -41,6 +42,11 @@ tasks:
     cmds:
       - golangci-lint run --timeout 5m0s
       - hadolint Dockerfile
+
+  fmt:
+    desc: gofumpt all code
+    cmds:
+      - gofumpt -w -l .
 
   clean:
     desc: Remove any built artifacts

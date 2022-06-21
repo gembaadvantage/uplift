@@ -54,7 +54,7 @@ func testFileWithConfig(t *testing.T, f string, cfg string) []byte {
 
 	c := []byte(`version: 0.0.0
 appVersion: 0.0.0`)
-	err := ioutil.WriteFile(f, c, 0644)
+	err := ioutil.WriteFile(f, c, 0o644)
 	require.NoError(t, err)
 
 	yml := fmt.Sprintf(`
@@ -64,7 +64,7 @@ bumps:
       - pattern: "version: $VERSION"
       - pattern: "appVersion: $VERSION"`, f)
 
-	err = ioutil.WriteFile(cfg, []byte(yml), 0644)
+	err = ioutil.WriteFile(cfg, []byte(yml), 0o644)
 	require.NoError(t, err)
 
 	// Ensure files are committed to prevent dirty repository

@@ -70,7 +70,7 @@ func TestLoadConfig(t *testing.T) {
 func TestLoadConfig_Malformed(t *testing.T) {
 	git.MkTmpDir(t)
 	yml := `firstV`
-	ioutil.WriteFile(".uplift.yml", []byte(yml), 0644)
+	ioutil.WriteFile(".uplift.yml", []byte(yml), 0o644)
 
 	_, err := loadConfig(currentWorkingDir)
 	assert.Error(t, err)
@@ -86,7 +86,7 @@ func TestLoadConfig_NotExists(t *testing.T) {
 func TestLoadConfig_CustomLocation(t *testing.T) {
 	git.MkTmpDir(t)
 
-	err := os.Mkdir("custom", 0755)
+	err := os.Mkdir("custom", 0o755)
 	require.NoError(t, err)
 
 	upliftConfigFile(t, "./custom/.uplift.yml")

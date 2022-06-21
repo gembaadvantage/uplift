@@ -80,7 +80,7 @@ func (c CommitDetails) String() string {
 
 // Run executes a git command and returns its output or errors
 func Run(args ...string) (string, error) {
-	var cmd = exec.Command("git", args...)
+	cmd := exec.Command("git", args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", errors.New(string(out))
