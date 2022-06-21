@@ -9,7 +9,7 @@ require (
 	github.com/muesli/mango-cobra v1.1.0
 	github.com/muesli/roff v0.1.0
 	github.com/spf13/cobra v1.5.0
-	github.com/stretchr/testify v1.7.2
+	github.com/stretchr/testify v1.7.4
 	github.com/tidwall/gjson v1.14.1
 	github.com/tidwall/sjson v1.2.4
 	gopkg.in/yaml.v3 v3.0.1
