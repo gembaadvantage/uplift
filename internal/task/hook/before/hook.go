@@ -46,5 +46,6 @@ func (t Task) Run(ctx *context.Context) error {
 	return hook.Exec(ctx.Context, ctx.Config.Hooks.Before, hook.ExecOptions{
 		DryRun: ctx.DryRun,
 		Debug:  ctx.Debug,
+		Env:    ctx.Config.Env,
 	})
 }

@@ -24,6 +24,7 @@ package hook
 
 import (
 	"context"
+	"io/ioutil"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -38,4 +39,51 @@ func TestExec_DryRun(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.NoFileExists(t, "out.txt")
+}
+
+func TestExec_InjectEnvVars(t *testing.T) {
+	git.MkTmpDir(t)
+
+	env := []string{"ONE=1", "TWO=2"}
+
+	sh := `#!/bin/bash
+echo -n "ONE=$ONE TWO=$TWO" > out.txt`
+	ioutil.WriteFile("print-env.sh", []byte(sh), 0o755)
+
+	cmds := []string{
+		"./print-env.sh",
+	}
+
+	err := Exec(context.Background(), cmds, ExecOptions{Env: env})
+	require.NoError(t, err)
+
+	data, err := ioutil.ReadFile("out.txt")
+	require.NoError(t, err)
+
+	assert.Equal(t, "ONE=1 TWO=2", string(data))
+}
+
+func TestExec_MergesEnvVars(t *testing.T) {
+	git.MkTmpDir(t)
+
+	env := []string{"ONE=1"}
+
+	sh := `#!/bin/bash
+printenv > out.txt`
+	ioutil.WriteFile("list-env.sh", []byte(sh), 0o755)
+
+	cmds := []string{
+		"./list-env.sh",
+	}
+
+	err := Exec(context.Background(), cmds, ExecOptions{Env: env})
+	require.NoError(t, err)
+
+	data, err := ioutil.ReadFile("out.txt")
+	require.NoError(t, err)
+
+	assert.Contains(t, string(data), "PATH=")
+	assert.Contains(t, string(data), "PWD=")
+	assert.Contains(t, string(data), "HOME=")
+	assert.Contains(t, string(data), "ONE=")
 }

@@ -29,6 +29,7 @@ import (
 	"strings"
 
 	"github.com/apex/log"
+	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
 )
@@ -37,10 +38,20 @@ import (
 type ExecOptions struct {
 	Debug  bool
 	DryRun bool
+	Env    []string
 }
 
 // Exec will execute a series of shell commands or scripts
 func Exec(ctx context.Context, cmds []string, opts ExecOptions) error {
+
+	// TODO: Is it a good idea to merge? How does a script behave by default?
+	env := os.Environ()
+	if len(opts.Env) > 0 {
+		env = append(env, opts.Env...)
+
+		// TODO: support the concept of .env files, log a warning for anything that isn't recognised
+	}
+
 	for _, c := range cmds {
 		log.WithField("hook", c).Info("running")
 		if opts.DryRun {
@@ -60,8 +71,10 @@ func Exec(ctx context.Context, cmds []string, opts ExecOptions) error {
 		}
 
 		r, err := interp.New(
+			interp.Params("-e"),
 			interp.StdIO(os.Stdin, out, os.Stderr),
 			interp.OpenHandler(openHandler),
+			interp.Env(expand.ListEnviron(env...)),
 		)
 		if err != nil {
 			return err
