@@ -43,7 +43,6 @@ type ExecOptions struct {
 
 // Exec will execute a series of shell commands or scripts
 func Exec(ctx context.Context, cmds []string, opts ExecOptions) error {
-
 	// TODO: Is it a good idea to merge? How does a script behave by default?
 	env := os.Environ()
 	if len(opts.Env) > 0 {
