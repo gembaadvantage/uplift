@@ -293,7 +293,7 @@ func Ignore(t *testing.T, fs ...string) {
 		_, err := Run("config", "advice.addIgnoredFile", "true")
 		require.NoError(t, err)
 
-		err = os.WriteFile(".gitignore", []byte(strings.Join(out, "\n")), 0644)
+		err = os.WriteFile(".gitignore", []byte(strings.Join(out, "\n")), 0o644)
 		require.NoError(t, err)
 
 		err = Stage(".gitignore")

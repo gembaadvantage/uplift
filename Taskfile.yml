@@ -42,6 +42,11 @@ tasks:
       - golangci-lint run --timeout 5m0s
       - hadolint Dockerfile
 
+  fmt:
+    desc: gofumpt all code
+    cmds:
+      - gofumpt -w -l .
+
   clean:
     desc: Remove any built artifacts
     cmds:

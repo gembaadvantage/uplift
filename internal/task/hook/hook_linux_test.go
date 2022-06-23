@@ -57,7 +57,7 @@ func TestExec_ShellScripts(t *testing.T) {
 	sh := `#!/bin/bash
 LATEST_TAG=$(git for-each-ref "refs/tags/*.*.*" --sort=-v:creatordate --format='%(refname:short)')
 echo -n $LATEST_TAG > out.txt`
-	ioutil.WriteFile("latest-tag.sh", []byte(sh), 0755)
+	ioutil.WriteFile("latest-tag.sh", []byte(sh), 0o755)
 
 	err := Exec(context.Background(), []string{"./latest-tag.sh"}, ExecOptions{})
 	require.NoError(t, err)

@@ -36,13 +36,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	commit = git.CommitDetails{
-		Author:  "joe.bloggs",
-		Email:   "joe.bloggs@example.com",
-		Message: "dummy commit",
-	}
-)
+var commit = git.CommitDetails{
+	Author:  "joe.bloggs",
+	Email:   "joe.bloggs@example.com",
+	Message: "dummy commit",
+}
 
 func TestRun_Regex(t *testing.T) {
 	tests := []struct {

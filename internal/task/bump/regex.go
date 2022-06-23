@@ -92,7 +92,7 @@ func regexBump(ctx *context.Context, path string, bumps []config.RegexBump) (boo
 		return false, nil
 	}
 
-	return true, ioutil.WriteFile(path, []byte(str), 0644)
+	return true, ioutil.WriteFile(path, []byte(str), 0o644)
 }
 
 func match(pattern string, data string) (string, error) {

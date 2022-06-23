@@ -268,7 +268,7 @@ func diffChangelog(rels []release) (string, error) {
 }
 
 func newChangelog(rels []release) error {
-	f, err := os.OpenFile(MarkdownFile, os.O_CREATE|os.O_RDWR, 0644)
+	f, err := os.OpenFile(MarkdownFile, os.O_CREATE|os.O_RDWR, 0o644)
 	if err != nil {
 		return err
 	}
@@ -298,7 +298,7 @@ func appendChangelog(rels []release) error {
 	apnd := strings.Replace(clStr, appendHeader, buf.String(), 1)
 
 	log.Debug("append to existing changelog in repository")
-	return ioutil.WriteFile(MarkdownFile, []byte(apnd), 0644)
+	return ioutil.WriteFile(MarkdownFile, []byte(apnd), 0o644)
 }
 
 func execTemplate(tmpl string, v interface{}) string {

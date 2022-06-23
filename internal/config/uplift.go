@@ -42,6 +42,7 @@ type Uplift struct {
 	GitHub        GitHub       `yaml:"github"`
 	GitLab        GitLab       `yaml:"gitlab"`
 	Hooks         Hooks        `yaml:"hooks"`
+	Env           []string     `yaml:"env"`
 }
 
 // Bump defines configuration for bumping individual files based

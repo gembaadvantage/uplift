@@ -89,7 +89,7 @@ func LastCommit(t *testing.T) string {
 }
 
 func trackFile(t *testing.T, name string) {
-	err := ioutil.WriteFile(name, []byte(`hello, world`), 0644)
+	err := ioutil.WriteFile(name, []byte(`hello, world`), 0o644)
 	require.NoError(t, err)
 
 	err = git.Stage(name)

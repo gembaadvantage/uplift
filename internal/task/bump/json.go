@@ -77,5 +77,5 @@ func jsonBump(ctx *context.Context, path string, bumps []config.JSONBump) (bool,
 		return false, nil
 	}
 
-	return true, ioutil.WriteFile(path, []byte(str), 0644)
+	return true, ioutil.WriteFile(path, []byte(str), 0o644)
 }

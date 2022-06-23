@@ -57,8 +57,8 @@ func TestExec_ShellScripts(t *testing.T) {
 	sh := `#!/bin/bash
 LAST_COMMIT=$(git log -1 --pretty=format:'%B')
 echo -n $LAST_COMMIT > out.txt`
-	os.Mkdir("subfolder", 0755)
-	ioutil.WriteFile("subfolder/last-commit.sh", []byte(sh), 0755)
+	os.Mkdir("subfolder", 0o755)
+	ioutil.WriteFile("subfolder/last-commit.sh", []byte(sh), 0o755)
 
 	err := Exec(context.Background(), []string{"bash subfolder//last-commit.sh"}, ExecOptions{})
 	require.NoError(t, err)

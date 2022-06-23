@@ -29,9 +29,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/config"
 )
 
-var (
-	files = [4]string{".uplift.yml", ".uplift.yaml", "uplift.yml", "uplift.yaml"}
-)
+var files = [4]string{".uplift.yml", ".uplift.yaml", "uplift.yml", "uplift.yaml"}
 
 const (
 	currentWorkingDir = "."

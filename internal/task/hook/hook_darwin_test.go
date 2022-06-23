@@ -57,7 +57,7 @@ func TestExec_ShellScripts(t *testing.T) {
 git checkout -b $BRANCH
 CURRENT=$(git branch --show-current)
 echo -n $CURRENT > out.txt`
-	ioutil.WriteFile("switch-branch.sh", []byte(sh), 0755)
+	ioutil.WriteFile("switch-branch.sh", []byte(sh), 0o755)
 
 	err := Exec(context.Background(), []string{"BRANCH=testing ./switch-branch.sh"}, ExecOptions{})
 	require.NoError(t, err)

@@ -37,6 +37,7 @@ nav:
       - File Bumping: config/bumping.md
       - Git: config/git.md
       - Hooks: config/hooks.md
+      - Environment Variables: config/env.md
   - Continuous Integration:
       - About: ci/about.md
       - AWS CodeBuild: ci/awscodebuild.md
