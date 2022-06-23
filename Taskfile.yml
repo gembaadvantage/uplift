@@ -25,7 +25,6 @@ tasks:
       - task: lint
       - task: test
       - task: build
-      - task: fmt
 
   build:
     desc: Build the uplift binary

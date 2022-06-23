@@ -25,6 +25,7 @@ package hook
 import (
 	"context"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -46,12 +47,8 @@ func TestExec_InjectEnvVars(t *testing.T) {
 
 	env := []string{"ONE=1", "TWO=2"}
 
-	sh := `#!/bin/bash
-echo -n "ONE=$ONE TWO=$TWO" > out.txt`
-	ioutil.WriteFile("print-env.sh", []byte(sh), 0o755)
-
 	cmds := []string{
-		"./print-env.sh",
+		"echo -n ONE=$ONE TWO=$TWO > out.txt",
 	}
 
 	err := Exec(context.Background(), cmds, ExecOptions{Env: env})
@@ -68,12 +65,8 @@ func TestExec_MergesEnvVars(t *testing.T) {
 
 	env := []string{"ONE=1"}
 
-	sh := `#!/bin/bash
-printenv > out.txt`
-	ioutil.WriteFile("list-env.sh", []byte(sh), 0o755)
-
 	cmds := []string{
-		"./list-env.sh",
+		"printenv > out.txt",
 	}
 
 	err := Exec(context.Background(), cmds, ExecOptions{Env: env})
@@ -86,4 +79,46 @@ printenv > out.txt`
 	assert.Contains(t, string(data), "PWD=")
 	assert.Contains(t, string(data), "HOME=")
 	assert.Contains(t, string(data), "ONE=")
+}
+
+func TestExec_VarsWithWhitespace(t *testing.T) {
+	git.MkTmpDir(t)
+
+	env := []string{"ONE = 1", "TWO= 2", "THREE    =    3"}
+
+	cmds := []string{
+		"echo -n $ONE $TWO $THREE > out.txt",
+	}
+
+	err := Exec(context.Background(), cmds, ExecOptions{Env: env})
+	require.NoError(t, err)
+
+	data, err := ioutil.ReadFile("out.txt")
+	require.NoError(t, err)
+
+	assert.Equal(t, "1 2 3", string(data))
+}
+
+func TestExec_LoadDotEnvFiles(t *testing.T) {
+	git.MkTmpDir(t)
+
+	dotenv1 := `ONE=1
+TWO   =   2`
+	ioutil.WriteFile(".env", []byte(dotenv1), 0o600)
+
+	os.Mkdir("custom", 0o755)
+	dotenv2 := "THREE=    3"
+	ioutil.WriteFile("custom/another.env", []byte(dotenv2), 0o600)
+
+	cmds := []string{
+		"echo -n $ONE $TWO $THREE > out.txt",
+	}
+
+	err := Exec(context.Background(), cmds, ExecOptions{Env: []string{".env", "custom/another.env"}})
+	require.NoError(t, err)
+
+	data, err := ioutil.ReadFile("out.txt")
+	require.NoError(t, err)
+
+	assert.Equal(t, "1 2 3", string(data))
 }
