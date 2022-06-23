@@ -105,7 +105,13 @@ func openHandler(ctx context.Context, path string, flag int, perm os.FileMode) (
 func resolveEnv(env []string) ([]string, error) {
 	renv := make([]string, 0, len(env))
 	for _, e := range env {
-		if _, err := os.Stat(e); err == nil {
+		// Check for a .env extension
+		if strings.HasSuffix(e, ".env") {
+			_, err := os.Stat(e)
+			if err != nil {
+				return []string{}, fmt.Errorf("file %s does not exist", e)
+			}
+
 			log.WithField("path", e).Debug("Loading dotenv file")
 
 			dotenv, err := godotenv.Read(e)
