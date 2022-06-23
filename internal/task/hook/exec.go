@@ -121,8 +121,6 @@ func resolveEnv(env []string) ([]string, error) {
 				renv = append(renv, denv)
 			}
 		} else {
-			// TODO: report a warning if environment var definition is invalid
-
 			// Crude sanitisation of env var, trimming any whitespace around the assignment '='
 			// otherwise it will be silently ignored
 			e = cleanEnv.ReplaceAllString(e, "=")
