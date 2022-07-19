@@ -1,4 +1,4 @@
-FROM alpine:3.16.0
+FROM alpine:3.16.1
 
 # Install tini to ensure docker waits for uplift to finish before terminating
 RUN apk add --no-cache \
