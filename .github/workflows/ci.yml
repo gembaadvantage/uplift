@@ -36,12 +36,15 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
         if: matrix.os == 'windows-latest'
+
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
           go-version: 1.18
+
       - name: Cache Go
         uses: actions/cache@v3
         with:
@@ -51,14 +54,18 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+
       - name: Install Task
         uses: arduino/setup-task@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Test
         run: task test
+
       - name: Build
         run: task build
+
       # All static checks from this point should run on linux as it is the
       # fastest platform
       - name: Lint Code
@@ -66,11 +73,13 @@ jobs:
         uses: golangci/golangci-lint-action@v3.2.0
         with:
           skip-go-installation: true
+
       - name: Lint Dockerfile
         if: matrix.os == 'ubuntu-latest'
         uses: hadolint/hadolint-action@v2.1.0
         with:
           dockerfile: Dockerfile
+
       - name: misspell
         if: matrix.os == 'ubuntu-latest'
         uses: reviewdog/action-misspell@v1
@@ -86,24 +95,7 @@ jobs:
             ./.goreleaser.yml
             ./.github/**
             ./internal/git/utils.go
+
       - name: Code Coverage
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v3
-
-  # Only run if the ci job is successful
-  release:
-    needs: ci
-    if: github.ref == 'refs/heads/main' && always() && (needs.ci.result == 'success')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GH_UPLIFT }}
-      - name: Release
-        uses: gembaadvantage/uplift-action@v2.0.1
-        with:
-          args: release --skip-changelog
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_UPLIFT }}
