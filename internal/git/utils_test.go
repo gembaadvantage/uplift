@@ -24,7 +24,7 @@ package git
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -574,7 +574,7 @@ func TestCommit(t *testing.T) {
 func UnstagedFile(t *testing.T) string {
 	t.Helper()
 
-	err := ioutil.WriteFile("dummy.txt", []byte("hello, world!"), 0o644)
+	err := os.WriteFile("dummy.txt", []byte("hello, world!"), 0o644)
 	require.NoError(t, err)
 
 	out, err := Clean(Run("status", "--porcelain"))
@@ -775,10 +775,10 @@ func TestLogBetween_ExcludesWildcards(t *testing.T) {
 
 func TestStaged(t *testing.T) {
 	InitRepo(t)
-	ioutil.WriteFile("test1.txt", []byte(`testing`), 0o644)
+	os.WriteFile("test1.txt", []byte(`testing`), 0o644)
 	Stage("test1.txt")
 
-	ioutil.WriteFile("test2.txt", []byte(`testing`), 0o644)
+	os.WriteFile("test2.txt", []byte(`testing`), 0o644)
 	Stage("test2.txt")
 
 	stg, err := Staged()
@@ -790,7 +790,7 @@ func TestStaged(t *testing.T) {
 
 func TestStaged_NoFilesStaged(t *testing.T) {
 	InitRepo(t)
-	ioutil.WriteFile("test.txt", []byte(`testing`), 0o644)
+	os.WriteFile("test.txt", []byte(`testing`), 0o644)
 
 	stg, err := Staged()
 	require.NoError(t, err)

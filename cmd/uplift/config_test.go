@@ -23,7 +23,6 @@ SOFTWARE.
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -70,7 +69,7 @@ func TestLoadConfig(t *testing.T) {
 func TestLoadConfig_Malformed(t *testing.T) {
 	git.MkTmpDir(t)
 	yml := `firstV`
-	ioutil.WriteFile(".uplift.yml", []byte(yml), 0o644)
+	os.WriteFile(".uplift.yml", []byte(yml), 0o644)
 
 	_, err := loadConfig(currentWorkingDir)
 	assert.Error(t, err)

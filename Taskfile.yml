@@ -23,6 +23,7 @@ tasks:
     cmds:
       - task: clean
       - task: lint
+      - task: docker-lint
       - task: test
       - task: build
 
@@ -40,6 +41,10 @@ tasks:
     desc: Lint the code using golangci
     cmds:
       - golangci-lint run --timeout 5m0s
+
+  docker-lint:
+    desc: Lint the Dockerfile using Hadolint
+    cmds:
       - hadolint Dockerfile
 
   fmt:

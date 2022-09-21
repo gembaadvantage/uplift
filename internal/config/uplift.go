@@ -24,7 +24,7 @@ package config
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -127,7 +127,7 @@ func Load(f string) (Uplift, error) {
 	defer fh.Close()
 
 	// Read the contents of the file in one go
-	data, err := ioutil.ReadAll(fh)
+	data, err := io.ReadAll(fh)
 	if err != nil {
 		return Uplift{}, err
 	}

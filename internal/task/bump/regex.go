@@ -24,7 +24,7 @@ package bump
 
 import (
 	"errors"
-	"io/ioutil"
+	"os"
 	"regexp"
 	"strings"
 
@@ -35,7 +35,7 @@ import (
 )
 
 func regexBump(ctx *context.Context, path string, bumps []config.RegexBump) (bool, error) {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return false, err
 	}
@@ -92,7 +92,7 @@ func regexBump(ctx *context.Context, path string, bumps []config.RegexBump) (boo
 		return false, nil
 	}
 
-	return true, ioutil.WriteFile(path, []byte(str), 0o644)
+	return true, os.WriteFile(path, []byte(str), 0o644)
 }
 
 func match(pattern string, data string) (string, error) {

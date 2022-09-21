@@ -23,7 +23,6 @@ SOFTWARE.
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -73,7 +72,7 @@ func upliftConfigFile(t *testing.T, name string) {
 	// Ensure .uplift.yml file is committed to repository
 	yml := "annotatedTags: true"
 
-	err := ioutil.WriteFile(name, []byte(yml), 0o644)
+	err := os.WriteFile(name, []byte(yml), 0o644)
 	require.NoError(t, err)
 }
 
@@ -115,10 +114,10 @@ func configWithHooks(t *testing.T) {
 	data, err := yaml.Marshal(&cfg)
 	require.NoError(t, err)
 
-	err = ioutil.WriteFile(".uplift.yml", data, 0o644)
+	err = os.WriteFile(".uplift.yml", data, 0o644)
 	require.NoError(t, err)
 
-	err = ioutil.WriteFile(".gitignore", []byte(HookDir), 0o644)
+	err = os.WriteFile(".gitignore", []byte(HookDir), 0o644)
 	require.NoError(t, err)
 
 	// Ensure files are committed to prevent dirty repository

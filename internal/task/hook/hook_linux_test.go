@@ -24,7 +24,7 @@ package hook
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -43,7 +43,7 @@ func TestExec_ShellCommands(t *testing.T) {
 	err := Exec(context.Background(), cmds, ExecOptions{})
 	require.NoError(t, err)
 
-	data, err := ioutil.ReadFile("out.txt")
+	data, err := os.ReadFile("out.txt")
 	require.NoError(t, err)
 
 	assert.Equal(t, "JohnSmith", string(data))
@@ -57,12 +57,12 @@ func TestExec_ShellScripts(t *testing.T) {
 	sh := `#!/bin/bash
 LATEST_TAG=$(git for-each-ref "refs/tags/*.*.*" --sort=-v:creatordate --format='%(refname:short)')
 echo -n $LATEST_TAG > out.txt`
-	ioutil.WriteFile("latest-tag.sh", []byte(sh), 0o755)
+	os.WriteFile("latest-tag.sh", []byte(sh), 0o755)
 
 	err := Exec(context.Background(), []string{"./latest-tag.sh"}, ExecOptions{})
 	require.NoError(t, err)
 
-	data, err := ioutil.ReadFile("out.txt")
+	data, err := os.ReadFile("out.txt")
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.0.0", string(data))
