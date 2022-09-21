@@ -23,7 +23,7 @@ SOFTWARE.
 package gitcommit
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/context"
@@ -89,7 +89,7 @@ func LastCommit(t *testing.T) string {
 }
 
 func trackFile(t *testing.T, name string) {
-	err := ioutil.WriteFile(name, []byte(`hello, world`), 0o644)
+	err := os.WriteFile(name, []byte(`hello, world`), 0o644)
 	require.NoError(t, err)
 
 	err = git.Stage(name)

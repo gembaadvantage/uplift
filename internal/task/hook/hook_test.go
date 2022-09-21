@@ -24,7 +24,6 @@ package hook
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -54,7 +53,7 @@ func TestExec_InjectEnvVars(t *testing.T) {
 	err := Exec(context.Background(), cmds, ExecOptions{Env: env})
 	require.NoError(t, err)
 
-	data, err := ioutil.ReadFile("out.txt")
+	data, err := os.ReadFile("out.txt")
 	require.NoError(t, err)
 
 	assert.Equal(t, "VALUE1=VALUE VALUE2=ANOTHER VALUE", string(data))
@@ -72,7 +71,7 @@ func TestExec_MergesEnvVars(t *testing.T) {
 	err := Exec(context.Background(), cmds, ExecOptions{Env: env})
 	require.NoError(t, err)
 
-	data, err := ioutil.ReadFile("out.txt")
+	data, err := os.ReadFile("out.txt")
 	require.NoError(t, err)
 
 	assert.Contains(t, string(data), "PATH=")
@@ -93,7 +92,7 @@ func TestExec_VarsWithWhitespace(t *testing.T) {
 	err := Exec(context.Background(), cmds, ExecOptions{Env: env})
 	require.NoError(t, err)
 
-	data, err := ioutil.ReadFile("out.txt")
+	data, err := os.ReadFile("out.txt")
 	require.NoError(t, err)
 
 	assert.Equal(t, "1 2 3", string(data))
@@ -104,11 +103,11 @@ func TestExec_LoadDotEnvFiles(t *testing.T) {
 
 	dotenv1 := `ONE=1
 TWO   =   2`
-	ioutil.WriteFile(".env", []byte(dotenv1), 0o600)
+	os.WriteFile(".env", []byte(dotenv1), 0o600)
 
 	os.Mkdir("custom", 0o755)
 	dotenv2 := "THREE=    3"
-	ioutil.WriteFile("custom/another.env", []byte(dotenv2), 0o600)
+	os.WriteFile("custom/another.env", []byte(dotenv2), 0o600)
 
 	cmds := []string{
 		"echo -n $ONE $TWO $THREE > out.txt",
@@ -117,7 +116,7 @@ TWO   =   2`
 	err := Exec(context.Background(), cmds, ExecOptions{Env: []string{".env", "custom/another.env"}})
 	require.NoError(t, err)
 
-	data, err := ioutil.ReadFile("out.txt")
+	data, err := os.ReadFile("out.txt")
 	require.NoError(t, err)
 
 	assert.Equal(t, "1 2 3", string(data))
@@ -127,7 +126,7 @@ func TestExec_FailsOnInvalidDotEnvFile(t *testing.T) {
 	git.MkTmpDir(t)
 
 	dotenv := "INVALID"
-	ioutil.WriteFile(".env", []byte(dotenv), 0o600)
+	os.WriteFile(".env", []byte(dotenv), 0o600)
 
 	err := Exec(context.Background(), []string{}, ExecOptions{Env: []string{".env"}})
 	require.Error(t, err)

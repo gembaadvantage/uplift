@@ -25,7 +25,6 @@ package changelog
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -133,7 +132,7 @@ func TestRun_AppendToUnsupportedTemplate(t *testing.T) {
 
 	cl := `# Changelog
 This changelog is deliberately missing the append marker`
-	ioutil.WriteFile(MarkdownFile, []byte(cl), 0o644)
+	os.WriteFile(MarkdownFile, []byte(cl), 0o644)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -164,7 +163,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - %s first commit
 - %s initialise repo
 `, abbrevHash(t, h1[0]), abbrevHash(t, ih))
-	ioutil.WriteFile(MarkdownFile, []byte(cl), 0o644)
+	os.WriteFile(MarkdownFile, []byte(cl), 0o644)
 
 	ctx := &context.Context{
 		CurrentVersion: semver.Version{
@@ -241,7 +240,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 func readChangelog(t *testing.T) string {
 	t.Helper()
 
-	data, err := ioutil.ReadFile(MarkdownFile)
+	data, err := os.ReadFile(MarkdownFile)
 	require.NoError(t, err)
 
 	return string(data)

@@ -23,7 +23,6 @@ SOFTWARE.
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -50,7 +49,7 @@ func TestRelease(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, out, "ci(uplift): uplifted for version v0.1.0")
 
-	actual, err := ioutil.ReadFile("test.txt")
+	actual, err := os.ReadFile("test.txt")
 	require.NoError(t, err)
 	assert.NotEqual(t, string(data), string(actual))
 	assert.Contains(t, string(actual), "version: v0.1.0")
@@ -116,7 +115,7 @@ func TestRelease_PrereleaseFlag(t *testing.T) {
 	assert.Len(t, tags, 1)
 	assert.Equal(t, "v0.1.0-beta.1+12345", tags[0].Ref)
 
-	actual, err := ioutil.ReadFile("test.txt")
+	actual, err := os.ReadFile("test.txt")
 	require.NoError(t, err)
 	assert.Contains(t, string(actual), "version: v0.1.0-beta.1+12345")
 }
@@ -155,7 +154,7 @@ func TestRelease_SkipBumps(t *testing.T) {
 	tag := git.LatestTag()
 	assert.Equal(t, "1.0.1", tag.Ref)
 
-	actual, err := ioutil.ReadFile("test.txt")
+	actual, err := os.ReadFile("test.txt")
 	require.NoError(t, err)
 	assert.NotContains(t, string(actual), "version: 1.0.0")
 }

@@ -24,7 +24,7 @@ package bump
 
 import (
 	"errors"
-	"io/ioutil"
+	"os"
 
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/config"
@@ -34,7 +34,7 @@ import (
 )
 
 func jsonBump(ctx *context.Context, path string, bumps []config.JSONBump) (bool, error) {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return false, err
 	}
@@ -77,5 +77,5 @@ func jsonBump(ctx *context.Context, path string, bumps []config.JSONBump) (bool,
 		return false, nil
 	}
 
-	return true, ioutil.WriteFile(path, []byte(str), 0o644)
+	return true, os.WriteFile(path, []byte(str), 0o644)
 }

@@ -24,7 +24,6 @@ package bump
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -431,7 +430,7 @@ func WriteFile(t *testing.T, s string) string {
 	current, err := os.Getwd()
 	require.NoError(t, err)
 
-	file, err := ioutil.TempFile(current, "*")
+	file, err := os.CreateTemp(current, "*")
 	require.NoError(t, err)
 
 	_, err = file.WriteString(s)
@@ -448,7 +447,7 @@ func WriteFile(t *testing.T, s string) string {
 func ReadFile(t *testing.T, path string) string {
 	t.Helper()
 
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	require.NoError(t, err)
 
 	return string(b)

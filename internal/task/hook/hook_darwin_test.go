@@ -24,7 +24,7 @@ package hook
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -43,7 +43,7 @@ func TestExec_ShellCommands(t *testing.T) {
 	err := Exec(context.Background(), cmds, ExecOptions{})
 	require.NoError(t, err)
 
-	data, err := ioutil.ReadFile("out.txt")
+	data, err := os.ReadFile("out.txt")
 	require.NoError(t, err)
 
 	assert.Equal(t, "JohnSmith", string(data))
@@ -57,12 +57,12 @@ func TestExec_ShellScripts(t *testing.T) {
 git checkout -b $BRANCH
 CURRENT=$(git branch --show-current)
 echo -n $CURRENT > out.txt`
-	ioutil.WriteFile("switch-branch.sh", []byte(sh), 0o755)
+	os.WriteFile("switch-branch.sh", []byte(sh), 0o755)
 
 	err := Exec(context.Background(), []string{"BRANCH=testing ./switch-branch.sh"}, ExecOptions{})
 	require.NoError(t, err)
 
-	data, err := ioutil.ReadFile("out.txt")
+	data, err := os.ReadFile("out.txt")
 	require.NoError(t, err)
 
 	assert.Equal(t, "testing", string(data))

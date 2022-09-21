@@ -27,7 +27,6 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"text/template"
@@ -279,7 +278,7 @@ func newChangelog(rels []release) error {
 }
 
 func appendChangelog(rels []release) error {
-	cl, err := ioutil.ReadFile(MarkdownFile)
+	cl, err := os.ReadFile(MarkdownFile)
 	if err != nil {
 		return err
 	}
@@ -298,7 +297,7 @@ func appendChangelog(rels []release) error {
 	apnd := strings.Replace(clStr, appendHeader, buf.String(), 1)
 
 	log.Debug("append to existing changelog in repository")
-	return ioutil.WriteFile(MarkdownFile, []byte(apnd), 0o644)
+	return os.WriteFile(MarkdownFile, []byte(apnd), 0o644)
 }
 
 func execTemplate(tmpl string, v interface{}) string {

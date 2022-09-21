@@ -24,7 +24,6 @@ package hook
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -44,7 +43,7 @@ func TestExec_ShellCommands(t *testing.T) {
 	err := Exec(context.Background(), cmds, ExecOptions{})
 	require.NoError(t, err)
 
-	data, err := ioutil.ReadFile("out.txt")
+	data, err := os.ReadFile("out.txt")
 	require.NoError(t, err)
 
 	assert.Equal(t, "JohnSmith", string(data))
@@ -58,12 +57,12 @@ func TestExec_ShellScripts(t *testing.T) {
 LAST_COMMIT=$(git log -1 --pretty=format:'%B')
 echo -n $LAST_COMMIT > out.txt`
 	os.Mkdir("subfolder", 0o755)
-	ioutil.WriteFile("subfolder/last-commit.sh", []byte(sh), 0o755)
+	os.WriteFile("subfolder/last-commit.sh", []byte(sh), 0o755)
 
 	err := Exec(context.Background(), []string{"bash subfolder//last-commit.sh"}, ExecOptions{})
 	require.NoError(t, err)
 
-	data, err := ioutil.ReadFile("out.txt")
+	data, err := os.ReadFile("out.txt")
 	require.NoError(t, err)
 
 	assert.Equal(t, "initialise repo", string(data))

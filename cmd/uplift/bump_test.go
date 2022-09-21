@@ -24,7 +24,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -43,7 +42,7 @@ func TestBump(t *testing.T) {
 	err := bmpCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	actual, err := ioutil.ReadFile("test.txt")
+	actual, err := os.ReadFile("test.txt")
 	require.NoError(t, err)
 	assert.Equal(t, `version: 0.2.0
 appVersion: 0.2.0`, string(actual))
@@ -54,7 +53,7 @@ func testFileWithConfig(t *testing.T, f string, cfg string) []byte {
 
 	c := []byte(`version: 0.0.0
 appVersion: 0.0.0`)
-	err := ioutil.WriteFile(f, c, 0o644)
+	err := os.WriteFile(f, c, 0o644)
 	require.NoError(t, err)
 
 	yml := fmt.Sprintf(`
@@ -64,7 +63,7 @@ bumps:
       - pattern: "version: $VERSION"
       - pattern: "appVersion: $VERSION"`, f)
 
-	err = ioutil.WriteFile(cfg, []byte(yml), 0o644)
+	err = os.WriteFile(cfg, []byte(yml), 0o644)
 	require.NoError(t, err)
 
 	// Ensure files are committed to prevent dirty repository
@@ -83,7 +82,7 @@ func TestBump_PrereleaseFlag(t *testing.T) {
 	err := bmpCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	actual, err := ioutil.ReadFile("test.txt")
+	actual, err := os.ReadFile("test.txt")
 	require.NoError(t, err)
 	assert.Equal(t, `version: v1.0.0-beta.1+12345
 appVersion: v1.0.0-beta.1+12345`, string(actual))
