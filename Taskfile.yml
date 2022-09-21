@@ -3,7 +3,6 @@
 version: "3"
 
 vars:
-  BINDIR: bin
   BINNAME: uplift
   GIT_COMMIT:
     sh: git rev-parse HEAD
@@ -21,7 +20,6 @@ tasks:
   default:
     desc: Runs all of the default tasks
     cmds:
-      - task: clean
       - task: lint
       - task: docker-lint
       - task: test
@@ -30,7 +28,7 @@ tasks:
   build:
     desc: Build the uplift binary
     cmds:
-      - go build -ldflags '-s -w {{.LDFLAGS}}' -o '{{.BINDIR}}/{{.BINNAME}}' ./cmd/uplift
+      - go build -ldflags '-s -w {{.LDFLAGS}}' -o '{{.BINDIR}}' ./cmd/uplift
 
   test:
     desc: Run the tests
@@ -47,12 +45,12 @@ tasks:
     cmds:
       - hadolint Dockerfile
 
-  fmt:
-    desc: gofumpt all code
+  format:
+    desc: Format all code using gofumpt
     cmds:
       - gofumpt -w -l .
 
   clean:
-    desc: Remove any built artifacts
+    desc: Delete all artefacts from recent build
     cmds:
-      - rm -rf {{.BINDIR}}
+      - rm -f ./{{.BINNAME}}

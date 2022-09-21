@@ -18,6 +18,7 @@
 bin/
 completions/
 manpages/
+uplift
 
 # GoReleaser build output
 dist/
