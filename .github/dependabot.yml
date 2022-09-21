@@ -20,15 +20,33 @@
 
 version: 2
 updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependabot"
+      - "pinned"
+    commit-message:
+      prefix: "feat"
+      include: "scope"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
-  - package-ecosystem: gomod
-    directory: "/"
-    schedule:
-      interval: daily
+    labels:
+      - "dependabot"
+      - "pinned"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "daily"
+    labels:
+      - "dependabot"
+      - "pinned"
+    commit-message:
+      prefix: "feat"
+      include: "scope"
