@@ -28,7 +28,7 @@ tasks:
   build:
     desc: Build the uplift binary
     cmds:
-      - go build -ldflags '-s -w {{.LDFLAGS}}' -o '{{.BINDIR}}' ./cmd/uplift
+      - CGO_ENABLED=0 go build -ldflags '-s -w {{.LDFLAGS}}' -o '{{.BINNAME}}' ./cmd/uplift
 
   test:
     desc: Run the tests
