@@ -61,7 +61,7 @@ var (
 		after.Task{},
 	}
 
-	nextTagPipeline = []task.Runner{
+	printTagPipeline = []task.Runner{
 		before.Task{},
 		gitcheck.Task{},
 		fetchtag.Task{},
@@ -74,10 +74,11 @@ var (
 )
 
 type tagOptions struct {
-	FetchTags   bool
-	NextTagOnly bool
-	Prerelease  string
-	NoPrefix    bool
+	FetchTags       bool
+	PrintCurrentTag bool
+	PrintNextTag    bool
+	Prerelease      string
+	NoPrefix        bool
 	*globalOptions
 }
 
@@ -104,10 +105,11 @@ func newTagCmd(gopts *globalOptions, out io.Writer) *tagCommand {
 	}
 
 	f := cmd.Flags()
+	f.BoolVar(&tagCmd.Opts.PrintCurrentTag, "current", false, "output the current tag")
 	f.BoolVar(&tagCmd.Opts.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
-	f.BoolVar(&tagCmd.Opts.NextTagOnly, "next", false, "output the next tag only")
-	f.StringVar(&tagCmd.Opts.Prerelease, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
+	f.BoolVar(&tagCmd.Opts.PrintNextTag, "next", false, "output the next tag")
 	f.BoolVar(&tagCmd.Opts.NoPrefix, "no-prefix", false, "strip the default 'v' prefix from the next calculated semantic version")
+	f.StringVar(&tagCmd.Opts.Prerelease, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
 
 	tagCmd.Cmd = cmd
 	return tagCmd
@@ -121,9 +123,9 @@ func tagRepo(opts tagOptions, out io.Writer) error {
 
 	tsks := tagRepoPipeline
 
-	// Switch pipeline if only the next tag needs to be calculated
-	if ctx.NextTagOnly {
-		tsks = nextTagPipeline
+	// Switch pipeline if either the current or next tag is to be printed only
+	if ctx.PrintCurrentTag || ctx.PrintNextTag {
+		tsks = printTagPipeline
 	}
 
 	for _, tsk := range tsks {
@@ -148,7 +150,8 @@ func setupTagContext(opts tagOptions, out io.Writer) (*context.Context, error) {
 	ctx.DryRun = opts.DryRun
 	ctx.NoPush = opts.NoPush
 	ctx.FetchTags = opts.FetchTags
-	ctx.NextTagOnly = opts.NextTagOnly
+	ctx.PrintCurrentTag = opts.PrintCurrentTag
+	ctx.PrintNextTag = opts.PrintNextTag
 	ctx.Out = out
 	ctx.NoPrefix = opts.NoPrefix
 

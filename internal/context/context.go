@@ -46,7 +46,8 @@ type Context struct {
 	NoVersionChanged bool
 	CommitDetails    git.CommitDetails
 	FetchTags        bool
-	NextTagOnly      bool
+	PrintCurrentTag  bool
+	PrintNextTag     bool
 	NoPush           bool
 	Changelog        Changelog
 	SCM              SCM

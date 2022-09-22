@@ -24,6 +24,7 @@ package gittag
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
@@ -60,8 +61,8 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
-	if ctx.NextTagOnly {
-		fmt.Fprint(ctx.Out, ctx.NextVersion.Raw)
+	if ctx.PrintCurrentTag || ctx.PrintNextTag {
+		printRepositoryTag(ctx)
 		return nil
 	}
 
@@ -85,4 +86,18 @@ func (t Task) Run(ctx *context.Context) error {
 
 	log.Info("pushing tag to remote")
 	return git.PushTag(ctx.NextVersion.Raw)
+}
+
+func printRepositoryTag(ctx *context.Context) {
+	tags := make([]string, 0, 2)
+
+	if ctx.PrintCurrentTag {
+		tags = append(tags, ctx.CurrentVersion.Raw)
+	}
+
+	if ctx.PrintNextTag {
+		tags = append(tags, ctx.NextVersion.Raw)
+	}
+
+	fmt.Fprint(ctx.Out, strings.Join(tags, " "))
 }
