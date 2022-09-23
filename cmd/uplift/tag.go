@@ -47,6 +47,21 @@ import (
 const (
 	tagDesc = `Tags a git repository with the next semantic version. The tag
 is based on the conventional commit message from the last commit.`
+
+	examples = `  # Tag the repository with the next calculated semantic version
+  uplift tag
+
+  # Identify the next semantic version and write to stdout. 
+  # Repository is not tagged
+  uplift tag --next --silent
+
+  # Identify the current semantic version and write to stdout. 
+  # Repository is not tagged
+  uplift tag --current
+
+  # Identify the next and current semantic versions and write to stdout.
+  # Repository is not tagged
+  uplift tag --current --next --silent`
 )
 
 var (
@@ -96,10 +111,11 @@ func newTagCmd(gopts *globalOptions, out io.Writer) *tagCommand {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "tag",
-		Short: "Tag a git repository with the next semantic version",
-		Long:  tagDesc,
-		Args:  cobra.NoArgs,
+		Use:     "tag",
+		Short:   "Tag a git repository with the next semantic version",
+		Long:    tagDesc,
+		Example: examples,
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// If only the current tag is to be printed, skip running a pipeline
 			// and just retrieve and print the latest tag
