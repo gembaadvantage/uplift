@@ -27,6 +27,7 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
@@ -61,7 +62,7 @@ var (
 		after.Task{},
 	}
 
-	printTagPipeline = []task.Runner{
+	printNextTagPipeline = []task.Runner{
 		before.Task{},
 		gitcheck.Task{},
 		fetchtag.Task{},
@@ -100,6 +101,14 @@ func newTagCmd(gopts *globalOptions, out io.Writer) *tagCommand {
 		Long:  tagDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// If only the current tag is to be printed, skip running a pipeline
+			// and just retrieve and print the latest tag
+			if tagCmd.Opts.PrintCurrentTag && !tagCmd.Opts.PrintNextTag {
+				tag := git.LatestTag()
+				fmt.Fprintf(out, tag.Ref)
+				return nil
+			}
+
 			return tagRepo(tagCmd.Opts, out)
 		},
 	}
@@ -123,9 +132,8 @@ func tagRepo(opts tagOptions, out io.Writer) error {
 
 	tsks := tagRepoPipeline
 
-	// Switch pipeline if either the current or next tag is to be printed only
-	if ctx.PrintCurrentTag || ctx.PrintNextTag {
-		tsks = printTagPipeline
+	if ctx.PrintNextTag {
+		tsks = printNextTagPipeline
 	}
 
 	for _, tsk := range tsks {

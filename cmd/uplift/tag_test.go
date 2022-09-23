@@ -45,8 +45,6 @@ func TestTag(t *testing.T) {
 	assert.Equal(t, "v0.1.0", tags[0].Ref)
 }
 
-// TODO: current flag, requires a different pipeline as it doesn't need to calculate next version (ignore commits)
-
 func TestTag_CurrentFlag(t *testing.T) {
 	taggedRepo(t, "v0.1.0", "docs: updated docs", "fix: bug fix")
 
