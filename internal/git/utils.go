@@ -361,11 +361,28 @@ func Commit(cd CommitDetails) error {
 		cd.Message,
 	}
 
+	// If GPG commit signing is enabled, append the -S flag to the args
+	if ConfigSet("commit.gpgsign", "true") {
+		args = append(args, "-S")
+		// TODO: test by using testcontainers-go and spinning up a git container including a random gpg key
+	}
+
 	if _, err := Clean(Run(args...)); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// ConfigSet checks whether a given property is set within the local git
+// config file of the repository
+func ConfigSet(key, value string) bool {
+	out, err := Clean(Run("config", "--get", key))
+	if err != nil {
+		return false
+	}
+
+	return out == value
 }
 
 // Stage will ensure the specified file is staged for the next commit
