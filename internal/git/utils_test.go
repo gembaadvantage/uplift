@@ -501,6 +501,38 @@ func TestLog_WithTag(t *testing.T) {
 	assert.Contains(t, log, "fix: a new bug fix has been added")
 }
 
+func TestAuthor(t *testing.T) {
+	InitRepo(t)
+	Run("config", "user.name", "uplift")
+	Run("config", "user.email", "uplift@test.com")
+
+	details := Author()
+	assert.Equal(t, "uplift", details.Name)
+	assert.Equal(t, "uplift@test.com", details.Email)
+}
+
+func TestAuthorNoNameSet(t *testing.T) {
+	InitRepo(t)
+	// Setting it to an empty string is the equivalent of it not existing
+	Run("config", "user.name", "")
+	Run("config", "user.email", "uplift@test.com")
+
+	details := Author()
+	assert.Empty(t, details.Name)
+	assert.Equal(t, "uplift@test.com", details.Email)
+}
+
+func TestAuthorNoEmailSet(t *testing.T) {
+	InitRepo(t)
+	// Setting it to an empty string is the equivalent of it not existing
+	Run("config", "user.name", "uplift")
+	Run("config", "user.email", "")
+
+	details := Author()
+	assert.Equal(t, "uplift", details.Name)
+	assert.Empty(t, details.Email)
+}
+
 func TestCommitDetails_String(t *testing.T) {
 	cd := CommitDetails{
 		Author:  "uplift",

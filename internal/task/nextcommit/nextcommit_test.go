@@ -27,6 +27,7 @@ import (
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -43,6 +44,11 @@ func TestSkip(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
+	git.InitRepo(t)
+	// Unset git author config
+	git.SetConfig(t, "user.name", "")
+	git.SetConfig(t, "user.email", "")
+
 	ctx := &context.Context{
 		NextVersion: semver.Version{
 			Raw: "0.1.0",
@@ -53,6 +59,24 @@ func TestRun(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "uplift-bot", ctx.CommitDetails.Author)
 	assert.Equal(t, "uplift@gembaadvantage.com", ctx.CommitDetails.Email)
+	assert.Equal(t, "ci(uplift): uplifted for version 0.1.0", ctx.CommitDetails.Message)
+}
+
+func TestRun_GitAuthorConfig(t *testing.T) {
+	git.InitRepo(t)
+	git.SetConfig(t, "user.name", "john.smith")
+	git.SetConfig(t, "user.email", "john.smith@testing.com")
+
+	ctx := &context.Context{
+		NextVersion: semver.Version{
+			Raw: "0.1.0",
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, "john.smith", ctx.CommitDetails.Author)
+	assert.Equal(t, "john.smith@testing.com", ctx.CommitDetails.Email)
 	assert.Equal(t, "ci(uplift): uplifted for version 0.1.0", ctx.CommitDetails.Message)
 }
 

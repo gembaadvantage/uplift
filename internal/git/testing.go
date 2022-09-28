@@ -77,10 +77,15 @@ func RemoteOrigin(t *testing.T, url string) {
 	_, err := Run("remote", "add", "origin", url)
 	require.NoError(t, err)
 
-	_, err = Run("config", "branch.main.remote", "origin")
-	require.NoError(t, err)
+	SetConfig(t, "branch.main.remote", "origin")
+	SetConfig(t, "branch.main.merge", "refs/heads/main")
+}
 
-	_, err = Run("config", "branch.main.merge", "refs/heads/main")
+// SetConfig attempts to set a property within the git config file of the repository
+func SetConfig(t *testing.T, key, value string) {
+	t.Helper()
+
+	_, err := Run("config", key, value)
 	require.NoError(t, err)
 }
 
