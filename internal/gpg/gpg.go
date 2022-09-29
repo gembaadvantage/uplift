@@ -67,7 +67,7 @@ func StartDaemon() error {
 // for use
 func ImportKey(key, passphrase, fingerprint string) (KeyDetails, error) {
 	if !strings.HasPrefix(key, "--") {
-		// Decode base64 string into expected armored format
+		// Decode base64 string into expected format
 		decoded, err := base64.StdEncoding.DecodeString(key)
 		if err != nil {
 			return KeyDetails{}, err
@@ -166,12 +166,3 @@ func Clean(output string, err error) (string, error) {
 	}
 	return output, err
 }
-
-/*
-   # Configure git globally to support GPG signing on both commits and tags
-   git config --global user.signingkey "$KEYID"
-   git config --global commit.gpgsign true
-   git config --global tag.gpgsign true
-   git config --global user.name "$(echo $GPG_UID | cut -d ' ' -f1)"
-   git config --global user.email "$(echo $GPG_UID | cut -d ' ' -f2 | tr -d '<>')"
-*/

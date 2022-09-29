@@ -603,6 +603,14 @@ func TestCommit(t *testing.T) {
 	assert.Equal(t, "joe.bloggs:joe.bloggs@gmail.com:first commit", out)
 }
 
+func TestConfigSet(t *testing.T) {
+
+}
+
+func TestConfigGet(t *testing.T) {
+
+}
+
 func UnstagedFile(t *testing.T) string {
 	t.Helper()
 

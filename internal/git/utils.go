@@ -362,9 +362,8 @@ func Commit(cd CommitDetails) error {
 	}
 
 	// If GPG commit signing is enabled, append the -S flag to the args
-	if ConfigSet("commit.gpgsign", "true") {
+	if ConfigGet("commit.gpgsign", "true") {
 		args = append(args, "-S")
-		// TODO: test by using testcontainers-go and spinning up a git container including a random gpg key
 	}
 
 	if _, err := Clean(Run(args...)); err != nil {
@@ -374,15 +373,26 @@ func Commit(cd CommitDetails) error {
 	return nil
 }
 
-// ConfigSet checks whether a given property is set within the local git
+// ConfigGet checks whether a given property is set within the local git
 // config file of the repository
-func ConfigSet(key, value string) bool {
+func ConfigGet(key, value string) bool {
 	out, err := Clean(Run("config", "--get", key))
 	if err != nil {
 		return false
 	}
 
 	return out == value
+}
+
+// ConfigSet will attempt to set a series of git properties within the
+// local config of the git repository
+func ConfigSet(values map[string]string) error {
+	for k, v := range values {
+		if _, err := Run("config", "--add", k, v); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Stage will ensure the specified file is staged for the next commit
