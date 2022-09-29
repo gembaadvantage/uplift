@@ -27,20 +27,19 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
-)
-
-const (
-	importKeyPath      = "/tmp/uplift-gpg-import.asc"
-	activateKeyPath    = "/tmp/uplift-activate-key.txt"
-	activateKeySigPath = "/tmp/uplift-activate-key.txt.sig"
 )
 
 var (
 	secLineRegex = regexp.MustCompile("(?im)^sec.*")
 	uidLineRegex = regexp.MustCompile("(?im)^uid.*")
 	uidRegex     = regexp.MustCompile(`([^\(]*)(\s\(.*\)\s)?<(.*)>`)
+
+	importKeyPath      = filepath.Join(os.TempDir(), "uplift-gpg-import.asc")
+	activateKeyPath    = filepath.Join(os.TempDir(), "uplift-activate-key.txt")
+	activateKeySigPath = filepath.Join(os.TempDir(), "uplift-activate-key.txt.sig")
 )
 
 // KeyDetails contains details about an imported private key
@@ -73,6 +72,8 @@ func ImportKey(key, passphrase, fingerprint string) (KeyDetails, error) {
 		return KeyDetails{}, err
 	}
 	defer os.Remove(importKeyPath)
+
+	os.TempDir()
 
 	// Import the key using the temporary file on disk
 	if _, err := Run("--batch", "--import", "--yes", importKeyPath); err != nil {
