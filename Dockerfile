@@ -9,5 +9,5 @@ RUN apk add --no-cache \
 
 COPY uplift /usr/local/bin
 
-ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/uplift"]
 CMD ["--help"]
