@@ -604,11 +604,9 @@ func TestCommit(t *testing.T) {
 }
 
 func TestConfigSet(t *testing.T) {
-
 }
 
 func TestConfigGet(t *testing.T) {
-
 }
 
 func UnstagedFile(t *testing.T) string {
