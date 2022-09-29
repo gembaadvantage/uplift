@@ -73,12 +73,13 @@ func TestRunImportKeyFailed(t *testing.T) {
 
 	t.Setenv("GPG_KEY", "-----BEGIN PGP PRIVATE KEY BLOCK-----key-----END PGP PRIVATE KEY BLOCK-----")
 	t.Setenv("GPG_PASSPHRASE", "passphrase")
-	t.Setenv("GPG_FINGERPRINT", "fingerprint")
+	t.Setenv("GPG_FINGERPRINT", "AABBCCDDEEFF1122334455")
 
 	err := Task{}.Run(&context.Context{})
 
 	require.Error(t, err)
-	assert.EqualError(t, err, `TODO
+	assert.EqualError(t, err, `uplift could not import GPG key with fingerprint AABBCCDDEEFF1122334455. Check your GPG
+key was exported correctly.
 
 For further details visit: https://upliftci.dev/faq/gpgimport
 `)

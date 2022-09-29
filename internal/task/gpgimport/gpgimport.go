@@ -67,7 +67,7 @@ func (t Task) Run(ctx *context.Context) error {
 	log.WithField("fingerprint", fingerprint).Info("importing gpg key")
 	keyDetails, err := gpg.ImportKey(key, passphrase, os.Getenv(envGpgFingerprint))
 	if err != nil {
-		return ErrKeyImport{}
+		return ErrKeyImport{fingerprint: fingerprint}
 	}
 
 	log.Info("setting git config to enable gpg signing")
