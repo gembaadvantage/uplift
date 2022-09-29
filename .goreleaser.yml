@@ -294,7 +294,7 @@ announce:
   skip: "{{gt .Patch 0}}"
 
   slack:
-    enabled: false
+    enabled: true
     message_template: "Uplift {{ .Tag }} has been released. Find out details here: https://github.com/gembaadvantage/uplift/releases/tag/{{ .Tag }}"
     channel: "#topic-uplift-github"
     username: "Uplift"
@@ -310,4 +310,4 @@ release:
     ## What to do next?
 
     - Read the [documentation](https://upliftci.dev)
-    - Follow me on [Twitter](https://twitter.com/GA_Uplift)
+    - Follow us on [Twitter](https://twitter.com/GA_Uplift)
