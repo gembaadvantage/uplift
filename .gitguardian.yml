@@ -18,24 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-run:
-  timeout: 2m
+version: 2
 
-linters:
-  disable-all: true
-  enable:
-    - dupl
-    - gofumpt
-    - goimports
-    - gosimple
-    - govet
-    - ineffassign
-    - misspell
-    - nakedret
-    - revive
-    - staticcheck
-    - unused
-
-linters-settings:
-  dupl:
-    threshold: 400
+secret:
+  ignored-matches:
+    - match: 0a02123d9062b57775cb6615bde089b4c909548a2d79c954276ab3a490aafc94
+    - match: 0c54d543682697c38e38116cf00325f943a275fb4dcac3799556da06aacc6c32
+    - match: 292377233baba35590bcf22156794c24c3ca1a3ce920a4e70d17da5346d5cde8

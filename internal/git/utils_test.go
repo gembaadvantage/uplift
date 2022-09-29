@@ -501,6 +501,38 @@ func TestLog_WithTag(t *testing.T) {
 	assert.Contains(t, log, "fix: a new bug fix has been added")
 }
 
+func TestAuthor(t *testing.T) {
+	InitRepo(t)
+	Run("config", "user.name", "uplift")
+	Run("config", "user.email", "uplift@test.com")
+
+	details := Author()
+	assert.Equal(t, "uplift", details.Name)
+	assert.Equal(t, "uplift@test.com", details.Email)
+}
+
+func TestAuthorNoNameSet(t *testing.T) {
+	InitRepo(t)
+	// Setting it to an empty string is the equivalent of it not existing
+	Run("config", "user.name", "")
+	Run("config", "user.email", "uplift@test.com")
+
+	details := Author()
+	assert.Empty(t, details.Name)
+	assert.Equal(t, "uplift@test.com", details.Email)
+}
+
+func TestAuthorNoEmailSet(t *testing.T) {
+	InitRepo(t)
+	// Setting it to an empty string is the equivalent of it not existing
+	Run("config", "user.name", "uplift")
+	Run("config", "user.email", "")
+
+	details := Author()
+	assert.Equal(t, "uplift", details.Name)
+	assert.Empty(t, details.Email)
+}
+
 func TestCommitDetails_String(t *testing.T) {
 	cd := CommitDetails{
 		Author:  "uplift",
@@ -569,6 +601,29 @@ func TestCommit(t *testing.T) {
 	out, err := Clean(Run("log", "-1", `--pretty=format:'%an:%ae:%B'`))
 	require.NoError(t, err)
 	assert.Equal(t, "joe.bloggs:joe.bloggs@gmail.com:first commit", out)
+}
+
+func TestConfigSet(t *testing.T) {
+	InitRepo(t)
+
+	err := ConfigSet(map[string]string{
+		"user.name":  "joe.bloggs",
+		"user.email": "joe.bloggs@gmail.com",
+	})
+	require.NoError(t, err)
+
+	name, _ := Clean(Run("config", "--get", "user.name"))
+	email, _ := Clean(Run("config", "--get", "user.email"))
+
+	assert.Equal(t, "joe.bloggs", name)
+	assert.Equal(t, "joe.bloggs@gmail.com", email)
+}
+
+func TestConfigExists(t *testing.T) {
+	InitRepo(t)
+	Run("config", "--add", "user.name", "joe.bloggs")
+
+	assert.True(t, ConfigExists("user.name", "joe.bloggs"))
 }
 
 func UnstagedFile(t *testing.T) string {

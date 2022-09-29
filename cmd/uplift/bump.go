@@ -34,6 +34,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/bump"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
+	"github.com/gembaadvantage/uplift/internal/task/gpgimport"
 	"github.com/gembaadvantage/uplift/internal/task/hook/after"
 	"github.com/gembaadvantage/uplift/internal/task/hook/afterbump"
 	"github.com/gembaadvantage/uplift/internal/task/hook/before"
@@ -92,6 +93,7 @@ func bumpFiles(opts bumpOptions, out io.Writer) error {
 	tsks := []task.Runner{
 		before.Task{},
 		gitcheck.Task{},
+		gpgimport.Task{},
 		nextsemver.Task{},
 		nextcommit.Task{},
 		beforebump.Task{},

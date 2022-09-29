@@ -52,6 +52,12 @@ type CommitDetails struct {
 	Email   string
 }
 
+// AuthorDetails contains details about a git commit author
+type AuthorDetails struct {
+	Name  string
+	Email string
+}
+
 // LogEntry contains details about a specific git log entry
 type LogEntry struct {
 	Hash       string
@@ -290,7 +296,7 @@ func commitLog(srch string) (string, error) {
 	return out, nil
 }
 
-// Tag will create a lightweight tag against the repository and push it to the origin
+// Tag will create a lightweight tag against the repository
 func Tag(tag string) error {
 	if _, err := Clean(Run("tag", "-f", tag)); err != nil {
 		return err
@@ -299,7 +305,7 @@ func Tag(tag string) error {
 	return nil
 }
 
-// AnnotatedTag will create an annotated tag against the repository and push it to the origin
+// AnnotatedTag will create an annotated tag against the repository
 func AnnotatedTag(tag string, cd CommitDetails) error {
 	args := []string{
 		"-c",
@@ -330,6 +336,18 @@ func PushTag(tag string) error {
 	return nil
 }
 
+// Author attempts to retrieve details about the commit author directly
+// from git config
+func Author() AuthorDetails {
+	name, _ := Clean(Run("config", "user.name"))
+	email, _ := Clean(Run("config", "user.email"))
+
+	return AuthorDetails{
+		Name:  name,
+		Email: email,
+	}
+}
+
 // Commit will generate a commit against the repository and push it to the origin.
 // The commit will be associated with the provided author and email address
 func Commit(cd CommitDetails) error {
@@ -343,10 +361,37 @@ func Commit(cd CommitDetails) error {
 		cd.Message,
 	}
 
+	// If GPG commit signing is enabled, append the -S flag to the args
+	if ConfigExists("commit.gpgsign", "true") {
+		args = append(args, "-S")
+	}
+
 	if _, err := Clean(Run(args...)); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+// ConfigExists checks whether a given property is set within the local git
+// config file of the repository
+func ConfigExists(key, value string) bool {
+	out, err := Clean(Run("config", "--get", key))
+	if err != nil {
+		return false
+	}
+
+	return out == value
+}
+
+// ConfigSet will attempt to set a series of git properties within the
+// local config of the git repository
+func ConfigSet(values map[string]string) error {
+	for k, v := range values {
+		if _, err := Run("config", "--add", k, v); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

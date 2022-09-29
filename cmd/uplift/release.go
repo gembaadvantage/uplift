@@ -38,6 +38,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
 	"github.com/gembaadvantage/uplift/internal/task/gitcommit"
 	"github.com/gembaadvantage/uplift/internal/task/gittag"
+	"github.com/gembaadvantage/uplift/internal/task/gpgimport"
 	"github.com/gembaadvantage/uplift/internal/task/hook/after"
 	"github.com/gembaadvantage/uplift/internal/task/hook/afterbump"
 	"github.com/gembaadvantage/uplift/internal/task/hook/afterchangelog"
@@ -120,6 +121,7 @@ func release(opts releaseOptions, out io.Writer) error {
 	tsks := []task.Runner{
 		before.Task{},
 		gitcheck.Task{},
+		gpgimport.Task{},
 		scm.Task{},
 		fetchtag.Task{},
 		nextsemver.Task{},
