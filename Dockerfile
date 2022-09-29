@@ -8,7 +8,6 @@ RUN apk add --no-cache \
     bash=5.1.16-r2
 
 COPY uplift /usr/local/bin
-COPY scripts/entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
 CMD ["--help"]
