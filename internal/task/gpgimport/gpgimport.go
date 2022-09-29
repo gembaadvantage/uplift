@@ -23,12 +23,11 @@ SOFTWARE.
 package gpgimport
 
 import (
-	"context"
-	"errors"
 	"os"
 	"strings"
 
 	"github.com/apex/log"
+	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/gpg"
 )
@@ -58,10 +57,8 @@ func (t Task) Skip(ctx *context.Context) bool {
 func (t Task) Run(ctx *context.Context) error {
 	log.Debug("checking if gpg is installed")
 	if !gpg.IsInstalled() {
-		return errors.New("install gpg as it isn't found")
+		return ErrGpgMissing
 	}
-
-	gpg.StartDaemon()
 
 	key := os.Getenv(envGpgKey)
 	passphrase := os.Getenv(envGpgPassphrase)
@@ -70,14 +67,13 @@ func (t Task) Run(ctx *context.Context) error {
 	log.WithField("fingerprint", fingerprint).Info("importing gpg key")
 	keyDetails, err := gpg.ImportKey(key, passphrase, os.Getenv(envGpgFingerprint))
 	if err != nil {
-		return err
+		return ErrKeyImport{}
 	}
 
 	log.Info("setting git config to enable gpg signing")
 	return git.ConfigSet(map[string]string{
 		"user.signingKey": keyDetails.ID,
 		"commit.gpgsign":  "true",
-		"tag.gpgsign":     "true",
 		"user.name":       keyDetails.UserName,
 		"user.email":      keyDetails.UserEmail,
 	})

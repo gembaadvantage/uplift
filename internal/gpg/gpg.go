@@ -56,12 +56,6 @@ func IsInstalled() bool {
 	return err == nil
 }
 
-// StartDaemon will start a gpg-agent in daemon mode
-func StartDaemon() error {
-	_, err := RunAgent("--daemon", "--default-cache-ttl", "21600")
-	return err
-}
-
 // ImportKey attempts to import the private key using the provided passphrase.
 // If importing is successful, the key will automatically be activated ready
 // for use

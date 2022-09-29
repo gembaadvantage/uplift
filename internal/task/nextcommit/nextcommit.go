@@ -56,23 +56,23 @@ func (t Task) Run(ctx *context.Context) error {
 
 	author := git.Author()
 	if author.Email != "" && author.Name != "" {
-		log.Info("overwriting commit author from git config")
+		log.Debug("overwriting commit author from git config")
 		c.Author = author.Name
 		c.Email = author.Email
 	}
 
 	if ctx.Config.CommitAuthor.Name != "" {
-		log.Info("overwriting commit author name from uplift config")
+		log.Debug("overwriting commit author name from uplift config")
 		c.Author = ctx.Config.CommitAuthor.Name
 	}
 
 	if ctx.Config.CommitAuthor.Email != "" {
-		log.Info("overwriting commit author email from uplift config")
+		log.Debug("overwriting commit author email from uplift config")
 		c.Email = ctx.Config.CommitAuthor.Email
 	}
 
 	if ctx.Config.CommitMessage != "" {
-		log.Info("overwriting commit message from uplift config")
+		log.Debug("overwriting commit message from uplift config")
 		c.Message = strings.ReplaceAll(ctx.Config.CommitMessage, semver.Token, ctx.NextVersion.Raw)
 	}
 

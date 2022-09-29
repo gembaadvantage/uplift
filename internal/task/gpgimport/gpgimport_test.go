@@ -20,4 +20,74 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package gpgimport_test
+package gpgimport
+
+import (
+	"testing"
+
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/gembaadvantage/uplift/internal/gpg"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestString(t *testing.T) {
+	assert.Equal(t, "importing gpg key", Task{}.String())
+}
+
+func TestSkip(t *testing.T) {
+	t.Setenv("GPG_KEY", "")
+	t.Setenv("GPG_PASSPHRASE", "")
+	t.Setenv("GPG_FINGERPRINT", "")
+
+	assert.True(t, Task{}.Skip(&context.Context{}))
+}
+
+func TestSkipFalse(t *testing.T) {
+	t.Setenv("GPG_KEY", "key")
+	t.Setenv("GPG_PASSPHRASE", "passphrase")
+	t.Setenv("GPG_FINGERPRINT", "fingerprint")
+
+	assert.False(t, Task{}.Skip(&context.Context{}))
+}
+
+func TestRun(t *testing.T) {
+	git.InitRepo(t)
+
+	t.Setenv("GPG_KEY", gpg.TestKey)
+	t.Setenv("GPG_PASSPHRASE", gpg.TestPassphrase)
+	t.Setenv("GPG_FINGERPRINT", gpg.TestFingerprint)
+
+	err := Task{}.Run(&context.Context{})
+
+	require.NoError(t, err)
+	assert.True(t, git.ConfigExists("user.signingKey", gpg.TestKeyID))
+	assert.True(t, git.ConfigExists("commit.gpgsign", "true"))
+	assert.True(t, git.ConfigExists("user.name", gpg.TestKeyUserName))
+	assert.True(t, git.ConfigExists("user.email", gpg.TestKeyUserEmail))
+}
+
+func TestRunImportKeyFailed(t *testing.T) {
+	git.InitRepo(t)
+
+	t.Setenv("GPG_KEY", "-----BEGIN PGP PRIVATE KEY BLOCK-----key-----END PGP PRIVATE KEY BLOCK-----")
+	t.Setenv("GPG_PASSPHRASE", "passphrase")
+	t.Setenv("GPG_FINGERPRINT", "fingerprint")
+
+	err := Task{}.Run(&context.Context{})
+
+	require.Error(t, err)
+	assert.EqualError(t, err, `TODO
+
+For further details visit: https://upliftci.dev/faq/gpgimport
+`)
+}
+
+func TestRunGpgMissing(t *testing.T) {
+	t.Setenv("PATH", "")
+
+	err := Task{}.Run(&context.Context{})
+
+	assert.EqualError(t, err, "gpg is not currently installed under $PATH")
+}

@@ -362,7 +362,7 @@ func Commit(cd CommitDetails) error {
 	}
 
 	// If GPG commit signing is enabled, append the -S flag to the args
-	if ConfigGet("commit.gpgsign", "true") {
+	if ConfigExists("commit.gpgsign", "true") {
 		args = append(args, "-S")
 	}
 
@@ -373,9 +373,9 @@ func Commit(cd CommitDetails) error {
 	return nil
 }
 
-// ConfigGet checks whether a given property is set within the local git
+// ConfigExists checks whether a given property is set within the local git
 // config file of the repository
-func ConfigGet(key, value string) bool {
+func ConfigExists(key, value string) bool {
 	out, err := Clean(Run("config", "--get", key))
 	if err != nil {
 		return false

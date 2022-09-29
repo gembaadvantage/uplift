@@ -604,9 +604,26 @@ func TestCommit(t *testing.T) {
 }
 
 func TestConfigSet(t *testing.T) {
+	InitRepo(t)
+
+	err := ConfigSet(map[string]string{
+		"user.name":  "joe.bloggs",
+		"user.email": "joe.bloggs@gmail.com",
+	})
+	require.NoError(t, err)
+
+	name, _ := Clean(Run("config", "--get", "user.name"))
+	email, _ := Clean(Run("config", "--get", "user.email"))
+
+	assert.Equal(t, "joe.bloggs", name)
+	assert.Equal(t, "joe.bloggs@gmail.com", email)
 }
 
-func TestConfigGet(t *testing.T) {
+func TestConfigExists(t *testing.T) {
+	InitRepo(t)
+	Run("config", "--add", "user.name", "joe.bloggs")
+
+	assert.True(t, ConfigExists("user.name", "joe.bloggs"))
 }
 
 func UnstagedFile(t *testing.T) string {
