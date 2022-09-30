@@ -4,16 +4,19 @@ site_description: Semantic versioning the easy way. Powered by Conventional Comm
 copyright: Uplift is built and maintained by the folk at Gemba Advantage
 repo_name: gembaadvantage/uplift
 repo_url: https://github.com/gembaadvantage/uplift
-edit_uri: edit/main/docs/content
-docs_dir: content
+edit_uri: edit/main/docs
 
 theme:
   name: material
-  custom_dir: overrides
+  custom_dir: docs/overrides
   logo: static/logo.png
   favicon: static/favicon.ico
   features:
     - content.code.annotate
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - navigation.tracking
     - search.suggest
     - search.highlight
     - search.share
@@ -22,15 +25,17 @@ theme:
 
 nav:
   - Home: index.md
-  - install.md
-  - Command Line Usage:
-      - uplift: cmd/root.md
-      - uplift tag: cmd/tag.md
-      - uplift bump: cmd/bump.md
-      - uplift changelog: cmd/changelog.md
-      - uplift release: cmd/release.md
-      - uplift completion: cmd/completion.md
-  - Configuration:
+  - Getting Started:
+      - Your First Release: first-release.md
+      - Tagging your Repository: tagging.md
+      - Bumping your Files: bumping-files.md
+      - Generating a Changelog: changelog.md
+      - Signing Commits: commit-signing.md
+      - Conventional Commits: conventional-commits.md
+      - License: license.md
+      - Installation:
+          - install.md
+  - Setup:
       - About: config/about.md
       - Basics: config/basics.md
       - Changelog: config/changelog.md
@@ -38,27 +43,34 @@ nav:
       - Git: config/git.md
       - Hooks: config/hooks.md
       - Environment Variables: config/env.md
-  - Continuous Integration:
-      - About: ci/about.md
-      - AWS CodeBuild: ci/awscodebuild.md
-      - AWS CodePipeline: ci/awscodepipeline.md
-      - CircleCI: ci/circleci.md
-      - Cirrus CI: ci/cirrusci.md
-      - Codefresh: ci/codefresh.md
-      - Drone: ci/drone.md
-      - GitHub Action: ci/github.md
-      - GitLab: ci/gitlab.md
-      - Semaphore: ci/semaphore.md
-      - Travis CI: ci/travisci.md
-  - SCM Detection:
-      - About: scm/about.md
-      - Gitea: scm/gitea.md
-      - GitHub: scm/github.md
-      - GitLab: scm/gitlab.md
-  - Frequently Asked Questions:
+      - CI:
+          - About: ci/about.md
+          - AWS CodeBuild: ci/awscodebuild.md
+          - AWS CodePipeline: ci/awscodepipeline.md
+          - CircleCI: ci/circleci.md
+          - Cirrus CI: ci/cirrusci.md
+          - Codefresh: ci/codefresh.md
+          - Drone: ci/drone.md
+          - GitHub Action: ci/github.md
+          - GitLab: ci/gitlab.md
+          - Semaphore: ci/semaphore.md
+          - Travis CI: ci/travisci.md
+      - SCM Detection:
+          - About: scm/about.md
+          - Gitea: scm/gitea.md
+          - GitHub: scm/github.md
+          - GitLab: scm/gitlab.md
+  - FAQ:
       - Git Repository is in a Dirty State: faq/gitdirty.md
       - Git Repository has a Detached HEAD: faq/gitdetached.md
       - Git Repository contains a Shallow Clone: faq/gitshallow.md
+  - Reference:
+      - uplift: cmd/root.md
+      - uplift tag: cmd/tag.md
+      - uplift bump: cmd/bump.md
+      - uplift changelog: cmd/changelog.md
+      - uplift release: cmd/release.md
+      - uplift completion: cmd/completion.md
 
 extra:
   social:
@@ -68,6 +80,9 @@ extra:
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/GA_Uplift
       name: Uplift on Twitter
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/u/gembaadvantage
+      name: Gemba Advantage on Docker
 
 plugins:
   - search

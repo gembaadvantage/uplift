@@ -24,5 +24,8 @@ uplift
 dist/
 
 # Mkdocs related
-docs/site
+site/
 .DS_store
+
+# VSCode
+.vscode/
