@@ -40,7 +40,7 @@ theme:
 nav:
   - Home: index.md
   - Getting Started:
-      - Your First Release: first-release.md
+      - Creating your First Release: first-release.md
       - Tagging your Repository: tagging.md
       - Bumping your Files: bumping-files.md
       - Generating a Changelog: changelog.md
@@ -107,6 +107,9 @@ markdown_extensions:
   - admonition
   - attr_list
   - footnotes
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:materialx.emoji.twemoji
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
