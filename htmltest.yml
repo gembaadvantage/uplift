@@ -5,6 +5,7 @@ IgnoreDirectoryMissingTrailingSlash: true
 IgnoreAltMissing: true
 IgnoreInternalEmptyHash: true
 ExternalTimeout: 60
+CheckDoctype: false
 HTTPHeaders:
   "Range": "bytes=0-10"
   "Accept": "*/*"
