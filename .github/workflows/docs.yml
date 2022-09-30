@@ -46,29 +46,29 @@ jobs:
       - name: Build
         run: docker run --rm -v ${PWD}:/docs squidfunk/mkdocs-material build
 
-      # - name: HTML Test
-      #   uses: wjdp/htmltest-action@master
-      #   with:
-      #     path: site
-      #     config: htmltest.yml
+      - name: HTML Test
+        uses: wjdp/htmltest-action@master
+        with:
+          path: site
+          config: htmltest.yml
 
-      # - name: Patch mkdocs.yml Site URL
-      #   if: startsWith(github.ref, 'refs/tags/v')
-      #   uses: jacobtomlinson/gha-find-replace@v2
-      #   with:
-      #     find: 'site_url: ""'
-      #     replace: 'site_url: "https://docs.purpleclay.dev/${{ github.event.repository.name }}/"'
-      #     regex: false
-      #     include: mkdocs.yml
+      - name: Patch mkdocs.yml Site URL
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: 'site_url: ""'
+          replace: 'site_url: "https://upliftci.dev"'
+          regex: false
+          include: mkdocs.yml
 
-      # - name: Patch mkdocs.yml Edit URI
-      #   if: startsWith(github.ref, 'refs/tags/v')
-      #   uses: jacobtomlinson/gha-find-replace@v2
-      #   with:
-      #     find: 'edit_uri: ""'
-      #     replace: 'edit_uri: "edit/main/docs"'
-      #     regex: false
-      #     include: mkdocs.yml
+      - name: Patch mkdocs.yml Edit URI
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: 'edit_uri: ""'
+          replace: 'edit_uri: "edit/main/docs"'
+          regex: false
+          include: mkdocs.yml
 
       - name: Deploy documentation
         if: startsWith(github.ref, 'refs/tags/v')

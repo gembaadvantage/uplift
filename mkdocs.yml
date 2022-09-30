@@ -1,10 +1,11 @@
 site_name: Uplift
-site_url: https://upliftci.dev
 site_description: Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI
 copyright: Uplift is built and maintained by the folk at Gemba Advantage
 repo_name: gembaadvantage/uplift
 repo_url: https://github.com/gembaadvantage/uplift
-edit_uri: edit/main/docs
+# Only set during a release to ensure htmltest doesn't break due to non existent directories
+site_url: ""
+edit_uri: ""
 
 theme:
   name: material
