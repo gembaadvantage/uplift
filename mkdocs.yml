@@ -107,6 +107,8 @@ markdown_extensions:
   - admonition
   - attr_list
   - footnotes
+  - pymdownx.caret
+  - pymdownx.critic
   - pymdownx.emoji:
       emoji_generator: !!python/name:materialx.emoji.to_svg
       emoji_index: !!python/name:materialx.emoji.twemoji
