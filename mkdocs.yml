@@ -48,7 +48,10 @@ nav:
       - Conventional Commits: conventional-commits.md
       - License: license.md
       - Installation:
-          - install.md
+          - Binary: install/binary.md
+          - With Docker: install/docker.md
+          - From Source: install/source.md
+          - Oh My Zsh: install/oh-my-zsh.md
   - Setup:
       - About: config/about.md
       - Basics: config/basics.md
