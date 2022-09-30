@@ -23,6 +23,19 @@ theme:
     - search.share
   icon:
     repo: fontawesome/brands/github
+  palette:
+    - scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/lightbulb
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to light mode
 
 nav:
   - Home: index.md
