@@ -1,6 +1,6 @@
 # CircleCI
 
-An example YAML file[^1] for configuring uplift to run on [CircleCI](https://circleci.com). As uplift is designed to push changes back to your GitHub repository you will need to ensure CircleCI is granted [write access](https://circleci.com/docs/2.0/gh-bb-integration) to your repository.
+An example YAML file for configuring Uplift to run on [CircleCI](https://circleci.com). As Uplift is designed to push changes back to your GitHub repository, you will need to ensure CircleCI is granted [write access](https://circleci.com/docs/2.0/gh-bb-integration) to your repository.
 
 ```{ .yaml .annotate linenums="1" }
 # .circleci/config.yml
@@ -30,6 +30,4 @@ jobs:
       - run: uplift release
 ```
 
-1. By default CircleCI will only have read-only access to your repository. For uplift to work, write access is required. This can be achieved by accessing a repository as a [machine-user](https://circleci.com/docs/2.0/gh-bb-integration/#controlling-access-via-a-machine-user) and then loading its [SSH key](https://circleci.com/docs/2.0/configuration-reference/#add-ssh-keys) into the pipeline by its fingerprint
-
-[^1]: There are many different ways of [installing](../install.md) uplift within a pipeline. Sudo access is needed when installing the binary into a protected path such as `/usr/local/bin`
+1. By default, CircleCI will only have read-only access to your repository. For Uplift to work, write access is required. This can be achieved by accessing a repository as a [machine-user](https://circleci.com/docs/2.0/gh-bb-integration/#controlling-access-via-a-machine-user) and then loading its [SSH key](https://circleci.com/docs/2.0/configuration-reference/#add-ssh-keys) into the pipeline by its fingerprint

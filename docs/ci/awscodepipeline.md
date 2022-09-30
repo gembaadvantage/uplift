@@ -4,13 +4,13 @@ AWS provides two developer services for building code, `AWS CodePipeline` and `A
 
 ## CodePipeline
 
-By default, CodePipeline clones a repository to S3 without the `.git` metadata folder. A [full clone](https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-codecommit-gitclone.html)[^2] is needed for uplift to run.
+By default, CodePipeline clones a repository to S3 without the `.git` metadata folder. A [full clone](https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-codecommit-gitclone.html)[^2] is needed for Uplift to run.
 
 ![CodePipeline Artefact Format](../static/codepipeline-fullclone.png){ align=left }
 
 ## CodeBuild
 
-CodeBuild will always receive a git clone with a detached HEAD. By default, uplift will [error](../faq/gitdetached.md) in this scenario. If performing a release, this will need to be resolved through a `git checkout`. However, the branch name is not exposed to CodeBuild by default. CodePipeline provides a [variable](https://docs.aws.amazon.com/codepipeline/latest/userguide/reference-variables.html) `#{SourceVariables.BranchName}` that can be mapped to CodeBuild as an environment variable:
+CodeBuild will always receive a git clone with a detached HEAD. By default, Uplift will [error](../faq/gitdetached.md) in this scenario. If performing a release, this will need to be resolved through a `git checkout`. However, the branch name is not exposed to CodeBuild by default. CodePipeline provides a [variable](https://docs.aws.amazon.com/codepipeline/latest/userguide/reference-variables.html) `#{SourceVariables.BranchName}` that can be mapped to CodeBuild as an environment variable:
 
 ![CodeBuild Branch Environment Variable](../static/codebuild-env.png){ align=left }
 
@@ -84,7 +84,7 @@ phases:
       - uplift release
 ```
 
-1. Without this uplift will lack any [credentials](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env.git-credential-helper) when attempting to push code back to the source SCM.
+1. Without this Uplift will lack any [credentials](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env.git-credential-helper) when attempting to push code back to the source SCM.
 2. The `BRANCH_NAME` environment variable can be referenced directly within the buildspec, once mapped.
 
 #### Official Uplift Image

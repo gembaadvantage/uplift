@@ -60,8 +60,7 @@ nav:
       - Git: config/git.md
       - Hooks: config/hooks.md
       - Environment Variables: config/env.md
-      - CI:
-          - About: ci/about.md
+      - Continuous Integration:
           - AWS CodeBuild: ci/awscodebuild.md
           - AWS CodePipeline: ci/awscodepipeline.md
           - CircleCI: ci/circleci.md
@@ -82,12 +81,12 @@ nav:
       - Git Repository has a Detached HEAD: faq/gitdetached.md
       - Git Repository contains a Shallow Clone: faq/gitshallow.md
   - Reference:
-      - uplift: cmd/root.md
-      - uplift tag: cmd/tag.md
-      - uplift bump: cmd/bump.md
-      - uplift changelog: cmd/changelog.md
-      - uplift release: cmd/release.md
-      - uplift completion: cmd/completion.md
+      - CLI:
+          - uplift: cli/root.md
+          - uplift tag: cli/tag.md
+          - uplift bump: cli/bump.md
+          - uplift changelog: cli/changelog.md
+          - uplift release: cli/release.md
 
 extra:
   social:

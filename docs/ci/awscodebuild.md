@@ -1,8 +1,8 @@
 # AWS CodeBuild
 
-AWS CodeBuild can be used as a standalone service when running uplift. This guide assumes CodeBuild was configured manually through the AWS Console and only focuses on the gotchas[^1].
+AWS CodeBuild can be used as a standalone service when running Uplift. This guide assumes CodeBuild was configured manually through the AWS Console and focuses on the gotchas[^1].
 
-CodeBuild will always receive a git clone with a detached HEAD. By default, uplift will [error](../faq/gitdetached.md) in this scenario. When performing a release, this will need to be resolved through a `git checkout`. The `CODEBUILD_SOURCE_VERSION` variable contains the necessary git reference.
+CodeBuild will always receive a git clone with a detached HEAD. By default, Uplift will [error](../faq/gitdetached.md) in this scenario. When performing a release, this will need to be resolved through a `git checkout`. The `CODEBUILD_SOURCE_VERSION` variable contains the necessary git reference.
 
 ## IAM
 
@@ -60,7 +60,7 @@ phases:
       - uplift release
 ```
 
-1. Without this uplift will lack any [credentials](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env.git-credential-helper) when attempting to push code back to the source SCM.
+1. Without this Uplift will lack any [credentials](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env.git-credential-helper) when attempting to push code back to the source SCM.
 2. This can be simplified to `git checkout $CODEBUILD_SOURCE_VERSION` when cloning from GitHub directly
 
 ### Official Uplift Image

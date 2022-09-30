@@ -1,6 +1,6 @@
 # Codefresh
 
-An example YAML file for configuring uplift to run on [Codefresh](https://g.codefresh.io/welcome). To ensure uplift can push changes back to your repository, you will need to store your Personal Access Token as a [shared configuration](https://codefresh.io/docs/docs/configure-ci-cd-pipeline/shared-configuration/) and [expose](https://codefresh.io/docs/docs/configure-ci-cd-pipeline/shared-configuration/#using-shared-environment-variables) it to your pipeline as an environment variable. Which in this example is `GH_UPLIFT`.
+An example YAML file for configuring Uplift to run on [Codefresh](https://g.codefresh.io/welcome). To ensure Uplift can push changes back to your repository, you will need to store your Personal Access Token as a [shared configuration](https://codefresh.io/docs/docs/configure-ci-cd-pipeline/shared-configuration/) and [expose](https://codefresh.io/docs/docs/configure-ci-cd-pipeline/shared-configuration/#using-shared-environment-variables) it to your pipeline as an environment variable, which in this example is `GH_UPLIFT`.
 
 ```{ .yaml .annotate linenums="1" }
 # codefresh.yml
