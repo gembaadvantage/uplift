@@ -10,7 +10,7 @@ A release comprises three stages:
 
 File bumping currently requires a configuration file named `.uplift.yml`. Please review our guide on configuring file bumps for comprehensive details.
 
-```yaml
+```yaml linenums="1"
 # .uplift.yml
 # Example of bumping a package.json file
 

@@ -80,13 +80,15 @@ nav:
       - Git Repository is in a Dirty State: faq/gitdirty.md
       - Git Repository has a Detached HEAD: faq/gitdetached.md
       - Git Repository contains a Shallow Clone: faq/gitshallow.md
+      - GPG Key fails to Import: faq/gpgimport.md
   - Reference:
+      - Configuration: reference/config.md
       - CLI:
-          - uplift: cli/root.md
-          - uplift tag: cli/tag.md
-          - uplift bump: cli/bump.md
-          - uplift changelog: cli/changelog.md
-          - uplift release: cli/release.md
+          - uplift: reference/cli/root.md
+          - uplift tag: reference/cli/tag.md
+          - uplift bump: reference/cli/bump.md
+          - uplift changelog: reference/cli/changelog.md
+          - uplift release: reference/cli/release.md
 
 extra:
   social:
