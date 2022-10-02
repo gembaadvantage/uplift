@@ -1,17 +1,24 @@
 # Git Repository is in a Dirty State
 
-Uplift won't run against a git repository that has un-staged and/or un-committed files, typically know as a dirty state. Uplift requires a clean git working directory.
+Uplift can't run against a git repository with unstaged or uncommitted files, typically known as a dirty state. If detected, Uplift will report the following error:
 
 ```text
 uplift cannot reliably run if the repository is in a dirty state. Changes detected:
- M main.go
-?? coverage.out
+?? {==coverage.out==}
 
 Please check and resolve the status of these files before retrying. For further
 details visit: https://upliftci.dev/faq/gitdirty
 ```
 
-As you can see the error message shows the offending files and their current git [status](https://git-scm.com/docs/git-status#_short_format). To resolve the error, you have the following options:
+## How to fix it
 
-1. Add a `.gitignore` file to your repository to ensure these files are no longer tracked
-2. Change your CI approach to ensure no tracked files are modified or temporary files are generated before Uplift is run
+You can resolve this error in one of two ways.
+
+### Use a .gitignore file
+
+Add or modify an existing `.gitignore` file to ignore the offending files listed in the error message.
+
+### Adapt your CI
+
+- Ensure no tracked files are unexpectedly modified
+- Prevent the creation of temporary files. If this isn't possible, you can fall back to using a `.gitignore` file.
