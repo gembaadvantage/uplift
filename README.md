@@ -5,7 +5,11 @@
   <h1>Uplift</h1>
 </div>
 
-Semantic versioning the easy way. Automatic tagging and version bumping of files in your repositories based on your commit messages. Powered by [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Easy to include in your CI.
+By harnessing the power of [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), Uplift simplifies the release management of your project through your use of commit messages.
+
+Built for Continuous Integration (CI), Uplift is incredibly simple to use, and its modular design allows you to choose which release cycle features you want to incorporate into your workflow. It adheres to the Semantic Versioning specification and plays nicely with other tools.
+
+And it's built using Go so that you can install it anywhere!
 
 ## Documentation
 
