@@ -1,9 +1,15 @@
-# Introduction
+# Semantic Versioning the Easy Way
 
-"Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
+By harnessing the power of [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), Uplift simplifies the release management of your project through your use of commit messages.
 
-Uplift is designed to simplify release management within a project. By harnessing the power of [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/), release automation can be introduced into any CI workflow. Uplift works by analysing the latest conventional commit message to identify the next semantic release. If a semantic release is identified, uplift will release the project. A release can comprise of file bumping (updating the version within a file), changelog management and tagging of a repository, all configurable through uplifts commands and/or configuration file.
+Built for Continuous Integration (CI), Uplift is incredibly simple to use, and its modular design allows you to choose which release cycle features you want to incorporate into your workflow. It adheres to the Semantic Versioning specification and plays nicely with other tools.
 
-Being built using Go, uplift is incredibly small and easy to install into any CI workflow. Once you are setup, you won't have to do anything again. Uplift will take care of the rest for you!
+And it's built using Go so that you can install it anywhere!
 
-# TODO: extend this further, include benefits
+## Features
+
+- `File Bumping:` Update the semantic version within any configured file
+- `Changelog Generation:` Creates and updates a changelog for each semantic release
+- `Repository Tagging:` Tags your repository with the next semantic version
+
+Uplift ❤️ Conventional Commits
