@@ -7,7 +7,7 @@ You are free to control Uplift through the use of a dedicated configuration file
 - `uplift.yml`
 - `uplift.yaml`
 
-```yaml linenums="1"
+```{ .yaml .annotate linenums="1" }
 # .uplift.yml
 
 # Define a set of environment variables that are made available to all
@@ -77,6 +77,12 @@ commitAuthor:
   #
   # Defaults to the author email within the last commit
   email: "joe.bloggs@gmail.com"
+
+# Changes the default commit message used by Uplift when committing
+# any staged changes.
+#
+# Default commit message is: ci(uplift): uplifted for version v0.1.0
+commitMessage: "chore(release): this is a custom release message"
 
 # Use annotated tags instead of lightweight tags when tagging a new
 # semantic version. An annotated tag is treated like a regular commit
@@ -174,3 +180,5 @@ bumps:
         # Defaults to 0, which replaces all matches
         count: 1
 ```
+
+1. An example of using POSIX based windows commands through the [mvdan/sh](https://github.com/mvdan/sh) GitHub library. Pay special attention to the use of `//` when specifying a path

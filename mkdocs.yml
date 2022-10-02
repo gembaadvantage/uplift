@@ -45,6 +45,7 @@ nav:
       - Bumping your Files: bumping-files.md
       - Generating a Changelog: changelog.md
       - Signing Commits: commit-signing.md
+      - Hello Uplift-Bot: uplift-bot.md
       - Conventional Commits: conventional-commits.md
       - License: license.md
       - Installation:
@@ -53,13 +54,12 @@ nav:
           - From Source: install/source.md
           - Oh My Zsh: install/oh-my-zsh.md
   - Setup:
-      - About: config/about.md
-      - Basics: config/basics.md
-      - Changelog: config/changelog.md
-      - File Bumping: config/bumping.md
-      - Git: config/git.md
-      - Hooks: config/hooks.md
-      - Environment Variables: config/env.md
+      - Changing Location of Config: setup/config-location.md
+      - Changing the Commit Details: setup/commit-details.md
+      - Configuring Git Behaviour: setup/git-behaviour.md
+      - Extending Uplift with Hooks: setup/hooks.md
+      - Print the next Tag Only: setup/next-tag.md
+      - Run without making Changes: setup/dry-run.md
       - Continuous Integration:
           - AWS CodeBuild: ci/awscodebuild.md
           - AWS CodePipeline: ci/awscodepipeline.md
