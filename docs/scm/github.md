@@ -5,6 +5,7 @@ Uplift comes with built-in detection for GitHub (SaaS). However, when using [Git
 ```yaml linenums="1"
 # uplift.yml
 
+# Add support for GitHub SCM detection
 github:
   # The URL of the enterprise instance of GitHub. Only the scheme and
   # hostname are required. The hostname is used when matching against

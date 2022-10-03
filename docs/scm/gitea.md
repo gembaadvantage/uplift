@@ -5,6 +5,7 @@ As [Gitea](https://gitea.io/en-us/) is a self-hosted SCM, custom configuration i
 ```yaml linenums="1"
 # uplift.yml
 
+# Add support for Gitea SCM detection
 gitea:
   # The URL of the self-hosted instance of Gitea. Only the scheme and
   # hostname are required. The hostname is used when matching against

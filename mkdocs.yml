@@ -23,6 +23,7 @@ theme:
     - search.share
   icon:
     repo: fontawesome/brands/github
+    edit: octicons/pencil-24
   palette:
     - scheme: default
       primary: teal
@@ -60,22 +61,22 @@ nav:
       - Extending Uplift with Hooks: setup/hooks.md
       - Print the next Tag Only: setup/next-tag.md
       - Run without making Changes: setup/dry-run.md
-      - Continuous Integration:
-          - AWS CodeBuild: ci/awscodebuild.md
-          - AWS CodePipeline: ci/awscodepipeline.md
-          - CircleCI: ci/circleci.md
-          - Cirrus CI: ci/cirrusci.md
-          - Codefresh: ci/codefresh.md
-          - Drone: ci/drone.md
-          - GitHub Action: ci/github.md
-          - GitLab: ci/gitlab.md
-          - Semaphore: ci/semaphore.md
-          - Travis CI: ci/travisci.md
       - SCM Detection:
           - About: scm/about.md
           - Gitea: scm/gitea.md
           - GitHub: scm/github.md
           - GitLab: scm/gitlab.md
+  - Continuous Integration:
+      - AWS CodeBuild: ci/awscodebuild.md
+      - AWS CodePipeline: ci/awscodepipeline.md
+      - CircleCI: ci/circleci.md
+      - Cirrus CI: ci/cirrusci.md
+      - Codefresh: ci/codefresh.md
+      - Drone: ci/drone.md
+      - GitHub Action: ci/github.md
+      - GitLab: ci/gitlab.md
+      - Semaphore: ci/semaphore.md
+      - Travis CI: ci/travisci.md
   - FAQ:
       - Git Repository is in a Dirty State: faq/gitdirty.md
       - Git Repository has a Detached HEAD: faq/gitdetached.md
@@ -103,9 +104,9 @@ extra:
       name: Gemba Advantage on Docker
 
 plugins:
-  - search
   - minify:
       minify_html: true
+  - search
 
 markdown_extensions:
   - admonition

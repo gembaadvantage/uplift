@@ -7,9 +7,9 @@ You are free to control Uplift through the use of a dedicated configuration file
 - `uplift.yml`
 - `uplift.yaml`
 
-```{ .yaml .annotate linenums="1" }
-# .uplift.yml
+## env
 
+```{ .yaml .annotate linenums="1" }
 # Define a set of environment variables that are made available to all
 # hooks. Supports loading environment variables from DotEnv (.env)
 # files. Environment variables are merged with system wide ones.
@@ -18,7 +18,11 @@ env:
   - ANOTHER_VARIABLE=ANOTHER VALUE
   - .env
   - path/to/other.env
+```
 
+## hooks
+
+```{ .yaml .annotate linenums="1" }
 # All hooks default to an empty list and will be skipped
 hooks:
   # A list of shell commands or scripts to execute before Uplift runs
@@ -62,7 +66,13 @@ hooks:
   # the repository with the next semantic release
   afterTag:
     - echo "After Tag"
+```
 
+1. An example of using POSIX based windows commands through the [mvdan/sh](https://github.com/mvdan/sh) GitHub library. Pay special attention to the use of `//` when specifying a path
+
+## commitAuthor
+
+```{ .yaml .annotate linenums="1" }
 # Changes the commit author used by Uplift when committing any staged
 # changes.
 #
@@ -77,13 +87,21 @@ commitAuthor:
   #
   # Defaults to the author email within the last commit
   email: "joe.bloggs@gmail.com"
+```
 
+## commitMessage
+
+```{ .yaml .annotate linenums="1" }
 # Changes the default commit message used by Uplift when committing
 # any staged changes.
 #
 # Default commit message is: ci(uplift): uplifted for version v0.1.0
 commitMessage: "chore(release): this is a custom release message"
+```
 
+## annotatedTags
+
+```{ .yaml .annotate linenums="1" }
 # Use annotated tags instead of lightweight tags when tagging a new
 # semantic version. An annotated tag is treated like a regular commit
 # by git and contains both author details and a commit message. Uplift
@@ -92,7 +110,11 @@ commitMessage: "chore(release): this is a custom release message"
 #
 # Defaults to false
 annotatedTags: true
+```
 
+## git
+
+```{ .yaml .annotate linenums="1" }
 # Customise how Uplift responds to its inbuilt Git checks
 git:
   # A flag for suppressing the git detached HEAD repository check. If set
@@ -108,7 +130,11 @@ git:
   #
   # Defaults to false
   ignoreShallow: true
+```
 
+## changelog
+
+```{ .yaml .annotate linenums="1" }
 # Customise the creation of the Changelog
 changelog:
   # Change the sort order of the commits within each changelog entry.
@@ -128,7 +154,11 @@ changelog:
     - chore(deps)
     - docs
     - ci
+```
 
+## bumps
+
+```{ .yaml .annotate linenums="1" }
 # Define a series of files whose semantic version will be bumped.
 # Supports both Regex and JSON Path based file bumps
 #
@@ -181,4 +211,41 @@ bumps:
         count: 1
 ```
 
-1. An example of using POSIX based windows commands through the [mvdan/sh](https://github.com/mvdan/sh) GitHub library. Pay special attention to the use of `//` when specifying a path
+## gitea
+
+```{ .yaml .annotate linenums="1" }
+# Add support for Gitea SCM detection
+gitea:
+  # The URL of the self-hosted instance of Gitea. Only the scheme and
+  # hostname are required. The hostname is used when matching against
+  # the configured remote origin of the cloned repository
+  #
+  # Defaults to empty string i.e. no detection is supported
+  url: https://my.gitea.com
+```
+
+## github
+
+```{ .yaml .annotate linenums="1" }
+# Add support for GitHub SCM detection
+github:
+  # The URL of the enterprise instance of GitHub. Only the scheme and
+  # hostname are required. The hostname is used when matching against
+  # the configured remote origin of the cloned repository
+  #
+  # Defaults to empty string i.e. no detection is supported
+  url: https://my.github.com
+```
+
+## gitlab
+
+```{ .yaml .annotate linenums="1" }
+# Add support for GitLab SCM detection
+gitlab:
+  # The URL of the self-managed instance of GitLab. Only the scheme and
+  # hostname are required. The hostname is used when matching against
+  # the configured remote origin of the cloned repository
+  #
+  # Defaults to empty string i.e. no detection is supported
+  url: https://my.gitlab.com
+```

@@ -8,7 +8,7 @@ A release comprises three stages:
 
 ## Uplift Configuration
 
-File bumping currently requires a configuration file named `.uplift.yml`. Please review our guide on configuring file bumps for comprehensive details.
+File bumping currently requires a configuration file named `.uplift.yml`. Please review our [guide](./reference/config.md#bumps) on configuring file bumps for comprehensive details.
 
 ```yaml linenums="1"
 # .uplift.yml
