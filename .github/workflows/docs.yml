@@ -73,5 +73,3 @@ jobs:
       - name: Deploy documentation
         if: startsWith(github.ref, 'refs/tags/v')
         run: docker run --rm -v ${PWD}:/docs squidfunk/mkdocs-material gh-deploy --force
-
-      # TODO: ensure custom domain is set
