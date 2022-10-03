@@ -81,6 +81,10 @@ func TestRun_GitAuthorConfig(t *testing.T) {
 }
 
 func TestRun_CustomCommitDetails(t *testing.T) {
+	git.InitRepo(t)
+	git.SetConfig(t, "user.name", "")
+	git.SetConfig(t, "user.email", "")
+
 	ctx := &context.Context{
 		Config: config.Uplift{
 			CommitMessage: "ci(release): this is a custom message",

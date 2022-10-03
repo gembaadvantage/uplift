@@ -85,22 +85,6 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: task lint
 
-      - name: misspell
-        if: matrix.os == 'ubuntu-latest'
-        uses: reviewdog/action-misspell@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          locale: "UK"
-          exclude: |
-            ./go.mod
-            ./go.sum
-            *.css
-            ./docs/yarn.lock
-            ./docs/tailwind.config.js
-            ./.goreleaser.yml
-            ./.github/**
-            ./internal/git/utils.go
-
       - name: Code Coverage
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v3

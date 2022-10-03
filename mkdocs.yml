@@ -1,0 +1,130 @@
+site_name: Uplift
+site_description: Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI
+copyright: Uplift is built and maintained by the folk at Gemba Advantage
+repo_name: gembaadvantage/uplift
+repo_url: https://github.com/gembaadvantage/uplift
+# Only set during a release to ensure htmltest doesn't break due to non existent directories
+site_url: ""
+edit_uri: ""
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  logo: static/logo.png
+  favicon: static/favicon.ico
+  features:
+    - content.code.annotate
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - search.share
+  icon:
+    repo: fontawesome/brands/github
+    edit: octicons/pencil-24
+  palette:
+    - scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/lightbulb
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Creating your First Release: first-release.md
+      - Tagging your Repository: tagging.md
+      - Bumping your Files: bumping-files.md
+      - Generating a Changelog: changelog.md
+      - Signing Commits: commit-signing.md
+      - Hello Uplift-Bot: uplift-bot.md
+      - Conventional Commits: conventional-commits.md
+      - License: license.md
+      - Installation:
+          - Binary: install/binary.md
+          - With Docker: install/docker.md
+          - From Source: install/source.md
+          - Oh My Zsh: install/oh-my-zsh.md
+  - Setup:
+      - Changing Location of Config: setup/config-location.md
+      - Changing the Commit Details: setup/commit-details.md
+      - Configuring Git Behaviour: setup/git-behaviour.md
+      - Extending Uplift with Hooks: setup/hooks.md
+      - Print the next Tag Only: setup/next-tag.md
+      - Run without making Changes: setup/dry-run.md
+      - SCM Detection:
+          - About: scm/about.md
+          - Gitea: scm/gitea.md
+          - GitHub: scm/github.md
+          - GitLab: scm/gitlab.md
+  - Continuous Integration:
+      - AWS CodeBuild: ci/awscodebuild.md
+      - AWS CodePipeline: ci/awscodepipeline.md
+      - CircleCI: ci/circleci.md
+      - Cirrus CI: ci/cirrusci.md
+      - Codefresh: ci/codefresh.md
+      - Drone: ci/drone.md
+      - GitHub Action: ci/github.md
+      - GitLab: ci/gitlab.md
+      - Semaphore: ci/semaphore.md
+      - Travis CI: ci/travisci.md
+  - FAQ:
+      - Git Repository is in a Dirty State: faq/gitdirty.md
+      - Git Repository has a Detached HEAD: faq/gitdetached.md
+      - Git Repository contains a Shallow Clone: faq/gitshallow.md
+      - GPG Key fails to Import: faq/gpgimport.md
+  - Reference:
+      - Configuration: reference/config.md
+      - CLI:
+          - uplift: reference/cli/root.md
+          - uplift tag: reference/cli/tag.md
+          - uplift bump: reference/cli/bump.md
+          - uplift changelog: reference/cli/changelog.md
+          - uplift release: reference/cli/release.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/gembaadvantage
+      name: Gemba Advantage on GitHub
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/GA_Uplift
+      name: Uplift on Twitter
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/u/gembaadvantage
+      name: Gemba Advantage on Docker
+
+plugins:
+  - minify:
+      minify_html: true
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:materialx.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - md_in_html
+  - meta
+  - toc:
+      permalink: true

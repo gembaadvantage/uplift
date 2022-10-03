@@ -54,13 +54,6 @@ func (t Task) Run(ctx *context.Context) error {
 		Message: fmt.Sprintf("ci(uplift): uplifted for version %s", ctx.NextVersion.Raw),
 	}
 
-	author := git.Author()
-	if author.Email != "" && author.Name != "" {
-		log.Debug("overwriting commit author from git config")
-		c.Author = author.Name
-		c.Email = author.Email
-	}
-
 	if ctx.Config.CommitAuthor.Name != "" {
 		log.Debug("overwriting commit author name from uplift config")
 		c.Author = ctx.Config.CommitAuthor.Name
@@ -74,6 +67,13 @@ func (t Task) Run(ctx *context.Context) error {
 	if ctx.Config.CommitMessage != "" {
 		log.Debug("overwriting commit message from uplift config")
 		c.Message = strings.ReplaceAll(ctx.Config.CommitMessage, semver.Token, ctx.NextVersion.Raw)
+	}
+
+	author := git.Author()
+	if author.Email != "" && author.Name != "" {
+		log.Debug("overwriting commit author from git config")
+		c.Author = author.Name
+		c.Email = author.Email
 	}
 
 	ctx.CommitDetails = c
