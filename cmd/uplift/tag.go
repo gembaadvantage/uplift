@@ -27,6 +27,7 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/middleware/logging"
 	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
@@ -46,6 +47,21 @@ import (
 const (
 	tagDesc = `Tags a git repository with the next semantic version. The tag
 is based on the conventional commit message from the last commit.`
+
+	examples = `  # Tag the repository with the next calculated semantic version
+  uplift tag
+
+  # Identify the next semantic version and write to stdout. 
+  # Repository is not tagged
+  uplift tag --next --silent
+
+  # Identify the current semantic version and write to stdout. 
+  # Repository is not tagged
+  uplift tag --current
+
+  # Identify the next and current semantic versions and write to stdout.
+  # Repository is not tagged
+  uplift tag --current --next --silent`
 )
 
 var (
@@ -61,7 +77,7 @@ var (
 		after.Task{},
 	}
 
-	nextTagPipeline = []task.Runner{
+	printNextTagPipeline = []task.Runner{
 		before.Task{},
 		gitcheck.Task{},
 		fetchtag.Task{},
@@ -74,10 +90,11 @@ var (
 )
 
 type tagOptions struct {
-	FetchTags   bool
-	NextTagOnly bool
-	Prerelease  string
-	NoPrefix    bool
+	FetchTags       bool
+	PrintCurrentTag bool
+	PrintNextTag    bool
+	Prerelease      string
+	NoPrefix        bool
 	*globalOptions
 }
 
@@ -94,20 +111,30 @@ func newTagCmd(gopts *globalOptions, out io.Writer) *tagCommand {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "tag",
-		Short: "Tag a git repository with the next semantic version",
-		Long:  tagDesc,
-		Args:  cobra.NoArgs,
+		Use:     "tag",
+		Short:   "Tag a git repository with the next semantic version",
+		Long:    tagDesc,
+		Example: examples,
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// If only the current tag is to be printed, skip running a pipeline
+			// and just retrieve and print the latest tag
+			if tagCmd.Opts.PrintCurrentTag && !tagCmd.Opts.PrintNextTag {
+				tag := git.LatestTag()
+				fmt.Fprintf(out, tag.Ref)
+				return nil
+			}
+
 			return tagRepo(tagCmd.Opts, out)
 		},
 	}
 
 	f := cmd.Flags()
+	f.BoolVar(&tagCmd.Opts.PrintCurrentTag, "current", false, "output the current tag")
 	f.BoolVar(&tagCmd.Opts.FetchTags, "fetch-all", false, "fetch all tags from the remote repository")
-	f.BoolVar(&tagCmd.Opts.NextTagOnly, "next", false, "output the next tag only")
-	f.StringVar(&tagCmd.Opts.Prerelease, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
+	f.BoolVar(&tagCmd.Opts.PrintNextTag, "next", false, "output the next tag")
 	f.BoolVar(&tagCmd.Opts.NoPrefix, "no-prefix", false, "strip the default 'v' prefix from the next calculated semantic version")
+	f.StringVar(&tagCmd.Opts.Prerelease, "prerelease", "", "append a prerelease suffix to next calculated semantic version")
 
 	tagCmd.Cmd = cmd
 	return tagCmd
@@ -121,9 +148,8 @@ func tagRepo(opts tagOptions, out io.Writer) error {
 
 	tsks := tagRepoPipeline
 
-	// Switch pipeline if only the next tag needs to be calculated
-	if ctx.NextTagOnly {
-		tsks = nextTagPipeline
+	if ctx.PrintNextTag {
+		tsks = printNextTagPipeline
 	}
 
 	for _, tsk := range tsks {
@@ -148,7 +174,8 @@ func setupTagContext(opts tagOptions, out io.Writer) (*context.Context, error) {
 	ctx.DryRun = opts.DryRun
 	ctx.NoPush = opts.NoPush
 	ctx.FetchTags = opts.FetchTags
-	ctx.NextTagOnly = opts.NextTagOnly
+	ctx.PrintCurrentTag = opts.PrintCurrentTag
+	ctx.PrintNextTag = opts.PrintNextTag
 	ctx.Out = out
 	ctx.NoPrefix = opts.NoPrefix
 

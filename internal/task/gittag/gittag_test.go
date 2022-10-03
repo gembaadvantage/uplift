@@ -145,7 +145,26 @@ func TestRun_AnnotatedTag(t *testing.T) {
 		ctx.CommitDetails.Author, ctx.CommitDetails.Email, ctx.CommitDetails.Message))
 }
 
-func TestRun_NextTagOnly(t *testing.T) {
+func TestRun_PrintCurrentTag(t *testing.T) {
+	git.InitRepo(t)
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		Out: &buf,
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		PrintCurrentTag: true,
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	assert.Equal(t, "1.0.0", buf.String())
+	assert.Len(t, git.AllTags(), 0)
+}
+
+func TestRun_PrintNextTag(t *testing.T) {
 	git.InitRepo(t)
 
 	var buf bytes.Buffer
@@ -154,12 +173,35 @@ func TestRun_NextTagOnly(t *testing.T) {
 		NextVersion: semver.Version{
 			Raw: "1.0.0",
 		},
-		NextTagOnly: true,
+		PrintNextTag: true,
 	}
 
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.0.0", buf.String())
+	assert.Len(t, git.AllTags(), 0)
+}
+
+func TestRun_PrintCurrentAndNextTag(t *testing.T) {
+	git.InitRepo(t)
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		Out: &buf,
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextVersion: semver.Version{
+			Raw: "1.1.0",
+		},
+		PrintCurrentTag: true,
+		PrintNextTag:    true,
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	assert.Equal(t, "1.0.0 1.1.0", buf.String())
 	assert.Len(t, git.AllTags(), 0)
 }
