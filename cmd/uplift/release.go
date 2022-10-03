@@ -119,8 +119,8 @@ func release(opts releaseOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		before.Task{},
 		gitcheck.Task{},
+		before.Task{},
 		gpgimport.Task{},
 		scm.Task{},
 		fetchtag.Task{},
