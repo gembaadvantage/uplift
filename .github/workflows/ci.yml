@@ -34,7 +34,6 @@ on:
       - "*.go"
       - "go.mod"
       - "go.sum"
-  workflow_dispatch:
 jobs:
   ci:
     strategy:
@@ -47,8 +46,6 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
         if: matrix.os == 'windows-latest'
-
-      - run: echo "event type is:" ${{ github.event.action }}
 
       - name: Checkout
         uses: actions/checkout@v3
