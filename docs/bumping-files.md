@@ -28,7 +28,7 @@ Please review our comprehensive [guide](./reference/config.md#bumps) on configur
 
 ## The $VERSION Token
 
-Writing a regex can be challenging at most times, so Uplift provides the `$VERSION` token for matching a semantic version with an optional `v` prefix. You are free to include this in a pattern you define within your config.
+Writing a regex can be challenging at most times, so Uplift provides the `$VERSION` token for matching a semantic version with an optional `v` prefix. You can include this in any pattern you define within your config.
 
 ## Prerelease Support
 
