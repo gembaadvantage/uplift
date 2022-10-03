@@ -21,8 +21,11 @@
 name: docker-description
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - main
+    paths:
+      - "README.md"
+  workflow_dispatch:
 
 jobs:
   goreleaser:
