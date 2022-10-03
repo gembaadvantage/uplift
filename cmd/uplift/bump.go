@@ -91,8 +91,8 @@ func bumpFiles(opts bumpOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		before.Task{},
 		gitcheck.Task{},
+		before.Task{},
 		gpgimport.Task{},
 		nextsemver.Task{},
 		nextcommit.Task{},

@@ -107,8 +107,8 @@ func writeChangelog(opts changelogOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		before.Task{},
 		gitcheck.Task{},
+		before.Task{},
 		scm.Task{},
 		nextcommit.Task{},
 		beforechangelog.Task{},
@@ -134,8 +134,8 @@ func writeChangelogDiff(opts changelogOptions, out io.Writer) error {
 	}
 
 	tsks := []task.Runner{
-		before.Task{},
 		gitcheck.Task{},
+		before.Task{},
 		scm.Task{},
 		changelog.Task{},
 		after.Task{},

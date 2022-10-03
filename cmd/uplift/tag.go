@@ -66,8 +66,8 @@ is based on the conventional commit message from the last commit.`
 
 var (
 	tagRepoPipeline = []task.Runner{
-		before.Task{},
 		gitcheck.Task{},
+		before.Task{},
 		fetchtag.Task{},
 		nextsemver.Task{},
 		nextcommit.Task{},
@@ -78,8 +78,8 @@ var (
 	}
 
 	printNextTagPipeline = []task.Runner{
-		before.Task{},
 		gitcheck.Task{},
+		before.Task{},
 		fetchtag.Task{},
 		nextsemver.Task{},
 		beforetag.Task{},
