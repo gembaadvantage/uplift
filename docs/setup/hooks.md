@@ -11,10 +11,6 @@ Uplift can be extended through the use of hooks. A hook is a specific point duri
 - `beforeTag`: a hook that executes before tagging the repository
 - `afterTag`: a hook that executes after the repository is tagged
 
-!!!warning "Ignore temporary files when using Before Hook"
-
-    A word of caution. The `before` hook precedes the git checks within Uplift. You will need to ignore any temporary files to prevent the repository from becoming [dirty](../faq/gitdirty.md).
-
 ```{ .yaml .annotate linenums="1" }
 # .uplift.yml
 
