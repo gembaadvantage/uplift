@@ -157,7 +157,7 @@
       "properties": {
         "before": {
           "items": {
-            "$comment": "https://upliftci.dev/reference/config#gitlab",
+            "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute before Uplift runs tasks within any workflow",
             "type": "string"
           },
@@ -165,7 +165,7 @@
         },
         "beforeBump": {
           "items": {
-            "$comment": "https://upliftci.dev/reference/config#gitlab",
+            "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute before Uplift bumps any configured file",
             "type": "string"
           },
@@ -173,7 +173,7 @@
         },
         "beforeTag": {
           "items": {
-            "$comment": "https://upliftci.dev/reference/config#gitlab",
+            "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute before Uplift tags the repository with the next semantic release",
             "type": "string"
           },
@@ -181,7 +181,7 @@
         },
         "beforeChangelog": {
           "items": {
-            "$comment": "https://upliftci.dev/reference/config#gitlab",
+            "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute before Uplift runs its changelog generation task",
             "type": "string"
           },
@@ -189,7 +189,7 @@
         },
         "after": {
           "items": {
-            "$comment": "https://upliftci.dev/reference/config#gitlab",
+            "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute after Uplift completes all tasks within any workflow",
             "type": "string"
           },
@@ -197,7 +197,7 @@
         },
         "afterBump": {
           "items": {
-            "$comment": "https://upliftci.dev/reference/config#gitlab",
+            "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute after Uplift bumps all configured files",
             "type": "string"
           },
@@ -205,7 +205,7 @@
         },
         "afterTag": {
           "items": {
-            "$comment": "https://upliftci.dev/reference/config#gitlab",
+            "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute after Uplift tags the repository with the next semantic release",
             "type": "string"
           },
@@ -213,7 +213,7 @@
         },
         "afterChangelog": {
           "items": {
-            "$comment": "https://upliftci.dev/reference/config#gitlab",
+            "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute after Uplift generates or updates a changelog",
             "type": "string"
           },
