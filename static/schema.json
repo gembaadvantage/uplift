@@ -1,0 +1,287 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/gembaadvantage/uplift/internal/config/uplift",
+  "$ref": "#/$defs/Uplift",
+  "title": "Uplift",
+  "description": "A JSON schema for the Uplift configuration file",
+  "$defs": {
+    "Bump": {
+      "properties": {
+        "file": {
+          "$comment": "https://upliftci.dev/reference/config#bumps",
+          "description": "The path of the file to bump relative to where Uplift is executed",
+          "type": "string"
+        },
+        "regex": {
+          "$comment": "https://upliftci.dev/reference/config#bumps",
+          "description": "A regex matcher to be used when bumping the file. Multiple regex matches are supported. Each will be carried out in the order they are defined here. All matches must succeed for the file to be bumped",
+          "items": {
+            "$ref": "#/$defs/RegexBump"
+          },
+          "type": "array"
+        },
+        "json": {
+          "$comment": "https://upliftci.dev/reference/config#bumps",
+          "description": "A JSON path matcher to be used when bumping the file. Multiple path matches are supported. Each will be carried out in the order they are defined here. All matches must succeed for the file to be bumped. JSON path syntax is based on https://github.com/tidwall/sjson",
+          "items": {
+            "type": "#/$defs/JSONBump"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RegexBump": {
+      "properties": {
+        "pattern": {
+          "$comment": "https://upliftci.dev/reference/config#bumps",
+          "description": "A regex pattern for matching and replacing the version within the file",
+          "type": "string"
+        },
+        "count": {
+          "$comment": "https://upliftci.dev/reference/config#bumps",
+          "description": "The number of times any matched version should be replaced",
+          "type": "integer",
+          "minimum": 1
+        },
+        "semver": {
+          "$comment": "https://upliftci.dev/reference/config#bumps",
+          "description": "A flag controlling if the matched version in the file should be replaced with a semantic version. This will strip any 'v' prefix if needed",
+          "type": "boolean"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "JSONBump": {
+      "properties": {
+        "path": {
+          "$comment": "https://upliftci.dev/reference/config#bumps",
+          "description": "A JSON path for matching and replacing the version within the file",
+          "type": "string"
+        },
+        "semver": {
+          "$comment": "https://upliftci.dev/reference/config#bumps",
+          "description": "A flag controlling if the matched version in the file should be replaced with a semantic version. This will strip any 'v' prefix if needed",
+          "type": "boolean"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CommitAuthor": {
+      "properties": {
+        "name": {
+          "$comment": "https://upliftci.dev/reference/config#commitAuthor",
+          "description": "Name of the commit author",
+          "type": "string"
+        },
+        "email": {
+          "$comment": "https://upliftci.dev/reference/config#commitAuthor",
+          "description": "Email of the commit author",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Changelog": {
+      "properties": {
+        "sort": {
+          "$comment": "https://upliftci.dev/reference/config#changelog",
+          "description": "Change the sort order of the commits within each changelog entry. Supported values are asc or desc (case is ignored). Defaults to desc (descending order) to mirror the default behaviour of 'git log'",
+          "type": "string"
+        },
+        "exclude": {
+          "$comment": "https://upliftci.dev/reference/config#changelog",
+          "description": "A list of commits to exclude during the creation of a changelog. Provide a list of conventional commit prefixes to filter on. Auto-generated commits from Uplift (with the prefix ci(uplift)) will always be excluded",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Git": {
+      "properties": {
+        "$comment": "https://upliftci.dev/reference/config#git",
+        "description": "A flag for suppressing the git detached HEAD repository check. If set to true, Uplift will report a warning while running, otherwise Uplift will raise an error and stop. Defaults to false",
+        "ignoreDetached": {
+          "type": "boolean"
+        },
+        "ignoreShallow": {
+          "$comment": "https://upliftci.dev/reference/config#git",
+          "description": "A flag for suppressing the git shallow repository check. If set to true, Uplift will report a warning while running, otherwise Uplift will raise an error and stop. Defaults to false",
+          "type": "boolean"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Gitea": {
+      "properties": {
+        "url": {
+          "$comment": "https://upliftci.dev/reference/config#gitea",
+          "description": "The URL of the self-hosted instance of Gitea. Only the scheme and hostname are required. The hostname is used when matching against the configured remote origin of the cloned repository",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "GitHub": {
+      "properties": {
+        "url": {
+          "$comment": "https://upliftci.dev/reference/config#github",
+          "description": "The URL of the enterprise instance of GitHub. Only the scheme and hostname are required. The hostname is used when matching against the configured remote origin of the cloned repository",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "GitLab": {
+      "properties": {
+        "url": {
+          "$comment": "https://upliftci.dev/reference/config#gitlab",
+          "description": "The URL of the self-managed instance of GitLab. Only the scheme and hostname are required. The hostname is used when matching against the configured remote origin of the cloned repository",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Hooks": {
+      "properties": {
+        "before": {
+          "items": {
+            "$comment": "https://upliftci.dev/reference/config#hooks",
+            "description": "A list of shell commands or scripts to execute before Uplift runs tasks within any workflow",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "beforeBump": {
+          "items": {
+            "$comment": "https://upliftci.dev/reference/config#hooks",
+            "description": "A list of shell commands or scripts to execute before Uplift bumps any configured file",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "beforeTag": {
+          "items": {
+            "$comment": "https://upliftci.dev/reference/config#hooks",
+            "description": "A list of shell commands or scripts to execute before Uplift tags the repository with the next semantic release",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "beforeChangelog": {
+          "items": {
+            "$comment": "https://upliftci.dev/reference/config#hooks",
+            "description": "A list of shell commands or scripts to execute before Uplift runs its changelog generation task",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "after": {
+          "items": {
+            "$comment": "https://upliftci.dev/reference/config#hooks",
+            "description": "A list of shell commands or scripts to execute after Uplift completes all tasks within any workflow",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "afterBump": {
+          "items": {
+            "$comment": "https://upliftci.dev/reference/config#hooks",
+            "description": "A list of shell commands or scripts to execute after Uplift bumps all configured files",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "afterTag": {
+          "items": {
+            "$comment": "https://upliftci.dev/reference/config#hooks",
+            "description": "A list of shell commands or scripts to execute after Uplift tags the repository with the next semantic release",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "afterChangelog": {
+          "items": {
+            "$comment": "https://upliftci.dev/reference/config#hooks",
+            "description": "A list of shell commands or scripts to execute after Uplift generates or updates a changelog",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Uplift": {
+      "properties": {
+        "annotatedTags": {
+          "$comment": "https://upliftci.dev/reference/config#annotatedTags",
+          "description": "Use annotated tags instead of lightweight tags when tagging a new semantic version. An annotated tag is treated like a regular commit by git and contains both author details and a commit message. Uplift will either use its defaults or the custom commit details provided when generating the annotated tag.",
+          "type": "boolean"
+        },
+        "bumps": {
+          "items": {
+            "$ref": "#/$defs/Bump"
+          },
+          "type": "array",
+          "description": "Define a series of files whose semantic version will be bumped. Supports both Regex and JSON Path based file bumps"
+        },
+        "commitAuthor": {
+          "$ref": "#/$defs/CommitAuthor",
+          "description": "Changes the commit author used by Uplift when committing any staged changes.\n Defaults to the Uplift Bot: uplift-bot <uplift@gembaadvantage.com>"
+        },
+        "commitMessage": {
+          "$comment": "https://upliftci.dev/reference/config#commitMessage",
+          "description": "Change the default commit message used by Uplift when committing any staged changes.\nThe default commit message is: ci(uplift): uplifted for version v0.1.0",
+          "type": "string"
+        },
+        "changelog": {
+          "$ref": "#/$defs/Changelog",
+          "description": "Customise how Uplift creates and updates a changelog within the repository"
+        },
+        "git": {
+          "$ref": "#/$defs/Git",
+          "description": "Customise how Uplift responds to its inbuilt Git checks"
+        },
+        "gitea": {
+          "$ref": "#/$defs/Gitea",
+          "description": "Configure SCM detection and support for Gitea"
+        },
+        "github": {
+          "$ref": "#/$defs/GitHub",
+          "description": "Configure SCM detection and support for GitHub"
+        },
+        "gitlab": {
+          "$ref": "#/$defs/GitLab",
+          "description": "Configure SCM detection and support for GitLab"
+        },
+        "hooks": {
+          "$ref": "#/$defs/Hooks",
+          "description": "Extend Uplift through the use of hooks. A hook is a specific point during a workflow where Uplift executes adhoc shell commands and scripts"
+        },
+        "env": {
+          "$comment": "https://upliftci.dev/reference/config#env",
+          "description": "Define a set of environment variables that are made available to all hooks. Supports loading environment variables from DotEnv (.env) files. Environment variables are merged with system wide ones.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    }
+  }
+}
