@@ -126,6 +126,7 @@ func TestRemote(t *testing.T) {
 		host     string
 		owner    string
 		repo     string
+		path     string
 	}{
 		{
 			name:     "GitHubSSH",
@@ -133,6 +134,7 @@ func TestRemote(t *testing.T) {
 			host:     "github.com",
 			owner:    "owner",
 			repo:     "testing1",
+			path:     "owner/testing1",
 		},
 		{
 			name:     "GitHubHTTPS",
@@ -140,6 +142,7 @@ func TestRemote(t *testing.T) {
 			host:     "github.com",
 			owner:    "owner",
 			repo:     "testing2",
+			path:     "owner/testing2",
 		},
 		{
 			name:     "GitHubHTTPSWithAccessToken",
@@ -147,6 +150,7 @@ func TestRemote(t *testing.T) {
 			host:     "github.com",
 			owner:    "owner",
 			repo:     "testing3",
+			path:     "owner/testing3",
 		},
 		{
 			name:     "GitLabSSH",
@@ -154,6 +158,7 @@ func TestRemote(t *testing.T) {
 			host:     "gitlab.com",
 			owner:    "owner",
 			repo:     "testing4",
+			path:     "owner/testing4",
 		},
 		{
 			name:     "GitLabHTTPS",
@@ -161,6 +166,7 @@ func TestRemote(t *testing.T) {
 			host:     "gitlab.com",
 			owner:    "owner",
 			repo:     "testing5",
+			path:     "owner/testing5",
 		},
 		{
 			name:     "GitLabHTTPSWithAccessToken",
@@ -168,6 +174,7 @@ func TestRemote(t *testing.T) {
 			host:     "gitlab.com",
 			owner:    "owner",
 			repo:     "testing6",
+			path:     "owner/testing6",
 		},
 		{
 			name:     "GitLabUsernamePasswordHTTPS",
@@ -175,20 +182,31 @@ func TestRemote(t *testing.T) {
 			host:     "gitlab.com",
 			owner:    "owner",
 			repo:     "testing7",
+			path:     "owner/testing7",
+		},
+		{
+			name:     "GitLabHTTPSWithNestedSubGroups",
+			cloneURL: "https://gitlab.com/owner/nested/subgroups/testing8.git",
+			host:     "gitlab.com",
+			owner:    "owner",
+			repo:     "testing8",
+			path:     "owner/nested/subgroups/testing8",
 		},
 		{
 			name:     "CodeCommitSSH",
-			cloneURL: "ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing8",
-			host:     "git-codecommit.eu-west-1.amazonaws.com",
-			owner:    "",
-			repo:     "testing8",
-		},
-		{
-			name:     "CodeCommitHTTPS",
-			cloneURL: "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing9",
+			cloneURL: "ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing9",
 			host:     "git-codecommit.eu-west-1.amazonaws.com",
 			owner:    "",
 			repo:     "testing9",
+			path:     "testing9",
+		},
+		{
+			name:     "CodeCommitHTTPS",
+			cloneURL: "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/testing10",
+			host:     "git-codecommit.eu-west-1.amazonaws.com",
+			owner:    "",
+			repo:     "testing10",
+			path:     "testing10",
 		},
 	}
 	for _, tt := range tests {
@@ -203,6 +221,7 @@ func TestRemote(t *testing.T) {
 			require.Equal(t, tt.host, repo.Host)
 			require.Equal(t, tt.owner, repo.Owner)
 			require.Equal(t, tt.repo, repo.Name)
+			require.Equal(t, tt.path, repo.Path)
 		})
 	}
 }
