@@ -3,13 +3,6 @@
   "$id": "https://github.com/gembaadvantage/uplift/internal/config/uplift",
   "$ref": "#/$defs/Uplift",
   "$defs": {
-    "Bumps": {
-      "items": {
-        "type": "#/$defs/Bump"
-      },
-      "type": "array",
-      "additionalProperties": false
-    },
     "Bump": {
       "properties": {
         "file": {
@@ -17,7 +10,7 @@
         },
         "regex": {
           "items": {
-            "type": "#/$defs/RegexBump"
+            "$ref": "#/$defs/RegexBump"
           },
           "type": "array"
         },
@@ -32,12 +25,29 @@
       "additionalProperties": false
     },
     "RegexBump": {
-      "properties": {},
+      "properties": {
+        "pattern": {
+          "type": "string"
+        },
+        "count": {
+          "type": "integer"
+        },
+        "semver": {
+          "type": "boolean"
+        }
+      },
       "type": "object",
       "additionalProperties": false
     },
     "JSONBump": {
-      "properties": {},
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "semver": {
+          "type": "boolean"
+        }
+      },
       "type": "object",
       "additionalProperties": false
     },
@@ -108,7 +118,101 @@
       "additionalProperties": false
     },
     "Hooks": {
-      "properties": {},
+      "properties": {
+        "before": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "beforeBump": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "beforeTag": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "beforeChangelog": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "after": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "afterBump": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "afterTag": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "afterChangelog": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Uplift": {
+      "properties": {
+        "annotatedTags": {
+          "type": "boolean"
+        },
+        "bumps": {
+          "items": {
+            "$ref": "#/$defs/Bump"
+          },
+          "type": "array"
+        },
+        "commitAuthor": {
+          "$ref": "#/$defs/CommitAuthor"
+        },
+        "commitMessage": {
+          "type": "string"
+        },
+        "changelog": {
+          "$ref": "#/$defs/Changelog"
+        },
+        "git": {
+          "$ref": "#/$defs/Git"
+        },
+        "gitea": {
+          "$ref": "#/$defs/Gitea"
+        },
+        "github": {
+          "$ref": "#/$defs/GitHub"
+        },
+        "gitlab": {
+          "$ref": "#/$defs/GitLab"
+        },
+        "hooks": {
+          "$ref": "#/$defs/Hooks"
+        },
+        "env": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
       "type": "object",
       "additionalProperties": false
     }
