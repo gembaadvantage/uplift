@@ -42,7 +42,8 @@
         "count": {
           "$comment": "https://upliftci.dev/reference/config#bumps",
           "description": "The number of times any matched version should be replaced",
-          "type": "integer"
+          "type": "integer",
+          "minimum": 1
         },
         "semver": {
           "$comment": "https://upliftci.dev/reference/config#bumps",
@@ -107,13 +108,13 @@
     "Git": {
       "properties": {
         "$comment": "https://upliftci.dev/reference/config#git",
-        "description": "ABC",
+        "description": "A flag for suppressing the git detached HEAD repository check. If set to true, Uplift will report a warning while running, otherwise Uplift will raise an error and stop. Defaults to false",
         "ignoreDetached": {
           "type": "boolean"
         },
         "ignoreShallow": {
           "$comment": "https://upliftci.dev/reference/config#git",
-          "description": "ABC",
+          "description": "A flag for suppressing the git shallow repository check. If set to true, Uplift will report a warning while running, otherwise Uplift will raise an error and stop. Defaults to false",
           "type": "boolean"
         }
       },
