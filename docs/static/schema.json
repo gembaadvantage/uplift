@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/gembaadvantage/uplift/internal/config/uplift",
+  "$ref": "#/$defs/Uplift",
+  "$defs": {
+    "Bumps": {
+      "items": {
+        "type": "#/$defs/Bump"
+      },
+      "type": "array",
+      "additionalProperties": false
+    },
+    "Bump": {
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "regex": {
+          "items": {
+            "type": "#/$defs/RegexBump"
+          },
+          "type": "array"
+        },
+        "json": {
+          "items": {
+            "type": "#/$defs/JSONBump"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RegexBump": {
+      "properties": {},
+      "type": "object",
+      "additionalProperties": false
+    },
+    "JSONBump": {
+      "properties": {},
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CommitAuthor": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Changelog": {
+      "properties": {
+        "sort": {
+          "type": "string"
+        },
+        "exclude": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Git": {
+      "properties": {
+        "ignoreDetached": {
+          "type": "boolean"
+        },
+        "ignoreShallow": {
+          "type": "boolean"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Gitea": {
+      "properties": {
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "GitHub": {
+      "properties": {
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "GitLab": {
+      "properties": {
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Hooks": {
+      "properties": {},
+      "type": "object",
+      "additionalProperties": false
+    }
+  }
+}
