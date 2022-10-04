@@ -63,6 +63,13 @@ func TestRun(t *testing.T) {
 			commitURL: "https://gitlab.com/owner/repository/-/commit/{{.Hash}}",
 		},
 		{
+			name:      "GitLabNestedSubGroups",
+			provider:  git.GitLab,
+			remote:    "https://gitlab.com/owner/nested/subgroup/repository.git",
+			tagURL:    "https://gitlab.com/owner/nested/subgroup/repository/-/tags/{{.Ref}}",
+			commitURL: "https://gitlab.com/owner/nested/subgroup/repository/-/commit/{{.Hash}}",
+		},
+		{
 			name:      "CodeCommit",
 			provider:  git.CodeCommit,
 			remote:    "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",

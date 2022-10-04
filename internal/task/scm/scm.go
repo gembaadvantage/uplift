@@ -111,7 +111,7 @@ func detectSCM(host string, ctx *context.Context) git.SCM {
 }
 
 func github(r git.Repository) context.SCM {
-	url := fmt.Sprintf("https://%s/%s/%s", r.Host, r.Owner, r.Name)
+	url := fmt.Sprintf("https://%s/%s", r.Host, r.Path)
 
 	return context.SCM{
 		Provider:  git.GitHub,
@@ -121,7 +121,7 @@ func github(r git.Repository) context.SCM {
 }
 
 func gitlab(r git.Repository) context.SCM {
-	url := fmt.Sprintf("https://%s/%s/%s", r.Host, r.Owner, r.Name)
+	url := fmt.Sprintf("https://%s/%s", r.Host, r.Path)
 
 	return context.SCM{
 		Provider:  git.GitLab,
@@ -147,7 +147,7 @@ func codecommit(r git.Repository) context.SCM {
 
 func gitea(r git.Repository, u string) context.SCM {
 	scheme := u[:strings.Index(u, ":")]
-	url := fmt.Sprintf("%s://%s/%s/%s", scheme, r.Host, r.Owner, r.Name)
+	url := fmt.Sprintf("%s://%s/%s", scheme, r.Host, r.Path)
 
 	return context.SCM{
 		Provider:  git.Gitea,

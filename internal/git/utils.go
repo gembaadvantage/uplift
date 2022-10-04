@@ -77,6 +77,7 @@ type Repository struct {
 	Owner  string
 	Name   string
 	Host   string
+	Path   string
 }
 
 // String prints out a user friendly string representation
@@ -179,16 +180,20 @@ func Remote() (Repository, error) {
 	}
 	host := p[0]
 	owner := p[1]
+	name := p[len(p)-1]
+	path := strings.Join(p[1:], "/")
 
 	if strings.Contains(p[0], "codecommit") {
 		// No concept of an owner with CodeCommit repositories
 		owner = ""
+		path = name
 	}
 
 	return Repository{
 		Origin: origin,
 		Owner:  owner,
-		Name:   p[len(p)-1],
+		Name:   name,
+		Path:   path,
 		Host:   host,
 	}, nil
 }
