@@ -61,6 +61,7 @@ nav:
       - Extending Uplift with Hooks: setup/hooks.md
       - Printing Repository Tags: setup/print-tags.md
       - Run without making Changes: setup/dry-run.md
+      - Silencing all Output: setup/silent.md
       - SCM Detection:
           - About: scm/about.md
           - Gitea: scm/gitea.md
