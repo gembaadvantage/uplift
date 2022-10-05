@@ -59,7 +59,7 @@ nav:
       - Changing the Commit Details: setup/commit-details.md
       - Configuring Git Behaviour: setup/git-behaviour.md
       - Extending Uplift with Hooks: setup/hooks.md
-      - Print the next Tag Only: setup/next-tag.md
+      - Printing Repository Tags: setup/print-tags.md
       - Run without making Changes: setup/dry-run.md
       - SCM Detection:
           - About: scm/about.md
