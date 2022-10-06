@@ -29,3 +29,9 @@ Uplift has early support for tagging a repository with prerelease metadata. You 
 ```sh
 uplift tag --prerelease beta.1+20220930
 ```
+
+If you need Uplift to ignore any existing prerelease metadata when calculating the next semantic version, you must include the `--ignore-existing-prerelease` flag:
+
+```sh
+uplift tag --prerelease beta.1+20221006 --ignore-existing-prerelease
+```
