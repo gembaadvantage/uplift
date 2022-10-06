@@ -52,6 +52,8 @@ func (t Task) Run(ctx *context.Context) error {
 	tag := git.LatestTag()
 	if tag.Ref == "" {
 		log.Debug("repository not tagged with version")
+	} else {
+		log.WithField("version", tag.Ref).Debug("identified latest version within repository")
 	}
 	ctx.CurrentVersion, _ = semver.Parse(tag.Ref)
 
@@ -81,15 +83,23 @@ func (t Task) Run(ctx *context.Context) error {
 
 	pver, _ := semv.NewVersion(tag.Ref)
 
-	// Bump the semantic version based on the increment
-	var nxt semv.Version
+	// Handle the fact semver returns a pointer when it initialises a new
+	// semv.Version, but all of its methods work on a copy
+	nxt := *pver
+
+	if ctx.IgnoreExistingPrerelease {
+		log.Info("stripped existing prerelease metadata from version")
+		nxt, _ = nxt.SetPrerelease("")
+		nxt, _ = nxt.SetMetadata("")
+	}
+
 	switch inc {
 	case semver.MajorIncrement:
-		nxt = pver.IncMajor()
+		nxt = nxt.IncMajor()
 	case semver.MinorIncrement:
-		nxt = pver.IncMinor()
+		nxt = nxt.IncMinor()
 	case semver.PatchIncrement:
-		nxt = pver.IncPatch()
+		nxt = nxt.IncPatch()
 	}
 
 	// Append any prerelease suffixes

@@ -100,6 +100,21 @@ BREAKING CHANGE: no backwards compatibility support`,
 	}
 }
 
+func TestRun_PatchIgnorePrerelease(t *testing.T) {
+	git.InitRepo(t)
+	git.Tag("0.1.0-beta.1")
+	git.EmptyCommit(t, "fix: this is a bug fix")
+
+	ctx := &context.Context{
+		Prerelease:               "beta.1",
+		IgnoreExistingPrerelease: true,
+	}
+	err := Task{}.Run(ctx)
+
+	require.NoError(t, err)
+	assert.Equal(t, "0.1.1-beta.1", ctx.NextVersion.Raw)
+}
+
 func TestRun_ExistingVersionNoPrefix(t *testing.T) {
 	git.InitRepo(t)
 	git.Tag("v1.0.0")

@@ -183,6 +183,7 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 			return nil, err
 		}
 	}
+	ctx.IgnoreExistingPrerelease = opts.IgnoreExistingPrerelease
 
 	// Handle git config. Command line flag takes precedences
 	ctx.IgnoreDetached = opts.IgnoreDetached
