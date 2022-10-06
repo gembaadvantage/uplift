@@ -32,13 +32,14 @@ import (
 )
 
 type globalOptions struct {
-	DryRun         bool
-	Debug          bool
-	NoPush         bool
-	Silent         bool
-	IgnoreDetached bool
-	IgnoreShallow  bool
-	ConfigDir      string
+	DryRun                   bool
+	Debug                    bool
+	NoPush                   bool
+	Silent                   bool
+	IgnoreExistingPrerelease bool
+	IgnoreDetached           bool
+	IgnoreShallow            bool
+	ConfigDir                string
 }
 type rootCommand struct {
 	Cmd  *cobra.Command
@@ -77,6 +78,7 @@ func newRootCmd(out io.Writer) *rootCommand {
 	pf.BoolVar(&rootCmd.Opts.Silent, "silent", false, "silence all logging")
 	pf.BoolVar(&rootCmd.Opts.IgnoreDetached, "ignore-detached", false, "ignore reported git detached HEAD error")
 	pf.BoolVar(&rootCmd.Opts.IgnoreShallow, "ignore-shallow", false, "ignore reported git shallow clone error")
+	pf.BoolVar(&rootCmd.Opts.IgnoreExistingPrerelease, "ignore-existing-prerelease", false, "ignore any existing prerelease when calculating next semantic version")
 
 	cmd.AddCommand(newVersionCmd(out),
 		newCompletionCmd(out),

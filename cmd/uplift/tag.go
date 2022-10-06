@@ -186,6 +186,7 @@ func setupTagContext(opts tagOptions, out io.Writer) (*context.Context, error) {
 			return nil, err
 		}
 	}
+	ctx.IgnoreExistingPrerelease = opts.IgnoreExistingPrerelease
 
 	// Handle git config. Command line flag takes precedences
 	ctx.IgnoreDetached = opts.IgnoreDetached

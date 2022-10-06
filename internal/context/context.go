@@ -34,27 +34,28 @@ import (
 // Context provides a way to share common state across tasks
 type Context struct {
 	ctx.Context
-	Out              io.Writer
-	Config           config.Uplift
-	DryRun           bool
-	Debug            bool
-	CurrentVersion   semver.Version
-	NextVersion      semver.Version
-	Prerelease       string
-	Metadata         string
-	NoPrefix         bool
-	NoVersionChanged bool
-	CommitDetails    git.CommitDetails
-	FetchTags        bool
-	PrintCurrentTag  bool
-	PrintNextTag     bool
-	NoPush           bool
-	Changelog        Changelog
-	SCM              SCM
-	SkipChangelog    bool
-	SkipBumps        bool
-	IgnoreDetached   bool
-	IgnoreShallow    bool
+	Out                      io.Writer
+	Config                   config.Uplift
+	DryRun                   bool
+	Debug                    bool
+	CurrentVersion           semver.Version
+	NextVersion              semver.Version
+	Prerelease               string
+	Metadata                 string
+	IgnoreExistingPrerelease bool
+	NoPrefix                 bool
+	NoVersionChanged         bool
+	CommitDetails            git.CommitDetails
+	FetchTags                bool
+	PrintCurrentTag          bool
+	PrintNextTag             bool
+	NoPush                   bool
+	Changelog                Changelog
+	SCM                      SCM
+	SkipChangelog            bool
+	SkipBumps                bool
+	IgnoreDetached           bool
+	IgnoreShallow            bool
 }
 
 // SCM provides details about the SCM provider of a repository
