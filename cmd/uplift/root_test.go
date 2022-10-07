@@ -89,3 +89,13 @@ func TestRoot_IgnoreShallowFlag(t *testing.T) {
 
 	assert.True(t, rootCmd.Opts.IgnoreShallow)
 }
+
+func TestRoot_NoStage(t *testing.T) {
+	rootCmd := newRootCmd(os.Stdout)
+
+	rootCmd.Cmd.SetArgs([]string{"--no-stage"})
+	err := rootCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, rootCmd.Opts.NoStage)
+}

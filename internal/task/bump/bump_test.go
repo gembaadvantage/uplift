@@ -30,6 +30,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestString(t *testing.T) {
@@ -65,4 +66,37 @@ func TestRun_NotGitRepository(t *testing.T) {
 
 	err := Task{}.Run(ctx)
 	assert.EqualError(t, err, "fatal: not a git repository (or any of the parent directories): .git")
+}
+
+func TestRun_NoStage(t *testing.T) {
+	git.InitRepo(t)
+	file := WriteFile(t, "version: 0.1.0")
+
+	ctx := &context.Context{
+		NextVersion: semver.Version{
+			Raw: "0.1.1",
+		},
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File: file,
+					Regex: []config.RegexBump{
+						{
+							Pattern: "version: $VERSION",
+						},
+					},
+				},
+			},
+		},
+		NoStage: true,
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	actual := ReadFile(t, file)
+	assert.Equal(t, "version: 0.1.1", actual)
+
+	staged, _ := git.Staged()
+	assert.Empty(t, staged)
 }

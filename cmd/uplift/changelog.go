@@ -163,6 +163,7 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	ctx.Debug = opts.Debug
 	ctx.DryRun = opts.DryRun
 	ctx.NoPush = opts.NoPush
+	ctx.NoStage = opts.NoStage
 	ctx.Changelog.DiffOnly = opts.DiffOnly
 	ctx.Changelog.All = opts.All
 

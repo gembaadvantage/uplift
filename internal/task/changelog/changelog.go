@@ -147,6 +147,11 @@ func (t Task) Run(ctx *context.Context) error {
 		return chgErr
 	}
 
+	if ctx.NoStage {
+		log.Info("skip staging of CHANGELOG.md")
+		return nil
+	}
+
 	log.Debug("staging CHANGELOG.md")
 	return git.Stage(MarkdownFile)
 }
