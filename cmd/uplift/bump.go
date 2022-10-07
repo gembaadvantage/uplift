@@ -124,6 +124,7 @@ func setupBumpContext(opts bumpOptions, out io.Writer) (*context.Context, error)
 	ctx.Debug = opts.Debug
 	ctx.DryRun = opts.DryRun
 	ctx.NoPush = opts.NoPush
+	ctx.NoStage = opts.NoStage
 	ctx.Out = out
 
 	// Handle prerelease suffix if one is provided

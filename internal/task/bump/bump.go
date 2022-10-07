@@ -51,7 +51,6 @@ func (t Task) Run(ctx *context.Context) error {
 
 	n := 0
 	for _, bump := range ctx.Config.Bumps {
-		var bumped bool
 		if len(bump.Regex) > 0 {
 			ok, err := regexBump(ctx, bump.File, bump.Regex)
 			if err != nil {
@@ -59,7 +58,7 @@ func (t Task) Run(ctx *context.Context) error {
 			}
 
 			if ok {
-				bumped = ok
+				n++
 			}
 		}
 
@@ -70,20 +69,19 @@ func (t Task) Run(ctx *context.Context) error {
 			}
 
 			if ok {
-				bumped = ok
+				n++
 			}
 		}
 
-		if bumped {
-			// Attempt to stage the changed file, if this isn't a dry run
-			if !ctx.DryRun {
-				if err := git.Stage(bump.File); err != nil {
-					return err
-				}
-				log.WithField("file", bump.File).Info("successfully staged file")
-			}
-			n++
+		if ctx.NoStage {
+			log.Info("skip staging of file")
+			continue
 		}
+
+		if err := git.Stage(bump.File); err != nil {
+			return err
+		}
+		log.WithField("file", bump.File).Info("successfully staged file")
 	}
 
 	if n > 0 {

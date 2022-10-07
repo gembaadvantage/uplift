@@ -50,6 +50,7 @@ type Context struct {
 	PrintCurrentTag          bool
 	PrintNextTag             bool
 	NoPush                   bool
+	NoStage                  bool
 	Changelog                Changelog
 	SCM                      SCM
 	SkipChangelog            bool

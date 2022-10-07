@@ -160,6 +160,7 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	ctx.Debug = opts.Debug
 	ctx.DryRun = opts.DryRun
 	ctx.NoPush = opts.NoPush
+	ctx.NoStage = opts.NoStage
 	ctx.FetchTags = opts.FetchTags
 	ctx.Out = out
 	ctx.SkipChangelog = opts.SkipChangelog

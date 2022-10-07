@@ -126,6 +126,24 @@ func TestRun_Staged(t *testing.T) {
 	assert.Equal(t, "CHANGELOG.md", stg[0])
 }
 
+func TestRun_NotStaged(t *testing.T) {
+	git.InitRepo(t)
+	git.EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
+
+	ctx := &context.Context{
+		NextVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NoStage: true,
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	stg, _ := git.Staged()
+	assert.Len(t, stg, 0)
+}
+
 func TestRun_AppendToUnsupportedTemplate(t *testing.T) {
 	git.InitRepo(t)
 	git.EmptyCommitsAndTag(t, "1.0.0", "first commit")
