@@ -35,3 +35,19 @@ Or include the following entry in your config file:
 git:
   ignoreShallow: true
 ```
+
+## Prevent any Staging of Files
+
+To take ownership of staging and committing files to your repository, you can disable this automatic feature within Uplift using the `--no-stage` flag.
+
+```sh
+uplift release --no-stage
+```
+
+## Prevent Pushing Changes to the Remote
+
+To take ownership of pushing changes to your repository, you can disable this automatic feature within Uplift with the `--no-push` flag.
+
+```sh
+uplift release --no-push
+```
