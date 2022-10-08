@@ -25,5 +25,6 @@ uplift bump [flags]
 --ignore-existing-prerelease   ignore any existing prerelease when calculating next semantic version
 --ignore-shallow               ignore reported git shallow clone error
 --no-push                      no changes will be pushed to the git remote
+--no-stage                     no changes will be git staged
 --silent                       silence all logging
 ```
