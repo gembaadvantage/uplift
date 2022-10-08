@@ -8,10 +8,10 @@ uplift changelog
 
 ## Excluding Commits
 
-You can exclude commits from the changelog by specifying a list of commit prefixes.
+You can exclude commits from the changelog by specifying a list of regex. Matching against a commit prefix is the most straightforward approach to doing this.
 
 ```sh
-uplift changelog --exclude chore,ci,test
+uplift changelog --exclude ^chore,^ci,^test
 ```
 
 ## Changing the Commit Order

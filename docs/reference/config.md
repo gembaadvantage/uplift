@@ -145,15 +145,15 @@ changelog:
   sort: asc
 
   # A list of commits to exclude during the creation of a changelog.
-  # Provide a list of conventional commit prefixes to filter on.
-  # Auto-generated commits from Uplift (with the prefix ci(uplift)) will
-  # always be excluded
+  # Provide a list of regular expressions for matching commits that
+  # are to be excluded. Auto-generated commits from Uplift
+  # (with the prefix ci(uplift)) will always be excluded
   #
-  # Defaults to including all commits within the generated changelog
+  # Defaults to an empty list. All commits are included
   exclude:
-    - chore(deps)
-    - docs
-    - ci
+    - '^chore\(deps\)'
+    - ^docs
+    - ^ci
 ```
 
 ## bumps

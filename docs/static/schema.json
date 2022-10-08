@@ -95,7 +95,7 @@
         },
         "exclude": {
           "$comment": "https://upliftci.dev/reference/config#changelog",
-          "description": "A list of commits to exclude during the creation of a changelog. Provide a list of conventional commit prefixes to filter on. Auto-generated commits from Uplift (with the prefix ci(uplift)) will always be excluded",
+          "description": "A list of commits to exclude during the creation of a changelog. Provide a list of regular expressions for matching commits that are to be excluded. Auto-generated commits from Uplift (with the prefix ci(uplift)) will always be excluded",
           "items": {
             "type": "string"
           },
