@@ -334,14 +334,14 @@ func TestRun_NoLogEntries(t *testing.T) {
 func TestRun_WithExcludes(t *testing.T) {
 	git.InitRepo(t)
 	git.Tag("1.0.0")
-	h := git.EmptyCommitsAndTag(t, "1.1.0", "first commit", "exclude: second commit", "third commit", "ignore: forth commit")
+	h := git.EmptyCommitsAndTag(t, "1.1.0", "first commit", "exclude(scope): second commit", "third commit", "ignore: forth commit")
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
 		Out: &buf,
 		Changelog: context.Changelog{
 			DiffOnly: true,
-			Exclude:  []string{"exclude", "ignore"},
+			Exclude:  []string{`^exclude\(scope\)`, "ignore:"},
 		},
 		CurrentVersion: semver.Version{
 			Raw: "1.0.0",
@@ -483,7 +483,7 @@ func TestRun_AllWithExcludes(t *testing.T) {
 	ctx := &context.Context{
 		Changelog: context.Changelog{
 			All:     true,
-			Exclude: []string{"refactor"},
+			Exclude: []string{"^refactor:"},
 		},
 		SCM: context.SCM{
 			Provider: git.Unrecognised,
