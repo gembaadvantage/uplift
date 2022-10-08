@@ -209,15 +209,15 @@
 <a id=__codelineno-6-8 name=__codelineno-6-8></a><span class=w>  </span><span class=nt>sort</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">asc</span><span class=w></span>
 <a id=__codelineno-6-9 name=__codelineno-6-9></a>
 <a id=__codelineno-6-10 name=__codelineno-6-10></a><span class=w>  </span><span class=c1># A list of commits to exclude during the creation of a changelog.</span><span class=w></span>
-<a id=__codelineno-6-11 name=__codelineno-6-11></a><span class=w>  </span><span class=c1># Provide a list of conventional commit prefixes to filter on.</span><span class=w></span>
-<a id=__codelineno-6-12 name=__codelineno-6-12></a><span class=w>  </span><span class=c1># Auto-generated commits from Uplift (with the prefix ci(uplift)) will</span><span class=w></span>
-<a id=__codelineno-6-13 name=__codelineno-6-13></a><span class=w>  </span><span class=c1># always be excluded</span><span class=w></span>
+<a id=__codelineno-6-11 name=__codelineno-6-11></a><span class=w>  </span><span class=c1># Provide a list of regular expressions for matching commits that</span><span class=w></span>
+<a id=__codelineno-6-12 name=__codelineno-6-12></a><span class=w>  </span><span class=c1># are to be excluded. Auto-generated commits from Uplift</span><span class=w></span>
+<a id=__codelineno-6-13 name=__codelineno-6-13></a><span class=w>  </span><span class=c1># (with the prefix ci(uplift)) will always be excluded</span><span class=w></span>
 <a id=__codelineno-6-14 name=__codelineno-6-14></a><span class=w>  </span><span class=c1>#</span><span class=w></span>
-<a id=__codelineno-6-15 name=__codelineno-6-15></a><span class=w>  </span><span class=c1># Defaults to including all commits within the generated changelog</span><span class=w></span>
+<a id=__codelineno-6-15 name=__codelineno-6-15></a><span class=w>  </span><span class=c1># Defaults to an empty list. All commits are included</span><span class=w></span>
 <a id=__codelineno-6-16 name=__codelineno-6-16></a><span class=w>  </span><span class=nt>exclude</span><span class=p>:</span><span class=w></span>
-<a id=__codelineno-6-17 name=__codelineno-6-17></a><span class=w>    </span><span class="p p-Indicator">-</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">chore(deps)</span><span class=w></span>
-<a id=__codelineno-6-18 name=__codelineno-6-18></a><span class=w>    </span><span class="p p-Indicator">-</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">docs</span><span class=w></span>
-<a id=__codelineno-6-19 name=__codelineno-6-19></a><span class=w>    </span><span class="p p-Indicator">-</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">ci</span><span class=w></span>
+<a id=__codelineno-6-17 name=__codelineno-6-17></a><span class=w>    </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;^chore\(deps\)&#39;</span><span class=w></span>
+<a id=__codelineno-6-18 name=__codelineno-6-18></a><span class=w>    </span><span class="p p-Indicator">-</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">^docs</span><span class=w></span>
+<a id=__codelineno-6-19 name=__codelineno-6-19></a><span class=w>    </span><span class="p p-Indicator">-</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">^ci</span><span class=w></span>
 </code></pre></div></td></tr></table></div> <h2 id=bumps>bumps<a class=headerlink href=#bumps title="Permanent link">&para;</a></h2> <div class="annotate highlight"><table class=highlighttable><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal><a href=#__codelineno-7-1> 1</a></span>
 <span class=normal><a href=#__codelineno-7-2> 2</a></span>
 <span class=normal><a href=#__codelineno-7-3> 3</a></span>
