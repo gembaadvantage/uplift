@@ -431,7 +431,7 @@ func Push() error {
 // LogBetween retrieves all log entries between two points of time within the
 // git history of the repository. Supports tags and specific git hashes as its
 // reference points. From must always be the closest point to HEAD
-func LogBetween(from, to string, excludes []string) ([]LogEntry, error) {
+func LogBetween(from, to string) ([]LogEntry, error) {
 	fmtFrom := from
 	if fmtFrom == "" {
 		fmtFrom = "HEAD"
@@ -446,19 +446,9 @@ func LogBetween(from, to string, excludes []string) ([]LogEntry, error) {
 	args := []string{
 		"log",
 		fmt.Sprintf("%s%s", fmtFrom, fmtTo),
-		"--pretty=format:'%H%s'",
-	}
-
-	// Convert excludes list into git grep commands
-	if len(excludes) > 0 {
-		fmtExcludes := make([]string, len(excludes))
-		for i := range excludes {
-			fmtExcludes[i] = fmt.Sprintf("--grep=%s", excludes[i])
-		}
-		fmtExcludes = append(fmtExcludes, "--invert-grep")
-
-		// Append to original set of arguments
-		args = append(args, fmtExcludes...)
+		"--pretty=oneline",
+		"--no-decorate",
+		"--no-color",
 	}
 
 	log, err := Clean(Run(args...))
@@ -473,10 +463,12 @@ func LogBetween(from, to string, excludes []string) ([]LogEntry, error) {
 	rows := strings.Split(log, "\n")
 	les := make([]LogEntry, 0, len(rows))
 	for _, r := range rows {
+		// Always a single whitespace between the hash and message
+		hash, message, _ := strings.Cut(r, " ")
 		les = append(les, LogEntry{
-			Hash:       r[:40],
-			AbbrevHash: r[:7],
-			Message:    r[40:],
+			Hash:       hash,
+			AbbrevHash: hash[:7],
+			Message:    message,
 		})
 	}
 

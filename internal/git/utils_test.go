@@ -674,7 +674,7 @@ func TestLogBetween_TwoTags(t *testing.T) {
 	EmptyCommitAndTag(t, "1.0.0", "first commit")
 	EmptyCommitsAndTag(t, "2.0.0", "second commit", "third commit", "forth commit")
 
-	log, err := LogBetween("2.0.0", "1.0.0", []string{})
+	log, err := LogBetween("2.0.0", "1.0.0")
 	require.NoError(t, err)
 
 	require.Len(t, log, 3)
@@ -688,7 +688,7 @@ func TestLogBetween_PrereleaseTag(t *testing.T) {
 	EmptyCommitAndTag(t, "0.1.0", "first commit")
 	EmptyCommitsAndTag(t, "0.2.0-beta1+12345", "second commit", "third commit")
 
-	log, err := LogBetween("0.2.0-beta1+12345", "0.1.0", []string{})
+	log, err := LogBetween("0.2.0-beta1+12345", "0.1.0")
 	require.NoError(t, err)
 
 	require.Len(t, log, 2)
@@ -700,7 +700,7 @@ func TestLogBetween_TwoHashes(t *testing.T) {
 	InitRepo(t)
 	h := EmptyCommits(t, "first commit", "second commit", "third commit", "forth commit")
 
-	log, err := LogBetween(h[2], h[1], []string{})
+	log, err := LogBetween(h[2], h[1])
 	require.NoError(t, err)
 
 	require.Len(t, log, 1)
@@ -712,7 +712,7 @@ func TestLogBetween_FromSpecificTag(t *testing.T) {
 	EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
 	EmptyCommit(t, "third commit")
 
-	log, err := LogBetween("1.0.0", "", []string{})
+	log, err := LogBetween("1.0.0", "")
 	require.NoError(t, err)
 
 	require.Len(t, log, 3)
@@ -725,7 +725,7 @@ func TestLogBetween_FromSpecificHash(t *testing.T) {
 	InitRepo(t)
 	h := EmptyCommits(t, "first commit", "second commit", "third commit", "forth commit")
 
-	log, err := LogBetween(h[2], "", []string{})
+	log, err := LogBetween(h[2], "")
 	require.NoError(t, err)
 
 	require.Len(t, log, 4)
@@ -739,7 +739,7 @@ func TestLogBetween_ToSpecificHash(t *testing.T) {
 	InitRepo(t)
 	h := EmptyCommits(t, "first commit", "second commit", "third commit", "forth commit")
 
-	log, err := LogBetween("", h[2], []string{})
+	log, err := LogBetween("", h[2])
 	require.NoError(t, err)
 
 	require.Len(t, log, 1)
@@ -751,7 +751,7 @@ func TestLogBetween_ToSpecificTag(t *testing.T) {
 	EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
 	EmptyCommit(t, "third commit")
 
-	log, err := LogBetween("", "1.0.0", []string{})
+	log, err := LogBetween("", "1.0.0")
 	require.NoError(t, err)
 
 	require.Len(t, log, 1)
@@ -762,7 +762,7 @@ func TestLogBetween_All(t *testing.T) {
 	InitRepo(t)
 	EmptyCommits(t, "first commit", "second commit", "third commit")
 
-	log, err := LogBetween("", "", []string{})
+	log, err := LogBetween("", "")
 	require.NoError(t, err)
 
 	require.Len(t, log, 4)
@@ -789,7 +789,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 	InitRepo(t)
 	EmptyCommits(t, c1, c2, c3)
 
-	log, err := LogBetween("", "", []string{})
+	log, err := LogBetween("", "")
 	require.NoError(t, err)
 
 	require.Len(t, log, 4)
@@ -802,7 +802,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 func TestLogBetween_ErrorInvalidRevision(t *testing.T) {
 	InitRepo(t)
 
-	_, err := LogBetween("1234567", "", []string{})
+	_, err := LogBetween("1234567", "")
 	require.Error(t, err)
 }
 
@@ -813,38 +813,10 @@ func TestLogBetween_TwoTagsAtSameCommit(t *testing.T) {
 	err := Tag("1.1.0")
 	require.NoError(t, err)
 
-	log, err := LogBetween("1.1.0", "1.0.0", []string{})
+	log, err := LogBetween("1.1.0", "1.0.0")
 	require.NoError(t, err)
 
 	assert.Len(t, log, 0)
-}
-
-func TestLogBetween_Excludes(t *testing.T) {
-	InitRepo(t)
-	EmptyCommitAndTag(t, "0.1.0", "first commit")
-	EmptyCommits(t, "second commit", "exclude: third commit", "ignore: forth commit")
-	EmptyCommitAndTag(t, "0.2.0", "fifth commit")
-
-	log, err := LogBetween("0.2.0", "0.1.0", []string{"exclude", "ignore"})
-	require.NoError(t, err)
-
-	assert.Len(t, log, 2)
-	assert.Equal(t, log[0].Message, "fifth commit")
-	assert.Equal(t, log[1].Message, "second commit")
-}
-
-func TestLogBetween_ExcludesWildcards(t *testing.T) {
-	InitRepo(t)
-	EmptyCommitAndTag(t, "0.1.0", "first commit")
-	EmptyCommits(t, "second commit", "exclude: third commit", "exclude(scope): forth commit")
-	EmptyCommitAndTag(t, "0.2.0", "fifth commit")
-
-	log, err := LogBetween("0.2.0", "0.1.0", []string{"exclude*"})
-	require.NoError(t, err)
-
-	assert.Len(t, log, 2)
-	assert.Equal(t, log[0].Message, "fifth commit")
-	assert.Equal(t, log[1].Message, "second commit")
 }
 
 func TestStaged(t *testing.T) {

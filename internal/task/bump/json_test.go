@@ -122,6 +122,7 @@ func TestRun_JSONStrictSemVer(t *testing.T) {
 }
 
 func TestRun_JSONDryRun(t *testing.T) {
+	git.InitRepo(t)
 	path := WriteFile(t, `{"version": "0.1.0"}`)
 
 	ctx := &context.Context{

@@ -178,7 +178,7 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, ctx.Config.Changelog.Exclude...)
 
 	// By default ensure the ci(uplift): commits are excluded also
-	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, "ci(uplift):")
+	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, `ci\(uplift\)`)
 
 	if !ctx.Changelog.All {
 		// Attempt to retrieve the latest 2 tags for generating a changelog entry
