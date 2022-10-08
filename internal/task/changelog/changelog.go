@@ -28,6 +28,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"text/template"
 	"time"
@@ -158,9 +159,17 @@ func (t Task) Run(ctx *context.Context) error {
 
 func changelogRelease(ctx *context.Context) ([]release, error) {
 	log.WithField("tag", ctx.NextVersion.Raw).Info("determine changes for release")
-	ents, err := git.LogBetween(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw, ctx.Changelog.Exclude)
+	ents, err := git.LogBetween(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw)
 	if err != nil {
 		return []release{}, err
+	}
+
+	if len(ctx.Changelog.Exclude) > 0 {
+		log.Info("removing commits based on exclude list")
+		ents, err = excludeCommits(ents, ctx.Changelog.Exclude)
+		if err != nil {
+			return []release{}, err
+		}
 	}
 
 	if len(ents) == 0 {
@@ -214,9 +223,17 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 		}
 
 		log.WithField("tag", tags[i].Ref).Info("determine changes for release")
-		ents, err := git.LogBetween(tags[i].Ref, nextTag, ctx.Changelog.Exclude)
+		ents, err := git.LogBetween(tags[i].Ref, nextTag)
 		if err != nil {
 			return []release{}, err
+		}
+
+		if len(ctx.Changelog.Exclude) > 0 {
+			log.Info("removing commits based on exclude list")
+			ents, err = excludeCommits(ents, ctx.Changelog.Exclude)
+			if err != nil {
+				return []release{}, err
+			}
 		}
 
 		if len(ents) == 0 {
@@ -320,4 +337,25 @@ func reverse(ents []git.LogEntry) {
 		i++
 		j--
 	}
+}
+
+func excludeCommits(commits []git.LogEntry, excludes []string) ([]git.LogEntry, error) {
+	filtered := commits
+	for _, exclude := range excludes {
+		excludeRgx, err := regexp.Compile(exclude)
+		if err != nil {
+			return filtered, err
+		}
+
+		// Carry out a filtering pass for each defined
+		filterPass := []git.LogEntry{}
+		for _, commit := range filtered {
+			if !excludeRgx.MatchString(commit.Message) {
+				filterPass = append(filterPass, commit)
+			}
+		}
+		filtered = filterPass
+	}
+
+	return filtered, nil
 }
