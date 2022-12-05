@@ -159,13 +159,6 @@ func Remote() (Repository, error) {
 		// Sanitise any SSH based URL to ensure it is parseable
 		rem = strings.TrimPrefix(rem, "git@")
 		rem = strings.Replace(rem, ":", "/", 1)
-	} else if strings.HasPrefix(rem, "http") {
-		// Strip any credentials from the URL to ensure it is parseable
-		if tkn := strings.Index(rem, "@"); tkn > -1 {
-			rem = rem[tkn+1:]
-		} else {
-			rem = rem[strings.Index(rem, "//")+2:]
-		}
 	}
 
 	u, err := url.Parse(rem)
@@ -175,15 +168,24 @@ func Remote() (Repository, error) {
 
 	// Split into parts
 	p := strings.Split(u.Path, "/")
+
 	if len(p) < 3 {
-		return Repository{}, fmt.Errorf("malformed repository URL: %s", remURL)
+		// This could be a custom Git server that doesn't follow the expected pattern.
+		// Don't fail, but return the raw origin for custom parsing
+		return Repository{Origin: origin}, nil
 	}
-	host := p[0]
+
+	// If the repository has a HTTP(S) origin, the host will have been correctly identified
+	host := u.Host
+	if host == "" {
+		// For other schemes, assume the host is contained within the first part
+		host = p[0]
+	}
 	owner := p[1]
 	name := p[len(p)-1]
 	path := strings.Join(p[1:], "/")
 
-	if strings.Contains(p[0], "codecommit") {
+	if strings.Contains(host, "codecommit") {
 		// No concept of an owner with CodeCommit repositories
 		owner = ""
 		path = name

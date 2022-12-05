@@ -208,6 +208,18 @@ func TestRemote(t *testing.T) {
 			repo:     "testing10",
 			path:     "testing10",
 		},
+		{
+			name:     "CustomGitServerSchemeWithPort",
+			cloneURL: "http://172.24.100.14:7990/owner/nested/testing11.git",
+			host:     "172.24.100.14:7990",
+			owner:    "owner",
+			repo:     "testing11",
+			path:     "owner/nested/testing11",
+		},
+		{
+			name:     "LocalRunningGitServer",
+			cloneURL: "http://localhost:8000/testing12.git",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -258,14 +270,6 @@ func TestRemote_NoRemoteSet(t *testing.T) {
 
 	_, err := Remote()
 	require.Error(t, err)
-}
-
-func TestRemote_MalformedURL(t *testing.T) {
-	InitRepo(t)
-	RemoteOrigin(t, "whizzbang.com/repository")
-
-	_, err := Remote()
-	require.EqualError(t, err, "malformed repository URL: whizzbang.com/repository")
 }
 
 func TestAllTags(t *testing.T) {
