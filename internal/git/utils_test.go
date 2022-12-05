@@ -210,11 +210,11 @@ func TestRemote(t *testing.T) {
 		},
 		{
 			name:     "CustomGitServerSchemeWithPort",
-			cloneURL: "http://172.24.100.14:7990/owner/scheme/testing11.git",
+			cloneURL: "http://172.24.100.14:7990/owner/nested/testing11.git",
 			host:     "172.24.100.14:7990",
 			owner:    "owner",
 			repo:     "testing11",
-			path:     "owner/scheme/testing11",
+			path:     "owner/nested/testing11",
 		},
 		{
 			name:     "LocalRunningGitServer",
