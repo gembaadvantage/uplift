@@ -147,7 +147,7 @@ func TestRun_Regex(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			git.InitRepo(t)
-			path := WriteFile(t, tt.content)
+			path := WriteTempFile(t, tt.content)
 
 			ctx := &context.Context{
 				NextVersion: semver.Version{
@@ -185,7 +185,7 @@ func TestRun_Regex(t *testing.T) {
 
 func TestRun_RegexForceSemanticVersion(t *testing.T) {
 	git.InitRepo(t)
-	path := WriteFile(t, "version: 0.1.0")
+	path := WriteTempFile(t, "version: 0.1.0")
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -216,7 +216,7 @@ func TestRun_RegexForceSemanticVersion(t *testing.T) {
 
 func TestRun_RegexDryRun(t *testing.T) {
 	git.InitRepo(t)
-	path := WriteFile(t, "version: 0.1.0")
+	path := WriteTempFile(t, "version: 0.1.0")
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -269,7 +269,7 @@ func TestRun_RegexFileDoesNotExist(t *testing.T) {
 
 func TestRun_RegexNotAllPathsMatch(t *testing.T) {
 	git.InitRepo(t)
-	path := WriteFile(t, "version: 0.1.0")
+	path := WriteTempFile(t, "version: 0.1.0")
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -303,8 +303,8 @@ func TestRun_RegexMultipleFiles(t *testing.T) {
 	git.InitRepo(t)
 
 	contents := "version: 0.1.0"
-	file1 := WriteFile(t, contents)
-	file2 := WriteFile(t, contents)
+	file1 := WriteTempFile(t, contents)
+	file2 := WriteTempFile(t, contents)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -346,7 +346,7 @@ func TestRun_RegexMultipleFiles(t *testing.T) {
 
 func TestRun_RegexNonMatchingRegex(t *testing.T) {
 	git.InitRepo(t)
-	file := WriteFile(t, "version: 0.1.0")
+	file := WriteTempFile(t, "version: 0.1.0")
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -372,7 +372,7 @@ func TestRun_RegexNonMatchingRegex(t *testing.T) {
 
 func TestRun_RegexNextVersionMatchesExistingVersion(t *testing.T) {
 	git.InitRepo(t)
-	file := WriteFile(t, "version: 0.1.0")
+	file := WriteTempFile(t, "version: 0.1.0")
 
 	efi, _ := os.Stat(file)
 
@@ -404,7 +404,7 @@ func TestRun_RegexNextVersionMatchesExistingVersion(t *testing.T) {
 
 func TestRun_RegexMalformedRegexError(t *testing.T) {
 	git.MkTmpDir(t)
-	file := WriteFile(t, "version: 0.1.0")
+	file := WriteTempFile(t, "version: 0.1.0")
 
 	ctx := &context.Context{
 		Config: config.Uplift{
@@ -425,7 +425,10 @@ func TestRun_RegexMalformedRegexError(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func WriteFile(t *testing.T, s string) string {
+// Generates a temporary file containing the provided content. The path of the
+// file is returned after creation. This test helper automatically deletes the
+// file after test execution.
+func WriteTempFile(t *testing.T, s string) string {
 	t.Helper()
 
 	current, err := os.Getwd()
@@ -457,7 +460,7 @@ func ReadFile(t *testing.T, path string) string {
 func TestRun_RegexMavenPom(t *testing.T) {
 	git.InitRepo(t)
 
-	file := WriteFile(t, `<?xml version="1.0" encoding="UTF-8"?>
+	file := WriteTempFile(t, `<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -535,7 +538,7 @@ func TestRun_RegexMavenPom(t *testing.T) {
 func TestRun_RegexHelmChart(t *testing.T) {
 	git.InitRepo(t)
 
-	file := WriteFile(t, `apiVersion: v2
+	file := WriteTempFile(t, `apiVersion: v2
 name: test-chart
 description: This is a test chart
 version: 0.1.0

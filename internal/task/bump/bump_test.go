@@ -23,6 +23,9 @@ SOFTWARE.
 package bump
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/config"
@@ -44,7 +47,9 @@ func TestRun_NoBumpConfig(t *testing.T) {
 
 func TestRun_NotGitRepository(t *testing.T) {
 	git.MkTmpDir(t)
-	file := WriteFile(t, "version: 0.1.0")
+	file := WriteTempFile(t, "version: 0.1.0")
+
+	fmt.Println(file)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -70,7 +75,7 @@ func TestRun_NotGitRepository(t *testing.T) {
 
 func TestRun_NoStage(t *testing.T) {
 	git.InitRepo(t)
-	file := WriteFile(t, "version: 0.1.0")
+	file := WriteTempFile(t, "version: 0.1.0")
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -99,4 +104,64 @@ func TestRun_NoStage(t *testing.T) {
 
 	staged, _ := git.Staged()
 	assert.Empty(t, staged)
+}
+
+func TestRun_GlobSupport(t *testing.T) {
+	git.InitRepo(t)
+
+	file1 := WriteFile(t, "a/1.json", `{"version": "0.1.0"}`)
+	file2 := WriteFile(t, "b/2.json", `{"version": "0.1.0"}`)
+
+	ctx := &context.Context{
+		NextVersion: semver.Version{
+			Raw: "0.1.1",
+		},
+		Config: config.Uplift{
+			Bumps: []config.Bump{
+				{
+					File: "**/*.json",
+					JSON: []config.JSONBump{
+						{
+							Path: "version",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	actual1 := ReadFile(t, file1)
+	assert.Equal(t, `{"version": "0.1.1"}`, actual1)
+
+	actual2 := ReadFile(t, file2)
+	assert.Equal(t, `{"version": "0.1.1"}`, actual2)
+}
+
+func WriteFile(t *testing.T, name, content string) string {
+	t.Helper()
+
+	current, err := os.Getwd()
+	require.NoError(t, err)
+
+	// Absolute path of file
+	absPath := filepath.Join(current, name)
+
+	err = os.MkdirAll(filepath.Dir(absPath), 0o755)
+	require.NoError(t, err)
+
+	file, err := os.Create(absPath)
+	require.NoError(t, err)
+
+	_, err = file.WriteString(content)
+	require.NoError(t, err)
+	require.NoError(t, file.Close())
+
+	t.Cleanup(func() {
+		require.NoError(t, os.Remove(file.Name()))
+	})
+
+	return file.Name()
 }
