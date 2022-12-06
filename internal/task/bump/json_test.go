@@ -34,7 +34,7 @@ import (
 )
 
 func TestRun_JSONNonMatchingPath(t *testing.T) {
-	path := WriteFile(t, `{"version": "0.1.0"}`)
+	path := WriteTempFile(t, `{"version": "0.1.0"}`)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -59,7 +59,7 @@ func TestRun_JSONNonMatchingPath(t *testing.T) {
 }
 
 func TestRun_JSONNotAllPathsMatch(t *testing.T) {
-	path := WriteFile(t, `{"version": "0.1.0"}`)
+	path := WriteTempFile(t, `{"version": "0.1.0"}`)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -93,7 +93,7 @@ func TestRun_JSONNotAllPathsMatch(t *testing.T) {
 
 func TestRun_JSONStrictSemVer(t *testing.T) {
 	git.InitRepo(t)
-	path := WriteFile(t, `{"version": "0.1.0"}`)
+	path := WriteTempFile(t, `{"version": "0.1.0"}`)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -123,7 +123,7 @@ func TestRun_JSONStrictSemVer(t *testing.T) {
 
 func TestRun_JSONDryRun(t *testing.T) {
 	git.InitRepo(t)
-	path := WriteFile(t, `{"version": "0.1.0"}`)
+	path := WriteTempFile(t, `{"version": "0.1.0"}`)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -177,7 +177,7 @@ func TestRun_JSONFileDoesNotExist(t *testing.T) {
 func TestRun_PackageJson(t *testing.T) {
 	git.InitRepo(t)
 
-	file := WriteFile(t, `{
+	file := WriteTempFile(t, `{
   "name": "test",
   "version": "0.1.0",
   "bin": {
