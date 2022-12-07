@@ -7,7 +7,7 @@ You are free to control Uplift through the use of a dedicated configuration file
 - `uplift.yml`
 - `uplift.yaml`
 
-## env
+## env
 
 ```{ .yaml .annotate linenums="1" }
 # Define a set of environment variables that are made available to all
@@ -164,7 +164,8 @@ changelog:
 #
 # Defaults to no files being bumped
 bumps:
-  # The path of the file relative to where Uplift is executed
+  # The path of the file relative to where Uplift is executed. Glob
+  # patterns can be used to match multiple files at the same time
   - file: package.json
 
     # A JSON path matcher should be used when bumping the file. Multiple
@@ -185,7 +186,8 @@ bumps:
         # Defaults to false
         semver: true
 
-  # The path of the file relative to where Uplift is executed
+  # The path of the file relative to where Uplift is executed. Glob
+  # patterns can be used to match multiple files at the same time
   - file: chart/my-chart/Chart.yaml
 
     # A regex matcher should be used when bumping the file. Multiple
