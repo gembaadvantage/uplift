@@ -6,7 +6,9 @@ RUN apk add --no-cache \
     tini=0.19.0-r1 \
     gnupg=2.2.40-r0
 
-COPY uplift /usr/local/bin
+COPY uplift_*.apk /tmp/
+RUN apk add --no-cache --allow-untrusted /tmp/uplift_*.apk && \
+    rm /tmp/uplift_*.apk
 
 ENTRYPOINT ["/sbin/tini", "--", "uplift"]
 CMD ["--help"]
