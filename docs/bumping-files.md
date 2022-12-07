@@ -26,6 +26,22 @@ Please review our comprehensive [guide](./reference/config.md#bumps) on configur
 
 ❤️ to the [github.com/tidwall/sjson](https://github.com/tidwall/sjson) library.
 
+## Glob Support
+
+If you need to bump multiple similar files at the same time, you can specify a file path using a Glob pattern.
+
+```yaml linenums="1"
+# .uplift.yml
+
+bumps:
+  - file: "**/package.json"
+    json:
+      - path: "version"
+        semver: true
+```
+
+❤️ to the [github.com/goreleaser/fileglob](https://github.com/goreleaser/fileglob) library.
+
 ## The $VERSION Token
 
 Writing a regex can be challenging at most times, so Uplift provides the `$VERSION` token for matching a semantic version with an optional `v` prefix. You can include this in any pattern you define within your config.
