@@ -72,7 +72,7 @@ jobs:
       - name: Build Image
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./dist
           push: false
           load: true
           tags: ${{ env.BUILD_TAG }}
