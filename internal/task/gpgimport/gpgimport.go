@@ -33,9 +33,9 @@ import (
 )
 
 const (
-	envGpgKey         = "GPG_KEY"
-	envGpgPassphrase  = "GPG_PASSPHRASE"
-	envGpgFingerprint = "GPG_FINGERPRINT"
+	envGpgKey         = "UPLIFT_GPG_KEY"
+	envGpgPassphrase  = "UPLIFT_GPG_PASSPHRASE"
+	envGpgFingerprint = "UPLIFT_GPG_FINGERPRINT"
 )
 
 // Task for tagging a repository
