@@ -73,6 +73,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ./dist
+          file: ./Dockerfile
           push: false
           load: true
           tags: ${{ env.BUILD_TAG }}
