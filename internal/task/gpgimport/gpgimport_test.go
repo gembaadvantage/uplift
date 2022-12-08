@@ -37,17 +37,17 @@ func TestString(t *testing.T) {
 }
 
 func TestSkip(t *testing.T) {
-	t.Setenv("GPG_KEY", "")
-	t.Setenv("GPG_PASSPHRASE", "")
-	t.Setenv("GPG_FINGERPRINT", "")
+	t.Setenv("UPLIFT_GPG_KEY", "")
+	t.Setenv("UPLIFT_GPG_PASSPHRASE", "")
+	t.Setenv("UPLIFT_GPG_FINGERPRINT", "")
 
 	assert.True(t, Task{}.Skip(&context.Context{}))
 }
 
 func TestSkipFalse(t *testing.T) {
-	t.Setenv("GPG_KEY", "key")
-	t.Setenv("GPG_PASSPHRASE", "passphrase")
-	t.Setenv("GPG_FINGERPRINT", "fingerprint")
+	t.Setenv("UPLIFT_GPG_KEY", "key")
+	t.Setenv("UPLIFT_GPG_PASSPHRASE", "passphrase")
+	t.Setenv("UPLIFT_GPG_FINGERPRINT", "fingerprint")
 
 	assert.False(t, Task{}.Skip(&context.Context{}))
 }
@@ -55,9 +55,9 @@ func TestSkipFalse(t *testing.T) {
 func TestRun(t *testing.T) {
 	git.InitRepo(t)
 
-	t.Setenv("GPG_KEY", gpg.TestKey)
-	t.Setenv("GPG_PASSPHRASE", gpg.TestPassphrase)
-	t.Setenv("GPG_FINGERPRINT", gpg.TestFingerprint)
+	t.Setenv("UPLIFT_GPG_KEY", gpg.TestKey)
+	t.Setenv("UPLIFT_GPG_PASSPHRASE", gpg.TestPassphrase)
+	t.Setenv("UPLIFT_GPG_FINGERPRINT", gpg.TestFingerprint)
 
 	err := Task{}.Run(&context.Context{})
 
@@ -71,9 +71,9 @@ func TestRun(t *testing.T) {
 func TestRunImportKeyFailed(t *testing.T) {
 	git.InitRepo(t)
 
-	t.Setenv("GPG_KEY", "-----BEGIN PGP PRIVATE KEY BLOCK-----key-----END PGP PRIVATE KEY BLOCK-----")
-	t.Setenv("GPG_PASSPHRASE", "passphrase")
-	t.Setenv("GPG_FINGERPRINT", "AABBCCDDEEFF1122334455")
+	t.Setenv("UPLIFT_GPG_KEY", "-----BEGIN PGP PRIVATE KEY BLOCK-----key-----END PGP PRIVATE KEY BLOCK-----")
+	t.Setenv("UPLIFT_GPG_PASSPHRASE", "passphrase")
+	t.Setenv("UPLIFT_GPG_FINGERPRINT", "AABBCCDDEEFF1122334455")
 
 	err := Task{}.Run(&context.Context{})
 
