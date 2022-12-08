@@ -52,13 +52,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: Install Task
-        uses: arduino/setup-task@v1
+      - name: GoReleaser Build APK
+        uses: goreleaser/goreleaser-action@v3
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build
-        run: task build
+          version: latest
+          args: release --rm-dist --skip-announce --skip-validate --skip-docker --skip-sign --skip-sbom --skip-publish -p 5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.0.0
@@ -72,7 +72,8 @@ jobs:
       - name: Build Image
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./dist
+          file: ./Dockerfile
           push: false
           load: true
           tags: ${{ env.BUILD_TAG }}
