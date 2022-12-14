@@ -1,6 +1,6 @@
 # GitLab
 
-An example YAML file for configuring Uplift to run on [GitLab](https://gitlab.com/). To ensure Uplift can push changes back to your repository, you will need to provide it with a [project](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html)](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) or [group](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html) access token[^1] with the `write_repository` permission.
+An example YAML file for configuring Uplift to run on [GitLab](https://gitlab.com/). To ensure Uplift can push changes back to your repository, you will need to provide it with a [project](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) or [group](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html) access token[^1] with the `write_repository` permission.
 
 ```{ .yaml .annotate linenums="1" hl_lines="11" }
 # .gitlab-ci.yml

@@ -1,6 +1,6 @@
 # Drone
 
-An example YAML file for configuring Uplift to run on [Drone](https://www.drone.io/)[^1]. Instructions for deploying a self-hosted instance of drone can be found [here](https://docs.drone.io/server/provider/github/). Uplift requires write permissions to your repository. A [Personal Access](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) needs to be configured with the `public_repo` permission and added to Drone as an [encrypted secret](https://docs.drone.io/secret/encrypted/).
+An example YAML file for configuring Uplift to run on [Drone](https://www.drone.io/)[^1]. Instructions for deploying a self-hosted instance of drone can be found [here](https://docs.drone.io/server/provider/github/). Uplift requires write permissions to your repository. A [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) needs to be configured with the `public_repo` permission and added to Drone as an [encrypted secret](https://docs.drone.io/secret/encrypted/).
 
 ```{ .yaml .annotate linenums="1" }
 # .drone.yml
