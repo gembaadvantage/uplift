@@ -255,13 +255,23 @@ func retrieveTags(sort []string) []TagEntry {
 }
 
 // LatestTag retrieves the latest tag within the repository
-func LatestTag() TagEntry {
+func LatestTag(suffix string) TagEntry {
 	tags := retrieveTags([]string{"--sort=-creatordate", "--sort=-v:refname"})
 	if len(tags) == 0 {
 		return TagEntry{}
 	}
+	if suffix == "" {
+		return tags[0]
+	}
+	// in case we want to consider suffix, return the first match
+	// as the slice is already sorted
+	for _, t := range tags {
+		if strings.HasSuffix(t.Ref, suffix) {
+			return t
+		}
+	}
 
-	return tags[0]
+	return TagEntry{}
 }
 
 // DescribeTag retrieves details about a specific tag

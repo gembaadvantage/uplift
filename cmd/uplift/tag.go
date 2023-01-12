@@ -142,7 +142,7 @@ func newTagCmd(gopts *globalOptions, out io.Writer) *tagCommand {
 			// If only the current tag is to be printed, skip running a pipeline
 			// and just retrieve and print the latest tag
 			if tagCmd.Opts.PrintCurrentTag && !tagCmd.Opts.PrintNextTag {
-				tag := git.LatestTag()
+				tag := git.LatestTag(tagCmd.Opts.Prerelease)
 				fmt.Fprintf(out, tag.Ref)
 				return nil
 			}

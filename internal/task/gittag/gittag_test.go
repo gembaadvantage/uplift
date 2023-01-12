@@ -60,7 +60,8 @@ func TestRun(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	ltag := git.LatestTag()
+	suffix := ""
+	ltag := git.LatestTag(suffix)
 	assert.Equal(t, tag, ltag.Ref)
 }
 
@@ -79,7 +80,8 @@ func TestRun_DryRunMode(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	ltag := git.LatestTag()
+	suffix := ""
+	ltag := git.LatestTag(suffix)
 	assert.Empty(t, ltag.Ref)
 }
 
@@ -100,7 +102,8 @@ func TestRun_NoVersionChange(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	ltag := git.LatestTag()
+	suffix := ""
+	ltag := git.LatestTag(suffix)
 	assert.Equal(t, tag, ltag.Ref)
 }
 
