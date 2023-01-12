@@ -132,7 +132,8 @@ func TestRelease_SkipChangelog(t *testing.T) {
 	err := relCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	tag := git.LatestTag()
+	suffix := ""
+	tag := git.LatestTag(suffix)
 	assert.Equal(t, "1.0.1", tag.Ref)
 
 	assert.False(t, changelogExists(t))
@@ -151,7 +152,8 @@ func TestRelease_SkipBumps(t *testing.T) {
 	err := relCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	tag := git.LatestTag()
+	suffix := ""
+	tag := git.LatestTag(suffix)
 	assert.Equal(t, "1.0.1", tag.Ref)
 
 	actual, err := os.ReadFile("test.txt")

@@ -396,7 +396,8 @@ func TestLatestTag(t *testing.T) {
 	v1, v2 := "v1.0.0", "v2.0.0"
 	TimeBasedTagSeries(t, []string{v1, v2})
 
-	tag := LatestTag()
+	suffix := ""
+	tag := LatestTag(suffix)
 	assert.Equal(t, v2, tag.Ref)
 }
 
@@ -419,14 +420,16 @@ func TestLatestTag_LargeHistory(t *testing.T) {
 		"v2",
 	})
 
-	tag := LatestTag()
+	suffix := ""
+	tag := LatestTag(suffix)
 	assert.Equal(t, "2.0.0", tag.Ref)
 }
 
 func TestLatestTag_NoTagsExist(t *testing.T) {
 	MkTmpDir(t)
 
-	tag := LatestTag()
+	suffix := ""
+	tag := LatestTag(suffix)
 	assert.Equal(t, "", tag.Ref)
 }
 
@@ -438,7 +441,8 @@ func TestLatestTag_NoSemanticTags(t *testing.T) {
 	v2 := "latest"
 	EmptyCommitAndTag(t, v2, "more work")
 
-	tag := LatestTag()
+	suffix := ""
+	tag := LatestTag(suffix)
 	assert.Equal(t, "", tag.Ref)
 }
 
@@ -448,7 +452,8 @@ func TestLatestTag_MixedTagConventions(t *testing.T) {
 	v1, v2, v3 := "v1.0.0", "2.0.0", "v3.0.0"
 	TimeBasedTagSeries(t, []string{v1, v2, v3})
 
-	tag := LatestTag()
+	suffix := ""
+	tag := LatestTag(suffix)
 	assert.Equal(t, "v3.0.0", tag.Ref)
 }
 
@@ -457,7 +462,8 @@ func TestLatestTag_CommitWithMixedTags(t *testing.T) {
 
 	EmptyCommitAndTags(t, "commit", "v1", "prod", "1.0.0")
 
-	tag := LatestTag()
+	suffix := ""
+	tag := LatestTag(suffix)
 	assert.Equal(t, "1.0.0", tag.Ref)
 }
 
@@ -467,7 +473,8 @@ func TestLatestTag_WithPrerelease(t *testing.T) {
 	t1, t2, t3, t4, t5 := "0.1.0-alpha+0001", "0.1.0-beta+0001", "0.1.0-beta+0002", "0.1.0", "0.1.1-beta+0001"
 	TimeBasedTagSeries(t, []string{t1, t2, t3, t4, t5})
 
-	tag := LatestTag()
+	suffix := ""
+	tag := LatestTag(suffix)
 
 	assert.Equal(t, "0.1.1-beta+0001", tag.Ref)
 }
