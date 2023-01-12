@@ -17,7 +17,7 @@ Check out the latest documentation at [upliftci.dev](https://upliftci.dev)
 
 ## Badges
 
-[![Build status](https://img.shields.io/github/workflow/status/gembaadvantage/uplift/ci?style=flat-square&logo=go)](https://github.com/gembaadvantage/uplift/actions?workflow=ci)
+[![Build status](https://img.shields.io/github/actions/workflow/status/gembaadvantage/uplift/ci.yml?style=flat-square&logo=go)](https://github.com/gembaadvantage/uplift/actions?workflow=ci)
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](/LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gembaadvantage/uplift?style=flat-square)](https://goreportcard.com/report/github.com/gembaadvantage/uplift)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/gembaadvantage/uplift.svg?style=flat-square)](go.mod)
