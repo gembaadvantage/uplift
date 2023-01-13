@@ -88,7 +88,7 @@ func TestChangelog_WithExclude(t *testing.T) {
 	taggedRepo(t, "2.0.0", "feat: a new feat", "fix: a new fix", "ci: a ci task", "docs: some new docs")
 
 	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
-	chglogCmd.Cmd.SetArgs([]string{"--exclude", "ci,docs"})
+	chglogCmd.Cmd.SetArgs([]string{"--exclude", "^ci,^docs"})
 
 	err := chglogCmd.Cmd.Execute()
 	require.NoError(t, err)
@@ -98,6 +98,24 @@ func TestChangelog_WithExclude(t *testing.T) {
 	cl := readChangelog(t)
 	assert.Contains(t, cl, "feat: a new feat")
 	assert.Contains(t, cl, "fix: a new fix")
+	assert.NotContains(t, cl, "ci: a ci task")
+	assert.NotContains(t, cl, "docs: some new docs")
+}
+
+func TestChangelog_WithInclude(t *testing.T) {
+	taggedRepo(t, "2.0.0", "feat(scope): a new feat", "fix(scope): a new fix", "ci: a ci task", "docs: some new docs")
+
+	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
+	chglogCmd.Cmd.SetArgs([]string{"--include", "^.*\\(scope\\)"})
+
+	err := chglogCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+
+	cl := readChangelog(t)
+	assert.Contains(t, cl, "feat(scope): a new feat")
+	assert.Contains(t, cl, "fix(scope): a new fix")
 	assert.NotContains(t, cl, "ci: a ci task")
 	assert.NotContains(t, cl, "docs: some new docs")
 }
