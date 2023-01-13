@@ -80,6 +80,7 @@ type CommitAuthor struct {
 type Changelog struct {
 	Sort    string   `yaml:"sort"`
 	Exclude []string `yaml:"exclude"`
+	Include []string `yaml:"include"`
 }
 
 // Git defines configuration for how uplift interacts with git

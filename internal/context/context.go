@@ -72,6 +72,7 @@ type Changelog struct {
 	All      bool
 	DiffOnly bool
 	Exclude  []string
+	Include  []string
 	Sort     string
 	PreTag   bool
 }

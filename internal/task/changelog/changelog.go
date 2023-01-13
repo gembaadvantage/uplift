@@ -164,6 +164,14 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 		return []release{}, err
 	}
 
+	if len(ctx.Changelog.Include) > 0 {
+		log.Info("cherry-picking commits based on include list")
+		ents, err = includeCommits(ents, ctx.Changelog.Include)
+		if err != nil {
+			return []release{}, err
+		}
+	}
+
 	if len(ctx.Changelog.Exclude) > 0 {
 		log.Info("removing commits based on exclude list")
 		ents, err = excludeCommits(ents, ctx.Changelog.Exclude)
@@ -226,6 +234,14 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 		ents, err := git.LogBetween(tags[i].Ref, nextTag)
 		if err != nil {
 			return []release{}, err
+		}
+
+		if len(ctx.Changelog.Include) > 0 {
+			log.Info("cherry-picking commits based on include list")
+			ents, err = includeCommits(ents, ctx.Changelog.Include)
+			if err != nil {
+				return []release{}, err
+			}
 		}
 
 		if len(ctx.Changelog.Exclude) > 0 {
@@ -339,6 +355,9 @@ func reverse(ents []git.LogEntry) {
 	}
 }
 
+// TODO: the only difference is this bit here (captured by an enum) -- IgnoreMatch, KeepMatch
+// TODO: these become wrapper methods
+
 func excludeCommits(commits []git.LogEntry, excludes []string) ([]git.LogEntry, error) {
 	filtered := commits
 	for _, exclude := range excludes {
@@ -351,6 +370,27 @@ func excludeCommits(commits []git.LogEntry, excludes []string) ([]git.LogEntry, 
 		filterPass := []git.LogEntry{}
 		for _, commit := range filtered {
 			if !excludeRgx.MatchString(commit.Message) {
+				filterPass = append(filterPass, commit)
+			}
+		}
+		filtered = filterPass
+	}
+
+	return filtered, nil
+}
+
+func includeCommits(commits []git.LogEntry, includes []string) ([]git.LogEntry, error) {
+	filtered := commits
+	for _, include := range includes {
+		includeRgx, err := regexp.Compile(include)
+		if err != nil {
+			return filtered, err
+		}
+
+		// Carry out a filtering pass for each defined
+		filterPass := []git.LogEntry{}
+		for _, commit := range filtered {
+			if includeRgx.MatchString(commit.Message) {
 				filterPass = append(filterPass, commit)
 			}
 		}

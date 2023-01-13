@@ -590,3 +590,43 @@ func TestRun_IdentifiedSCM(t *testing.T) {
 
 	assert.Contains(t, buf.String(), expected)
 }
+
+func TestRun_WithIncludes(t *testing.T) {
+	git.InitRepo(t)
+	git.Tag("1.0.0")
+	h := git.EmptyCommitsAndTag(t, "1.1.0", "ci: tweak", "fix(scope1): a fix", "feat(scope1): a feature", "fix(scope2): another fix")
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		Out: &buf,
+		Changelog: context.Changelog{
+			DiffOnly: true,
+			Include:  []string{`^.*\(scope1\)`},
+		},
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextVersion: semver.Version{
+			Raw: "1.1.0",
+		},
+		SCM: context.SCM{
+			Provider: git.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`## 1.1.0 - %s
+
+- %s feat(scope1): a feature
+- %s fix(scope1): a fix
+`, changelogDate(t), abbrevHash(t, h[2]), abbrevHash(t, h[1]))
+
+	assert.False(t, changelogExists(t))
+	assert.Equal(t, expected, buf.String())
+}
+
+func TestRun_AllWithIncludes(t *testing.T) {
+	// TODO: improve the way of matching commits
+}
