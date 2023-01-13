@@ -55,6 +55,7 @@ release tags`
 type changelogOptions struct {
 	DiffOnly bool
 	Exclude  []string
+	Include  []string
 	All      bool
 	Sort     string
 	*globalOptions
@@ -93,7 +94,8 @@ func newChangelogCmd(gopts *globalOptions, out io.Writer) *changelogCommand {
 	f := cmd.Flags()
 	f.BoolVar(&chglogCmd.Opts.DiffOnly, "diff-only", false, "output the changelog diff only")
 	f.BoolVar(&chglogCmd.Opts.All, "all", false, "generate a changelog from the entire history of this repository")
-	f.StringSliceVar(&chglogCmd.Opts.Exclude, "exclude", []string{}, "a list of conventional commit prefixes to exclude")
+	f.StringSliceVar(&chglogCmd.Opts.Exclude, "exclude", []string{}, "a list of regexes for excluding conventional commits from the changelog")
+	f.StringSliceVar(&chglogCmd.Opts.Include, "include", []string{}, "a list of regexes to cherry-pick conventional commits for the changelog")
 	f.StringVar(&chglogCmd.Opts.Sort, "sort", "", "the sort order of commits within each changelog entry")
 
 	chglogCmd.Cmd = cmd
@@ -173,7 +175,11 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 		ctx.Changelog.Sort = strings.ToLower(cfg.Changelog.Sort)
 	}
 
+	// TODO: can this just be done with a direct append, rather than multiple statements
+
 	// Merge config and command line arguments together
+	ctx.Changelog.Include = opts.Include
+	ctx.Changelog.Include = append(ctx.Changelog.Include, ctx.Config.Changelog.Include...)
 	ctx.Changelog.Exclude = opts.Exclude
 	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, ctx.Config.Changelog.Exclude...)
 

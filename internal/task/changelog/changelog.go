@@ -76,6 +76,9 @@ type release struct {
 	Changes []git.LogEntry
 }
 
+// Define functions for filtering commits
+type commitFilter func([]git.LogEntry, *regexp.Regexp) []git.LogEntry
+
 // Task that generates a changelog for the current repository
 type Task struct{}
 
@@ -164,9 +167,17 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 		return []release{}, err
 	}
 
+	if len(ctx.Changelog.Include) > 0 {
+		log.Info("cherry-picking commits based on include list")
+		ents, err = filterCommits(ents, ctx.Changelog.Include, includeCommits)
+		if err != nil {
+			return []release{}, err
+		}
+	}
+
 	if len(ctx.Changelog.Exclude) > 0 {
 		log.Info("removing commits based on exclude list")
-		ents, err = excludeCommits(ents, ctx.Changelog.Exclude)
+		ents, err = filterCommits(ents, ctx.Changelog.Exclude, excludeCommits)
 		if err != nil {
 			return []release{}, err
 		}
@@ -228,9 +239,17 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 			return []release{}, err
 		}
 
+		if len(ctx.Changelog.Include) > 0 {
+			log.Info("cherry-picking commits based on include list")
+			ents, err = filterCommits(ents, ctx.Changelog.Include, includeCommits)
+			if err != nil {
+				return []release{}, err
+			}
+		}
+
 		if len(ctx.Changelog.Exclude) > 0 {
 			log.Info("removing commits based on exclude list")
-			ents, err = excludeCommits(ents, ctx.Changelog.Exclude)
+			ents, err = filterCommits(ents, ctx.Changelog.Exclude, excludeCommits)
 			if err != nil {
 				return []release{}, err
 			}
@@ -339,23 +358,35 @@ func reverse(ents []git.LogEntry) {
 	}
 }
 
-func excludeCommits(commits []git.LogEntry, excludes []string) ([]git.LogEntry, error) {
-	filtered := commits
-	for _, exclude := range excludes {
-		excludeRgx, err := regexp.Compile(exclude)
+func filterCommits(commits []git.LogEntry, regexes []string, filter commitFilter) ([]git.LogEntry, error) {
+	filteredCommits := commits
+	for _, regex := range regexes {
+		rgx, err := regexp.Compile(regex)
 		if err != nil {
-			return filtered, err
+			return filteredCommits, err
 		}
-
-		// Carry out a filtering pass for each defined
-		filterPass := []git.LogEntry{}
-		for _, commit := range filtered {
-			if !excludeRgx.MatchString(commit.Message) {
-				filterPass = append(filterPass, commit)
-			}
-		}
-		filtered = filterPass
+		filteredCommits = filter(filteredCommits, rgx)
 	}
 
-	return filtered, nil
+	return filteredCommits, nil
+}
+
+func includeCommits(commits []git.LogEntry, rgx *regexp.Regexp) []git.LogEntry {
+	filteredCommits := []git.LogEntry{}
+	for _, commit := range commits {
+		if rgx.MatchString(commit.Message) {
+			filteredCommits = append(filteredCommits, commit)
+		}
+	}
+	return filteredCommits
+}
+
+func excludeCommits(commits []git.LogEntry, rgx *regexp.Regexp) []git.LogEntry {
+	filteredCommits := []git.LogEntry{}
+	for _, commit := range commits {
+		if !rgx.MatchString(commit.Message) {
+			filteredCommits = append(filteredCommits, commit)
+		}
+	}
+	return filteredCommits
 }
