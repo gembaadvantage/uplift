@@ -51,7 +51,7 @@ func (t Task) Skip(ctx *context.Context) bool {
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
 	var tagSuffix string
-	if ctx.IgnoreExistingPrerelease {
+	if ctx.IgnoreExistingPrerelease && ctx.FilterOnPrerelease {
 		tagSuffix = buildTagSuffix(ctx)
 	}
 	tag := git.LatestTag(tagSuffix)
