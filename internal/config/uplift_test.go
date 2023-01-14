@@ -26,6 +26,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -68,4 +69,45 @@ func WriteFile(t *testing.T, s string) string {
 	})
 
 	return file.Name()
+}
+
+func TestUnmarshalGitPushOption(t *testing.T) {
+	path := WriteFile(t, `
+git:
+  pushOptions:
+    - custom-option
+`)
+
+	cfg, err := Load(path)
+
+	require.NoError(t, err)
+	assert.Len(t, cfg.Git.PushOptions, 1)
+
+	opt := cfg.Git.PushOptions[0]
+	assert.Equal(t, "custom-option", opt.Option)
+	assert.False(t, opt.SkipBranch)
+	assert.False(t, opt.SkipTag)
+}
+
+func TestUnmarshalGitPushOptionComplex(t *testing.T) {
+	path := WriteFile(t, `
+git:
+  pushOptions:
+    - option: custom-option-1
+      skipTag: true
+    - option: custom-option-2
+      skipBranch: true
+`)
+
+	cfg, err := Load(path)
+
+	require.NoError(t, err)
+	assert.Len(t, cfg.Git.PushOptions, 2)
+
+	opt1 := cfg.Git.PushOptions[0]
+	assert.Equal(t, "custom-option-1", opt1.Option)
+	assert.True(t, opt1.SkipTag)
+	opt2 := cfg.Git.PushOptions[1]
+	assert.Equal(t, "custom-option-2", opt2.Option)
+	assert.True(t, opt2.SkipBranch)
 }
