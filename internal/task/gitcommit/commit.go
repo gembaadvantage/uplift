@@ -24,6 +24,7 @@ package gitcommit
 
 import (
 	"github.com/apex/log"
+	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 )
@@ -66,5 +67,18 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	log.Info("pushing commit to remote")
-	return git.Push()
+	pushOpts := filterPushOptions(ctx.Config.Git.PushOptions)
+	return git.Push(pushOpts)
+}
+
+func filterPushOptions(options []config.GitPushOption) []string {
+	filtered := []string{}
+	for _, opt := range options {
+		if !opt.SkipTag {
+			log.WithField("option", opt.Option).Debug("with push option")
+			filtered = append(filtered, opt.Option)
+		}
+	}
+
+	return filtered
 }

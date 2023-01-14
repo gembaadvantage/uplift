@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/apex/log"
+	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 )
@@ -85,7 +86,8 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	log.Info("pushing tag to remote")
-	return git.PushTag(ctx.NextVersion.Raw)
+	pushOpts := filterPushOptions(ctx.Config.Git.PushOptions)
+	return git.PushTag(ctx.NextVersion.Raw, pushOpts)
 }
 
 func printRepositoryTag(ctx *context.Context) {
@@ -100,4 +102,16 @@ func printRepositoryTag(ctx *context.Context) {
 	}
 
 	fmt.Fprint(ctx.Out, strings.Join(tags, " "))
+}
+
+func filterPushOptions(options []config.GitPushOption) []string {
+	filtered := []string{}
+	for _, opt := range options {
+		if !opt.SkipTag {
+			log.WithField("option", opt.Option).Debug("with push option")
+			filtered = append(filtered, opt.Option)
+		}
+	}
+
+	return filtered
 }
