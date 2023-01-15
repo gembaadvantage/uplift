@@ -85,8 +85,39 @@ type Changelog struct {
 
 // Git defines configuration for how uplift interacts with git
 type Git struct {
-	IgnoreDetached bool `yaml:"ignoreDetached"`
-	IgnoreShallow  bool `yaml:"ignoreShallow"`
+	IgnoreDetached bool            `yaml:"ignoreDetached"`
+	IgnoreShallow  bool            `yaml:"ignoreShallow"`
+	PushOptions    []GitPushOption `yaml:"pushOptions"`
+}
+
+// GitPushOption provides a way of supplying additional options to
+// git push commands
+type GitPushOption struct {
+	Option     string `yaml:"option"`
+	SkipBranch bool   `yaml:"skipBranch"`
+	SkipTag    bool   `yaml:"skipTag"`
+}
+
+type gitPushOption GitPushOption
+
+// UnmarshalYAML defines a custom YAML unmarshal for a [config.GitPushOption]
+func (o *GitPushOption) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var str string
+	if err := unmarshal(&str); err == nil {
+		o.Option = str
+		return nil
+	}
+
+	var opt gitPushOption
+	if err := unmarshal(&opt); err != nil {
+		return err
+	}
+
+	o.Option = opt.Option
+	o.SkipBranch = opt.SkipBranch
+	o.SkipTag = opt.SkipTag
+
+	return nil
 }
 
 // Gitea defines custom configuration for accessing a self-hosted Gitea instance

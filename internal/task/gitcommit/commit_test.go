@@ -26,6 +26,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/stretchr/testify/assert"
@@ -117,4 +118,24 @@ func TestRun_NoGitRepository(t *testing.T) {
 
 	err := Task{}.Run(&context.Context{})
 	require.Error(t, err)
+}
+
+func TestFilterPushOptions(t *testing.T) {
+	pushOpts := []config.GitPushOption{
+		{
+			Option: "option1",
+		},
+		{
+			Option:     "option2",
+			SkipBranch: true,
+		},
+		{
+			Option:  "option3",
+			SkipTag: true,
+		},
+	}
+
+	filtered := filterPushOptions(pushOpts)
+	assert.Len(t, filtered, 2)
+	assert.Equal(t, []string{"option1", "option3"}, filtered)
 }

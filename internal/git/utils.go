@@ -335,8 +335,19 @@ func AnnotatedTag(tag string, cd CommitDetails) error {
 }
 
 // PushTag attempts to push a newly created tag to the configured origin
-func PushTag(tag string) error {
-	if _, err := Clean(Run("push", "origin", tag)); err != nil {
+func PushTag(tag string, options []string) error {
+	args := []string{"push"}
+
+	// Append each push option in the following format --push-option=<option>
+	if len(options) > 0 {
+		for _, opt := range options {
+			args = append(args, fmt.Sprintf("--push-option=%s", opt))
+		}
+	}
+
+	args = append(args, []string{"origin", tag}...)
+
+	if _, err := Clean(Run(args...)); err != nil {
 		return err
 	}
 
@@ -412,7 +423,7 @@ func Stage(path string) error {
 }
 
 // Push all committed changes to the configured origin
-func Push() error {
+func Push(options []string) error {
 	// Inspect the repo for an origin. If no origin exists, then skip the push
 	if _, err := Clean(Run("remote", "show", "origin")); err != nil {
 		return nil
@@ -423,7 +434,18 @@ func Push() error {
 		return err
 	}
 
-	if _, err := Clean(Run("push", "origin", branch)); err != nil {
+	args := []string{"push"}
+
+	// Append each push option in the following format --push-option=<option>
+	if len(options) > 0 {
+		for _, opt := range options {
+			args = append(args, fmt.Sprintf("--push-option=%s", opt))
+		}
+	}
+
+	args = append(args, []string{"origin", branch}...)
+
+	if _, err := Clean(Run(args...)); err != nil {
 		return err
 	}
 

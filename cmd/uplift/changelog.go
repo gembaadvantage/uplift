@@ -175,13 +175,9 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 		ctx.Changelog.Sort = strings.ToLower(cfg.Changelog.Sort)
 	}
 
-	// TODO: can this just be done with a direct append, rather than multiple statements
-
 	// Merge config and command line arguments together
-	ctx.Changelog.Include = opts.Include
-	ctx.Changelog.Include = append(ctx.Changelog.Include, ctx.Config.Changelog.Include...)
-	ctx.Changelog.Exclude = opts.Exclude
-	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, ctx.Config.Changelog.Exclude...)
+	ctx.Changelog.Include = append(opts.Include, ctx.Config.Changelog.Include...)
+	ctx.Changelog.Exclude = append(opts.Exclude, ctx.Config.Changelog.Exclude...)
 
 	// By default ensure the ci(uplift): commits are excluded also
 	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, `ci\(uplift\)`)
