@@ -205,3 +205,23 @@ func TestRun_PrintCurrentAndNextTag(t *testing.T) {
 	assert.Equal(t, "1.0.0 1.1.0", buf.String())
 	assert.Len(t, git.AllTags(), 0)
 }
+
+func TestFilterPushOptions(t *testing.T) {
+	pushOpts := []config.GitPushOption{
+		{
+			Option: "option1",
+		},
+		{
+			Option:  "option2",
+			SkipTag: true,
+		},
+		{
+			Option:     "option3",
+			SkipBranch: true,
+		},
+	}
+
+	filtered := filterPushOptions(pushOpts)
+	assert.Len(t, filtered, 2)
+	assert.Equal(t, []string{"option1", "option3"}, filtered)
+}

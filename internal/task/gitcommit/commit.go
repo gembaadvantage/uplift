@@ -74,7 +74,7 @@ func (t Task) Run(ctx *context.Context) error {
 func filterPushOptions(options []config.GitPushOption) []string {
 	filtered := []string{}
 	for _, opt := range options {
-		if !opt.SkipTag {
+		if !opt.SkipBranch {
 			log.WithField("option", opt.Option).Debug("with push option")
 			filtered = append(filtered, opt.Option)
 		}
