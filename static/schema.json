@@ -1,10 +1,9 @@
 {
-  "$schema": "http://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
   "$id": "https://github.com/gembaadvantage/uplift/internal/config/uplift",
-  "$ref": "#/$defs/Uplift",
   "title": "Uplift",
   "description": "A JSON schema for the Uplift configuration file",
-  "$defs": {
+  "definitions": {
     "Bump": {
       "properties": {
         "file": {
@@ -16,34 +15,48 @@
           "$comment": "https://upliftci.dev/reference/config#bumps",
           "description": "A regex matcher to be used when bumping the file. Multiple regex matches are supported. Each will be carried out in the order they are defined here. All matches must succeed for the file to be bumped",
           "items": {
-            "$ref": "#/$defs/RegexBump"
+            "$ref": "#/definitions/RegexBump"
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
         },
         "json": {
           "$comment": "https://upliftci.dev/reference/config#bumps",
           "description": "A JSON path matcher to be used when bumping the file. Multiple path matches are supported. Each will be carried out in the order they are defined here. All matches must succeed for the file to be bumped. JSON path syntax is based on https://github.com/tidwall/sjson",
           "items": {
-            "type": "#/$defs/JSONBump"
+            "$ref": "#/definitions/JSONBump"
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
         }
       },
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": ["file"],
+      "not": {
+        "properties": {
+          "regex": {
+            "maxItems": 0
+          },
+          "json": {
+            "maxItems": 0
+          }
+        }
+      }
     },
     "RegexBump": {
       "properties": {
         "pattern": {
           "$comment": "https://upliftci.dev/reference/config#bumps",
           "description": "A regex pattern for matching and replacing the version within the file.",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "count": {
           "$comment": "https://upliftci.dev/reference/config#bumps",
           "description": "The number of times any matched version should be replaced",
           "type": "integer",
-          "minimum": 1
+          "minimum": 0
         },
         "semver": {
           "$comment": "https://upliftci.dev/reference/config#bumps",
@@ -52,14 +65,16 @@
         }
       },
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": ["pattern"]
     },
     "JSONBump": {
       "properties": {
         "path": {
           "$comment": "https://upliftci.dev/reference/config#bumps",
           "description": "A JSON path for matching and replacing the version within the file",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "semver": {
           "$comment": "https://upliftci.dev/reference/config#bumps",
@@ -68,91 +83,184 @@
         }
       },
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": ["path"]
     },
     "CommitAuthor": {
       "properties": {
         "name": {
           "$comment": "https://upliftci.dev/reference/config#commitAuthor",
           "description": "Name of the commit author",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "email": {
           "$comment": "https://upliftci.dev/reference/config#commitAuthor",
           "description": "Email of the commit author",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         }
       },
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": ["name"]
+        },
+        {
+          "required": ["email"]
+        }
+      ]
     },
     "Changelog": {
       "properties": {
         "sort": {
           "$comment": "https://upliftci.dev/reference/config#changelog",
-          "description": "Change the sort order of the commits within each changelog entry. Supported values are asc or desc (case is ignored). Defaults to desc (descending order) to mirror the default behaviour of 'git log'",
-          "type": "string"
+          "description": "Change the sort order of the commits within each changelog entry. Supported values are [asc, desc, ASC or DESC]. Defaults to desc (descending order) to mirror the default behaviour of 'git log'",
+          "type": "string",
+          "enum": ["asc", "desc", "ASC", "DESC"]
         },
         "exclude": {
           "$comment": "https://upliftci.dev/reference/config#changelog",
           "description": "A list of commits to exclude during the creation of a changelog. Provide a list of regular expressions for matching commits that are to be excluded. Auto-generated commits from Uplift (with the prefix ci(uplift)) will always be excluded",
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
+        },
+        "include": {
+          "$comment": "https://upliftci.dev/reference/config#changelog",
+          "description": "A list of commits to cherry-pick and include during the creation of a changelog. Provide a list of regular expressions for matching commits that are to be included",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": "array",
+          "minItems": 1
         }
       },
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": ["sort"]
+        },
+        {
+          "required": ["exclude"]
+        },
+        {
+          "required": ["include"]
+        }
+      ]
     },
     "Git": {
       "properties": {
-        "$comment": "https://upliftci.dev/reference/config#git",
-        "description": "A flag for suppressing the git detached HEAD repository check. If set to true, Uplift will report a warning while running, otherwise Uplift will raise an error and stop. Defaults to false",
         "ignoreDetached": {
+          "$comment": "https://upliftci.dev/reference/config#git",
+          "description": "A flag for suppressing the git detached HEAD repository check. If set to true, Uplift will report a warning while running, otherwise Uplift will raise an error and stop. Defaults to false",
           "type": "boolean"
         },
         "ignoreShallow": {
           "$comment": "https://upliftci.dev/reference/config#git",
           "description": "A flag for suppressing the git shallow repository check. If set to true, Uplift will report a warning while running, otherwise Uplift will raise an error and stop. Defaults to false",
           "type": "boolean"
+        },
+        "pushOptions": {
+          "items": {
+            "$comment": "https://upliftci.dev/reference/config#git",
+            "description": "An array of Git push options that can be independently configured for both branch and tag operations within Uplift. Provided options will be filtered accordingly and appended to the git push operation through the use of the --push-option flag as documented in https://git-scm.com/docs/git-push#Documentation/git-push.txt",
+            "$ref": "#/definitions/GitPushOptions"
+          },
+          "type": "array",
+          "minItems": 1
         }
       },
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": ["ignoreDetached"]
+        },
+        {
+          "required": ["ignoreShallow"]
+        },
+        {
+          "required": ["pushOptions"]
+        }
+      ]
+    },
+    "GitPushOptions": {
+      "anyOf": [
+        {
+          "description": "A push option that will be appended to a git push operation within Uplift",
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "properties": {
+            "option": {
+              "$comment": "https://upliftci.dev/reference/config#git",
+              "description": "A push option that will be appended to a git push operation within Uplift",
+              "type": "string",
+              "minLength": 1
+            },
+            "skipBranch": {
+              "$comment": "https://upliftci.dev/reference/config#git",
+              "description": "A flag to control the exclusion of the current push option from any branch based git push operation",
+              "type": "boolean"
+            },
+            "skipTag": {
+              "$comment": "https://upliftci.dev/reference/config#git",
+              "description": "A flag to control the exclusion of the current push option from any tag based git push operation",
+              "type": "boolean"
+            }
+          },
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["option"]
+        }
+      ]
     },
     "Gitea": {
       "properties": {
         "url": {
           "$comment": "https://upliftci.dev/reference/config#gitea",
           "description": "The URL of the self-hosted instance of Gitea. Only the scheme and hostname are required. The hostname is used when matching against the configured remote origin of the cloned repository",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         }
       },
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": ["url"]
     },
     "GitHub": {
       "properties": {
         "url": {
           "$comment": "https://upliftci.dev/reference/config#github",
           "description": "The URL of the enterprise instance of GitHub. Only the scheme and hostname are required. The hostname is used when matching against the configured remote origin of the cloned repository",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         }
       },
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": ["url"]
     },
     "GitLab": {
       "properties": {
         "url": {
           "$comment": "https://upliftci.dev/reference/config#gitlab",
           "description": "The URL of the self-managed instance of GitLab. Only the scheme and hostname are required. The hostname is used when matching against the configured remote origin of the cloned repository",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         }
       },
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": ["url"]
     },
     "Hooks": {
       "properties": {
@@ -160,128 +268,192 @@
           "items": {
             "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute before Uplift runs tasks within any workflow",
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
         },
         "beforeBump": {
           "items": {
             "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute before Uplift bumps any configured file",
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
         },
         "beforeTag": {
           "items": {
             "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute before Uplift tags the repository with the next semantic release",
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
         },
         "beforeChangelog": {
           "items": {
             "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute before Uplift runs its changelog generation task",
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
         },
         "after": {
           "items": {
             "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute after Uplift completes all tasks within any workflow",
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
         },
         "afterBump": {
           "items": {
             "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute after Uplift bumps all configured files",
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
         },
         "afterTag": {
           "items": {
             "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute after Uplift tags the repository with the next semantic release",
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
-          "type": "array"
+          "type": "array",
+          "minItems": 1
         },
         "afterChangelog": {
           "items": {
             "$comment": "https://upliftci.dev/reference/config#hooks",
             "description": "A list of shell commands or scripts to execute after Uplift generates or updates a changelog",
-            "type": "string"
-          },
-          "type": "array"
-        }
-      },
-      "type": "object",
-      "additionalProperties": false
-    },
-    "Uplift": {
-      "properties": {
-        "annotatedTags": {
-          "$comment": "https://upliftci.dev/reference/config#annotatedTags",
-          "description": "Use annotated tags instead of lightweight tags when tagging a new semantic version. An annotated tag is treated like a regular commit by git and contains both author details and a commit message. Uplift will either use its defaults or the custom commit details provided when generating the annotated tag.",
-          "type": "boolean"
-        },
-        "bumps": {
-          "items": {
-            "$ref": "#/$defs/Bump"
+            "type": "string",
+            "minLength": 1
           },
           "type": "array",
-          "description": "Define a series of files whose semantic version will be bumped. Supports both Regex and JSON Path based file bumps"
-        },
-        "commitAuthor": {
-          "$ref": "#/$defs/CommitAuthor",
-          "description": "Changes the commit author used by Uplift when committing any staged changes.\n Defaults to the Uplift Bot: uplift-bot <uplift@gembaadvantage.com>"
-        },
-        "commitMessage": {
-          "$comment": "https://upliftci.dev/reference/config#commitMessage",
-          "description": "Change the default commit message used by Uplift when committing any staged changes.\nThe default commit message is: ci(uplift): uplifted for version v0.1.0",
-          "type": "string"
-        },
-        "changelog": {
-          "$ref": "#/$defs/Changelog",
-          "description": "Customise how Uplift creates and updates a changelog within the repository"
-        },
-        "git": {
-          "$ref": "#/$defs/Git",
-          "description": "Customise how Uplift responds to its inbuilt Git checks"
-        },
-        "gitea": {
-          "$ref": "#/$defs/Gitea",
-          "description": "Configure SCM detection and support for Gitea"
-        },
-        "github": {
-          "$ref": "#/$defs/GitHub",
-          "description": "Configure SCM detection and support for GitHub"
-        },
-        "gitlab": {
-          "$ref": "#/$defs/GitLab",
-          "description": "Configure SCM detection and support for GitLab"
-        },
-        "hooks": {
-          "$ref": "#/$defs/Hooks",
-          "description": "Extend Uplift through the use of hooks. A hook is a specific point during a workflow where Uplift executes adhoc shell commands and scripts"
-        },
-        "env": {
-          "$comment": "https://upliftci.dev/reference/config#env",
-          "description": "Define a set of environment variables that are made available to all hooks. Supports loading environment variables from DotEnv (.env) files. Environment variables are merged with system wide ones.",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
+          "minItems": 1
         }
       },
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": ["before"]
+        },
+        {
+          "required": ["beforeBump"]
+        },
+        {
+          "required": ["beforeTag"]
+        },
+        {
+          "required": ["beforeChangelog"]
+        },
+        {
+          "required": ["after"]
+        },
+        {
+          "required": ["afterBump"]
+        },
+        {
+          "required": ["afterTag"]
+        },
+        {
+          "required": ["afterChangelog"]
+        }
+      ]
     }
-  }
+  },
+  "properties": {
+    "annotatedTags": {
+      "$comment": "https://upliftci.dev/reference/config#annotatedTags",
+      "description": "Use annotated tags instead of lightweight tags when tagging a new semantic version. An annotated tag is treated like a regular commit by git and contains both author details and a commit message. Uplift will either use its defaults or the custom commit details provided when generating the annotated tag.",
+      "type": "boolean"
+    },
+    "bumps": {
+      "items": {
+        "$ref": "#/definitions/Bump"
+      },
+      "type": "array",
+      "minItems": 1,
+      "description": "Define a series of files whose semantic version will be bumped. Supports both Regex and JSON Path based file bumps"
+    },
+    "commitAuthor": {
+      "$ref": "#/definitions/CommitAuthor",
+      "description": "Changes the commit author used by Uplift when committing any staged changes.\nDefaults to the Uplift Bot: uplift-bot <uplift@gembaadvantage.com>"
+    },
+    "commitMessage": {
+      "$comment": "https://upliftci.dev/reference/config#commitMessage",
+      "description": "Change the default commit message used by Uplift when committing any staged changes.\nThe default commit message is: ci(uplift): uplifted for version v0.1.0",
+      "type": "string",
+      "minLength": 1
+    },
+    "changelog": {
+      "$ref": "#/definitions/Changelog",
+      "description": "Customise how Uplift creates and updates a changelog within the repository"
+    },
+    "git": {
+      "$ref": "#/definitions/Git",
+      "description": "Customise how Uplift responds to its inbuilt Git checks"
+    },
+    "gitea": {
+      "$ref": "#/definitions/Gitea",
+      "description": "Configure SCM detection and support for Gitea"
+    },
+    "github": {
+      "$ref": "#/definitions/GitHub",
+      "description": "Configure SCM detection and support for GitHub"
+    },
+    "gitlab": {
+      "$ref": "#/definitions/GitLab",
+      "description": "Configure SCM detection and support for GitLab"
+    },
+    "hooks": {
+      "$ref": "#/definitions/Hooks",
+      "description": "Extend Uplift through the use of hooks. A hook is a specific point during a workflow where Uplift executes adhoc shell commands and scripts"
+    },
+    "env": {
+      "$comment": "https://upliftci.dev/reference/config#env",
+      "description": "Define a set of environment variables that are made available to all hooks. Supports loading environment variables from DotEnv (.env) files. Environment variables are merged with system wide ones.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "type": "array",
+      "minItems": 1
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "oneOf": [
+        {
+          "required": ["gitea"]
+        },
+        {
+          "required": ["github"]
+        },
+        {
+          "required": ["gitlab"]
+        }
+      ]
+    },
+    {
+      "not": {
+        "required": ["gitea", "github", "gitlab"]
+      }
+    }
+  ]
 }
