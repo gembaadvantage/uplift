@@ -2,222 +2,222 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://upliftci.dev/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/bumping-files/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/changelog/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/commit-signing/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/conventional-commits/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/first-release/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/license/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/tagging/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/uplift-bot/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/ci/awscodebuild/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/ci/awscodepipeline/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/ci/circleci/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/ci/cirrusci/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/ci/codefresh/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/ci/drone/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/ci/github/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/ci/gitlab/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/ci/semaphore/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/ci/travisci/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/faq/gitdetached/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/faq/gitdirty/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/faq/gitshallow/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/faq/gpgimport/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/install/binary/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/install/docker/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/install/oh-my-zsh/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/install/source/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/reference/config/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/reference/cli/bump/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/reference/cli/changelog/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/reference/cli/release/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/reference/cli/root/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/reference/cli/tag/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/scm/about/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/scm/gitea/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/scm/github/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/scm/gitlab/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/setup/commit-details/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/setup/config-location/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/setup/dry-run/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/setup/git-behaviour/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/setup/hooks/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/setup/print-tags/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://upliftci.dev/setup/silent/</loc>
-         <lastmod>2023-01-15</lastmod>
+         <lastmod>2023-01-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
