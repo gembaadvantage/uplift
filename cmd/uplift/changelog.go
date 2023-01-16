@@ -45,11 +45,41 @@ import (
 )
 
 const (
-	chlogDesc = `Create or update an existing changelog with an entry for
-the latest semantic release. For a first release, all commits
-between the latest tag and trunk will be written to the
-changelog. Subsequent entries will contain only commits between 
-release tags`
+	changelogLongDesc = `Scans the git log for the latest semantic release and generates a changelog
+entry. If this is a first release, all commits between the last release (or
+identifiable tag) and the repository trunk will be written to the changelog.
+Any subsequent entry within the changelog will only contain commits between 
+the latest set of tags. Basic customization is supported. Optionally commits 
+can be explicitly included or excluded from the entry and sorted in ascending 
+or descending order. Uplift automatically handles the staging and pushing of
+changes to the CHANGELOG.md file to the git remote, but this behavior can be
+disabled, to manage this action manually.
+
+Uplift bases its changelog format on the Keep a Changelog specification:
+
+https://keepachangelog.com/en/1.0.0/`
+
+	changelogExamples = `
+# Generate the next changelog entry for the latest semantic release
+uplift changelog
+
+# Generate a changelog for the entire history of the repository
+uplift changelog --all
+
+# Generate the next changelog entry and write it to stdout
+uplift changelog --diff-only
+
+# Generate the next changelog entry by exclude any conventional commits
+# with the ci, chore or test prefixes
+uplift changelog --exclude "^ci,^chore,^test"
+
+# Generate the next changelog entry with commits that only include the
+# following scope
+uplift changelog --include "^.*\(scope\)"
+
+# Generate the next changelog entry but do not stage or push any changes
+# back to the git remote
+uplift changelog --no-stage`
 )
 
 type changelogOptions struct {
@@ -74,10 +104,11 @@ func newChangelogCmd(gopts *globalOptions, out io.Writer) *changelogCommand {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "changelog",
-		Short: "Create or update a changelog with the latest semantic release",
-		Long:  chlogDesc,
-		Args:  cobra.NoArgs,
+		Use:     "changelog",
+		Short:   "Create or update a changelog with the latest semantic release",
+		Long:    changelogLongDesc,
+		Example: changelogExamples,
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Always lowercase sort
 			chglogCmd.Opts.Sort = strings.ToLower(chglogCmd.Opts.Sort)

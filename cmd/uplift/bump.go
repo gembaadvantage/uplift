@@ -45,9 +45,28 @@ import (
 )
 
 const (
-	bumpDesc = `Bumps the semantic version within files in your git repository. The
-version bump is based on the conventional commit message from the last commit.
-Uplift can bump the version in any file using regex pattern matching`
+	bumpLongDesc = `Calculates the next semantic version based on the conventional commits since the
+last release (or identifiable tag) and bumps (or patches) a configurable set of
+files with said version. JSON Path or Regex Pattern matching is supported when
+scanning files for an existing semantic version. Uplift automatically handles
+the staging and pushing of modified files to the git remote, but this behavior
+can be disabled, to manage this action manually.
+
+Configuring a bump requires an Uplift configuration file to exist within the
+root of your project:
+
+https://upliftci.dev/bumping-files/`
+
+	bumpExamples = `
+# Bump (patch) all configured files with the next calculated semantic version
+uplift bump
+
+# Append a prerelease suffix to the next calculated semantic version
+uplift bump --prerelease beta.1
+
+# Bump (patch) all configured files but do not stage or push any changes
+# back to the git remote
+uplift bump --no-stage`
 )
 
 type bumpOptions struct {
@@ -68,10 +87,11 @@ func newBumpCmd(gopts *globalOptions, out io.Writer) *bumpCommand {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "bump",
-		Short: "Bump the semantic version within files",
-		Long:  bumpDesc,
-		Args:  cobra.NoArgs,
+		Use:     "bump",
+		Short:   "Bump the semantic version within files",
+		Long:    bumpLongDesc,
+		Example: bumpExamples,
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return bumpFiles(bmpCmd.Opts, out)
 		},
