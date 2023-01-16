@@ -54,9 +54,34 @@ import (
 )
 
 const (
-	releaseDesc = `Release the next semantic version of your git repository. A release
-will automatically bump any files and tag the associated commit with 
-the required semantic version`
+	releaseLongDesc = `Release the next semantic version of your git repository. A release consists of
+a three-stage process. First, all configured files will be bumped (patched) using
+the next semantic version. Second, a changelog entry containing all commits for
+the latest semantic release will be created. Finally, Uplift will tag the
+repository. Uplift automatically handles the staging and pushing of modified
+files and the tagging of the repository with two separate git pushes. But this
+behavior can be disabled to manage these actions manually.
+
+Parts of this release process can be disabled if needed.
+
+https://upliftci.dev/first-release/`
+
+	releaseExamples = `
+# Release the next semantic version
+uplift release
+
+# Release the next semantic version without bumping any files
+uplift release --skip-bumps
+
+# Release the next semantic version without generating a changelog
+uplift release --skip-changelog
+
+# Append a prerelease suffix to the next calculated semantic version
+uplift release --prerelease beta.1
+
+# Ensure any "v" prefix is stripped from the next calculated semantic
+# version to explicitly adhere to the SemVer specification
+uplift release --no-prefix`
 )
 
 type releaseOptions struct {
@@ -67,6 +92,7 @@ type releaseOptions struct {
 	SkipBumps     bool
 	NoPrefix      bool
 	Exclude       []string
+	Include       []string
 	Sort          string
 	*globalOptions
 }
@@ -84,10 +110,11 @@ func newReleaseCmd(gopts *globalOptions, out io.Writer) *releaseCommand {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "release",
-		Short: "Release the next semantic version of a repository",
-		Long:  releaseDesc,
-		Args:  cobra.NoArgs,
+		Use:     "release",
+		Short:   "Release the next semantic version of a repository",
+		Long:    releaseLongDesc,
+		Example: releaseExamples,
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Just check if uplift would trigger a release
 			if relCmd.Opts.Check {
@@ -105,7 +132,8 @@ func newReleaseCmd(gopts *globalOptions, out io.Writer) *releaseCommand {
 	f.BoolVar(&relCmd.Opts.SkipChangelog, "skip-changelog", false, "skips the creation or amendment of a changelog")
 	f.BoolVar(&relCmd.Opts.SkipBumps, "skip-bumps", false, "skips the bumping of any files")
 	f.BoolVar(&relCmd.Opts.NoPrefix, "no-prefix", false, "strip the default 'v' prefix from the next calculated semantic version")
-	f.StringSliceVar(&relCmd.Opts.Exclude, "exclude", []string{}, "a list of conventional commit prefixes to exclude from the changelog")
+	f.StringSliceVar(&relCmd.Opts.Exclude, "exclude", []string{}, "a list of regexes for excluding conventional commits from the changelog")
+	f.StringSliceVar(&relCmd.Opts.Include, "include", []string{}, "a list of regexes to cherry-pick conventional commits for the changelog")
 	f.StringVar(&relCmd.Opts.Sort, "sort", "", "the sort order of commits within each changelog entry")
 
 	relCmd.Cmd = cmd
@@ -171,8 +199,8 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	ctx.Changelog.PreTag = true
 
 	// Merge config and command line arguments together
-	ctx.Changelog.Exclude = opts.Exclude
-	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, ctx.Config.Changelog.Exclude...)
+	ctx.Changelog.Include = append(opts.Include, ctx.Config.Changelog.Include...)
+	ctx.Changelog.Exclude = append(opts.Exclude, ctx.Config.Changelog.Exclude...)
 
 	// By default ensure the ci(uplift): commits are excluded also
 	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, "ci(uplift):")
