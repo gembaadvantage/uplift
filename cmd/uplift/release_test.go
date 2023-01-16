@@ -197,7 +197,7 @@ func TestRelease_WithExclude(t *testing.T) {
 	untaggedRepo(t, "feat: a new feat", "fix: a new fix", "ci: a ci task", "docs: some new docs")
 
 	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
-	relCmd.Cmd.SetArgs([]string{"--exclude", "ci,docs"})
+	relCmd.Cmd.SetArgs([]string{"--exclude", "^ci,^docs"})
 
 	err := relCmd.Cmd.Execute()
 	require.NoError(t, err)
@@ -207,6 +207,24 @@ func TestRelease_WithExclude(t *testing.T) {
 	cl := readChangelog(t)
 	assert.Contains(t, cl, "feat: a new feat")
 	assert.Contains(t, cl, "fix: a new fix")
+	assert.NotContains(t, cl, "ci: a ci task")
+	assert.NotContains(t, cl, "docs: some new docs")
+}
+
+func TestRelease_WithInclude(t *testing.T) {
+	untaggedRepo(t, "feat: a new feat", "fix: a new fix", "ci: a ci task", "docs: some new docs")
+
+	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
+	relCmd.Cmd.SetArgs([]string{"--include", "^feat"})
+
+	err := relCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+
+	cl := readChangelog(t)
+	assert.Contains(t, cl, "feat: a new feat")
+	assert.NotContains(t, cl, "fix: a new fix")
 	assert.NotContains(t, cl, "ci: a ci task")
 	assert.NotContains(t, cl, "docs: some new docs")
 }
