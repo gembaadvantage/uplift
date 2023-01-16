@@ -154,6 +154,12 @@ changelog:
     - '^chore\(deps\)'
     - ^docs
     - ^ci
+
+  # A list of commits to cherry-pick and include during the creation
+  # of a changelog. Provide a list of regular expressions for matching
+  # commits that are to be included
+  include:
+    - '^.*\(scope\)'
 ```
 
 ## bumps
