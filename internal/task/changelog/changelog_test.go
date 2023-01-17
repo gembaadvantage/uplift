@@ -590,17 +590,17 @@ func TestRun_IdentifiedSCM(t *testing.T) {
 	assert.Contains(t, buf.String(), expected)
 }
 
-func TestRun_WithIncludes(t *testing.T) {
+func TestRun_WithMultipleIncludes(t *testing.T) {
 	git.InitRepo(t)
 	git.Tag("1.0.0")
-	git.EmptyCommitsAndTag(t, "1.1.0", "ci: tweak", "fix(scope1): a fix", "feat(scope1): a feature", "fix(scope2): another fix")
+	git.EmptyCommitsAndTag(t, "1.1.0", "ci: tweak", "fix(scope1): a fix", "feat(scope1): a feature", "fix(common): another fix")
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
 		Out: &buf,
 		Changelog: context.Changelog{
 			DiffOnly: true,
-			Include:  []string{`^.*\(scope1\)`},
+			Include:  []string{`^.*\(scope1\)`, `^.*\(common\)`},
 		},
 		CurrentVersion: semver.Version{
 			Raw: "1.0.0",
@@ -619,8 +619,8 @@ func TestRun_WithIncludes(t *testing.T) {
 	actual := buf.String()
 	assert.Contains(t, actual, "fix(scope1): a fix")
 	assert.Contains(t, actual, "feat(scope1): a feature")
+	assert.Contains(t, actual, "fix(common): another fix")
 	assert.NotContains(t, actual, "ci: tweak")
-	assert.NotContains(t, actual, "fix(scope2): another fix")
 }
 
 func TestRun_AllWithIncludes(t *testing.T) {
@@ -655,14 +655,14 @@ func TestRun_AllWithIncludes(t *testing.T) {
 func TestRun_CombinedIncludeAndExclude(t *testing.T) {
 	git.InitRepo(t)
 	git.Tag("1.0.0")
-	git.EmptyCommitsAndTag(t, "1.1.0", "ci: tweak", "fix(scope1): a fix", "feat(scope1): a feature", "fix(scope2): another fix")
+	git.EmptyCommitsAndTag(t, "1.1.0", "ci: tweak", "fix(scope1): a fix", "feat(scope1): a feature", "feat(scope2): another feature")
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
 		Out: &buf,
 		Changelog: context.Changelog{
 			DiffOnly: true,
-			Include:  []string{`^.*\(scope1\)`},
+			Include:  []string{`^.*\(scope1\)`, `^.*\(scope2\)`},
 			Exclude:  []string{`^fix`},
 		},
 		CurrentVersion: semver.Version{
@@ -681,7 +681,7 @@ func TestRun_CombinedIncludeAndExclude(t *testing.T) {
 
 	actual := buf.String()
 	assert.Contains(t, actual, "feat(scope1): a feature")
+	assert.Contains(t, actual, "feat(scope2): another feature")
 	assert.NotContains(t, actual, "ci: tweak")
 	assert.NotContains(t, actual, "fix(scope1): a fix")
-	assert.NotContains(t, actual, "fix(scope2): another fix")
 }
