@@ -405,7 +405,7 @@
     },
     "git": {
       "$ref": "#/definitions/Git",
-      "description": "Customise how Uplift responds to its inbuilt Git checks"
+      "description": "Customise how Uplift interacts with Git"
     },
     "gitea": {
       "$ref": "#/definitions/Gitea",

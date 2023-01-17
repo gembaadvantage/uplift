@@ -55,7 +55,7 @@ nav:
           - From Source: install/source.md
           - Oh My Zsh: install/oh-my-zsh.md
   - Setup:
-      - Changing Location of Config: setup/config-location.md
+      - Changing Config Location: setup/config-location.md
       - Changing the Commit Details: setup/commit-details.md
       - Configuring Git Behaviour: setup/git-behaviour.md
       - Extending Uplift with Hooks: setup/hooks.md
