@@ -577,6 +577,19 @@ func TestTag(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestDeleteLocalTag(t *testing.T) {
+	tag := "1.0.0"
+
+	InitRepo(t)
+	EmptyCommitAndTag(t, tag, "first commit")
+
+	err := DeleteLocalTag(tag)
+	require.NoError(t, err)
+
+	out, _ := Clean(Run("for-each-ref", fmt.Sprintf("refs/tags/%s", tag)))
+	assert.Empty(t, out)
+}
+
 func TestAnnotatedTag(t *testing.T) {
 	InitRepo(t)
 
