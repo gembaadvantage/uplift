@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Gemba Advantage
+# Copyright (c) 2023 Gemba Advantage
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -55,12 +55,15 @@ archives:
   - id: uplift-archive
     format: tar.gz
     name_template: |-
-      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}-{{ .Arch }}
+      {{ .ProjectName }}_
+      {{- .Version }}
+      {{- .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
     builds:
       - uplift
-    replacements:
-      386: i386
-      amd64: x86_64
+    rlcp: true
     format_overrides:
       - goos: windows
         format: zip
