@@ -312,6 +312,15 @@ func Tag(tag string) error {
 	return nil
 }
 
+// DeleteLocalTag will remove a local tag from the repository
+// with no changes being propagated back to the remote
+func DeleteLocalTag(tag string) error {
+	if _, err := Clean(Run("tag", "-d", tag)); err != nil {
+		return err
+	}
+	return nil
+}
+
 // AnnotatedTag will create an annotated tag against the repository
 func AnnotatedTag(tag string, cd CommitDetails) error {
 	args := []string{

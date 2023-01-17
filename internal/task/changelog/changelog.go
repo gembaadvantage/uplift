@@ -108,6 +108,12 @@ func (t Task) Run(ctx *context.Context) error {
 		if err := git.Tag(ctx.NextVersion.Raw); err != nil {
 			return err
 		}
+		defer func() {
+			log.Info("removing pre-tag after changelog creation")
+			if err := git.DeleteLocalTag(ctx.NextVersion.Raw); err != nil {
+				log.WithError(err).Error("failed to delete pre-tag")
+			}
+		}()
 	}
 
 	// Retrieve log entries based on the changelog expectations
