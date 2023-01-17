@@ -362,43 +362,39 @@ func reverse(ents []git.LogEntry) {
 }
 
 func includeCommits(commits []git.LogEntry, regexes []string) ([]git.LogEntry, error) {
-	filtered := []git.LogEntry{}
+	filteredCommits := []git.LogEntry{}
 	for _, regex := range regexes {
-		includeRgx, err := regexp.Compile(regex)
+		rgx, err := regexp.Compile(regex)
 		if err != nil {
-			return filtered, err
+			return filteredCommits, err
 		}
 
-		// Iterate over the entire list of log entries for each regex and
-		// append any match to the filtered list
 		for _, commit := range commits {
-			if includeRgx.MatchString(commit.Message) {
-				filtered = append(filtered, commit)
+			if rgx.MatchString(commit.Message) {
+				filteredCommits = append(filteredCommits, commit)
 			}
 		}
 	}
 
-	return filtered, nil
+	return filteredCommits, nil
 }
 
 func excludeCommits(commits []git.LogEntry, regexes []string) ([]git.LogEntry, error) {
-	filtered := commits
+	filteredCommits := commits
 	for _, regex := range regexes {
-		excludeRgx, err := regexp.Compile(regex)
+		rgx, err := regexp.Compile(regex)
 		if err != nil {
-			return filtered, err
+			return filteredCommits, err
 		}
 
-		// Repeat over the filtered list for every exclude, compressing the list
-		// of log entries on each iteration
 		filterPass := []git.LogEntry{}
-		for _, commit := range filtered {
-			if !excludeRgx.MatchString(commit.Message) {
+		for _, commit := range filteredCommits {
+			if !rgx.MatchString(commit.Message) {
 				filterPass = append(filterPass, commit)
 			}
 		}
-		filtered = filterPass
+		filteredCommits = filterPass
 	}
 
-	return filtered, nil
+	return filteredCommits, nil
 }

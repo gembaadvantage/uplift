@@ -623,6 +623,41 @@ func TestRun_WithMultipleIncludes(t *testing.T) {
 	assert.NotContains(t, actual, "ci: tweak")
 }
 
+func TestRun_WithMultipleIncludesExcludes(t *testing.T) {
+	git.InitRepo(t)
+	git.Tag("1.0.0")
+	git.EmptyCommitsAndTag(t, "1.1.0", "ci: tweak", "fix(scope1): a fix", "feat(scope1): a feature", "fix(common): another fix", "ci(common): common fix")
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		Out: &buf,
+		Changelog: context.Changelog{
+			DiffOnly: true,
+			Include:  []string{`^.*\(scope1\)`, `^.*\(common\)`},
+			Exclude:  []string{`^ci`, `^docs`},
+		},
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextVersion: semver.Version{
+			Raw: "1.1.0",
+		},
+		SCM: context.SCM{
+			Provider: git.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	actual := buf.String()
+	assert.Contains(t, actual, "fix(scope1): a fix")
+	assert.Contains(t, actual, "feat(scope1): a feature")
+	assert.Contains(t, actual, "fix(common): another fix")
+	assert.NotContains(t, actual, "ci: tweak")
+	assert.NotContains(t, actual, "ci(common): common fix")
+}
+
 func TestRun_AllWithIncludes(t *testing.T) {
 	git.InitRepo(t)
 	git.TimeBasedTagSeries(t, []string{"0.1.0", "0.2.0"})
