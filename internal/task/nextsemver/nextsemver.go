@@ -23,6 +23,7 @@ SOFTWARE.
 package nextsemver
 
 import (
+	"fmt"
 	"strings"
 
 	semv "github.com/Masterminds/semver"
@@ -49,7 +50,12 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	tag := git.LatestTag()
+	var tagSuffix string
+	if ctx.IgnoreExistingPrerelease && ctx.FilterOnPrerelease {
+		tagSuffix = buildTagSuffix(ctx)
+	}
+	tag := git.LatestTag(tagSuffix)
+
 	if tag.Ref == "" {
 		log.Debug("repository not tagged with version")
 	} else {
@@ -125,4 +131,15 @@ func (t Task) Run(ctx *context.Context) error {
 
 	log.WithField("version", ctx.NextVersion.Raw).Info("identified next semantic version")
 	return nil
+}
+
+func buildTagSuffix(ctx *context.Context) string {
+	var suffix string
+	if ctx.Prerelease != "" {
+		suffix = fmt.Sprintf("-%s", ctx.Prerelease)
+		if ctx.Metadata != "" {
+			suffix = fmt.Sprintf("%s+%s", suffix, ctx.Metadata)
+		}
+	}
+	return suffix
 }

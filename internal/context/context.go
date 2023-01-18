@@ -43,6 +43,7 @@ type Context struct {
 	Prerelease               string
 	Metadata                 string
 	IgnoreExistingPrerelease bool
+	FilterOnPrerelease       bool
 	NoPrefix                 bool
 	NoVersionChanged         bool
 	CommitDetails            git.CommitDetails

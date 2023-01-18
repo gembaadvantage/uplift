@@ -100,21 +100,6 @@ BREAKING CHANGE: no backwards compatibility support`,
 	}
 }
 
-func TestRun_PatchIgnorePrerelease(t *testing.T) {
-	git.InitRepo(t)
-	git.Tag("0.1.0-beta.1")
-	git.EmptyCommit(t, "fix: this is a bug fix")
-
-	ctx := &context.Context{
-		Prerelease:               "beta.1",
-		IgnoreExistingPrerelease: true,
-	}
-	err := Task{}.Run(ctx)
-
-	require.NoError(t, err)
-	assert.Equal(t, "0.1.1-beta.1", ctx.NextVersion.Raw)
-}
-
 func TestRun_ExistingVersionNoPrefix(t *testing.T) {
 	git.InitRepo(t)
 	git.Tag("v1.0.0")
@@ -138,6 +123,73 @@ func TestRun_NoSemanticBump(t *testing.T) {
 
 	require.NoError(t, err)
 	require.True(t, ctx.NoVersionChanged)
+}
+
+func TestRun_IgnorePrerelease(t *testing.T) {
+	tests := []struct {
+		name       string
+		commit     string
+		curVer     string
+		prerelease string
+		metadata   string
+		expected   string
+
+		ignorePrerelease bool
+		filterPrerelease bool
+	}{
+		{
+			name:             "PatchIncrement",
+			commit:           "fix: this is a bug fix",
+			curVer:           "0.1.0-beta.1",
+			prerelease:       "beta.1",
+			ignorePrerelease: true,
+			expected:         "0.1.1-beta.1",
+		},
+		{
+			name:             "MinorIncrementNewPrerelease",
+			commit:           "feat: a new beta",
+			curVer:           "0.1.0-beta.1",
+			prerelease:       "beta.2",
+			ignorePrerelease: true,
+			expected:         "0.2.0-beta.2",
+		},
+		{
+			name:             "PatchIncrementFilterPrerelease",
+			commit:           "fix: a new fix",
+			curVer:           "0.1.0-moduleA.1",
+			prerelease:       "moduleA.1",
+			ignorePrerelease: true,
+			filterPrerelease: true,
+			expected:         "0.1.1-moduleA.1",
+		},
+		{
+			name:             "NewReleaseWithNewModule",
+			commit:           "feat: a new module",
+			curVer:           "v1.0.0-moduleA",
+			prerelease:       "moduleB",
+			ignorePrerelease: true,
+			filterPrerelease: true,
+			expected:         "v0.1.0-moduleB",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			git.InitRepo(t)
+			git.Tag(tt.curVer)
+			git.EmptyCommit(t, tt.commit)
+
+			ctx := &context.Context{
+				Prerelease:               tt.prerelease,
+				Metadata:                 tt.metadata,
+				IgnoreExistingPrerelease: tt.ignorePrerelease,
+				FilterOnPrerelease:       tt.filterPrerelease,
+			}
+			err := Task{}.Run(ctx)
+
+			require.NoError(t, err)
+			require.Equal(t, tt.expected, ctx.NextVersion.Raw)
+		})
+	}
 }
 
 func TestRun_FirstVersion(t *testing.T) {
