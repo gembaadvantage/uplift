@@ -165,11 +165,11 @@ func TestRun_IgnorePrerelease(t *testing.T) {
 		{
 			name:             "NewReleaseWithNewModule",
 			commit:           "feat: a new module",
-			curVer:           "1.0.0-moduleA",
+			curVer:           "v1.0.0-moduleA",
 			prerelease:       "moduleB",
 			ignorePrerelease: true,
 			filterPrerelease: true,
-			expected:         "0.1.0-moduleB",
+			expected:         "v0.1.0-moduleB",
 		},
 	}
 	for _, tt := range tests {
