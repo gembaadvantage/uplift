@@ -23,14 +23,18 @@ SOFTWARE.
 package git
 
 import (
+	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
-	"os/exec"
+	"os"
 	"strings"
 
 	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
 	"github.com/gembaadvantage/uplift/internal/semver"
+	"mvdan.cc/sh/v3/interp"
+	"mvdan.cc/sh/v3/syntax"
 )
 
 // SCM is used for identifying the source code management tool used by the current
@@ -87,12 +91,27 @@ func (c CommitDetails) String() string {
 
 // Run executes a git command and returns its output or errors
 func Run(args ...string) (string, error) {
-	cmd := exec.Command("git", args...)
-	out, err := cmd.CombinedOutput()
+	args = append([]string{"git"}, args...)
+
+	p, err := syntax.NewParser().Parse(strings.NewReader(strings.Join(args, " ")), "")
 	if err != nil {
-		return "", errors.New(string(out))
+		return "", err
 	}
-	return string(out), nil
+
+	var buf bytes.Buffer
+	r, err := interp.New(
+		interp.StdIO(os.Stdin, &buf, &buf),
+	)
+	if err != nil {
+		return "", errors.New(buf.String())
+	}
+
+	err = r.Run(context.Background(), p)
+	if err != nil {
+		return "", errors.New(buf.String())
+	}
+
+	return buf.String(), nil
 }
 
 // IsInstalled identifies whether git is installed under the current $PATH
@@ -305,7 +324,7 @@ func Log(tag string) (string, error) {
 }
 
 func commitLog(srch string) (string, error) {
-	out, err := Clean(Run("log", "--no-decorate", "--no-color", srch))
+	out, err := Clean(Run("log", "--no-decorate", "--no-color", fmt.Sprintf("'%s'", srch)))
 	if err != nil {
 		return "", err
 	}
@@ -343,7 +362,7 @@ func AnnotatedTag(tag string, cd CommitDetails) error {
 		tag,
 		"-f",
 		"-m",
-		cd.Message,
+		fmt.Sprintf("'%s'", cd.Message),
 	}
 
 	if _, err := Clean(Run(args...)); err != nil {
@@ -395,7 +414,7 @@ func Commit(cd CommitDetails) error {
 		fmt.Sprintf("user.email='%s'", cd.Email),
 		"commit",
 		"-m",
-		cd.Message,
+		fmt.Sprintf("'%s'", cd.Message),
 	}
 
 	// If GPG commit signing is enabled, append the -S flag to the args

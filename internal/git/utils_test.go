@@ -544,7 +544,7 @@ func TestAuthor(t *testing.T) {
 func TestAuthorNoNameSet(t *testing.T) {
 	InitRepo(t)
 	// Setting it to an empty string is the equivalent of it not existing
-	Run("config", "user.name", "")
+	Run("config", "user.name", "''")
 	Run("config", "user.email", "uplift@test.com")
 
 	details := Author()
@@ -556,7 +556,7 @@ func TestAuthorNoEmailSet(t *testing.T) {
 	InitRepo(t)
 	// Setting it to an empty string is the equivalent of it not existing
 	Run("config", "user.name", "uplift")
-	Run("config", "user.email", "")
+	Run("config", "user.email", "''")
 
 	details := Author()
 	assert.Equal(t, "uplift", details.Name)

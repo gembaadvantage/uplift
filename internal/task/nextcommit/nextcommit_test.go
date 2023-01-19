@@ -46,8 +46,8 @@ func TestSkip(t *testing.T) {
 func TestRun(t *testing.T) {
 	git.InitRepo(t)
 	// Unset git author config
-	git.SetConfig(t, "user.name", "")
-	git.SetConfig(t, "user.email", "")
+	git.SetConfig(t, "user.name", "''")
+	git.SetConfig(t, "user.email", "''")
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -82,8 +82,8 @@ func TestRun_GitAuthorConfig(t *testing.T) {
 
 func TestRun_CustomCommitDetails(t *testing.T) {
 	git.InitRepo(t)
-	git.SetConfig(t, "user.name", "")
-	git.SetConfig(t, "user.email", "")
+	git.SetConfig(t, "user.name", "''")
+	git.SetConfig(t, "user.email", "''")
 
 	ctx := &context.Context{
 		Config: config.Uplift{
