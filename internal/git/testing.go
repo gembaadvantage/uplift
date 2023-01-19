@@ -118,7 +118,7 @@ func EmptyCommit(t *testing.T, commit string) string {
 		"commit",
 		"--allow-empty",
 		"-m",
-		commit,
+		fmt.Sprintf("'%s'", commit),
 	}
 
 	_, err := Run(args...)
@@ -228,7 +228,7 @@ func TimeBasedTagSeries(t *testing.T, tags []string) []TimedTag {
 			"commit",
 			"--allow-empty",
 			"-m",
-			fmt.Sprintf("feat: %d", c),
+			fmt.Sprintf("'feat: %d'", c),
 			"--date",
 			dtf,
 		}
