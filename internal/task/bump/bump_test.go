@@ -23,7 +23,6 @@ SOFTWARE.
 package bump
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,8 +47,6 @@ func TestRun_NoBumpConfig(t *testing.T) {
 func TestRun_NotGitRepository(t *testing.T) {
 	git.MkTmpDir(t)
 	file := WriteTempFile(t, "version: 0.1.0")
-
-	fmt.Println(file)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{

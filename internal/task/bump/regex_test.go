@@ -544,8 +544,6 @@ description: This is a test chart
 version: 0.1.0
 appVersion: v0.1.0`)
 
-	fmt.Println(file)
-
 	ctx := &context.Context{
 		NextVersion: semver.Version{
 			Raw: "v0.1.1",
