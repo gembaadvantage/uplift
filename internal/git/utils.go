@@ -91,9 +91,14 @@ func (c CommitDetails) String() string {
 
 // Run executes a git command and returns its output or errors
 func Run(args ...string) (string, error) {
-	args = append([]string{"git"}, args...)
+	var cmd strings.Builder
+	cmd.WriteString("git")
+	for _, arg := range args {
+		cmd.WriteString(" ")
+		cmd.WriteString(arg)
+	}
 
-	p, err := syntax.NewParser().Parse(strings.NewReader(strings.Join(args, " ")), "")
+	p, err := syntax.NewParser().Parse(strings.NewReader(cmd.String()), "")
 	if err != nil {
 		return "", err
 	}
