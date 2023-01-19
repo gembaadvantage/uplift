@@ -23,6 +23,8 @@ SOFTWARE.
 package bump
 
 import (
+	"fmt"
+
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
@@ -84,6 +86,9 @@ func (t Task) Run(ctx *context.Context) error {
 				log.Info("skip staging of file")
 				continue
 			}
+
+			fmt.Println("About to stage file at path")
+			fmt.Println(resolvedBump)
 
 			if err := git.Stage(resolvedBump); err != nil {
 				return err

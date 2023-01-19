@@ -24,6 +24,7 @@ package bump
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -91,6 +92,9 @@ func regexBump(ctx *context.Context, path string, bumps []config.RegexBump) (boo
 		log.Info("file not modified in dry run mode")
 		return false, nil
 	}
+
+	fmt.Println("Writing to file at path")
+	fmt.Println(path)
 
 	return true, os.WriteFile(path, []byte(str), 0o644)
 }
