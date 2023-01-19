@@ -458,7 +458,7 @@ func ConfigSet(values map[string]string) error {
 
 // Stage will ensure the specified file is staged for the next commit
 func Stage(path string) error {
-	if _, err := Clean(Run("add", path)); err != nil {
+	if _, err := Clean(Run("add", fmt.Sprintf("'%s'", path))); err != nil {
 		return err
 	}
 
