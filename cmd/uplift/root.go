@@ -82,7 +82,7 @@ func newRootCmd(out io.Writer) *rootCommand {
 	pf.BoolVar(&rootCmd.Opts.IgnoreDetached, "ignore-detached", false, "ignore reported git detached HEAD error")
 	pf.BoolVar(&rootCmd.Opts.IgnoreShallow, "ignore-shallow", false, "ignore reported git shallow clone error")
 	pf.BoolVar(&rootCmd.Opts.IgnoreExistingPrerelease, "ignore-existing-prerelease", false, "ignore any existing prerelease when calculating next semantic version")
-	pf.BoolVar(&rootCmd.Opts.FilterOnPrerelease, "filter-on-prerelease", false, "filter tags that doesn't match the prerelease (requires --ignore-existing-prerelease)")
+	pf.BoolVar(&rootCmd.Opts.FilterOnPrerelease, "filter-on-prerelease", false, "filter tags that only match the provided prerelease when calculating next semantic version")
 
 	cmd.AddCommand(newVersionCmd(out),
 		newCompletionCmd(out),
