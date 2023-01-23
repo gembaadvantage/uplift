@@ -28,8 +28,6 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/middleware/logging"
-	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/bump"
@@ -146,7 +144,7 @@ func release(opts releaseOptions, out io.Writer) error {
 		return err
 	}
 
-	tsks := []task.Runner{
+	tasks := []task.Runner{
 		gitcheck.Task{},
 		before.Task{},
 		gpgimport.Task{},
@@ -167,13 +165,7 @@ func release(opts releaseOptions, out io.Writer) error {
 		after.Task{},
 	}
 
-	for _, tsk := range tsks {
-		if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return task.Execute(ctx, tasks)
 }
 
 func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, error) {
@@ -235,14 +227,12 @@ func checkRelease(opts releaseOptions, out io.Writer) error {
 		return err
 	}
 
-	tsks := []task.Runner{
+	tasks := []task.Runner{
 		nextsemver.Task{},
 	}
 
-	for _, tsk := range tsks {
-		if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
-			return err
-		}
+	if err := task.Execute(ctx, tasks); err != nil {
+		return err
 	}
 
 	if ctx.NoVersionChanged {

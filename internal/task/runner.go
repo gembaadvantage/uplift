@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2022 Gemba Advantage
+Copyright (c) 2023 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,17 @@ package task
 import (
 	"fmt"
 
+	"github.com/apex/log"
+	"github.com/apex/log/handlers/cli"
 	"github.com/gembaadvantage/uplift/internal/context"
+)
+
+const (
+	// DefaultPadding ensures all titles are indented by a set number of spaces
+	DefaultPadding = 3
+
+	// PrettyPadding ensures all other logging is indented twice the size of the default padding
+	PrettyPadding = DefaultPadding * 2
 )
 
 // Runner defines a way of running a task. A task can either be run as a
@@ -39,4 +49,29 @@ type Runner interface {
 
 	// Skip running of the task based on the current context state
 	Skip(ctx *context.Context) bool
+}
+
+// Execute a series of tasks, providing the [context.Context] to each. Before executing
+// a task, a precondition check is performed, identifying if the task should be skipped
+// or not. Tasks that are skipped, will automatically have [skipped] appended to their
+// task name. Execution will be aborted upon the first encountered error
+func Execute(ctx *context.Context, tasks []Runner) error {
+	for _, t := range tasks {
+		defer func() {
+			// Ensure padding is automatically reset
+			cli.Default.Padding = DefaultPadding
+		}()
+
+		cli.Default.Padding = DefaultPadding
+
+		if t.Skip(ctx) {
+			log.Debug(fmt.Sprintf("(skipped) %s", t.String()))
+		} else {
+			log.Info(t.String())
+			cli.Default.Padding = PrettyPadding
+			t.Run(ctx)
+		}
+	}
+
+	return nil
 }
