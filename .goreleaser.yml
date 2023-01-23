@@ -56,8 +56,8 @@ archives:
     format: tar.gz
     name_template: |-
       {{ .ProjectName }}_
-      {{- .Version }}
-      {{- .Os }}_
+      {{- .Version }}_
+      {{- .Os }}-
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
@@ -297,14 +297,10 @@ announce:
   skip: "{{gt .Patch 0}}"
 
   slack:
-    enabled: true
+    enabled: false
     message_template: "Uplift {{ .Tag }} has been released. Find out details here: https://github.com/gembaadvantage/uplift/releases/tag/{{ .Tag }}"
     channel: "#topic-uplift-github"
     username: "Uplift"
-
-  twitter:
-    enabled: true
-    message_template: "Uplift {{ .Tag }} has been released. Find out details here: https://github.com/gembaadvantage/uplift/releases/tag/{{ .Tag }}"
 
 release:
   footer: |
@@ -313,4 +309,3 @@ release:
     ## What to do next?
 
     - Read the [documentation](https://upliftci.dev)
-    - Follow us on [Twitter](https://twitter.com/GA_Uplift)
