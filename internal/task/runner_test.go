@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2022 Gemba Advantage
+Copyright (c) 2023 Gemba Advantage
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,49 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package middleware
+package task_test
 
-import "github.com/gembaadvantage/uplift/internal/context"
+import (
+	"testing"
 
-// Action defines a function that allows middleware to easily be chained.
-// Action is defined with the same method signature as task.Runner Run(),
-// allowing tasks to be transparently wrapped more easily
-type Action func(ctx *context.Context) error
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/task"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+)
+
+func TestExecute(t *testing.T) {
+	m := &MockedTask{}
+	m.On("Run", mock.Anything).Return(nil)
+	m.On("Skip", mock.Anything).Return(false)
+
+	err := task.Execute(&context.Context{}, []task.Runner{m})
+
+	require.NoError(t, err)
+	m.AssertExpectations(t)
+}
+
+func TestExecute_Skips(t *testing.T) {
+	m := &MockedTask{}
+	m.On("Skip", mock.Anything).Return(true)
+
+	err := task.Execute(&context.Context{}, []task.Runner{m})
+
+	require.NoError(t, err)
+	m.AssertExpectations(t)
+	m.AssertNotCalled(t, "Run")
+}
+
+type MockedTask struct {
+	mock.Mock
+}
+
+func (m *MockedTask) Run(ctx *context.Context) error {
+	args := m.Called(ctx)
+	return args.Error(0)
+}
+
+func (m *MockedTask) Skip(ctx *context.Context) bool {
+	args := m.Called(ctx)
+	return args.Bool(0)
+}

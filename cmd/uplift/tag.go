@@ -28,8 +28,6 @@ import (
 
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/gembaadvantage/uplift/internal/git"
-	"github.com/gembaadvantage/uplift/internal/middleware/logging"
-	"github.com/gembaadvantage/uplift/internal/middleware/skip"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
@@ -168,19 +166,13 @@ func tagRepo(opts tagOptions, out io.Writer) error {
 		return err
 	}
 
-	tsks := tagRepoPipeline
+	tasks := tagRepoPipeline
 
 	if ctx.PrintNextTag {
-		tsks = printNextTagPipeline
+		tasks = printNextTagPipeline
 	}
 
-	for _, tsk := range tsks {
-		if err := skip.Running(tsk.Skip, logging.Log(tsk.String(), tsk.Run))(ctx); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return task.Execute(ctx, tasks)
 }
 
 func setupTagContext(opts tagOptions, out io.Writer) (*context.Context, error) {
