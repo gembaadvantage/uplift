@@ -22,29 +22,47 @@ SOFTWARE.
 
 package task_test
 
-// TODO: Execute -> check that task is executed
-// TODO: Execute -> check that task is skipped
+import (
+	"testing"
 
-/*
-func TestRunning(t *testing.T) {
-	Running(func(ctx *context.Context) bool {
-		return true
-	}, func(ctx *context.Context) error {
-		assert.Fail(t, "action should be skipped")
-		return nil
-	})(&context.Context{})
+	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/task"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+)
+
+func TestExecute(t *testing.T) {
+	m := &MockedTask{}
+	m.On("Run", mock.Anything).Return(nil)
+	m.On("Skip", mock.Anything).Return(false)
+
+	err := task.Execute(&context.Context{}, []task.Runner{m})
+
+	require.NoError(t, err)
+	m.AssertExpectations(t)
 }
 
-func TestRunning_NoSkip(t *testing.T) {
-	exec := false
+func TestExecute_Skips(t *testing.T) {
+	m := &MockedTask{}
+	m.On("Skip", mock.Anything).Return(true)
 
-	Running(func(ctx *context.Context) bool {
-		return false
-	}, func(ctx *context.Context) error {
-		exec = true
-		return nil
-	})(&context.Context{})
+	err := task.Execute(&context.Context{}, []task.Runner{m})
 
-	assert.True(t, exec)
+	require.NoError(t, err)
+	m.AssertExpectations(t)
+	m.AssertNotCalled(t, "Run")
 }
-*/
+
+type MockedTask struct {
+	mock.Mock
+}
+
+func (m *MockedTask) Run(ctx *context.Context) error {
+	args := m.Called(ctx)
+	return args.Error(0)
+}
+
+func (m *MockedTask) Skip(ctx *context.Context) bool {
+	args := m.Called(ctx)
+	return args.Bool(0)
+}
