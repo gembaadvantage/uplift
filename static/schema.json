@@ -9,7 +9,8 @@
         "file": {
           "$comment": "https://upliftci.dev/reference/config#bumps",
           "description": "The path of the file relative to where Uplift is executed. Glob patterns can be used to match multiple files at the same time. Glob syntax is based on https://github.com/goreleaser/fileglob",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "regex": {
           "$comment": "https://upliftci.dev/reference/config#bumps",
