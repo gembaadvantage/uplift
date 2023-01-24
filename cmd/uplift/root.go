@@ -91,6 +91,7 @@ func newRootCmd(out io.Writer) *rootCommand {
 		newReleaseCmd(rootCmd.Opts, out).Cmd,
 		newChangelogCmd(rootCmd.Opts, out).Cmd,
 		newManPageCmd(out).Cmd,
+		newCheckCmd(rootCmd.Opts, out),
 	)
 
 	rootCmd.Cmd = cmd

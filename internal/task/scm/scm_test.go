@@ -99,7 +99,7 @@ func TestRun_GiteaSelfHosted(t *testing.T) {
 
 	ctx := &context.Context{
 		Config: config.Uplift{
-			Gitea: config.Gitea{
+			Gitea: &config.Gitea{
 				URL: "https://my.gitea.com",
 			},
 		},
@@ -118,7 +118,7 @@ func TestRun_GitHubEnterprise(t *testing.T) {
 
 	ctx := &context.Context{
 		Config: config.Uplift{
-			GitHub: config.GitHub{
+			GitHub: &config.GitHub{
 				URL: "https://my.github.com",
 			},
 		},
@@ -137,7 +137,7 @@ func TestRun_GitLabSelfHosted(t *testing.T) {
 
 	ctx := &context.Context{
 		Config: config.Uplift{
-			GitLab: config.GitLab{
+			GitLab: &config.GitLab{
 				URL: "https://my.gitlab.com",
 			},
 		},

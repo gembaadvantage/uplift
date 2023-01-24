@@ -205,12 +205,12 @@ func setupTagContext(opts tagOptions, out io.Writer) (*context.Context, error) {
 
 	// Handle git config. Command line flag takes precedences
 	ctx.IgnoreDetached = opts.IgnoreDetached
-	if !ctx.IgnoreDetached {
+	if !ctx.IgnoreDetached && ctx.Config.Git != nil {
 		ctx.IgnoreDetached = ctx.Config.Git.IgnoreDetached
 	}
 
 	ctx.IgnoreShallow = opts.IgnoreShallow
-	if !ctx.IgnoreShallow {
+	if !ctx.IgnoreShallow && ctx.Config.Git != nil {
 		ctx.IgnoreShallow = ctx.Config.Git.IgnoreShallow
 	}
 

@@ -38,7 +38,10 @@ func (t Task) String() string {
 
 // Skip running the task
 func (t Task) Skip(ctx *context.Context) bool {
-	return len(ctx.Config.Hooks.AfterBump) == 0 || ctx.NoVersionChanged || ctx.SkipBumps
+	return ctx.Config.Hooks == nil ||
+		len(ctx.Config.Hooks.AfterBump) == 0 ||
+		ctx.NoVersionChanged ||
+		ctx.SkipBumps
 }
 
 // Run the task

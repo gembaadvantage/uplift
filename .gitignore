@@ -17,7 +17,7 @@
 # Built dependencies
 completions/
 manpages/
-uplift
+./uplift
 
 # GoReleaser build output
 dist/

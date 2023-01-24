@@ -41,7 +41,7 @@ func TestSkip(t *testing.T) {
 
 	assert.True(t, Task{}.Skip(&context.Context{
 		Config: config.Uplift{
-			Hooks: config.Hooks{
+			Hooks: &config.Hooks{
 				Before:          cmd,
 				BeforeBump:      []string{},
 				BeforeTag:       cmd,
@@ -72,7 +72,7 @@ func TestRun(t *testing.T) {
 
 	err := Task{}.Run(&context.Context{
 		Config: config.Uplift{
-			Hooks: config.Hooks{
+			Hooks: &config.Hooks{
 				BeforeBump: []string{"touch a.out"},
 			},
 		},

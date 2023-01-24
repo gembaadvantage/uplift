@@ -191,8 +191,12 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	ctx.Changelog.PreTag = true
 
 	// Merge config and command line arguments together
-	ctx.Changelog.Include = append(opts.Include, ctx.Config.Changelog.Include...)
-	ctx.Changelog.Exclude = append(opts.Exclude, ctx.Config.Changelog.Exclude...)
+	ctx.Changelog.Include = opts.Include
+	ctx.Changelog.Exclude = opts.Exclude
+	if ctx.Config.Changelog != nil {
+		ctx.Changelog.Include = append(ctx.Changelog.Include, ctx.Config.Changelog.Include...)
+		ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, ctx.Config.Changelog.Exclude...)
+	}
 
 	// By default ensure the ci(uplift): commits are excluded also
 	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, "ci(uplift):")
@@ -209,12 +213,12 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 
 	// Handle git config. Command line flag takes precedences
 	ctx.IgnoreDetached = opts.IgnoreDetached
-	if !ctx.IgnoreDetached {
+	if !ctx.IgnoreDetached && ctx.Config.Git != nil {
 		ctx.IgnoreDetached = ctx.Config.Git.IgnoreDetached
 	}
 
 	ctx.IgnoreShallow = opts.IgnoreShallow
-	if !ctx.IgnoreShallow {
+	if !ctx.IgnoreShallow && ctx.Config.Git != nil {
 		ctx.IgnoreShallow = ctx.Config.Git.IgnoreShallow
 	}
 

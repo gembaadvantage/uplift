@@ -88,7 +88,7 @@ func TestRun_CustomCommitDetails(t *testing.T) {
 	ctx := &context.Context{
 		Config: config.Uplift{
 			CommitMessage: "ci(release): this is a custom message",
-			CommitAuthor: config.CommitAuthor{
+			CommitAuthor: &config.CommitAuthor{
 				Name:  "releasebot",
 				Email: "releasebot@example.com",
 			},

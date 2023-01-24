@@ -38,7 +38,7 @@ func (t Task) String() string {
 
 // Skip running the task
 func (t Task) Skip(ctx *context.Context) bool {
-	return len(ctx.Config.Hooks.Before) == 0
+	return ctx.Config.Hooks == nil || len(ctx.Config.Hooks.Before) == 0
 }
 
 // Run the task

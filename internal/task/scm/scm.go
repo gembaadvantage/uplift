@@ -92,15 +92,15 @@ func detectSCM(host string, ctx *context.Context) git.SCM {
 		return git.CodeCommit
 	}
 
-	if ctx.Config.GitHub.URL != "" {
+	if ctx.Config.GitHub != nil {
 		if checkHost(host, ctx.Config.GitHub.URL) {
 			return git.GitHub
 		}
-	} else if ctx.Config.GitLab.URL != "" {
+	} else if ctx.Config.GitLab != nil {
 		if checkHost(host, ctx.Config.GitLab.URL) {
 			return git.GitLab
 		}
-	} else if ctx.Config.Gitea.URL != "" {
+	} else if ctx.Config.Gitea != nil {
 		if checkHost(host, ctx.Config.Gitea.URL) {
 			return git.Gitea
 		}
