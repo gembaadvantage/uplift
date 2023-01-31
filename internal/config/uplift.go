@@ -24,21 +24,22 @@ package config
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
 )
-
-// TODO: return a custom error that contains all of the validation errors, make it easier for users to fix them
 
 // Uplift defines the root configuration of the application
 type Uplift struct {
 	AnnotatedTags bool          `yaml:"annotatedTags"`
 	Bumps         []Bump        `yaml:"bumps" validate:"omitempty,dive"`
 	CommitAuthor  *CommitAuthor `yaml:"commitAuthor" validate:"omitempty"`
-	CommitMessage string        `yaml:"commitMessage" validate:"omitempty,min=1"`
+	CommitMessage string        `yaml:"commitMessage"`
 	Changelog     *Changelog    `yaml:"changelog" validate:"omitempty"`
 	Git           *Git          `yaml:"git" validate:"omitempty"`
 	Gitea         *Gitea        `yaml:"gitea" validate:"omitempty"`
@@ -52,11 +53,9 @@ type Uplift struct {
 // on the new calculated semantic version number
 type Bump struct {
 	File  string      `yaml:"file" validate:"min=1,file"`
-	Regex []RegexBump `yaml:"regex" validate:"dive"`
-	JSON  []JSONBump  `yaml:"json" validate:"dive"`
+	Regex []RegexBump `yaml:"regex" validate:"required_without=JSON,dive"`
+	JSON  []JSONBump  `yaml:"json" validate:"required_without=Regex,dive"`
 }
-
-// TODO: both Regex and JSON cannot be empty
 
 // RegexBump defines configuration for bumping a file based on
 // a given regex pattern
@@ -76,20 +75,17 @@ type JSONBump struct {
 
 // CommitAuthor defines configuration about the author of a git commit
 type CommitAuthor struct {
-	Name  string `yaml:"name" validate:"min=1"`
-	Email string `yaml:"email" validate:"min=1"`
+	Name  string `yaml:"name" validate:"required_without=Email,min=1"`
+	Email string `yaml:"email" validate:"required_without=Name,email"`
 }
 
 // Changelog defines configuration for generating a changelog of the latest
 // semantic version based release
 type Changelog struct {
-	Sort    string   `yaml:"sort" validate:"omitempty,oneof=asc desc ASC DESC"`
-	Exclude []string `yaml:"exclude" validate:"dive,min=1"`
-	Include []string `yaml:"include" validate:"dive,min=1"`
+	Sort    string   `yaml:"sort" validate:"required_without_all=Exclude Include,oneof=asc desc ASC DESC"`
+	Exclude []string `yaml:"exclude" validate:"required_without_all=Sort Include,dive,min=1"`
+	Include []string `yaml:"include" validate:"required_without_all=Sort Exclude,dive,min=1"`
 }
-
-// TODO: if changelog is defined, one of the fields must be provided
-// required_without_all
 
 // Git defines configuration for how uplift interacts with git
 type Git struct {
@@ -185,5 +181,21 @@ func Load(f string) (Uplift, error) {
 // criteria. This also ensures any config file aligns with the
 // schema [https://upliftci.dev/static/schema.json]
 func (c Uplift) Validate() error {
-	return validator.New().Struct(c)
+	if err := validator.New().Struct(c); err != nil {
+		var errMsg strings.Builder
+		errMsg.WriteString("uplift configuration contains validation errors. Please fix before proceeding:\n")
+
+		for _, err := range err.(validator.ValidationErrors) {
+			valMsg := fmt.Sprintf("field '%s' at '%s' contains unexpected value '%v'\n",
+				err.Field(),
+				err.Namespace(),
+				err.Value())
+
+			errMsg.WriteString(valMsg)
+		}
+
+		return errors.New(errMsg.String())
+	}
+
+	return nil
 }
