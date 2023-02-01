@@ -75,7 +75,7 @@ type JSONBump struct {
 
 // CommitAuthor defines configuration about the author of a git commit
 type CommitAuthor struct {
-	Name  string `yaml:"name" validate:"required_without=Email,omitempty,min=1"`
+	Name  string `yaml:"name" validate:"required_without=Email,min=1"`
 	Email string `yaml:"email" validate:"required_without=Name,email"`
 }
 
@@ -183,7 +183,7 @@ func Load(f string) (Uplift, error) {
 func (c Uplift) Validate() error {
 	if err := validator.New().Struct(c); err != nil {
 		var errMsg strings.Builder
-		errMsg.WriteString("uplift configuration contains validation errors. Please fix before proceeding:\n")
+		errMsg.WriteString("uplift configuration contains validation errors. Please fix before proceeding:\n\n")
 
 		for _, err := range err.(validator.ValidationErrors) {
 			var reason string
@@ -204,7 +204,7 @@ func (c Uplift) Validate() error {
 				reason = fmt.Sprintf("must be provided when all other fields [%s] are missing\n", err.Param())
 			}
 
-			errMsg.WriteString(fmt.Sprintf("field '%s' ", err.Namespace()))
+			errMsg.WriteString(fmt.Sprintf(" field '%s' ", err.Namespace()))
 			errMsg.WriteString(reason)
 		}
 

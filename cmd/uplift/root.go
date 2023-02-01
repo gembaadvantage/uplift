@@ -56,9 +56,10 @@ func newRootCmd(out io.Writer) *rootCommand {
 	}
 
 	cmd := &cobra.Command{
-		Use:          "uplift",
-		Short:        "Semantic versioning the easy way",
-		SilenceUsage: true,
+		Use:           "uplift",
+		Short:         "Semantic versioning the easy way",
+		SilenceUsage:  true,
+		SilenceErrors: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if rootCmd.Opts.Debug {
 				log.SetLevel(log.InvalidLevel)
