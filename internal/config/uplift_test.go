@@ -251,7 +251,7 @@ func TestValidateCommitEmail(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.CommitAuthor.Name")
+	require.ErrorContains(t, err, "Uplift.CommitAuthor.Email")
 }
 
 func TestValidateChangelogSort(t *testing.T) {

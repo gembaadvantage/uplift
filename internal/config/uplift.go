@@ -75,7 +75,7 @@ type JSONBump struct {
 
 // CommitAuthor defines configuration about the author of a git commit
 type CommitAuthor struct {
-	Name  string `yaml:"name" validate:"required_without=Email,min=1"`
+	Name  string `yaml:"name" validate:"required_without=Email,omitempty,min=1"`
 	Email string `yaml:"email" validate:"required_without=Name,email"`
 }
 
@@ -186,12 +186,28 @@ func (c Uplift) Validate() error {
 		errMsg.WriteString("uplift configuration contains validation errors. Please fix before proceeding:\n")
 
 		for _, err := range err.(validator.ValidationErrors) {
-			valMsg := fmt.Sprintf("field '%s' at '%s' contains unexpected value '%v'\n",
-				err.Field(),
-				err.Namespace(),
-				err.Value())
+			var reason string
+			switch err.ActualTag() {
+			case "min":
+				reason = fmt.Sprintf("contains a value that does not meet the minimum expected length of '%s'\n", err.Param())
+			case "file":
+				reason = fmt.Sprintf("contains a path to a file that does not exist '%v'\n", err.Value())
+			case "url":
+				reason = fmt.Sprintf("contains an invalid url '%s'\n", err.Value())
+			case "email":
+				reason = fmt.Sprintf("contains an invalid email address '%s'\n", err.Value())
+			case "oneof":
+				reason = fmt.Sprintf("contains a value that is not one of the following [%s]\n", err.Param())
+			case "required_without":
+				reason = fmt.Sprintf("must be provided when field '%s' is missing\n", err.Param())
+			case "required_without_all":
+				reason = fmt.Sprintf("must be provided when all other fields [%s] are missing\n", err.Param())
+			default:
+				reason = fmt.Sprintf("contains an unexpected value '%v'\n", err.Value())
+			}
 
-			errMsg.WriteString(valMsg)
+			errMsg.WriteString(fmt.Sprintf("field '%s' at '%s' ", err.Field(), err.Namespace()))
+			errMsg.WriteString(reason)
 		}
 
 		return errors.New(errMsg.String())
