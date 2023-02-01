@@ -204,7 +204,7 @@ func (c Uplift) Validate() error {
 				reason = fmt.Sprintf("must be provided when all other fields [%s] are missing\n", err.Param())
 			}
 
-			errMsg.WriteString(fmt.Sprintf("field '%s' at '%s' ", err.Field(), err.Namespace()))
+			errMsg.WriteString(fmt.Sprintf("field '%s' ", err.Namespace()))
 			errMsg.WriteString(reason)
 		}
 

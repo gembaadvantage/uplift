@@ -134,7 +134,7 @@ func TestValidateBumpFilePathEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Bumps[0].File")
+	require.ErrorContains(t, err, "field 'Uplift.Bumps[0].File' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateBumpFilePathDoesNotResolve(t *testing.T) {
@@ -147,7 +147,7 @@ func TestValidateBumpFilePathDoesNotResolve(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Bumps[0].File")
+	require.ErrorContains(t, err, "field 'Uplift.Bumps[0].File' contains a path to a file that does not exist 'does-not-exist.txt'")
 }
 
 func TestValidateBumpFileRegexAndJSONEmpty(t *testing.T) {
@@ -161,8 +161,8 @@ func TestValidateBumpFileRegexAndJSONEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Bumps[0].Regex")
-	require.ErrorContains(t, err, "Uplift.Bumps[0].JSON")
+	require.ErrorContains(t, err, "field 'Uplift.Bumps[0].Regex' must be provided when field 'JSON' is missing")
+	require.ErrorContains(t, err, "field 'Uplift.Bumps[0].JSON' must be provided when field 'Regex' is missing")
 }
 
 func TestValidateRegexBumpPatternEmpty(t *testing.T) {
@@ -181,7 +181,7 @@ func TestValidateRegexBumpPatternEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Bumps[0].Regex[0].Pattern")
+	require.ErrorContains(t, err, "field 'Uplift.Bumps[0].Regex[0].Pattern' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateRegexBumpCountLessThanZero(t *testing.T) {
@@ -201,7 +201,7 @@ func TestValidateRegexBumpCountLessThanZero(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Bumps[0].Regex[0].Count")
+	require.ErrorContains(t, err, "field 'Uplift.Bumps[0].Regex[0].Count' contains a value that does not meet the minimum expected length of '0'")
 }
 
 func TestValidateJsonBumpPathEmpty(t *testing.T) {
@@ -220,7 +220,7 @@ func TestValidateJsonBumpPathEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Bumps[0].JSON[0].Path")
+	require.ErrorContains(t, err, "field 'Uplift.Bumps[0].JSON[0].Path' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateCommitAuthorNameAndEmailEmpty(t *testing.T) {
@@ -229,30 +229,8 @@ func TestValidateCommitAuthorNameAndEmailEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.CommitAuthor.Name")
-	require.ErrorContains(t, err, "Uplift.CommitAuthor.Email")
-}
-
-func TestValidateCommitAuthorNameEmpty(t *testing.T) {
-	cfg := Uplift{
-		CommitAuthor: &CommitAuthor{
-			Name: "",
-		},
-	}
-
-	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.CommitAuthor.Name")
-}
-
-func TestValidateCommitAuthorEmailEmpty(t *testing.T) {
-	cfg := Uplift{
-		CommitAuthor: &CommitAuthor{
-			Name: "",
-		},
-	}
-
-	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.CommitAuthor.Name")
+	require.ErrorContains(t, err, "field 'Uplift.CommitAuthor.Name' must be provided when field 'Email' is missing")
+	require.ErrorContains(t, err, "field 'Uplift.CommitAuthor.Email' must be provided when field 'Name' is missing")
 }
 
 func TestValidateCommitEmail(t *testing.T) {
@@ -263,7 +241,7 @@ func TestValidateCommitEmail(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.CommitAuthor.Email")
+	require.ErrorContains(t, err, "field 'Uplift.CommitAuthor.Email' contains an invalid email address 'not-a-valid-email'")
 }
 
 func TestValidateChangelogSort(t *testing.T) {
@@ -310,7 +288,7 @@ func TestValidateChangelogSortUnsupported(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Changelog.Sort")
+	require.ErrorContains(t, err, "field 'Uplift.Changelog.Sort' contains a value that is not one of the following [asc desc ASC DESC]")
 }
 
 func TestValidateChangeLogExcludeEmpty(t *testing.T) {
@@ -321,7 +299,7 @@ func TestValidateChangeLogExcludeEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Changelog.Exclude[0]")
+	require.ErrorContains(t, err, "field 'Uplift.Changelog.Exclude[0]' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateChangelogIncludeEmpty(t *testing.T) {
@@ -332,7 +310,7 @@ func TestValidateChangelogIncludeEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Changelog.Include[0]")
+	require.ErrorContains(t, err, "field 'Uplift.Changelog.Include[0]' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateChangelogAllEmpty(t *testing.T) {
@@ -341,9 +319,9 @@ func TestValidateChangelogAllEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Changelog.Sort")
-	require.ErrorContains(t, err, "Uplift.Changelog.Include")
-	require.ErrorContains(t, err, "Uplift.Changelog.Exclude")
+	require.ErrorContains(t, err, "field 'Uplift.Changelog.Sort' must be provided when all other fields [Exclude Include] are missing")
+	require.ErrorContains(t, err, "field 'Uplift.Changelog.Exclude' must be provided when all other fields [Sort Include] are missing")
+	require.ErrorContains(t, err, "field 'Uplift.Changelog.Include' must be provided when all other fields [Sort Exclude] are missing")
 }
 
 func TestValidateGitPushOptionEmpty(t *testing.T) {
@@ -358,7 +336,7 @@ func TestValidateGitPushOptionEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Git.PushOptions[0].Option")
+	require.ErrorContains(t, err, "field 'Uplift.Git.PushOptions[0].Option' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateGitHubNonCompliantURL(t *testing.T) {
@@ -369,7 +347,7 @@ func TestValidateGitHubNonCompliantURL(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.GitHub.URL")
+	require.ErrorContains(t, err, "field 'Uplift.GitHub.URL' contains an invalid url 'not-a-url'")
 }
 
 func TestValidateGitLabNonCompliantURL(t *testing.T) {
@@ -380,7 +358,7 @@ func TestValidateGitLabNonCompliantURL(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.GitLab.URL")
+	require.ErrorContains(t, err, "field 'Uplift.GitLab.URL' contains an invalid url 'not-a-url'")
 }
 
 func TestValidateGiteaNonCompliantURL(t *testing.T) {
@@ -391,7 +369,7 @@ func TestValidateGiteaNonCompliantURL(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Gitea.URL")
+	require.ErrorContains(t, err, "field 'Uplift.Gitea.URL' contains an invalid url 'not-a-url'")
 }
 
 func TestValidateHooksBeforeEmpty(t *testing.T) {
@@ -402,7 +380,7 @@ func TestValidateHooksBeforeEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Hooks.Before[0]")
+	require.ErrorContains(t, err, "field 'Uplift.Hooks.Before[0]' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateHooksBeforeBumpEmpty(t *testing.T) {
@@ -413,7 +391,7 @@ func TestValidateHooksBeforeBumpEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Hooks.BeforeBump[0]")
+	require.ErrorContains(t, err, "field 'Uplift.Hooks.BeforeBump[0]' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateHooksBeforeTagEmpty(t *testing.T) {
@@ -424,7 +402,7 @@ func TestValidateHooksBeforeTagEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Hooks.BeforeTag[0]")
+	require.ErrorContains(t, err, "field 'Uplift.Hooks.BeforeTag[0]' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateHooksBeforeChangelogEmpty(t *testing.T) {
@@ -435,7 +413,7 @@ func TestValidateHooksBeforeChangelogEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Hooks.BeforeChangelog[0]")
+	require.ErrorContains(t, err, "field 'Uplift.Hooks.BeforeChangelog[0]' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateHooksAfterEmpty(t *testing.T) {
@@ -446,7 +424,7 @@ func TestValidateHooksAfterEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Hooks.After[0]")
+	require.ErrorContains(t, err, "field 'Uplift.Hooks.After[0]' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateHooksAfterBumpEmpty(t *testing.T) {
@@ -457,7 +435,7 @@ func TestValidateHooksAfterBumpEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Hooks.AfterBump[0]")
+	require.ErrorContains(t, err, "field 'Uplift.Hooks.AfterBump[0]' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateHooksAfterTagEmpty(t *testing.T) {
@@ -468,7 +446,7 @@ func TestValidateHooksAfterTagEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Hooks.AfterTag[0]")
+	require.ErrorContains(t, err, "field 'Uplift.Hooks.AfterTag[0]' contains a value that does not meet the minimum expected length of '1'")
 }
 
 func TestValidateHooksAfterChangelogEmpty(t *testing.T) {
@@ -479,5 +457,5 @@ func TestValidateHooksAfterChangelogEmpty(t *testing.T) {
 	}
 
 	err := cfg.Validate()
-	require.ErrorContains(t, err, "Uplift.Hooks.AfterChangelog[0]")
+	require.ErrorContains(t, err, "field 'Uplift.Hooks.AfterChangelog[0]' contains a value that does not meet the minimum expected length of '1'")
 }
