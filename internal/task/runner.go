@@ -69,7 +69,9 @@ func Execute(ctx *context.Context, tasks []Runner) error {
 		} else {
 			log.Info(t.String())
 			cli.Default.Padding = PrettyPadding
-			t.Run(ctx)
+			if err := t.Run(ctx); err != nil {
+				return err
+			}
 		}
 	}
 

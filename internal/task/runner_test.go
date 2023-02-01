@@ -23,6 +23,7 @@ SOFTWARE.
 package task_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/context"
@@ -39,6 +40,17 @@ func TestExecute(t *testing.T) {
 	err := task.Execute(&context.Context{}, []task.Runner{m})
 
 	require.NoError(t, err)
+	m.AssertExpectations(t)
+}
+
+func TestExecuteError(t *testing.T) {
+	m := &MockedTask{}
+	m.On("Run", mock.Anything).Return(errors.New("unexpected error"))
+	m.On("Skip", mock.Anything).Return(false)
+
+	err := task.Execute(&context.Context{}, []task.Runner{m})
+
+	require.EqualError(t, err, "unexpected error")
 	m.AssertExpectations(t)
 }
 

@@ -100,7 +100,7 @@ func configWithHooks(t *testing.T) {
 	require.NoError(t, err)
 
 	cfg := &config.Uplift{
-		Hooks: config.Hooks{
+		Hooks: &config.Hooks{
 			Before:          []string{"touch " + BeforeFile},
 			BeforeBump:      []string{"touch " + BeforeBumpFile},
 			BeforeTag:       []string{"touch " + BeforeTagFile},

@@ -67,7 +67,10 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	log.Info("pushing commit to remote")
-	pushOpts := filterPushOptions(ctx.Config.Git.PushOptions)
+	var pushOpts []string
+	if ctx.Config.Git != nil {
+		pushOpts = filterPushOptions(ctx.Config.Git.PushOptions)
+	}
 	return git.Push(pushOpts)
 }
 
