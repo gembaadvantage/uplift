@@ -112,6 +112,18 @@ git:
 	assert.True(t, opt2.SkipBranch)
 }
 
+func TestUnmarshalGitPushOptionInvalid(t *testing.T) {
+	path := WriteFile(t, `
+git:
+  pushOptions:
+    - invalid: option
+`)
+
+	_, err := Load(path)
+
+	require.Error(t, err)
+}
+
 func TestValidateBumpFilePathEmpty(t *testing.T) {
 	cfg := Uplift{
 		Bumps: []Bump{

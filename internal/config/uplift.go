@@ -202,8 +202,6 @@ func (c Uplift) Validate() error {
 				reason = fmt.Sprintf("must be provided when field '%s' is missing\n", err.Param())
 			case "required_without_all":
 				reason = fmt.Sprintf("must be provided when all other fields [%s] are missing\n", err.Param())
-			default:
-				reason = fmt.Sprintf("contains an unexpected value '%v'\n", err.Value())
 			}
 
 			errMsg.WriteString(fmt.Sprintf("field '%s' at '%s' ", err.Field(), err.Namespace()))
