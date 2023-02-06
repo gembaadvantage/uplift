@@ -8,7 +8,7 @@ require (
 	github.com/gembaadvantage/codecommit-sign v1.4.0
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/goreleaser/fileglob v1.3.0
-	github.com/joho/godotenv v1.4.0
+	github.com/joho/godotenv v1.5.1
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
 	github.com/spf13/cobra v1.6.1
