@@ -15,7 +15,7 @@ git:
 
 ## Dynamically update CI/CD Variables
 
-GitLab provides AutoDevOps jobs that run across all pipelines types, an example being the Code Quality job. After uplift has tagged a new release, it may be deemed surplus to requirements to run the code quality job again. The `CODE_QUALITY_DISABLED` CI variable can be dynamically set on the tag pipeline.
+GitLab provides AutoDevOps jobs that run across all pipelines types, an example being the Code Quality job. After uplift has tagged a new release, it may be deemed surplus to requirements to rerun the code quality job. The `CODE_QUALITY_DISABLED` CI variable can be dynamically set on the tag pipeline.
 
 ```{ .yaml .annotate linenums="1" }
 git:
