@@ -83,6 +83,8 @@ nav:
       - Git Repository has a Detached HEAD: faq/gitdetached.md
       - Git Repository contains a Shallow Clone: faq/gitshallow.md
       - GPG Key fails to Import: faq/gpgimport.md
+  - Cookbook:
+      - GitLab Push Options: cookbook/push-options.md
   - Reference:
       - Configuration: reference/config.md
       - CLI:
