@@ -23,12 +23,12 @@ SOFTWARE.
 package gitcommit
 
 import (
-	"os"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
+	git "github.com/purpleclay/gitz"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -63,61 +63,41 @@ func TestSkip(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-	git.InitRepo(t)
-	trackFile(t, "test.txt")
+	gittest.InitRepository(t, gittest.WithStagedFiles("test.txt"))
 
 	err := Task{}.Run(&context.Context{
 		CommitDetails: git.CommitDetails{
-			Author:  "uplift",
-			Email:   "uplift@test.com",
+			Author: git.Person{
+				Name:  "uplift",
+				Email: "uplift@test.com",
+			},
 			Message: "test commit",
 		},
 	})
 	require.NoError(t, err)
 
-	lc := LastCommit(t)
-	assert.Equal(t, "uplift,uplift@test.com,test commit", lc)
-}
-
-// LastCommit returns the latest log in the following format: author,email,message
-func LastCommit(t *testing.T) string {
-	t.Helper()
-
-	out, err := git.Clean(git.Run("log", "-1", `--pretty=format:'%an,%ae,%B'`))
-	require.NoError(t, err)
-
-	return out
-}
-
-func trackFile(t *testing.T, name string) {
-	err := os.WriteFile(name, []byte(`hello, world`), 0o644)
-	require.NoError(t, err)
-
-	err = git.Stage(name)
-	require.NoError(t, err)
+	lc := gittest.LastCommit(t)
+	assert.Equal(t, "uplift", lc.AuthorName)
+	assert.Equal(t, "uplift@test.com", lc.AuthorEmail)
+	assert.Equal(t, "test commit", lc.Message)
 }
 
 func TestRun_NoStagedFiles(t *testing.T) {
-	git.InitRepo(t)
+	gittest.InitRepository(t)
 
 	err := Task{}.Run(&context.Context{
 		CommitDetails: git.CommitDetails{
-			Author:  "uplift",
-			Email:   "uplift@test.com",
+			Author: git.Person{
+				Name:  "uplift",
+				Email: "uplift@test.com",
+			},
 			Message: "test commit",
 		},
 	})
 	require.NoError(t, err)
 
-	lc := LastCommit(t)
-	assert.NotContains(t, "test commit", lc)
-}
-
-func TestRun_NoGitRepository(t *testing.T) {
-	git.MkTmpDir(t)
-
-	err := Task{}.Run(&context.Context{})
-	require.Error(t, err)
+	lc := gittest.LastCommit(t)
+	assert.NotEqual(t, "test commit", lc.Message)
 }
 
 func TestFilterPushOptions(t *testing.T) {

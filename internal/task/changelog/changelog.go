@@ -35,7 +35,7 @@ import (
 
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
+	git "github.com/purpleclay/gitz"
 )
 
 const (
@@ -71,8 +71,8 @@ var (
 )
 
 type release struct {
-	SCM     context.SCM
-	Tag     git.TagEntry
+	SCM context.SCM
+	// Tag     git.TagEntry
 	Changes []git.LogEntry
 }
 
@@ -102,12 +102,13 @@ func (t Task) Run(ctx *context.Context) error {
 	// that cannot be invoked by the caller
 	if ctx.Changelog.PreTag {
 		log.WithField("tag", ctx.NextVersion.Raw).Info("pre-tagging latest commit for changelog creation")
-		if err := git.Tag(ctx.NextVersion.Raw); err != nil {
+		// TODO: there is no option to tag locally
+		if _, err := ctx.GitClient.Tag("ctx.NextVersion.Raw"); err != nil {
 			return err
 		}
 		defer func() {
 			log.Info("removing pre-tag after changelog creation")
-			if err := git.DeleteLocalTag(ctx.NextVersion.Raw); err != nil {
+			if _, err := ctx.GitClient.DeleteTag(ctx.NextVersion.Raw, git.WithLocalDelete()); err != nil {
 				log.WithError(err).Error("failed to delete pre-tag")
 			}
 		}()
@@ -160,16 +161,18 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	log.Debug("staging CHANGELOG.md")
-	return git.Stage(MarkdownFile)
+	_, err := ctx.GitClient.Stage(git.WithPathSpecs(MarkdownFile))
+	return err
 }
 
 func changelogRelease(ctx *context.Context) ([]release, error) {
 	log.WithField("tag", ctx.NextVersion.Raw).Info("determine changes for release")
-	ents, err := git.LogBetween(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw)
+	glog, err := ctx.GitClient.Log(git.WithRefRange(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw))
 	if err != nil {
 		return []release{}, err
 	}
 
+	ents := glog.Commits
 	if len(ctx.Changelog.Include) > 0 {
 		log.Info("cherry-picking commits based on include list")
 		ents, err = includeCommits(ents, ctx.Changelog.Include)
@@ -215,15 +218,21 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 
 	return []release{
 		{
-			SCM:     ctx.SCM,
-			Tag:     git.DescribeTag(ctx.NextVersion.Raw),
+			SCM: ctx.SCM,
+			// Tag:     git.DescribeTag(ctx.NextVersion.Raw),
 			Changes: ents,
 		},
 	}, nil
 }
 
 func changelogReleases(ctx *context.Context) ([]release, error) {
-	tags := git.AllTags()
+	// TODO: option to retrieve a formatted string (custom format)
+	tags, err := ctx.GitClient.Tags(git.WithShellGlob("*.*.*"),
+		git.WithSortBy(git.CreatorDateDesc, git.VersionDesc))
+	if err != nil {
+		return []release{}, nil
+	}
+
 	if len(tags) == 0 {
 		log.Info("no tags found within repository")
 		return []release{}, nil
@@ -233,15 +242,16 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 	for i := 0; i < len(tags); i++ {
 		nextTag := ""
 		if i+1 < len(tags) {
-			nextTag = tags[i+1].Ref
+			nextTag = tags[i+1]
 		}
 
-		log.WithField("tag", tags[i].Ref).Info("determine changes for release")
-		ents, err := git.LogBetween(tags[i].Ref, nextTag)
+		log.WithField("tag", tags[i]).Info("determine changes for release")
+		glog, err := ctx.GitClient.Log(git.WithRefRange(tags[i], nextTag))
 		if err != nil {
 			return []release{}, err
 		}
 
+		ents := glog.Commits
 		if len(ctx.Changelog.Include) > 0 {
 			log.Info("cherry-picking commits based on include list")
 			ents, err = includeCommits(ents, ctx.Changelog.Include)
@@ -260,13 +270,13 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 
 		if len(ents) == 0 {
 			log.WithFields(log.Fields{
-				"tag":  tags[i].Ref,
+				"tag":  tags[i],
 				"prev": nextTag,
 			}).Info("no log entries between tags")
 		} else {
 			log.WithFields(log.Fields{
-				"tag":     tags[i].Ref,
-				"date":    tags[i].Created,
+				"tag": tags[i],
+				//"date":    tags[i].Created,
 				"commits": len(ents),
 			}).Info("changeset identified")
 
@@ -285,8 +295,8 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 		}
 
 		rels = append(rels, release{
-			SCM:     ctx.SCM,
-			Tag:     tags[i],
+			SCM: ctx.SCM,
+			// Tag:     tags[i],
 			Changes: ents,
 		})
 	}

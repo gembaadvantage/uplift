@@ -28,7 +28,6 @@ import (
 
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/gpg"
 )
 
@@ -71,10 +70,8 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	log.Info("setting git config to enable gpg signing")
-	return git.ConfigSet(map[string]string{
-		"user.signingKey": keyDetails.ID,
-		"commit.gpgsign":  "true",
-		"user.name":       keyDetails.UserName,
-		"user.email":      keyDetails.UserEmail,
-	})
+	return ctx.GitClient.ConfigSetL("user.signingKey", keyDetails.ID,
+		"commit.gpgsign", "true",
+		"user.name", keyDetails.UserName,
+		"user.email", keyDetails.UserEmail)
 }

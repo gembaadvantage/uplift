@@ -28,9 +28,9 @@ import (
 
 	semv "github.com/Masterminds/semver"
 	"github.com/apex/log"
+	git "github.com/purpleclay/gitz"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
 )
 
@@ -54,22 +54,25 @@ func (t Task) Run(ctx *context.Context) error {
 	if ctx.FilterOnPrerelease {
 		tagSuffix = buildTagSuffix(ctx)
 	}
-	tag := git.LatestTag(tagSuffix)
+	tag, err := latestTag(ctx.GitClient, tagSuffix)
+	if err != nil {
+		return err
+	}
 
-	if tag.Ref == "" {
+	if tag == "" {
 		log.Debug("repository not tagged with version")
 	} else {
-		log.WithField("version", tag.Ref).Debug("identified latest version within repository")
+		log.WithField("version", tag).Debug("identified latest version within repository")
 	}
-	ctx.CurrentVersion, _ = semver.Parse(tag.Ref)
+	ctx.CurrentVersion, _ = semver.Parse(tag)
 
-	cl, err := git.Log(tag.Ref)
+	glog, err := ctx.GitClient.Log(git.WithRefRange(git.HeadRef, tag))
 	if err != nil {
 		return err
 	}
 
 	// Identify any commit that will trigger the largest semantic version bump
-	inc := semver.ParseLog(cl)
+	inc := semver.ParseLog(glog.Raw)
 	if inc == semver.NoIncrement {
 		ctx.NoVersionChanged = true
 
@@ -78,16 +81,16 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 	log.WithField("increment", string(inc)).Info("largest increment detected from commits")
 
-	if tag.Ref == "" {
-		tag.Ref = "v0.0.0"
+	if tag == "" {
+		tag = "v0.0.0"
 	}
 
 	// Remove the prefix if needed
 	if ctx.NoPrefix {
-		tag.Ref = strings.TrimPrefix(tag.Ref, "v")
+		tag = strings.TrimPrefix(tag, "v")
 	}
 
-	pver, _ := semv.NewVersion(tag.Ref)
+	pver, _ := semv.NewVersion(tag)
 
 	// Handle the fact semver returns a pointer when it initialises a new
 	// semv.Version, but all of its methods work on a copy
@@ -131,6 +134,30 @@ func (t Task) Run(ctx *context.Context) error {
 
 	log.WithField("version", ctx.NextVersion.Raw).Info("identified next semantic version")
 	return nil
+}
+
+func latestTag(gitc *git.Client, suffix string) (string, error) {
+	tags, err := gitc.Tags(git.WithShellGlob("*.*.*"),
+		git.WithSortBy(git.CreatorDateDesc, git.VersionDesc))
+	if err != nil {
+		return "", err
+	}
+
+	if len(tags) == 0 {
+		return "", nil
+	}
+
+	if suffix == "" {
+		return tags[0], nil
+	}
+
+	for _, t := range tags {
+		if strings.HasSuffix(t, suffix) {
+			return t, nil
+		}
+	}
+
+	return "", nil
 }
 
 func buildTagSuffix(ctx *context.Context) string {

@@ -38,3 +38,5 @@ func TestSkip(t *testing.T) {
 		FetchTags: false,
 	}))
 }
+
+// TODO: a test should be added??

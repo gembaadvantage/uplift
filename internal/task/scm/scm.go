@@ -30,8 +30,15 @@ import (
 	"github.com/apex/log"
 	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 )
+
+type remote struct {
+	Origin string
+	Owner  string
+	Name   string
+	Host   string
+	Path   string
+}
 
 // Task that determines the SCM provider of a repository
 type Task struct{}
@@ -49,14 +56,19 @@ func (t Task) Skip(ctx *context.Context) bool {
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
 	log.Debug("parsing repository remote")
-	rem, err := git.Remote()
+	repo, err := ctx.GitClient.Repository()
 	if err != nil {
 		log.Error("failed to parse repository remote")
 		return err
 	}
 
+	rem, err := parseRemote(repo.Origin)
+	if err != nil {
+		return err
+	}
+
 	scm := detectSCM(rem.Host, ctx)
-	if scm == git.Unrecognised {
+	if scm == context.Unrecognised {
 		ctx.SCM = context.SCM{
 			Provider: scm,
 		}
@@ -66,91 +78,156 @@ func (t Task) Run(ctx *context.Context) error {
 	log.WithField("scm", scm).Info("scm provider identified")
 
 	switch scm {
-	case git.GitHub:
+	case context.GitHub:
 		ctx.SCM = github(rem)
-	case git.GitLab:
+	case context.GitLab:
 		ctx.SCM = gitlab(rem)
-	case git.CodeCommit:
+	case context.CodeCommit:
 		ctx.SCM = codecommit(rem)
-	case git.Gitea:
+	case context.Gitea:
 		ctx.SCM = gitea(rem, ctx.Config.Gitea.URL)
 	}
 
 	return nil
 }
 
-func detectSCM(host string, ctx *context.Context) git.SCM {
+func parseRemote(remURL string) (remote, error) {
+	origin := remURL
+
+	// Strip off any trailing .git suffix
+	rem := strings.TrimSuffix(remURL, ".git")
+
+	// Special use case for CodeCommit as that prefixes SSH URLs with ssh://
+	rem = strings.TrimPrefix(rem, "ssh://")
+
+	// Detect and translate a CodeCommit GRC URL into its HTTPS counterpart
+	if strings.HasPrefix(rem, "codecommit:") {
+		// Translate a codecommit GRC URL into its HTTPS counterpart
+		var err error
+		if rem, err = translate.FromGRC(rem); err != nil {
+			return remote{}, err
+		}
+
+		origin = rem
+	}
+
+	if strings.HasPrefix(rem, "git@") {
+		// Sanitise any SSH based URL to ensure it is parseable
+		rem = strings.TrimPrefix(rem, "git@")
+		rem = strings.Replace(rem, ":", "/", 1)
+	}
+
+	u, err := url.Parse(rem)
+	if err != nil {
+		return remote{}, err
+	}
+
+	// Split into parts
+	p := strings.Split(u.Path, "/")
+
+	if len(p) < 3 {
+		// This could be a custom Git server that doesn't follow the expected pattern.
+		// Don't fail, but return the raw origin for custom parsing
+		return remote{Origin: origin}, nil
+	}
+
+	// If the repository has a HTTP(S) origin, the host will have been correctly identified
+	host := u.Host
+	if host == "" {
+		// For other schemes, assume the host is contained within the first part
+		host = p[0]
+	}
+	owner := p[1]
+	name := p[len(p)-1]
+	path := strings.Join(p[1:], "/")
+
+	if strings.Contains(host, "codecommit") {
+		// No concept of an owner with CodeCommit repositories
+		owner = ""
+		path = name
+	}
+
+	return remote{
+		Origin: origin,
+		Owner:  owner,
+		Name:   name,
+		Path:   path,
+		Host:   host,
+	}, nil
+}
+
+func detectSCM(host string, ctx *context.Context) context.SCMProvider {
 	switch host {
 	case "github.com":
-		return git.GitHub
+		return context.GitHub
 	case "gitlab.com":
-		return git.GitLab
+		return context.GitLab
 	}
 
 	// Handle special case CodeCommit URLs
 	if strings.HasPrefix(host, "git-codecommit") {
-		return git.CodeCommit
+		return context.CodeCommit
 	}
 
 	if ctx.Config.GitHub != nil {
 		if checkHost(host, ctx.Config.GitHub.URL) {
-			return git.GitHub
+			return context.GitHub
 		}
 	} else if ctx.Config.GitLab != nil {
 		if checkHost(host, ctx.Config.GitLab.URL) {
-			return git.GitLab
+			return context.GitLab
 		}
 	} else if ctx.Config.Gitea != nil {
 		if checkHost(host, ctx.Config.Gitea.URL) {
-			return git.Gitea
+			return context.Gitea
 		}
 	}
 
 	log.WithField("host", host).Warn("no recognised scm provider detected")
-	return git.Unrecognised
+	return context.Unrecognised
 }
 
-func github(r git.Repository) context.SCM {
-	url := fmt.Sprintf("https://%s/%s", r.Host, r.Path)
+func github(rem remote) context.SCM {
+	url := fmt.Sprintf("https://%s/%s", rem.Host, rem.Path)
 
 	return context.SCM{
-		Provider:  git.GitHub,
+		Provider:  context.GitHub,
 		TagURL:    url + "/releases/tag/{{.Ref}}",
 		CommitURL: url + "/commit/{{.Hash}}",
 	}
 }
 
-func gitlab(r git.Repository) context.SCM {
-	url := fmt.Sprintf("https://%s/%s", r.Host, r.Path)
+func gitlab(rem remote) context.SCM {
+	url := fmt.Sprintf("https://%s/%s", rem.Host, rem.Path)
 
 	return context.SCM{
-		Provider:  git.GitLab,
+		Provider:  context.GitLab,
 		TagURL:    url + "/-/tags/{{.Ref}}",
 		CommitURL: url + "/-/commit/{{.Hash}}",
 	}
 }
 
-func codecommit(r git.Repository) context.SCM {
+func codecommit(rem remote) context.SCM {
 	// CodeCommit URLs are a special case and require a region query parameter to be appended.
 	// Extract the region from the clone URL
-	t, _ := translate.RemoteHTTPS(r.Origin)
+	t, _ := translate.RemoteHTTPS(rem.Origin)
 
 	// CodeCommit uses a different URL when browsing the repository
-	browseURL := fmt.Sprintf("https://%s.console.aws.amazon.com/codesuite/codecommit/repositories/%s", t.Region, r.Name)
+	browseURL := fmt.Sprintf("https://%s.console.aws.amazon.com/codesuite/codecommit/repositories/%s", t.Region, rem.Name)
 
 	return context.SCM{
-		Provider:  git.CodeCommit,
+		Provider:  context.CodeCommit,
 		TagURL:    fmt.Sprintf("%s/browse/refs/tags/{{.Ref}}?region=%s", browseURL, t.Region),
 		CommitURL: fmt.Sprintf("%s/commit/{{.Hash}}?region=%s", browseURL, t.Region),
 	}
 }
 
-func gitea(r git.Repository, u string) context.SCM {
+func gitea(rem remote, u string) context.SCM {
 	scheme := u[:strings.Index(u, ":")]
-	url := fmt.Sprintf("%s://%s/%s", scheme, r.Host, r.Path)
+	url := fmt.Sprintf("%s://%s/%s", scheme, rem.Host, rem.Path)
 
 	return context.SCM{
-		Provider:  git.Gitea,
+		Provider:  context.Gitea,
 		TagURL:    url + "/releases/tag/{{.Ref}}",
 		CommitURL: url + "/commit/{{.Hash}}",
 	}

@@ -28,7 +28,6 @@ import (
 	"strings"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
@@ -46,9 +45,9 @@ const (
 	changelogLongDesc = `Scans the git log for the latest semantic release and generates a changelog
 entry. If this is a first release, all commits between the last release (or
 identifiable tag) and the repository trunk will be written to the changelog.
-Any subsequent entry within the changelog will only contain commits between 
-the latest set of tags. Basic customization is supported. Optionally commits 
-can be explicitly included or excluded from the entry and sorted in ascending 
+Any subsequent entry within the changelog will only contain commits between
+the latest set of tags. Basic customization is supported. Optionally commits
+can be explicitly included or excluded from the entry and sorted in ascending
 or descending order. Uplift automatically handles the staging and pushing of
 changes to the CHANGELOG.md file to the git remote, but this behavior can be
 disabled, to manage this action manually.
@@ -203,16 +202,17 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	// By default ensure the ci(uplift): commits are excluded also
 	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, `ci\(uplift\)`)
 
-	if !ctx.Changelog.All {
-		// Attempt to retrieve the latest 2 tags for generating a changelog entry
-		tags := git.AllTags()
-		if len(tags) == 1 {
-			ctx.NextVersion.Raw = tags[0].Ref
-		} else if len(tags) > 1 {
-			ctx.NextVersion.Raw = tags[0].Ref
-			ctx.CurrentVersion.Raw = tags[1].Ref
-		}
-	}
+	// TODO: uncomment this
+	// if !ctx.Changelog.All {
+	// 	// Attempt to retrieve the latest 2 tags for generating a changelog entry
+	// 	tags := git.AllTags()
+	// 	if len(tags) == 1 {
+	// 		ctx.NextVersion.Raw = tags[0].Ref
+	// 	} else if len(tags) > 1 {
+	// 		ctx.NextVersion.Raw = tags[0].Ref
+	// 		ctx.CurrentVersion.Raw = tags[1].Ref
+	// 	}
+	// }
 
 	// Handle git config. Command line flag takes precedences
 	ctx.IgnoreDetached = opts.IgnoreDetached

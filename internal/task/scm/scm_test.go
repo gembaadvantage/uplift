@@ -27,7 +27,7 @@ import (
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -44,34 +44,34 @@ func TestRun(t *testing.T) {
 	tests := []struct {
 		name      string
 		remote    string
-		provider  git.SCM
+		provider  context.SCMProvider
 		tagURL    string
 		commitURL string
 	}{
 		{
 			name:      "GitHub",
 			remote:    "https://github.com/owner/repository.git",
-			provider:  git.GitHub,
+			provider:  context.GitHub,
 			tagURL:    "https://github.com/owner/repository/releases/tag/{{.Ref}}",
 			commitURL: "https://github.com/owner/repository/commit/{{.Hash}}",
 		},
 		{
 			name:      "GitLab",
-			provider:  git.GitLab,
+			provider:  context.GitLab,
 			remote:    "https://gitlab.com/owner/repository.git",
 			tagURL:    "https://gitlab.com/owner/repository/-/tags/{{.Ref}}",
 			commitURL: "https://gitlab.com/owner/repository/-/commit/{{.Hash}}",
 		},
 		{
 			name:      "GitLabNestedSubGroups",
-			provider:  git.GitLab,
+			provider:  context.GitLab,
 			remote:    "https://gitlab.com/owner/nested/subgroup/repository.git",
 			tagURL:    "https://gitlab.com/owner/nested/subgroup/repository/-/tags/{{.Ref}}",
 			commitURL: "https://gitlab.com/owner/nested/subgroup/repository/-/commit/{{.Hash}}",
 		},
 		{
 			name:      "CodeCommit",
-			provider:  git.CodeCommit,
+			provider:  context.CodeCommit,
 			remote:    "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repository",
 			tagURL:    "https://eu-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/repository/browse/refs/tags/{{.Ref}}?region=eu-west-1",
 			commitURL: "https://eu-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/repository/commit/{{.Hash}}?region=eu-west-1",
@@ -79,8 +79,8 @@ func TestRun(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			git.InitRepo(t)
-			git.RemoteOrigin(t, tt.remote)
+			gittest.InitRepository(t)
+			setOrigin(t, tt.remote)
 
 			ctx := &context.Context{}
 			err := Task{}.Run(ctx)
@@ -94,8 +94,8 @@ func TestRun(t *testing.T) {
 }
 
 func TestRun_GiteaSelfHosted(t *testing.T) {
-	git.InitRepo(t)
-	git.RemoteOrigin(t, "https://my.gitea.com/owner/repository.git")
+	gittest.InitRepository(t)
+	setOrigin(t, "https://my.gitea.com/owner/repository.git")
 
 	ctx := &context.Context{
 		Config: config.Uplift{
@@ -107,14 +107,14 @@ func TestRun_GiteaSelfHosted(t *testing.T) {
 	err := Task{}.Run(ctx)
 
 	require.NoError(t, err)
-	assert.Equal(t, ctx.SCM.Provider, git.Gitea)
+	assert.Equal(t, ctx.SCM.Provider, context.Gitea)
 	assert.Equal(t, ctx.SCM.TagURL, "https://my.gitea.com/owner/repository/releases/tag/{{.Ref}}")
 	assert.Equal(t, ctx.SCM.CommitURL, "https://my.gitea.com/owner/repository/commit/{{.Hash}}")
 }
 
 func TestRun_GitHubEnterprise(t *testing.T) {
-	git.InitRepo(t)
-	git.RemoteOrigin(t, "https://my.github.com/owner/repository.git")
+	gittest.InitRepository(t)
+	setOrigin(t, "https://my.github.com/owner/repository.git")
 
 	ctx := &context.Context{
 		Config: config.Uplift{
@@ -126,14 +126,14 @@ func TestRun_GitHubEnterprise(t *testing.T) {
 	err := Task{}.Run(ctx)
 
 	require.NoError(t, err)
-	assert.Equal(t, ctx.SCM.Provider, git.GitHub)
+	assert.Equal(t, ctx.SCM.Provider, context.GitHub)
 	assert.Equal(t, ctx.SCM.TagURL, "https://my.github.com/owner/repository/releases/tag/{{.Ref}}")
 	assert.Equal(t, ctx.SCM.CommitURL, "https://my.github.com/owner/repository/commit/{{.Hash}}")
 }
 
 func TestRun_GitLabSelfHosted(t *testing.T) {
-	git.InitRepo(t)
-	git.RemoteOrigin(t, "https://my.gitlab.com/owner/repository.git")
+	gittest.InitRepository(t)
+	setOrigin(t, "https://my.gitlab.com/owner/repository.git")
 
 	ctx := &context.Context{
 		Config: config.Uplift{
@@ -145,25 +145,24 @@ func TestRun_GitLabSelfHosted(t *testing.T) {
 	err := Task{}.Run(ctx)
 
 	require.NoError(t, err)
-	assert.Equal(t, ctx.SCM.Provider, git.GitLab)
+	assert.Equal(t, ctx.SCM.Provider, context.GitLab)
 	assert.Equal(t, ctx.SCM.TagURL, "https://my.gitlab.com/owner/repository/-/tags/{{.Ref}}")
 	assert.Equal(t, ctx.SCM.CommitURL, "https://my.gitlab.com/owner/repository/-/commit/{{.Hash}}")
 }
 
-func TestRun_NoRemoteSet(t *testing.T) {
-	git.MkTmpDir(t)
-
-	err := Task{}.Run(&context.Context{})
-	require.Error(t, err)
-}
-
 func TestRun_UnrecognisedSCM(t *testing.T) {
-	git.InitRepo(t)
-	git.RemoteOrigin(t, "https://unrecognised.com/owner/repository.git")
+	gittest.InitRepository(t)
+	setOrigin(t, "https://unrecognised.com/owner/repository.git")
 
 	ctx := &context.Context{}
 	err := Task{}.Run(ctx)
 
 	require.NoError(t, err)
-	assert.Equal(t, git.Unrecognised, ctx.SCM.Provider)
+	assert.Equal(t, context.Unrecognised, ctx.SCM.Provider)
+}
+
+func setOrigin(t *testing.T, url string) {
+	t.Helper()
+	gittest.MustExec(t, "git remote remove origin")
+	gittest.MustExec(t, "git remote add origin "+url)
 }

@@ -28,8 +28,8 @@ import (
 
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
+	git "github.com/purpleclay/gitz"
 )
 
 // Task for generating the next commit message
@@ -49,20 +49,22 @@ func (t Task) Skip(ctx *context.Context) bool {
 // from the last commit or by generating a user defined commit
 func (t Task) Run(ctx *context.Context) error {
 	c := git.CommitDetails{
-		Author:  "uplift-bot",
-		Email:   "uplift@gembaadvantage.com",
+		Author: git.Person{
+			Name:  "uplift-bot",
+			Email: "uplift@gembaadvantage.com",
+		},
 		Message: fmt.Sprintf("ci(uplift): uplifted for version %s", ctx.NextVersion.Raw),
 	}
 
 	if ctx.Config.CommitAuthor != nil {
 		if ctx.Config.CommitAuthor.Name != "" {
 			log.Debug("overwriting commit author name from uplift config")
-			c.Author = ctx.Config.CommitAuthor.Name
+			c.Author.Name = ctx.Config.CommitAuthor.Name
 		}
 
 		if ctx.Config.CommitAuthor.Email != "" {
 			log.Debug("overwriting commit author email from uplift config")
-			c.Email = ctx.Config.CommitAuthor.Email
+			c.Author.Email = ctx.Config.CommitAuthor.Email
 		}
 	}
 
@@ -71,17 +73,23 @@ func (t Task) Run(ctx *context.Context) error {
 		c.Message = strings.ReplaceAll(ctx.Config.CommitMessage, semver.Token, ctx.NextVersion.Raw)
 	}
 
-	author := git.Author()
-	if author.Email != "" && author.Name != "" {
+	cfg, err := ctx.GitClient.Config()
+	if err != nil {
+		return err
+	}
+
+	name, _ := cfg["user.name"]
+	email, _ := cfg["user.email"]
+	if name != "" && email != "" {
 		log.Debug("overwriting commit author from git config")
-		c.Author = author.Name
-		c.Email = author.Email
+		c.Author.Name = name
+		c.Author.Email = email
 	}
 
 	ctx.CommitDetails = c
 	log.WithFields(log.Fields{
-		"name":    ctx.CommitDetails.Author,
-		"email":   ctx.CommitDetails.Email,
+		"name":    ctx.CommitDetails.Author.Name,
+		"email":   ctx.CommitDetails.Author.Email,
 		"message": ctx.CommitDetails.Message,
 	}).Info("changes will be committed with")
 	return nil

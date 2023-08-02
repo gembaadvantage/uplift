@@ -23,11 +23,10 @@ SOFTWARE.
 package gitcheck
 
 import (
-	"os"
+	"strings"
 
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 )
 
 // Task for detecting if uplift is being run within a recognised
@@ -46,29 +45,29 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	log.Debug("checking if git is installed")
-	if !git.IsInstalled() {
-		return ErrGitMissing
-	}
-
-	cwd, _ := os.Getwd()
-	log.WithField("cwd", cwd).Debug("checking for git repo")
-	if !git.IsRepo() {
+	repo, err := ctx.GitClient.Repository()
+	if err != nil {
 		return ErrNoRepository
 	}
 
 	log.Debug("checking if repository is dirty")
-	out, err := git.CheckDirty()
+	status, err := ctx.GitClient.PorcelainStatus()
 	if err != nil {
 		return err
 	}
 
-	if out != "" {
-		return ErrDirty{status: out}
+	if len(status) > 0 {
+		// Convert status into string friendly output
+		out := make([]string, 0, len(status))
+		for _, s := range status {
+			out = append(out, s.String())
+		}
+
+		return ErrDirty{status: strings.Join(out, "\n")}
 	}
 
 	log.Debug("checking for detached head")
-	if git.IsDetached() {
+	if repo.DetachedHead {
 		if ctx.IgnoreDetached {
 			log.Warn("detached HEAD detected. This may impact certain operations within uplift")
 		} else {
@@ -77,7 +76,7 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	log.Debug("checking if shallow clone used")
-	if git.IsShallow() {
+	if repo.ShallowClone {
 		if ctx.IgnoreShallow {
 			log.Warn("shallow clone detected. This may impact certain operations within uplift")
 		} else {

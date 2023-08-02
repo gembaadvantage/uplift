@@ -27,14 +27,15 @@ import (
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRun_JSONNonMatchingPath(t *testing.T) {
-	path := WriteTempFile(t, `{"version": "0.1.0"}`)
+	gittest.InitRepository(t)
+	gittest.TempFile(t, "test.json", `{"version": "0.1.0"}`)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -43,7 +44,7 @@ func TestRun_JSONNonMatchingPath(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File: path,
+					File: "test.json",
 					JSON: []config.JSONBump{
 						{
 							Path: "nomatch",
@@ -59,7 +60,8 @@ func TestRun_JSONNonMatchingPath(t *testing.T) {
 }
 
 func TestRun_JSONNotAllPathsMatch(t *testing.T) {
-	path := WriteTempFile(t, `{"version": "0.1.0"}`)
+	gittest.InitRepository(t)
+	gittest.TempFile(t, "example.json", `{"version": "0.1.0"}`)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -68,7 +70,7 @@ func TestRun_JSONNotAllPathsMatch(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File: path,
+					File: "example.json",
 					JSON: []config.JSONBump{
 						{
 							Path:   "version",
@@ -87,13 +89,13 @@ func TestRun_JSONNotAllPathsMatch(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.Error(t, err)
 
-	actual := ReadFile(t, path)
+	actual := ReadFile(t, "example.json")
 	assert.Equal(t, `{"version": "0.1.0"}`, actual)
 }
 
 func TestRun_JSONStrictSemVer(t *testing.T) {
-	git.InitRepo(t)
-	path := WriteTempFile(t, `{"version": "0.1.0"}`)
+	gittest.InitRepository(t)
+	gittest.TempFile(t, "example.json", `{"version": "0.1.0"}`)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -102,7 +104,7 @@ func TestRun_JSONStrictSemVer(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File: path,
+					File: "example.json",
 					JSON: []config.JSONBump{
 						{
 							Path:   "version",
@@ -117,13 +119,13 @@ func TestRun_JSONStrictSemVer(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	actual := ReadFile(t, path)
+	actual := ReadFile(t, "example.json")
 	assert.Equal(t, `{"version": "0.2.0"}`, actual)
 }
 
 func TestRun_JSONDryRun(t *testing.T) {
-	git.InitRepo(t)
-	path := WriteTempFile(t, `{"version": "0.1.0"}`)
+	gittest.InitRepository(t)
+	gittest.TempFile(t, "test.json", `{"version": "0.1.0"}`)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -132,7 +134,7 @@ func TestRun_JSONDryRun(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File: path,
+					File: "test.json",
 					JSON: []config.JSONBump{
 						{
 							Path: "version",
@@ -147,7 +149,7 @@ func TestRun_JSONDryRun(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	actual := ReadFile(t, path)
+	actual := ReadFile(t, "test.json")
 	assert.Equal(t, `{"version": "0.1.0"}`, actual)
 }
 
@@ -175,9 +177,8 @@ func TestRun_JSONFileDoesNotExist(t *testing.T) {
 }
 
 func TestRun_PackageJson(t *testing.T) {
-	git.InitRepo(t)
-
-	file := WriteTempFile(t, `{
+	gittest.InitRepository(t)
+	gittest.TempFile(t, "temp.json", `{
   "name": "test",
   "version": "0.1.0",
   "bin": {
@@ -200,7 +201,7 @@ func TestRun_PackageJson(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File: file,
+					File: "temp.json",
 					JSON: []config.JSONBump{
 						{
 							Path: "version",
@@ -214,7 +215,7 @@ func TestRun_PackageJson(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	actual := ReadFile(t, file)
+	actual := ReadFile(t, "temp.json")
 	assert.Equal(t, `{
   "name": "test",
   "version": "1.0.0",

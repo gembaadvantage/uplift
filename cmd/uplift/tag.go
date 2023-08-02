@@ -27,7 +27,6 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/fetchtag"
@@ -39,6 +38,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforetag"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/nextsemver"
+	git "github.com/purpleclay/gitz"
 	"github.com/spf13/cobra"
 )
 
@@ -60,11 +60,11 @@ https://www.conventionalcommits.org/en/v1.0.0`
 # Tag the repository with the next calculated semantic version
 uplift tag
 
-# Identify the next semantic version and write to stdout. Repository is 
+# Identify the next semantic version and write to stdout. Repository is
 # not tagged
 uplift tag --next --silent
 
-# Identify the current semantic version and write to stdout. Repository 
+# Identify the current semantic version and write to stdout. Repository
 # is not tagged
 uplift tag --current
 
@@ -140,8 +140,17 @@ func newTagCmd(gopts *globalOptions, out io.Writer) *tagCommand {
 			// If only the current tag is to be printed, skip running a pipeline
 			// and just retrieve and print the latest tag
 			if tagCmd.Opts.PrintCurrentTag && !tagCmd.Opts.PrintNextTag {
-				tag := git.LatestTag(tagCmd.Opts.Prerelease)
-				fmt.Fprintf(out, tag.Ref)
+				gc, err := git.NewClient()
+				if err != nil {
+					return err
+				}
+
+				tags, _ := gc.Tags(git.WithShellGlob("*.*.*"),
+					git.WithSortBy(git.CreatorDateDesc, git.VersionDesc),
+					git.WithCount(1))
+				if len(tags) == 1 {
+					fmt.Fprintf(out, tags[0])
+				}
 				return nil
 			}
 

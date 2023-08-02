@@ -24,7 +24,6 @@ package fetchtag
 
 import (
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 )
 
 // Task for fetching tags from a remote repository
@@ -40,7 +39,11 @@ func (t Task) Skip(ctx *context.Context) bool {
 	return !ctx.FetchTags
 }
 
+// TODO: no ability to fetch tags only (add options to the pull command)
+
 // Run the task fetching all tags from the remote repository
 func (t Task) Run(ctx *context.Context) error {
-	return git.FetchTags()
+	//return git.FetchTags()
+	//_, err := ctx.GitClient.Pull()
+	return nil
 }

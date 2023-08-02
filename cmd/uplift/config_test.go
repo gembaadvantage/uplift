@@ -23,10 +23,9 @@ SOFTWARE.
 package main
 
 import (
-	"os"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -55,8 +54,8 @@ func TestLoadConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			git.MkTmpDir(t)
-			upliftConfigFile(t, tt.filename)
+			gittest.InitRepository(t)
+			gittest.TempFile(t, tt.filename, "annotatedTags: true")
 
 			cfg, err := loadConfig(currentWorkingDir)
 
@@ -67,28 +66,23 @@ func TestLoadConfig(t *testing.T) {
 }
 
 func TestLoadConfig_Malformed(t *testing.T) {
-	git.MkTmpDir(t)
-	yml := `firstV`
-	os.WriteFile(".uplift.yml", []byte(yml), 0o644)
+	gittest.InitRepository(t)
+	gittest.TempFile(t, ".uplift.yml", "firstV")
 
 	_, err := loadConfig(currentWorkingDir)
 	assert.Error(t, err)
 }
 
 func TestLoadConfig_NotExists(t *testing.T) {
-	git.MkTmpDir(t)
+	gittest.InitRepository(t)
 
 	_, err := loadConfig(currentWorkingDir)
 	assert.NoError(t, err)
 }
 
 func TestLoadConfig_CustomLocation(t *testing.T) {
-	git.MkTmpDir(t)
-
-	err := os.Mkdir("custom", 0o755)
-	require.NoError(t, err)
-
-	upliftConfigFile(t, "./custom/.uplift.yml")
+	gittest.InitRepository(t)
+	gittest.TempFile(t, "custom/.uplift.yml", "annotatedTags: true")
 
 	cfg, err := loadConfig("custom")
 	assert.NoError(t, err)

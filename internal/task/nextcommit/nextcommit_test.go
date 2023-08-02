@@ -27,8 +27,8 @@ import (
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -44,10 +44,8 @@ func TestSkip(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-	git.InitRepo(t)
-	// Unset git author config
-	git.SetConfig(t, "user.name", "''")
-	git.SetConfig(t, "user.email", "''")
+	gittest.InitRepository(t)
+	gittest.ConfigSet(t, "user.name", "", "user.email", "")
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -57,15 +55,14 @@ func TestRun(t *testing.T) {
 
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, "uplift-bot", ctx.CommitDetails.Author)
-	assert.Equal(t, "uplift@gembaadvantage.com", ctx.CommitDetails.Email)
+	assert.Equal(t, "uplift-bot", ctx.CommitDetails.Author.Name)
+	assert.Equal(t, "uplift@gembaadvantage.com", ctx.CommitDetails.Author.Email)
 	assert.Equal(t, "ci(uplift): uplifted for version 0.1.0", ctx.CommitDetails.Message)
 }
 
 func TestRun_GitAuthorConfig(t *testing.T) {
-	git.InitRepo(t)
-	git.SetConfig(t, "user.name", "john.smith")
-	git.SetConfig(t, "user.email", "john.smith@testing.com")
+	gittest.InitRepository(t)
+	gittest.ConfigSet(t, "user.name", "john.smith", "user.email", "john.smith@testing.com")
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -75,15 +72,14 @@ func TestRun_GitAuthorConfig(t *testing.T) {
 
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, "john.smith", ctx.CommitDetails.Author)
-	assert.Equal(t, "john.smith@testing.com", ctx.CommitDetails.Email)
+	assert.Equal(t, "john.smith", ctx.CommitDetails.Author.Name)
+	assert.Equal(t, "john.smith@testing.com", ctx.CommitDetails.Author.Email)
 	assert.Equal(t, "ci(uplift): uplifted for version 0.1.0", ctx.CommitDetails.Message)
 }
 
 func TestRun_CustomCommitDetails(t *testing.T) {
-	git.InitRepo(t)
-	git.SetConfig(t, "user.name", "''")
-	git.SetConfig(t, "user.email", "''")
+	gittest.InitRepository(t)
+	gittest.ConfigSet(t, "user.name", "", "user.email", "")
 
 	ctx := &context.Context{
 		Config: config.Uplift{
@@ -97,10 +93,12 @@ func TestRun_CustomCommitDetails(t *testing.T) {
 
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, "releasebot", ctx.CommitDetails.Author)
-	assert.Equal(t, "releasebot@example.com", ctx.CommitDetails.Email)
+	assert.Equal(t, "releasebot", ctx.CommitDetails.Author.Name)
+	assert.Equal(t, "releasebot@example.com", ctx.CommitDetails.Author.Email)
 	assert.Equal(t, "ci(release): this is a custom message", ctx.CommitDetails.Message)
 }
+
+// TODO: is this even a test, is this supported?
 
 func TestRun_CustomCommitWithVersionToken(t *testing.T) {
 	ctx := &context.Context{
