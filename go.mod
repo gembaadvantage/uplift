@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/apex/log v1.9.0
 	github.com/gembaadvantage/codecommit-sign v1.4.0
-	github.com/go-playground/validator/v10 v10.14.1
+	github.com/go-playground/validator/v10 v10.15.0
 	github.com/goreleaser/fileglob v1.3.0
 	github.com/joho/godotenv v1.5.1
 	github.com/muesli/mango-cobra v1.2.0
