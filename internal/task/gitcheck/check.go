@@ -58,7 +58,7 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	log.Debug("checking if repository is dirty")
-	out, err := git.CheckDirty()
+	out, err := git.CheckDirty(ctx.Config.DirtyFiles)
 	if err != nil {
 		return err
 	}

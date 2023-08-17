@@ -85,9 +85,60 @@ func TestCheckDirty(t *testing.T) {
 	InitRepo(t)
 	EmptyCommit(t, "this is a test")
 
-	out, err := CheckDirty()
+	out, err := CheckDirty(nil)
 	require.NoError(t, err)
 	assert.Empty(t, out)
+}
+
+
+func TestCheckDirty_allowedFiles(t *testing.T) {
+	InitRepo(t)
+	
+	TouchFiles(t, "main.go", "testing.go")
+	Stage("main.go")
+	Stage("testing.go")
+
+	allowedFiles := []string{"main.go", "testing.go"}
+	out, err := CheckDirty(allowedFiles)
+
+	require.NoError(t, err)
+	assert.Empty(t, out)
+}
+
+func TestCheckDirty_unexpectedDirtyFile(t *testing.T) {
+	InitRepo(t)
+	
+	TouchFiles(t, "main.go", "testing.go", "iShouldError.go")
+	Stage("main.go")
+	Stage("testing.go")
+	Stage("iShouldError.go")
+
+	allowedFiles := []string{"main.go", "testing.go"}
+
+	out, err := CheckDirty(allowedFiles)
+	require.NoError(t, err)
+
+	exp := `A  iShouldError.go
+A  main.go
+A  testing.go`
+	assert.Equal(t, exp, out)
+}
+
+func TestCheckDirty_emptyArrayProvided(t *testing.T) {
+	InitRepo(t)
+	
+	TouchFiles(t, "main.go", "testing.go")
+	Stage("main.go")
+	Stage("testing.go")
+
+	allowedFiles := []string{}
+
+	out, err := CheckDirty(allowedFiles)
+	require.NoError(t, err)
+
+	exp := `A  main.go
+A  testing.go`
+	assert.Equal(t, exp, out)
 }
 
 func TestCheckDirty_UnCommitted(t *testing.T) {
@@ -97,7 +148,7 @@ func TestCheckDirty_UnCommitted(t *testing.T) {
 	Stage("main.go")
 	Stage("testing.go")
 
-	out, err := CheckDirty()
+	out, err := CheckDirty(nil)
 	require.NoError(t, err)
 
 	exp := `A  main.go
@@ -111,7 +162,7 @@ func TestCheckDirty_UnStaged(t *testing.T) {
 	// Add an empty file
 	TouchFiles(t, "main.go", "testing.go")
 
-	out, err := CheckDirty()
+	out, err := CheckDirty(nil)
 	require.NoError(t, err)
 
 	exp := `?? main.go
