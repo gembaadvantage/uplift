@@ -30,7 +30,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
-
+	"slices"
 	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"mvdan.cc/sh/v3/interp"
@@ -140,10 +140,29 @@ func IsShallow() bool {
 
 // CheckDirty identifies if the current repository is dirty through the presence of
 // un-committed and/or un-staged changes and returns a list of those files
-func CheckDirty() (string, error) {
+func CheckDirty(allowedFiles []string) (string, error) {
 	out, err := Clean(Run("status", "--porcelain"))
 	if out != "" || err != nil {
-		return out, err
+		
+		if allowedFiles == nil {
+			return out, err	
+		}
+
+		if len(allowedFiles) == 0 {
+			return out, err
+		}
+
+		dirtyFilesArray := strings.Split(out, "\n")
+				
+		for i := 0; i < len(dirtyFilesArray); i++ {
+			dirtyFilepath := dirtyFilesArray[i][3:len(dirtyFilesArray[i])]
+			isFileInConfig := slices.Contains(allowedFiles, dirtyFilepath)
+
+			if !isFileInConfig {
+				return out, err
+			}
+		}
+				
 	}
 	return "", nil
 }
