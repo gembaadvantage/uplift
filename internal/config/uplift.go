@@ -47,6 +47,7 @@ type Uplift struct {
 	GitLab        *GitLab       `yaml:"gitlab" validate:"omitempty"`
 	Hooks         *Hooks        `yaml:"hooks" validate:"omitempty"`
 	Env           []string      `yaml:"env" validate:"dive,min=1"`
+	DirtyFiles    []string 		`yaml:dirtyFiles validate:"omitempty"`
 }
 
 // Bump defines configuration for bumping individual files based
