@@ -51,6 +51,7 @@ fix: a bug fix
 (tag: 0.1.0) feat: this was the last feature`
 	gittest.InitRepository(t, gittest.WithLog(log))
 
+	// TODO:
 	// gittest.StagedFile(t, "", "") > TempFile and StageFile under the covers
 	// gittest.WithCommittedFiles("", "", "", "") > file is automatically committed at the end
 

@@ -49,7 +49,7 @@ func (t Task) String() string {
 }
 
 // Skip is disabled for this task
-func (t Task) Skip(ctx *context.Context) bool {
+func (t Task) Skip(_ *context.Context) bool {
 	return false
 }
 

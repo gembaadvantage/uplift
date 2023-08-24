@@ -38,6 +38,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforechangelog"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/scm"
+	git "github.com/purpleclay/gitz"
 	"github.com/spf13/cobra"
 )
 
@@ -202,17 +203,21 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	// By default ensure the ci(uplift): commits are excluded also
 	ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, `ci\(uplift\)`)
 
-	// TODO: uncomment this
-	// if !ctx.Changelog.All {
-	// 	// Attempt to retrieve the latest 2 tags for generating a changelog entry
-	// 	tags := git.AllTags()
-	// 	if len(tags) == 1 {
-	// 		ctx.NextVersion.Raw = tags[0].Ref
-	// 	} else if len(tags) > 1 {
-	// 		ctx.NextVersion.Raw = tags[0].Ref
-	// 		ctx.CurrentVersion.Raw = tags[1].Ref
-	// 	}
-	// }
+	if !ctx.Changelog.All {
+		// Attempt to retrieve the latest 2 tags for generating a changelog entry
+		tags, err := ctx.GitClient.Tags(git.WithShellGlob("*.*.*"),
+			git.WithSortBy(git.CreatorDateDesc, git.VersionDesc))
+		if err != nil {
+			return nil, err
+		}
+
+		if len(tags) == 1 {
+			ctx.NextVersion.Raw = tags[0]
+		} else if len(tags) > 1 {
+			ctx.NextVersion.Raw = tags[0]
+			ctx.CurrentVersion.Raw = tags[1]
+		}
+	}
 
 	// Handle git config. Command line flag takes precedences
 	ctx.IgnoreDetached = opts.IgnoreDetached

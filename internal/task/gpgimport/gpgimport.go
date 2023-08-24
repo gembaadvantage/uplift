@@ -46,7 +46,7 @@ func (t Task) String() string {
 }
 
 // Skip running the task if no version has changed
-func (t Task) Skip(ctx *context.Context) bool {
+func (t Task) Skip(_ *context.Context) bool {
 	return strings.TrimSpace(os.Getenv(envGpgKey)) == "" ||
 		strings.TrimSpace(os.Getenv(envGpgPassphrase)) == "" ||
 		strings.TrimSpace(os.Getenv(envGpgFingerprint)) == ""

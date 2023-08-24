@@ -39,7 +39,7 @@ func (t Task) String() string {
 }
 
 // Skip running the task
-func (t Task) Skip(ctx *context.Context) bool {
+func (t Task) Skip(_ *context.Context) bool {
 	return false
 }
 

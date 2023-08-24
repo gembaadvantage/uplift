@@ -243,7 +243,6 @@ func extractTagEntry(dets git.TagDetails) tagEntry {
 }
 
 func changelogReleases(ctx *context.Context) ([]release, error) {
-	// TODO: is this filter ok?
 	tags, err := ctx.GitClient.Tags(git.WithShellGlob("*.*.*"),
 		git.WithSortBy(git.CreatorDateDesc, git.VersionDesc))
 	if err != nil {

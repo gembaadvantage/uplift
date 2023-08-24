@@ -48,7 +48,7 @@ type ExecOptions struct {
 }
 
 // Exec will execute a series of shell commands or scripts
-func Exec(ctx context.Context, cmds []string, opts ExecOptions) error {
+func Exec(_ context.Context, cmds []string, opts ExecOptions) error {
 	env := os.Environ()
 	if len(opts.Env) > 0 {
 		renv, err := resolveEnv(opts.Env)

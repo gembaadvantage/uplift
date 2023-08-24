@@ -78,8 +78,8 @@ func (t Task) Run(ctx *context.Context) error {
 		return err
 	}
 
-	name, _ := cfg["user.name"]
-	email, _ := cfg["user.email"]
+	name := cfg["user.name"]
+	email := cfg["user.email"]
 	if name != "" && email != "" {
 		log.Debug("overwriting commit author from git config")
 		c.Author.Name = name

@@ -33,20 +33,20 @@ import (
 )
 
 func TestExec_ShellCommands(t *testing.T) {
-	// git.MkTmpDir(t)
+	gittest.InitRepository(t)
 
-	// cmds := []string{
-	// 	"echo -n 'JohnDoe' > out.txt",
-	// 	"sed -i '' 's/Doe/Smith/g' out.txt",
-	// }
+	cmds := []string{
+		"echo -n 'JohnDoe' > out.txt",
+		"sed -i '' 's/Doe/Smith/g' out.txt",
+	}
 
-	// err := Exec(context.Background(), cmds, ExecOptions{})
-	// require.NoError(t, err)
+	err := Exec(context.Background(), cmds, ExecOptions{})
+	require.NoError(t, err)
 
-	// data, err := os.ReadFile("out.txt")
-	// require.NoError(t, err)
+	data, err := os.ReadFile("out.txt")
+	require.NoError(t, err)
 
-	// assert.Equal(t, "JohnSmith", string(data))
+	assert.Equal(t, "JohnSmith", string(data))
 }
 
 func TestExec_ShellScripts(t *testing.T) {

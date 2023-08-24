@@ -44,23 +44,6 @@ const (
 	AfterChangelogFile  = HookDir + "afterChangelog.out"
 )
 
-func tagRepoWith(t *testing.T, tags []string) {
-	t.Helper()
-
-	// git.InitRepo(t)
-	// git.TimeBasedTagSeries(t, tags)
-}
-
-func upliftConfigFile(t *testing.T, name string) {
-	t.Helper()
-
-	// Ensure .uplift.yml file is committed to repository
-	yml := "annotatedTags: true"
-
-	err := os.WriteFile(name, []byte(yml), 0o644)
-	require.NoError(t, err)
-}
-
 func noChangesPushed() *globalOptions {
 	return &globalOptions{NoPush: true}
 }
