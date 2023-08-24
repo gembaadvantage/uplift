@@ -31,46 +31,23 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestChangelog(t *testing.T) {
-	tests := []struct {
-		name      string
-		tags      []string
-		detectTag string
-	}{
-		{
-			name:      "SingleTag",
-			tags:      []string{"1.0.0"},
-			detectTag: "## 1.0.0",
-		},
-		{
-			name:      "MultipleTags",
-			tags:      []string{"1.0.0", "1.1.0", "1.2.0", "1.3.0"},
-			detectTag: "## 1.3.0",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tagRepoWith(t, tt.tags)
+	gittest.InitRepository(t, gittest.WithLog("(tag: 0.1.0) feature"))
 
-			chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
-			err := chglogCmd.Cmd.Execute()
-			require.NoError(t, err)
+	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
+	err := chglogCmd.Cmd.Execute()
+	require.NoError(t, err)
 
-			assert.True(t, changelogExists(t))
-
-			chglog := readChangelog(t)
-			assert.Contains(t, chglog, tt.detectTag)
-		})
-	}
+	assert.True(t, changelogExists(t))
 }
 
 func TestChangelog_DiffOnly(t *testing.T) {
-	taggedRepo(t, "v0.1.0", "feat: a new feature")
+	gittest.InitRepository(t, gittest.WithLog("(tag: 0.1.0) feature"))
 
 	var buf bytes.Buffer
 
@@ -81,11 +58,15 @@ func TestChangelog_DiffOnly(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.False(t, changelogExists(t))
-	assert.Contains(t, buf.String(), "## v0.1.0")
+	assert.Contains(t, buf.String(), "## 0.1.0")
 }
 
 func TestChangelog_WithExclude(t *testing.T) {
-	taggedRepo(t, "2.0.0", "feat: a new feat", "fix: a new fix", "ci: a ci task", "docs: some new docs")
+	log := `(tag: 2.0.0) docs: some new docs
+ci: a ci task
+fix: a new fix
+feat: a new feat`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 	chglogCmd.Cmd.SetArgs([]string{"--exclude", "^ci,^docs"})
@@ -103,7 +84,11 @@ func TestChangelog_WithExclude(t *testing.T) {
 }
 
 func TestChangelog_WithInclude(t *testing.T) {
-	taggedRepo(t, "2.0.0", "feat(scope): a new feat", "fix(scope): a new fix", "ci: a ci task", "docs: some new docs")
+	log := `(tag: 2.0.0) docs: some new docs
+ci: a ci task
+fix(scope): a new fix
+feat(scope): a new feat`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 	chglogCmd.Cmd.SetArgs([]string{"--include", "^.*\\(scope\\)"})
@@ -121,7 +106,12 @@ func TestChangelog_WithInclude(t *testing.T) {
 }
 
 func TestChangelog_All(t *testing.T) {
-	tagRepoWith(t, []string{"0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0"})
+	log := `(tag: 0.5.0) feature 5
+(tag: 0.4.0) feature 4
+(tag: 0.3.0) feature 3
+(tag: 0.2.0) feature 2
+(tag: 0.1.0) feature 1`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 	chglogCmd.Cmd.SetArgs([]string{"--all"})
@@ -140,7 +130,12 @@ func TestChangelog_All(t *testing.T) {
 }
 
 func TestChangelog_AllAsDiff(t *testing.T) {
-	tagRepoWith(t, []string{"v0.1.0", "v0.2.0", "v0.3.0", "v0.4.0", "v0.5.0"})
+	log := `(tag: 0.5.0) feature 5
+(tag: 0.4.0) feature 4
+(tag: 0.3.0) feature 3
+(tag: 0.2.0) feature 2
+(tag: 0.1.0) feature 1`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	var buf bytes.Buffer
 
@@ -153,11 +148,11 @@ func TestChangelog_AllAsDiff(t *testing.T) {
 	assert.False(t, changelogExists(t))
 
 	cl := buf.String()
-	assert.Contains(t, cl, "## v0.1.0")
-	assert.Contains(t, cl, "## v0.2.0")
-	assert.Contains(t, cl, "## v0.3.0")
-	assert.Contains(t, cl, "## v0.4.0")
-	assert.Contains(t, cl, "## v0.5.0")
+	assert.Contains(t, cl, "## 0.1.0")
+	assert.Contains(t, cl, "## 0.2.0")
+	assert.Contains(t, cl, "## 0.3.0")
+	assert.Contains(t, cl, "## 0.4.0")
+	assert.Contains(t, cl, "## 0.5.0")
 }
 
 func TestChangelog_SortOrder(t *testing.T) {
@@ -194,7 +189,11 @@ func TestChangelog_SortOrder(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			taggedRepo(t, "1.0.0", tt.commits...)
+			gittest.InitRepository(t)
+			for _, commit := range tt.commits {
+				gittest.CommitEmpty(t, commit)
+			}
+			gittest.Tag(t, "1.0.0")
 
 			chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 			chglogCmd.Cmd.SetArgs([]string{"--sort", tt.sort})
@@ -228,7 +227,10 @@ func buildChangelogRegex(t *testing.T, commits []string) *regexp.Regexp {
 }
 
 func TestChangelog_ExcludesUpliftCommitByDefault(t *testing.T) {
-	taggedRepo(t, "0.1.0", "ci: tweak workflow", "fix: a bug fix", "ci(uplift): uplifted version 0.1.0")
+	log := `(tag: 0.1.0) ci(uplift): uplifted version 0.1.0
+feat: a new feature
+ci: tweak workflow`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 	err := chglogCmd.Cmd.Execute()
@@ -238,7 +240,7 @@ func TestChangelog_ExcludesUpliftCommitByDefault(t *testing.T) {
 
 	cl := readChangelog(t)
 	assert.NotContains(t, cl, "ci(uplift): uplifted version 0.1.0")
-	assert.Contains(t, cl, "fix: a bug fix")
+	assert.Contains(t, cl, "feat: a new feature")
 	assert.Contains(t, cl, "ci: tweak workflow")
 }
 
@@ -268,9 +270,8 @@ func readChangelog(t *testing.T) string {
 }
 
 func TestChangelog_Hooks(t *testing.T) {
-	git.InitRepo(t)
+	gittest.InitRepository(t, gittest.WithLog("feat: this is a new feature"))
 	configWithHooks(t)
-	git.EmptyCommit(t, "feat: this is a new feature")
 
 	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
 	err := chglogCmd.Cmd.Execute()

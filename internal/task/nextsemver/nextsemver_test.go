@@ -23,10 +23,11 @@ SOFTWARE.
 package nextsemver
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -84,9 +85,9 @@ BREAKING CHANGE: no backwards compatibility support`,
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			git.InitRepo(t)
-			git.Tag(tt.curVer)
-			git.EmptyCommit(t, tt.commit)
+			gittest.InitRepository(t)
+			gittest.Tag(t, tt.curVer)
+			gittest.CommitEmpty(t, tt.commit)
 
 			ctx := &context.Context{
 				Prerelease: tt.prerelease,
@@ -101,9 +102,9 @@ BREAKING CHANGE: no backwards compatibility support`,
 }
 
 func TestRun_ExistingVersionNoPrefix(t *testing.T) {
-	git.InitRepo(t)
-	git.Tag("v1.0.0")
-	git.EmptyCommit(t, "fix: a new bug fix")
+	gittest.InitRepository(t)
+	gittest.Tag(t, "v1.0.0")
+	gittest.CommitEmpty(t, "fix: a new bug fix")
 
 	ctx := &context.Context{
 		NoPrefix: true,
@@ -115,8 +116,8 @@ func TestRun_ExistingVersionNoPrefix(t *testing.T) {
 }
 
 func TestRun_NoSemanticBump(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommit(t, "docs: started writing docs")
+	log := "docs: started writing docs"
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	ctx := &context.Context{}
 	err := Task{}.Run(ctx)
@@ -174,9 +175,9 @@ func TestRun_IgnorePrerelease(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			git.InitRepo(t)
-			git.Tag(tt.curVer)
-			git.EmptyCommit(t, tt.commit)
+			gittest.InitRepository(t)
+			gittest.Tag(t, tt.curVer)
+			gittest.CommitEmpty(t, tt.commit)
 
 			ctx := &context.Context{
 				Prerelease:               tt.prerelease,
@@ -232,8 +233,8 @@ BREAKING CHANGE: no backwards compatibility support`,
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			git.InitRepo(t)
-			git.EmptyCommit(t, tt.commit)
+			log := fmt.Sprintf("> %s", tt.commit)
+			gittest.InitRepository(t, gittest.WithLog(log))
 
 			ctx := &context.Context{
 				Prerelease: tt.prerelease,
@@ -248,8 +249,8 @@ BREAKING CHANGE: no backwards compatibility support`,
 }
 
 func TestRun_FirstVersionNoPrefix(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommit(t, "feat: a new feature")
+	log := "feat: a new feature"
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	ctx := &context.Context{
 		NoPrefix: true,

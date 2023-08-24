@@ -28,7 +28,7 @@ import "io"
 // pinched from https://github.com/go-task/task/blob/master/internal/execext/devnull.go
 type DevNull struct{}
 
-func (DevNull) Read(p []byte) (int, error) {
+func (DevNull) Read(_ []byte) (int, error) {
 	return 0, io.EOF
 }
 

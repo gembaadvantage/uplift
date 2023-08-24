@@ -25,8 +25,8 @@ package bump
 import (
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/goreleaser/fileglob"
+	git "github.com/purpleclay/gitz"
 )
 
 // Task for bumping versions within files
@@ -85,7 +85,7 @@ func (t Task) Run(ctx *context.Context) error {
 				continue
 			}
 
-			if err := git.Stage(resolvedBump); err != nil {
+			if _, err := ctx.GitClient.Stage(git.WithPathSpecs(resolvedBump)); err != nil {
 				return err
 			}
 			log.WithField("file", resolvedBump).Info("successfully staged file")

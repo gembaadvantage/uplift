@@ -37,7 +37,7 @@ func (e ErrDirty) Error() string {
 	return fmt.Sprintf(`uplift cannot reliably run if the repository is in a dirty state. Changes detected:
 %s
 
-Please check and resolve the status of these files before retrying. For further 
+Please check and resolve the status of these files before retrying. For further
 details visit: https://upliftci.dev/faq/gitdirty
 `, e.status)
 }
@@ -49,7 +49,7 @@ type ErrDetachedHead struct{}
 // Error returns a formatted message of the current error
 func (e ErrDetachedHead) Error() string {
 	return `uplift cannot reliably run when the repository is in a detached HEAD state. Some features
-will not run as expected. To suppress this error, use the '--ignore-detached' flag, or 
+will not run as expected. To suppress this error, use the '--ignore-detached' flag, or
 set the required config.
 
 For further details visit: https://upliftci.dev/faq/gitdetached
@@ -62,8 +62,8 @@ type ErrShallowClone struct{}
 
 // Error returns a formatted message of the current error
 func (e ErrShallowClone) Error() string {
-	return `uplift cannot reliably run against a shallow clone of the repository. Some features may not 
-work as expected. To suppress this error, use the '--ignore-shallow' flag, or set the 
+	return `uplift cannot reliably run against a shallow clone of the repository. Some features may not
+work as expected. To suppress this error, use the '--ignore-shallow' flag, or set the
 required config.
 
 For further details visit: https://upliftci.dev/faq/gitshallow

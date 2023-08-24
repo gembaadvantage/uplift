@@ -1,6 +1,6 @@
 module github.com/gembaadvantage/uplift
 
-go 1.19
+go 1.20
 
 require (
 	github.com/Masterminds/semver v1.5.0
@@ -11,6 +11,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
+	github.com/purpleclay/gitz v0.7.0
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.4
 	github.com/tidwall/gjson v1.16.0

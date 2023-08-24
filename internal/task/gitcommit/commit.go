@@ -26,7 +26,7 @@ import (
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
+	git "github.com/purpleclay/gitz"
 )
 
 // Task for committing all staged changes and optionally pushing
@@ -45,7 +45,7 @@ func (t Task) Skip(ctx *context.Context) bool {
 
 // Run the task
 func (t Task) Run(ctx *context.Context) error {
-	stg, err := git.Staged()
+	stg, err := ctx.GitClient.Staged()
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,9 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	log.Debug("attempting to commit changes")
-	if err := git.Commit(ctx.CommitDetails); err != nil {
+	if _, err := ctx.GitClient.Commit(ctx.CommitDetails.Message,
+		git.WithCommitConfig("user.name", ctx.CommitDetails.Author.Name,
+			"user.email", ctx.CommitDetails.Author.Email)); err != nil {
 		return err
 	}
 	log.Info("staged changes committed")
@@ -71,7 +73,8 @@ func (t Task) Run(ctx *context.Context) error {
 	if ctx.Config.Git != nil {
 		pushOpts = filterPushOptions(ctx.Config.Git.PushOptions)
 	}
-	return git.Push(pushOpts)
+	_, err = ctx.GitClient.Push(git.WithPushOptions(pushOpts...))
+	return err
 }
 
 func filterPushOptions(options []config.GitPushOption) []string {

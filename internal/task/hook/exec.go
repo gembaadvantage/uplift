@@ -24,6 +24,7 @@ package hook
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -47,7 +48,7 @@ type ExecOptions struct {
 }
 
 // Exec will execute a series of shell commands or scripts
-func Exec(ctx context.Context, cmds []string, opts ExecOptions) error {
+func Exec(_ context.Context, cmds []string, opts ExecOptions) error {
 	env := os.Environ()
 	if len(opts.Env) > 0 {
 		renv, err := resolveEnv(opts.Env)
@@ -119,8 +120,14 @@ func resolveEnv(env []string) ([]string, error) {
 				return []string{}, err
 			}
 
-			// Append map to slice
 			for k, v := range dotenv {
+				// A breaking change was introduced during the release of godotenv 1.5.0
+				// that parsing an env file without a key e.g. '=VALUE' no longer returns
+				// an error. Ensure this behaviour persists within uplift
+				if k == "" {
+					return []string{}, errors.New("Can't separate key from value")
+				}
+
 				denv := fmt.Sprintf("%s=%s", k, v)
 
 				log.WithField("var", denv).Debug("Injecting env var")

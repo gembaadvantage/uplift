@@ -26,8 +26,8 @@ import (
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/gpg"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -53,7 +53,7 @@ func TestSkipFalse(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-	git.InitRepo(t)
+	gittest.InitRepository(t)
 
 	t.Setenv("UPLIFT_GPG_KEY", gpg.TestKey)
 	t.Setenv("UPLIFT_GPG_PASSPHRASE", gpg.TestPassphrase)
@@ -62,14 +62,15 @@ func TestRun(t *testing.T) {
 	err := Task{}.Run(&context.Context{})
 
 	require.NoError(t, err)
-	assert.True(t, git.ConfigExists("user.signingKey", gpg.TestKeyID))
-	assert.True(t, git.ConfigExists("commit.gpgsign", "true"))
-	assert.True(t, git.ConfigExists("user.name", gpg.TestKeyUserName))
-	assert.True(t, git.ConfigExists("user.email", gpg.TestKeyUserEmail))
+	gittest.MustExec(t, "")
+	assert.Equal(t, gpg.TestKeyID, gittest.MustExec(t, "git config --get user.signingKey"))
+	assert.Equal(t, "true", gittest.MustExec(t, "git config --get commit.gpgsign"))
+	assert.Equal(t, gpg.TestKeyUserName, gittest.MustExec(t, "git config --get user.name"))
+	assert.Equal(t, gpg.TestKeyUserEmail, gittest.MustExec(t, "git config --get user.email"))
 }
 
 func TestRunImportKeyFailed(t *testing.T) {
-	git.InitRepo(t)
+	gittest.InitRepository(t)
 
 	t.Setenv("UPLIFT_GPG_KEY", "-----BEGIN PGP PRIVATE KEY BLOCK-----key-----END PGP PRIVATE KEY BLOCK-----")
 	t.Setenv("UPLIFT_GPG_PASSPHRASE", "passphrase")

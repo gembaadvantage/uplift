@@ -29,7 +29,7 @@ import (
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
+	git "github.com/purpleclay/gitz"
 )
 
 // Task for tagging a repository
@@ -69,15 +69,17 @@ func (t Task) Run(ctx *context.Context) error {
 
 	log.Debug("attempting to tag repository")
 	if ctx.Config.AnnotatedTags {
-		if err := git.AnnotatedTag(ctx.NextVersion.Raw, ctx.CommitDetails); err != nil {
+		if _, err := ctx.GitClient.Tag(ctx.NextVersion.Raw,
+			git.WithTagConfig("user.name", ctx.CommitDetails.Author.Name, "user.email", ctx.CommitDetails.Author.Email),
+			git.WithAnnotation(ctx.CommitDetails.Message)); err != nil {
 			return err
 		}
 		log.Info("tagged repository with annotated tag")
 	} else {
-		if err := git.Tag(ctx.NextVersion.Raw); err != nil {
+		if _, err := ctx.GitClient.Tag(ctx.NextVersion.Raw); err != nil {
 			return err
 		}
-		log.Info("tagged repository with standard tag")
+		log.Info("tagged repository with lightweight tag")
 	}
 
 	if ctx.NoPush {
@@ -90,7 +92,10 @@ func (t Task) Run(ctx *context.Context) error {
 	if ctx.Config.Git != nil {
 		pushOpts = filterPushOptions(ctx.Config.Git.PushOptions)
 	}
-	return git.PushTag(ctx.NextVersion.Raw, pushOpts)
+
+	_, err := ctx.GitClient.Push(git.WithRefSpecs(ctx.NextVersion.Raw),
+		git.WithPushOptions(pushOpts...))
+	return err
 }
 
 func printRepositoryTag(ctx *context.Context) {

@@ -28,7 +28,6 @@ import (
 
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/gpg"
 )
 
@@ -47,7 +46,7 @@ func (t Task) String() string {
 }
 
 // Skip running the task if no version has changed
-func (t Task) Skip(ctx *context.Context) bool {
+func (t Task) Skip(_ *context.Context) bool {
 	return strings.TrimSpace(os.Getenv(envGpgKey)) == "" ||
 		strings.TrimSpace(os.Getenv(envGpgPassphrase)) == "" ||
 		strings.TrimSpace(os.Getenv(envGpgFingerprint)) == ""
@@ -71,10 +70,8 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	log.Info("setting git config to enable gpg signing")
-	return git.ConfigSet(map[string]string{
-		"user.signingKey": keyDetails.ID,
-		"commit.gpgsign":  "true",
-		"user.name":       keyDetails.UserName,
-		"user.email":      keyDetails.UserEmail,
-	})
+	return ctx.GitClient.ConfigSetL("user.signingKey", keyDetails.ID,
+		"commit.gpgsign", "true",
+		"user.name", keyDetails.UserName,
+		"user.email", keyDetails.UserEmail)
 }

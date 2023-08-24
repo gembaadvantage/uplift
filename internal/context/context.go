@@ -27,42 +27,55 @@ import (
 	"io"
 
 	"github.com/gembaadvantage/uplift/internal/config"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
+	git "github.com/purpleclay/gitz"
 )
 
 // Context provides a way to share common state across tasks
 type Context struct {
 	ctx.Context
-	Out                      io.Writer
+	Changelog                Changelog
+	CommitDetails            git.CommitDetails
 	Config                   config.Uplift
+	CurrentVersion           semver.Version
 	DryRun                   bool
 	Debug                    bool
-	CurrentVersion           semver.Version
-	NextVersion              semver.Version
+	FetchTags                bool
+	FilterOnPrerelease       bool
+	GitClient                *git.Client
+	IgnoreDetached           bool
+	IgnoreExistingPrerelease bool
+	IgnoreShallow            bool
 	Prerelease               string
 	Metadata                 string
-	IgnoreExistingPrerelease bool
-	FilterOnPrerelease       bool
+	NextVersion              semver.Version
 	NoPrefix                 bool
 	NoVersionChanged         bool
-	CommitDetails            git.CommitDetails
-	FetchTags                bool
-	PrintCurrentTag          bool
-	PrintNextTag             bool
 	NoPush                   bool
 	NoStage                  bool
-	Changelog                Changelog
+	Out                      io.Writer
+	PrintCurrentTag          bool
+	PrintNextTag             bool
 	SCM                      SCM
-	SkipChangelog            bool
 	SkipBumps                bool
-	IgnoreDetached           bool
-	IgnoreShallow            bool
+	SkipChangelog            bool
 }
+
+// SCMProvider is used for identifying the source code management tool used
+// by the current git repository
+type SCMProvider string
+
+const (
+	GitHub       SCMProvider = "GitHub"
+	GitLab       SCMProvider = "GitLab"
+	CodeCommit   SCMProvider = "CodeCommit"
+	Gitea        SCMProvider = "Gitea"
+	Unrecognised SCMProvider = "Unrecognised"
+)
 
 // SCM provides details about the SCM provider of a repository
 type SCM struct {
-	Provider  git.SCM
+	Provider  SCMProvider
 	TagURL    string
 	CommitURL string
 }
@@ -81,12 +94,16 @@ type Changelog struct {
 // New constructs a context that captures both runtime configuration and
 // user defined runtime options
 func New(cfg config.Uplift, out io.Writer) *Context {
+	// TODO: this should throw an error if required
+	gc, _ := git.NewClient()
+
 	return &Context{
-		Context: ctx.Background(),
-		Config:  cfg,
-		Out:     out,
+		Context:   ctx.Background(),
+		Config:    cfg,
+		GitClient: gc,
+		Out:       out,
 		SCM: SCM{
-			Provider: git.Unrecognised,
+			Provider: Unrecognised,
 		},
 	}
 }
