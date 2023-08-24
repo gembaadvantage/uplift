@@ -98,12 +98,10 @@ func TestRun_CustomCommitDetails(t *testing.T) {
 	assert.Equal(t, "ci(release): this is a custom message", ctx.CommitDetails.Message)
 }
 
-// TODO: is this even a test, is this supported?
-
 func TestRun_CustomCommitWithVersionToken(t *testing.T) {
 	ctx := &context.Context{
 		NextVersion: semver.Version{
-			Raw: "0.1.0",
+			Raw: "0.1.1",
 		},
 		Config: config.Uplift{
 			CommitMessage: "ci(release): a release for $VERSION",
@@ -112,5 +110,5 @@ func TestRun_CustomCommitWithVersionToken(t *testing.T) {
 
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, "ci(release): a release for 0.1.0", ctx.CommitDetails.Message)
+	assert.Equal(t, "ci(release): a release for 0.1.1", ctx.CommitDetails.Message)
 }

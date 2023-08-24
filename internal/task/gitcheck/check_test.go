@@ -47,6 +47,8 @@ func TestRun(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// TODO: this should be carried out early on in cobra
+
 func TestRun_NotGitRepository(t *testing.T) {
 	mkTmpDir(t)
 

@@ -86,6 +86,8 @@ github.com/purpleclay/gitz v0.6.0 h1:P185UCq8HskUd4AaRPpZw80XVrTOD7UcVqM7CbrzQb8
 github.com/purpleclay/gitz v0.6.0/go.mod h1:yDVD7c+yc9PeKMhHy0sTH4maHDrTb+iOOplwNoJB0J8=
 github.com/purpleclay/gitz v0.6.1 h1:FpRMdOEoeZOATDVpwxKOYL2dL0O9lswx622UbMeTu+Y=
 github.com/purpleclay/gitz v0.6.1/go.mod h1:yDVD7c+yc9PeKMhHy0sTH4maHDrTb+iOOplwNoJB0J8=
+github.com/purpleclay/gitz v0.7.0 h1:wtgUTKEPcWv3Xzri3Db55ttg4j4Lb/ekKBvwygs76t0=
+github.com/purpleclay/gitz v0.7.0/go.mod h1:yDVD7c+yc9PeKMhHy0sTH4maHDrTb+iOOplwNoJB0J8=
 github.com/rogpeppe/fastuuid v1.1.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.10.1-0.20230524175051-ec119421bb97 h1:3RPlVWzZ/PDqmVuf/FKHARG5EMid/tl7cv54Sw/QRVY=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=

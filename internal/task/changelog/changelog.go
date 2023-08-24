@@ -71,9 +71,14 @@ var (
 )
 
 type release struct {
-	SCM context.SCM
-	// Tag     git.TagEntry
+	SCM     context.SCM
+	Tag     tagEntry
 	Changes []git.LogEntry
+}
+
+type tagEntry struct {
+	Ref     string
+	Created string
 }
 
 // Task that generates a changelog for the current repository
@@ -102,8 +107,7 @@ func (t Task) Run(ctx *context.Context) error {
 	// that cannot be invoked by the caller
 	if ctx.Changelog.PreTag {
 		log.WithField("tag", ctx.NextVersion.Raw).Info("pre-tagging latest commit for changelog creation")
-		// TODO: there is no option to tag locally
-		if _, err := ctx.GitClient.Tag("ctx.NextVersion.Raw"); err != nil {
+		if _, err := ctx.GitClient.Tag(ctx.NextVersion.Raw, git.WithLocalOnly()); err != nil {
 			return err
 		}
 		defer func() {
@@ -216,17 +220,30 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 		reverse(ents)
 	}
 
+	tagDetails, _ := ctx.GitClient.ShowTags(ctx.NextVersion.Raw)
 	return []release{
 		{
-			SCM: ctx.SCM,
-			// Tag:     git.DescribeTag(ctx.NextVersion.Raw),
+			SCM:     ctx.SCM,
+			Tag:     extractTagEntry(tagDetails[ctx.NextVersion.Raw]),
 			Changes: ents,
 		},
 	}, nil
 }
 
+func extractTagEntry(dets git.TagDetails) tagEntry {
+	created := dets.Commit.CommitterDate.Format(ChangeDate)
+	if dets.Annotation != nil {
+		created = dets.Annotation.TaggerDate.Format(ChangeDate)
+	}
+
+	return tagEntry{
+		Ref:     dets.Ref,
+		Created: created,
+	}
+}
+
 func changelogReleases(ctx *context.Context) ([]release, error) {
-	// TODO: option to retrieve a formatted string (custom format)
+	// TODO: is this filter ok?
 	tags, err := ctx.GitClient.Tags(git.WithShellGlob("*.*.*"),
 		git.WithSortBy(git.CreatorDateDesc, git.VersionDesc))
 	if err != nil {
@@ -245,8 +262,11 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 			nextTag = tags[i+1]
 		}
 
+		tagDetails, _ := ctx.GitClient.ShowTags(tags[i])
+		tag := extractTagEntry(tagDetails[tags[i]])
+
 		log.WithField("tag", tags[i]).Info("determine changes for release")
-		glog, err := ctx.GitClient.Log(git.WithRefRange(tags[i], nextTag))
+		glog, err := ctx.GitClient.Log(git.WithRefRange(tag.Ref, nextTag))
 		if err != nil {
 			return []release{}, err
 		}
@@ -270,13 +290,13 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 
 		if len(ents) == 0 {
 			log.WithFields(log.Fields{
-				"tag":  tags[i],
+				"tag":  tag.Ref,
 				"prev": nextTag,
 			}).Info("no log entries between tags")
 		} else {
 			log.WithFields(log.Fields{
-				"tag": tags[i],
-				//"date":    tags[i].Created,
+				"tag":     tag.Ref,
+				"date":    tag.Created,
 				"commits": len(ents),
 			}).Info("changeset identified")
 
@@ -295,8 +315,8 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 		}
 
 		rels = append(rels, release{
-			SCM: ctx.SCM,
-			// Tag:     tags[i],
+			SCM:     ctx.SCM,
+			Tag:     tag,
 			Changes: ents,
 		})
 	}
