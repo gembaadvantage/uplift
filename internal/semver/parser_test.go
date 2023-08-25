@@ -25,128 +25,116 @@ package semver
 import (
 	"testing"
 
+	git "github.com/purpleclay/gitz"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestParseLog_BreakingFooter(t *testing.T) {
-	inc := ParseLog(`
-commit 95bdec4c8fe888ae2fd4e6cecea99f5b7ae2a045
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Wed May 18 20:44:10 2022 +0100
+	log := []git.LogEntry{
+		{
+			Message: "docs: document about new breaking change",
+		},
+		{
+			Message: "fix: annoying bug has now been fixed",
+		},
+		{
+			Message: `refactor: changed a really important part of the app
 
-    docs: document about new breaking change
+BREAKING CHANGE: the cli has been completely refactored with no backwards compatibility`,
+		},
+		{
+			Message: "docs(config): document new configuration option",
+		},
+	}
 
-commit 0a437181e47e79ac80b683f411677ce94859633a
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Tue May 17 21:13:13 2022 +0100
-
-    fix: annoying bug has now been fixed
-
-commit f51d067556e8cc0eadcabeb5a1f3d27577bc0a84
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Tue May 17 08:33:59 2022 +0100
-
-    refactor: changed a really important part of the app
-
-	BREAKING CHANGE: the cli has been completely refactored with no backwards compatibility
-
-commit a7095058f2b42a87d772a084f427c0e645440308
-Author: paul.t <paul.t@gembaadvantage.com>
-Date:   Mon May 16 12:12:34 2022 +0100
-
-    docs(config): document new configuration option`)
-
+	inc := ParseLog(log)
 	assert.Equal(t, MajorIncrement, inc)
 }
 
 func TestParseLog_BreakingBang(t *testing.T) {
-	inc := ParseLog(`
-commit 95bdec4c8fe888ae2fd4e6cecea99f5b7ae2a045
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Wed May 18 20:44:10 2022 +0100
+	log := []git.LogEntry{
+		{
+			Message: "feat: a new snazzy feature has been added",
+		},
+		{
+			Message: "fix: annoying bug has now been fixed",
+		},
+		{
+			Message: "feat!: changed a really important part of the app",
+		},
+	}
 
-    feat: a new snazzy feature has been added
-
-commit 0a437181e47e79ac80b683f411677ce94859633a
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Tue May 17 21:13:13 2022 +0100
-
-    fix: annoying bug has now been fixed
-
-commit f51d067556e8cc0eadcabeb5a1f3d27577bc0a84
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Tue May 17 08:33:59 2022 +0100
-
-    feat!: changed a really important part of the app`)
-
+	inc := ParseLog(log)
 	assert.Equal(t, MajorIncrement, inc)
 }
 
 func TestParseLog_Minor(t *testing.T) {
-	inc := ParseLog(`
-commit 95bdec4c8fe888ae2fd4e6cecea99f5b7ae2a045
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Wed May 18 20:44:10 2022 +0100
+	log := []git.LogEntry{
+		{
+			Message: "ci: change to the existing workflow",
+		},
+		{
+			Message: "fix: annoying bug has now been fixed",
+		},
+		{
+			Message: "feat: shiny new feature has been added",
+		},
+	}
 
-    ci: change to the existing workflow
-
-commit 0a437181e47e79ac80b683f411677ce94859633a
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Tue May 17 21:13:13 2022 +0100
-
-    fix: annoying bug has now been fixed
-
-commit f51d067556e8cc0eadcabeb5a1f3d27577bc0a84
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Tue May 17 08:33:59 2022 +0100
-
-    feat: shiny new feature has been added`)
-
+	inc := ParseLog(log)
 	assert.Equal(t, MinorIncrement, inc)
 }
 
 func TestParseLog_Patch(t *testing.T) {
-	inc := ParseLog(`
-commit 95bdec4c8fe888ae2fd4e6cecea99f5b7ae2a045
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Wed May 18 20:44:10 2022 +0100
+	log := []git.LogEntry{
+		{
+			Message: "ci: change to the existing workflow",
+		},
+		{
+			Message: "docs: updated documented to talk about fix",
+		},
+		{
+			Message: "fix: small bug fixed",
+		},
+	}
 
-    ci: change to the existing workflow
-
-commit 0a437181e47e79ac80b683f411677ce94859633a
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Tue May 17 21:13:13 2022 +0100
-
-    docs: updated documented to talk about fix
-
-commit f51d067556e8cc0eadcabeb5a1f3d27577bc0a84
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Tue May 17 08:33:59 2022 +0100
-
-    fix: small bug fixed`)
-
+	inc := ParseLog(log)
 	assert.Equal(t, PatchIncrement, inc)
 }
 
 func TestParseLog_NoIncrement(t *testing.T) {
-	inc := ParseLog(`
-commit 0a437181e47e79ac80b683f411677ce94859633a
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Tue May 17 21:13:13 2022 +0100
+	log := []git.LogEntry{
+		{
+			Message: "docs(ci): documented additional CI support",
+		},
+		{
+			Message: "ci: sped up the existing build",
+		},
+		{
+			Message: "docs(config): documented new configuration option",
+		},
+	}
 
-    docs(ci): documented additional CI support
-
-commit f51d067556e8cc0eadcabeb5a1f3d27577bc0a84
-Author: Paul T <paul.t@gembaadvantage.com>
-Date:   Tue May 17 08:33:59 2022 +0100
-
-    ci: sped up the existing build
-
-commit a7095058f2b42a87d772a084f427c0e645440308
-Author: paul.t <paul.t@gembaadvantage.com>
-Date:   Mon May 16 12:12:34 2022 +0100
-
-    docs(config): documented new configuration option`)
-
+	inc := ParseLog(log)
 	assert.Equal(t, NoIncrement, inc)
+}
+
+func TestParseLog_RenovateMultilineCommit(t *testing.T) {
+	log := []git.LogEntry{
+		{
+			Message: "fix: bug within search has been fixed",
+		},
+		{
+			Message: `chore(deps): update dependency aws/aws-cdk to v2.90.0
+
+## Changelog:
+
+feat: a brand new feature has been added
+feat!: a breaking change to the interface
+refactor: tidy up some bits of the code`,
+		},
+	}
+
+	inc := ParseLog(log)
+	assert.Equal(t, PatchIncrement, inc)
 }
