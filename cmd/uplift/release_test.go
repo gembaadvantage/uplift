@@ -73,7 +73,7 @@ func TestRelease_NoPrefix(t *testing.T) {
 > docs: update docs
 > refactor: a big change
 a description about the work involved
-> BREAKING CHANGE: the existing cli is no longer backward compatible
+BREAKING CHANGE: the existing cli is no longer backward compatible
 > fix: bug fix
 > feat: new feature`
 	gittest.InitRepository(t, gittest.WithLog(log))

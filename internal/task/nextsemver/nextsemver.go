@@ -72,7 +72,7 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	// Identify any commit that will trigger the largest semantic version bump
-	inc := semver.ParseLog(glog.Raw)
+	inc := semver.ParseLog(glog.Commits)
 	if inc == semver.NoIncrement {
 		ctx.NoVersionChanged = true
 
