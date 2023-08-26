@@ -81,11 +81,12 @@ uplift changelog --no-stage`
 )
 
 type changelogOptions struct {
-	DiffOnly bool
-	Exclude  []string
-	Include  []string
-	All      bool
-	Sort     string
+	DiffOnly  bool
+	Exclude   []string
+	Include   []string
+	All       bool
+	Sort      string
+	Multiline bool
 	*globalOptions
 }
 
@@ -126,6 +127,7 @@ func newChangelogCmd(gopts *globalOptions, out io.Writer) *changelogCommand {
 	f.StringSliceVar(&chglogCmd.Opts.Exclude, "exclude", []string{}, "a list of regexes for excluding conventional commits from the changelog")
 	f.StringSliceVar(&chglogCmd.Opts.Include, "include", []string{}, "a list of regexes to cherry-pick conventional commits for the changelog")
 	f.StringVar(&chglogCmd.Opts.Sort, "sort", "", "the sort order of commits within each changelog entry")
+	f.BoolVar(&chglogCmd.Opts.Multiline, "multiline", false, "include multiline commit messages within changelog (skips truncation)")
 
 	chglogCmd.Cmd = cmd
 	return chglogCmd
@@ -185,6 +187,10 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	ctx.NoStage = opts.NoStage
 	ctx.Changelog.DiffOnly = opts.DiffOnly
 	ctx.Changelog.All = opts.All
+	ctx.Changelog.Multiline = opts.Multiline
+	if !ctx.Changelog.Multiline && ctx.Config.Changelog != nil {
+		ctx.Changelog.Multiline = ctx.Config.Changelog.Multiline
+	}
 
 	// Sort order provided as a command-line flag takes precedence
 	ctx.Changelog.Sort = opts.Sort

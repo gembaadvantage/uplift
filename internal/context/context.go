@@ -83,12 +83,13 @@ type SCM struct {
 // Changelog provides details about how the changelog should be managed
 // for the current repository
 type Changelog struct {
-	All      bool
-	DiffOnly bool
-	Exclude  []string
-	Include  []string
-	Sort     string
-	PreTag   bool
+	All       bool
+	DiffOnly  bool
+	Exclude   []string
+	Include   []string
+	Sort      string
+	PreTag    bool
+	Multiline bool
 }
 
 // New constructs a context that captures both runtime configuration and

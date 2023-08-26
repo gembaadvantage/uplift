@@ -92,6 +92,7 @@ type releaseOptions struct {
 	Exclude       []string
 	Include       []string
 	Sort          string
+	Multiline     bool
 	*globalOptions
 }
 
@@ -133,6 +134,7 @@ func newReleaseCmd(gopts *globalOptions, out io.Writer) *releaseCommand {
 	f.StringSliceVar(&relCmd.Opts.Exclude, "exclude", []string{}, "a list of regexes for excluding conventional commits from the changelog")
 	f.StringSliceVar(&relCmd.Opts.Include, "include", []string{}, "a list of regexes to cherry-pick conventional commits for the changelog")
 	f.StringVar(&relCmd.Opts.Sort, "sort", "", "the sort order of commits within each changelog entry")
+	f.BoolVar(&relCmd.Opts.Multiline, "multiline", false, "include multiline commit messages within changelog (skips truncation)")
 
 	relCmd.Cmd = cmd
 	return relCmd
@@ -191,6 +193,10 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	ctx.Changelog.PreTag = true
 
 	// Merge config and command line arguments together
+	ctx.Changelog.Multiline = opts.Multiline
+	if !ctx.Changelog.Multiline && ctx.Config.Changelog != nil {
+		ctx.Changelog.Multiline = ctx.Config.Changelog.Multiline
+	}
 	ctx.Changelog.Include = opts.Include
 	ctx.Changelog.Exclude = opts.Exclude
 	if ctx.Config.Changelog != nil {

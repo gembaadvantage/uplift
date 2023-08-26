@@ -49,17 +49,10 @@ docs: update docs
 feat: a new feature
 fix: a bug fix
 (tag: 0.1.0) feat: this was the last feature`
-	gittest.InitRepository(t, gittest.WithLog(log))
-
-	// TODO:
-	// gittest.StagedFile(t, "", "") > TempFile and StageFile under the covers
-	// gittest.WithCommittedFiles("", "", "", "") > file is automatically committed at the end
-
-	gittest.TempFile(t, "test.txt", bumpFile)
-	gittest.StageFile(t, "test.txt")
-	gittest.TempFile(t, ".uplift.yml", bumpConfig)
-	gittest.StageFile(t, ".uplift.yml")
-	gittest.Commit(t, "chore: added files")
+	gittest.InitRepository(t,
+		gittest.WithLog(log),
+		gittest.WithCommittedFiles("test.txt", ".uplift.yml"),
+		gittest.WithFileContent("test.txt", bumpFile, ".uplift.yml", bumpConfig))
 
 	bmpCmd := newBumpCmd(noChangesPushed(), os.Stdout)
 
@@ -77,12 +70,10 @@ func TestBump_PrereleaseFlag(t *testing.T) {
 fix: fix bug
 feat!: breaking change
 feat: this is a new feature`
-	gittest.InitRepository(t, gittest.WithLog(log))
-	gittest.TempFile(t, "test.txt", bumpFile)
-	gittest.StageFile(t, "test.txt")
-	gittest.TempFile(t, ".uplift.yml", bumpConfig)
-	gittest.StageFile(t, ".uplift.yml")
-	gittest.Commit(t, "chore: added files")
+	gittest.InitRepository(t,
+		gittest.WithLog(log),
+		gittest.WithCommittedFiles("test.txt", ".uplift.yml"),
+		gittest.WithFileContent("test.txt", bumpFile, ".uplift.yml", bumpConfig))
 
 	bmpCmd := newBumpCmd(&globalOptions{}, os.Stdout)
 	bmpCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})

@@ -140,6 +140,18 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
+	if !ctx.Changelog.Multiline {
+		log.Info("trim all commit messages to a single line")
+		for i := range rels {
+			for j := range rels[i].Changes {
+				msg := rels[i].Changes[j].Message
+				if idx := strings.Index(msg, "\n"); idx > -1 {
+					rels[i].Changes[j].Message = strings.TrimSpace(msg[:idx])
+				}
+			}
+		}
+	}
+
 	if ctx.Changelog.DiffOnly {
 		diff, err := diffChangelog(rels)
 		if err != nil {
