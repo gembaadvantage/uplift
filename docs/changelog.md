@@ -40,10 +40,16 @@ uplift changelog --diff-only
 
 ## Migrate an Existing Repository
 
-:octicons-beaker-24: Experimental
-
 If your repository does not contain a `CHANGELOG.md` file, you can generate one that spans its entire history. A word of warning, this does require a tagging structure to be in place.
 
 ```sh
 uplift changelog --all
+```
+
+## Supporting Multiline Commits
+
+You can configure `uplift` to include multiline commit messages within your changelog, by disabling its default behaviour to truncate them to a single line.
+
+```sh
+uplift changelog --multiline
 ```

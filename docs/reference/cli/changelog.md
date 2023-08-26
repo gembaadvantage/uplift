@@ -61,7 +61,8 @@ uplift changelog --multiline
 -h, --help              help for changelog
     --include strings   a list of regexes to cherry-pick conventional commits
                         for the changelog
-    --multiline         include multiline commit messages within changelog (skips truncation)
+    --multiline         include multiline commit messages within changelog
+                        (skips truncation)
     --sort string       the sort order of commits within each changelog entry
 ```
 
