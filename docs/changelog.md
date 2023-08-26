@@ -48,7 +48,7 @@ uplift changelog --all
 
 ## Supporting Multiline Commits
 
-You can configure `uplift` to include multiline commit messages within your changelog, by disabling its default behaviour to truncate them to a single line.
+You can configure `uplift` to include multiline commit messages within your changelog by changing its default behaviour to truncate them to a single line.
 
 ```sh
 uplift changelog --multiline
