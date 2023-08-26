@@ -33,7 +33,9 @@
       },
       "type": "object",
       "additionalProperties": false,
-      "required": ["file"],
+      "required": [
+        "file"
+      ],
       "not": {
         "properties": {
           "regex": {
@@ -67,7 +69,9 @@
       },
       "type": "object",
       "additionalProperties": false,
-      "required": ["pattern"]
+      "required": [
+        "pattern"
+      ]
     },
     "JSONBump": {
       "properties": {
@@ -85,7 +89,9 @@
       },
       "type": "object",
       "additionalProperties": false,
-      "required": ["path"]
+      "required": [
+        "path"
+      ]
     },
     "CommitAuthor": {
       "properties": {
@@ -106,10 +112,14 @@
       "additionalProperties": false,
       "anyOf": [
         {
-          "required": ["name"]
+          "required": [
+            "name"
+          ]
         },
         {
-          "required": ["email"]
+          "required": [
+            "email"
+          ]
         }
       ]
     },
@@ -119,7 +129,12 @@
           "$comment": "https://upliftci.dev/reference/config#changelog",
           "description": "Change the sort order of the commits within each changelog entry. Supported values are [asc, desc, ASC or DESC]. Defaults to desc (descending order) to mirror the default behaviour of 'git log'",
           "type": "string",
-          "enum": ["asc", "desc", "ASC", "DESC"]
+          "enum": [
+            "asc",
+            "desc",
+            "ASC",
+            "DESC"
+          ]
         },
         "exclude": {
           "$comment": "https://upliftci.dev/reference/config#changelog",
@@ -140,19 +155,35 @@
           },
           "type": "array",
           "minItems": 1
+        },
+        "multiline": {
+          "$comment": "https://upliftci.dev/reference/config#changelog",
+          "description": "Include multiline commit messages within the changelog. Disables default behaviour of truncating a commit message to its first line",
+          "type": "boolean"
         }
       },
       "type": "object",
       "additionalProperties": false,
       "anyOf": [
         {
-          "required": ["sort"]
+          "required": [
+            "sort"
+          ]
         },
         {
-          "required": ["exclude"]
+          "required": [
+            "exclude"
+          ]
         },
         {
-          "required": ["include"]
+          "required": [
+            "include"
+          ]
+        },
+        {
+          "required": [
+            "multiline"
+          ]
         }
       ]
     },
@@ -182,13 +213,19 @@
       "additionalProperties": false,
       "anyOf": [
         {
-          "required": ["ignoreDetached"]
+          "required": [
+            "ignoreDetached"
+          ]
         },
         {
-          "required": ["ignoreShallow"]
+          "required": [
+            "ignoreShallow"
+          ]
         },
         {
-          "required": ["pushOptions"]
+          "required": [
+            "pushOptions"
+          ]
         }
       ]
     },
@@ -220,7 +257,9 @@
           },
           "type": "object",
           "additionalProperties": false,
-          "required": ["option"]
+          "required": [
+            "option"
+          ]
         }
       ]
     },
@@ -235,7 +274,9 @@
       },
       "type": "object",
       "additionalProperties": false,
-      "required": ["url"]
+      "required": [
+        "url"
+      ]
     },
     "GitHub": {
       "properties": {
@@ -248,7 +289,9 @@
       },
       "type": "object",
       "additionalProperties": false,
-      "required": ["url"]
+      "required": [
+        "url"
+      ]
     },
     "GitLab": {
       "properties": {
@@ -261,7 +304,9 @@
       },
       "type": "object",
       "additionalProperties": false,
-      "required": ["url"]
+      "required": [
+        "url"
+      ]
     },
     "Hooks": {
       "properties": {
@@ -350,28 +395,44 @@
       "additionalProperties": false,
       "anyOf": [
         {
-          "required": ["before"]
+          "required": [
+            "before"
+          ]
         },
         {
-          "required": ["beforeBump"]
+          "required": [
+            "beforeBump"
+          ]
         },
         {
-          "required": ["beforeTag"]
+          "required": [
+            "beforeTag"
+          ]
         },
         {
-          "required": ["beforeChangelog"]
+          "required": [
+            "beforeChangelog"
+          ]
         },
         {
-          "required": ["after"]
+          "required": [
+            "after"
+          ]
         },
         {
-          "required": ["afterBump"]
+          "required": [
+            "afterBump"
+          ]
         },
         {
-          "required": ["afterTag"]
+          "required": [
+            "afterTag"
+          ]
         },
         {
-          "required": ["afterChangelog"]
+          "required": [
+            "afterChangelog"
+          ]
         }
       ]
     }
@@ -441,19 +502,29 @@
     {
       "oneOf": [
         {
-          "required": ["gitea"]
+          "required": [
+            "gitea"
+          ]
         },
         {
-          "required": ["github"]
+          "required": [
+            "github"
+          ]
         },
         {
-          "required": ["gitlab"]
+          "required": [
+            "gitlab"
+          ]
         }
       ]
     },
     {
       "not": {
-        "required": ["gitea", "github", "gitlab"]
+        "required": [
+          "gitea",
+          "github",
+          "gitlab"
+        ]
       }
     }
   ]

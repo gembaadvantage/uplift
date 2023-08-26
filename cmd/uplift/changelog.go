@@ -77,7 +77,10 @@ uplift changelog --include "^.*\(scope\)"
 
 # Generate the next changelog entry but do not stage or push any changes
 # back to the git remote
-uplift changelog --no-stage`
+uplift changelog --no-stage
+
+# Generate a changelog with multiline commit messages
+uplift changelog --multiline`
 )
 
 type changelogOptions struct {

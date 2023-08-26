@@ -50,6 +50,7 @@ uplift release --no-prefix
 -h, --help                help for release
     --include strings     a list of regexes to cherry-pick conventional commits
                           for the changelog
+    --multiline           include multiline commit messages within changelog (skips truncation)
     --no-prefix           strip the default 'v' prefix from the next calculated
                           semantic version
     --prerelease string   append a prerelease suffix to next calculated semantic
