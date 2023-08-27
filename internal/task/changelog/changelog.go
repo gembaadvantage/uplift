@@ -68,9 +68,6 @@ var (
 
 	// ErrNoAppendHeader is reported if a changelog is missing the expected append header
 	ErrNoAppendHeader = errors.New("changelog missing supported append header")
-
-	// Formatting multiline messages for markdown
-	multilineFmtRegex = regexp.MustCompile("\n+")
 )
 
 type release struct {
