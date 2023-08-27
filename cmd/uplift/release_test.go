@@ -264,7 +264,9 @@ feat: a new feat`
 
 func TestRelease_WithMultiline(t *testing.T) {
 	log := `> feat: this is a multiline commit
-The entire contents of this commit should exist in the changelog
+The entire contents of this commit should exist in the changelog.
+
+Multiline formatting should be correct for rendering in markdown
 > fix: this is a bug fix
 > docs: update documentation
 this now includes code examples`
@@ -280,8 +282,10 @@ this now includes code examples`
 
 	cl := readChangelog(t)
 	assert.Contains(t, cl, `feat: this is a multiline commit
-The entire contents of this commit should exist in the changelog`)
+  The entire contents of this commit should exist in the changelog.
+
+  Multiline formatting should be correct for rendering in markdown`)
 	assert.Contains(t, cl, "fix: this is a bug fix")
 	assert.Contains(t, cl, `docs: update documentation
-this now includes code examples`)
+  this now includes code examples`)
 }

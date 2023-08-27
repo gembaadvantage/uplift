@@ -68,6 +68,9 @@ var (
 
 	// ErrNoAppendHeader is reported if a changelog is missing the expected append header
 	ErrNoAppendHeader = errors.New("changelog missing supported append header")
+
+	// Formatting multiline messages for markdown
+	multilineFmtRegex = regexp.MustCompile("\n+")
 )
 
 type release struct {
@@ -140,7 +143,18 @@ func (t Task) Run(ctx *context.Context) error {
 		return nil
 	}
 
-	if !ctx.Changelog.Multiline {
+	if ctx.Changelog.Multiline {
+		log.Info("formatting multiline messages for changelog")
+		for i := range rels {
+			for j := range rels[i].Changes {
+				msg := rels[i].Changes[j].Message
+				msg = strings.ReplaceAll(msg, "\n", "\n  ")
+				msg = strings.ReplaceAll(msg, "\n  \n", "\n\n")
+
+				rels[i].Changes[j].Message = msg
+			}
+		}
+	} else {
 		log.Info("trim all commit messages to a single line")
 		for i := range rels {
 			for j := range rels[i].Changes {

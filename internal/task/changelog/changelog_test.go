@@ -727,8 +727,10 @@ ci: tweak
 func TestRun_MultilineMessages(t *testing.T) {
 	log := `> (tag: 1.1.0) feat: this is a multiline commmit
 
-that should be displayed across multiple lines
-within the changelog
+That should be displayed across multiple lines within the changelog.
+It should be formatted as expected.
+
+With the correct indentation for rendering in markdown
 > feat: this is a single line commit that remains unchanged
 > (tag: 1.0.0) not included in changelog`
 	gittest.InitRepository(t, gittest.WithLog(log))
@@ -759,8 +761,10 @@ within the changelog
 
 - %s feat: this is a multiline commmit
 
-that should be displayed across multiple lines
-within the changelog
+  That should be displayed across multiple lines within the changelog.
+  It should be formatted as expected.
+
+  With the correct indentation for rendering in markdown
 - %s feat: this is a single line commit that remains unchanged
 `, changelogDate(t), fmt.Sprintf("`%s`", glog[0].AbbrevHash), fmt.Sprintf("`%s`", glog[1].AbbrevHash))
 

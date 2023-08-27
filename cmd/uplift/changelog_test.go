@@ -286,7 +286,9 @@ func TestChangelog_Hooks(t *testing.T) {
 
 func TestChangelog_WithMultiline(t *testing.T) {
 	log := `> (tag: 2.0.0) feat: this is a multiline commit
-The entire contents of this commit should exist in the changelog
+The entire contents of this commit should exist in the changelog.
+
+Multiline formatting should be correct for rendering in markdown
 > fix: this is a bug fix
 > docs: update documentation
 this now includes code examples`
@@ -302,8 +304,10 @@ this now includes code examples`
 
 	cl := readChangelog(t)
 	assert.Contains(t, cl, `feat: this is a multiline commit
-The entire contents of this commit should exist in the changelog`)
+  The entire contents of this commit should exist in the changelog.
+
+  Multiline formatting should be correct for rendering in markdown`)
 	assert.Contains(t, cl, "fix: this is a bug fix")
 	assert.Contains(t, cl, `docs: update documentation
-this now includes code examples`)
+  this now includes code examples`)
 }
