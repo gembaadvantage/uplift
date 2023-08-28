@@ -897,3 +897,52 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 	assert.Equal(t, expected, readChangelog(t))
 }
+
+func TestRun_AllSkipPrerelease(t *testing.T) {
+	log := `(tag: 0.2.0) feat: 4
+(tag: 0.2.0-pre.2) feat: 3
+(tag: 0.2.0-pre.1) fix: 2
+(tag: 0.1.0) feat: 2
+(tag: 0.1.0-pre.2) fix: 1
+(tag: 0.1.0-pre.1) feat: 1`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
+
+	ctx := &context.Context{
+		Changelog: context.Changelog{
+			All:            true,
+			SkipPrerelease: true,
+		},
+		SCM: context.SCM{
+			Provider: context.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+## 0.2.0 - %s
+
+- %s feat: 4
+- %s feat: 3
+- %s fix: 2
+
+## 0.1.0 - %s
+
+- %s feat: 2
+- %s fix: 1
+- %s feat: 1
+- %s %s
+`, changelogDate(t), hashes["feat: 4"], hashes["feat: 3"], hashes["fix: 2"], changelogDate(t),
+		hashes["feat: 2"], hashes["fix: 1"], hashes["feat: 1"], hashes[gittest.InitialCommit], gittest.InitialCommit)
+
+	assert.Equal(t, expected, readChangelog(t))
+}

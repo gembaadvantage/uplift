@@ -299,11 +299,21 @@ func extractTagEntry(dets git.TagDetails) tagEntry {
 }
 
 func changelogReleases(ctx *context.Context) ([]release, error) {
-	// Changelog (All)
-	// Need to merge releases (post processing step?) Or is there a way to filter the git log?
-
 	tags, err := ctx.GitClient.Tags(git.WithShellGlob("*.*.*"),
-		git.WithSortBy(git.CreatorDateDesc, git.VersionDesc))
+		git.WithSortBy(git.CreatorDateDesc, git.VersionDesc),
+		git.WithFilters(func(tag string) bool {
+			if !ctx.Changelog.SkipPrerelease {
+				return true
+			}
+
+			ver, err := semver.Parse(tag)
+			if err != nil {
+				return false
+			}
+
+			return ver.Prerelease == ""
+		}))
+
 	if err != nil {
 		return []release{}, nil
 	}
