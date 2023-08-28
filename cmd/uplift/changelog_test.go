@@ -283,3 +283,31 @@ func TestChangelog_Hooks(t *testing.T) {
 	assert.FileExists(t, AfterChangelogFile)
 	assert.FileExists(t, AfterFile)
 }
+
+func TestChangelog_WithMultiline(t *testing.T) {
+	log := `> (tag: 2.0.0) feat: this is a multiline commit
+The entire contents of this commit should exist in the changelog.
+
+Multiline formatting should be correct for rendering in markdown
+> fix: this is a bug fix
+> docs: update documentation
+this now includes code examples`
+	gittest.InitRepository(t, gittest.WithLog(log))
+
+	chglogCmd := newChangelogCmd(noChangesPushed(), os.Stdout)
+	chglogCmd.Cmd.SetArgs([]string{"--multiline"})
+
+	err := chglogCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+
+	cl := readChangelog(t)
+	assert.Contains(t, cl, `feat: this is a multiline commit
+  The entire contents of this commit should exist in the changelog.
+
+  Multiline formatting should be correct for rendering in markdown`)
+	assert.Contains(t, cl, "fix: this is a bug fix")
+	assert.Contains(t, cl, `docs: update documentation
+  this now includes code examples`)
+}

@@ -36,13 +36,10 @@ func TestRelease(t *testing.T) {
 fix: bug fix
 docs: update docs
 ci: update pipeline`
-	gittest.InitRepository(t, gittest.WithLog(log))
-
-	gittest.TempFile(t, "test.txt", bumpFile)
-	gittest.StageFile(t, "test.txt")
-	gittest.TempFile(t, ".uplift.yml", bumpConfig)
-	gittest.StageFile(t, ".uplift.yml")
-	gittest.Commit(t, "chore: added files")
+	gittest.InitRepository(t,
+		gittest.WithLog(log),
+		gittest.WithCommittedFiles("test.txt", ".uplift.yml"),
+		gittest.WithFileContent("test.txt", bumpFile, ".uplift.yml", bumpConfig))
 
 	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
 
@@ -120,13 +117,10 @@ func TestRelease_PrereleaseFlag(t *testing.T) {
 	log := `refactor: make changes
 feat: new feature
 docs: update docs`
-	gittest.InitRepository(t, gittest.WithLog(log))
-
-	gittest.TempFile(t, "test.txt", bumpFile)
-	gittest.StageFile(t, "test.txt")
-	gittest.TempFile(t, ".uplift.yml", bumpConfig)
-	gittest.StageFile(t, ".uplift.yml")
-	gittest.Commit(t, "chore: added files")
+	gittest.InitRepository(t,
+		gittest.WithLog(log),
+		gittest.WithCommittedFiles("test.txt", ".uplift.yml"),
+		gittest.WithFileContent("test.txt", bumpFile, ".uplift.yml", bumpConfig))
 
 	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
 	relCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
@@ -166,13 +160,10 @@ func TestRelease_SkipBumps(t *testing.T) {
 fix: bug fix
 ci: updated workflow
 (tag: 1.0.0) feat: first feature`
-	gittest.InitRepository(t, gittest.WithLog(log))
-
-	gittest.TempFile(t, "test.txt", bumpFile)
-	gittest.StageFile(t, "test.txt")
-	gittest.TempFile(t, ".uplift.yml", bumpConfig)
-	gittest.StageFile(t, ".uplift.yml")
-	gittest.Commit(t, "chore: added files")
+	gittest.InitRepository(t,
+		gittest.WithLog(log),
+		gittest.WithCommittedFiles("test.txt", ".uplift.yml"),
+		gittest.WithFileContent("test.txt", bumpFile, ".uplift.yml", bumpConfig))
 
 	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
 	relCmd.Cmd.SetArgs([]string{"--skip-bumps"})
@@ -269,4 +260,32 @@ feat: a new feat`
 	assert.NotContains(t, cl, "fix: a new fix")
 	assert.NotContains(t, cl, "ci: a ci task")
 	assert.NotContains(t, cl, "docs: some new docs")
+}
+
+func TestRelease_WithMultiline(t *testing.T) {
+	log := `> feat: this is a multiline commit
+The entire contents of this commit should exist in the changelog.
+
+Multiline formatting should be correct for rendering in markdown
+> fix: this is a bug fix
+> docs: update documentation
+this now includes code examples`
+	gittest.InitRepository(t, gittest.WithLog(log))
+
+	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
+	relCmd.Cmd.SetArgs([]string{"--multiline"})
+
+	err := relCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+
+	cl := readChangelog(t)
+	assert.Contains(t, cl, `feat: this is a multiline commit
+  The entire contents of this commit should exist in the changelog.
+
+  Multiline formatting should be correct for rendering in markdown`)
+	assert.Contains(t, cl, "fix: this is a bug fix")
+	assert.Contains(t, cl, `docs: update documentation
+  this now includes code examples`)
 }
