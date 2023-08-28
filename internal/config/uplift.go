@@ -82,10 +82,11 @@ type CommitAuthor struct {
 // Changelog defines configuration for generating a changelog of the latest
 // semantic version based release
 type Changelog struct {
-	Sort      string   `yaml:"sort" validate:"required_without_all=Exclude Include,oneof=asc desc ASC DESC"`
-	Exclude   []string `yaml:"exclude" validate:"required_without_all=Sort Include,dive,min=1"`
-	Include   []string `yaml:"include" validate:"required_without_all=Sort Exclude,dive,min=1"`
-	Multiline bool     `yaml:"multiline"`
+	Sort           string   `yaml:"sort" validate:"required_without_all=Exclude Include,oneof=asc desc ASC DESC"`
+	Exclude        []string `yaml:"exclude" validate:"required_without_all=Sort Include,dive,min=1"`
+	Include        []string `yaml:"include" validate:"required_without_all=Sort Exclude,dive,min=1"`
+	Multiline      bool     `yaml:"multiline"`
+	SkipPrerelease bool     `yaml:"skipPrerelease"`
 }
 
 // Git defines configuration for how uplift interacts with git
