@@ -90,10 +90,9 @@ func TestCheckDirty(t *testing.T) {
 	assert.Empty(t, out)
 }
 
-
-func TestCheckDirty_allowedFiles(t *testing.T) {
+func TestCheckDirty_AllowedFiles(t *testing.T) {
 	InitRepo(t)
-	
+
 	TouchFiles(t, "main.go", "testing.go")
 	Stage("main.go")
 	Stage("testing.go")
@@ -105,9 +104,9 @@ func TestCheckDirty_allowedFiles(t *testing.T) {
 	assert.Empty(t, out)
 }
 
-func TestCheckDirty_unexpectedDirtyFile(t *testing.T) {
+func TestCheckDirty_UnexpectedDirtyFile(t *testing.T) {
 	InitRepo(t)
-	
+
 	TouchFiles(t, "main.go", "testing.go", "iShouldError.go")
 	Stage("main.go")
 	Stage("testing.go")
@@ -124,9 +123,9 @@ A  testing.go`
 	assert.Equal(t, exp, out)
 }
 
-func TestCheckDirty_emptyArrayProvided(t *testing.T) {
+func TestCheckDirty_EmptyArrayProvided(t *testing.T) {
 	InitRepo(t)
-	
+
 	TouchFiles(t, "main.go", "testing.go")
 	Stage("main.go")
 	Stage("testing.go")

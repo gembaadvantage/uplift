@@ -30,7 +30,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"slices"
+
 	"github.com/gembaadvantage/codecommit-sign/pkg/translate"
 	"github.com/gembaadvantage/uplift/internal/semver"
 	"mvdan.cc/sh/v3/interp"
@@ -143,9 +143,9 @@ func IsShallow() bool {
 func CheckDirty(allowedFiles []string) (string, error) {
 	out, err := Clean(Run("status", "--porcelain"))
 	if out != "" || err != nil {
-		
+
 		if allowedFiles == nil {
-			return out, err	
+			return out, err
 		}
 
 		if len(allowedFiles) == 0 {
@@ -153,16 +153,16 @@ func CheckDirty(allowedFiles []string) (string, error) {
 		}
 
 		dirtyFilesArray := strings.Split(out, "\n")
-				
+
 		for i := 0; i < len(dirtyFilesArray); i++ {
 			dirtyFilepath := dirtyFilesArray[i][3:len(dirtyFilesArray[i])]
-			isFileInConfig := slices.Contains(allowedFiles, dirtyFilepath)
+			isFileInConfig := stringInSlice(dirtyFilepath, allowedFiles)
 
 			if !isFileInConfig {
 				return out, err
 			}
 		}
-				
+
 	}
 	return "", nil
 }
@@ -583,4 +583,13 @@ func Clean(output string, err error) (string, error) {
 		err = errors.New(strings.TrimSuffix(err.Error(), "\n"))
 	}
 	return output, err
+}
+
+func stringInSlice(stringToFind string, listOfStrings []string) bool {
+	for _, value := range listOfStrings {
+		if value == stringToFind {
+			return true
+		}
+	}
+	return false
 }

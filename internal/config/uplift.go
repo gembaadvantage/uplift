@@ -47,7 +47,6 @@ type Uplift struct {
 	GitLab        *GitLab       `yaml:"gitlab" validate:"omitempty"`
 	Hooks         *Hooks        `yaml:"hooks" validate:"omitempty"`
 	Env           []string      `yaml:"env" validate:"dive,min=1"`
-	DirtyFiles    []string 		`yaml:dirtyFiles validate:"omitempty"`
 }
 
 // Bump defines configuration for bumping individual files based
@@ -93,6 +92,7 @@ type Git struct {
 	IgnoreDetached bool            `yaml:"ignoreDetached"`
 	IgnoreShallow  bool            `yaml:"ignoreShallow"`
 	PushOptions    []GitPushOption `yaml:"pushOptions" validate:"dive"`
+	DirtyFiles     []string        `yaml:"dirtyFiles" validate:"omitempty,dive,min=1,file"`
 }
 
 // GitPushOption provides a way of supplying additional options to

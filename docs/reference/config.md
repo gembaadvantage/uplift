@@ -141,8 +141,10 @@ commitMessage: "chore(release): this is a custom release message"
 # Allowing specific case sensitive files to allow using uplift to
 # add unedited but changed files as part of your CI
 
-dirtyFiles:
-    - /path/to/file
+git:
+    dirtyFiles:
+        - file.txt
+        - path/to/file.txt
 ```
 
 ## hooks
