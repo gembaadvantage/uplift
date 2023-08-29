@@ -26,18 +26,16 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCheck(t *testing.T) {
-	cfg := `
-commitAuthor:
+	gittest.InitRepository(t)
+	gittest.TempFile(t, ".uplift.yml", `commitAuthor:
   name: joe.bloggs
   email: joe.bloggs@example.com
-`
-	configFileWith(t, cfg)
+`)
 
 	checkCmd := newCheckCmd(&globalOptions{}, os.Stdout)
 	err := checkCmd.Execute()
@@ -46,24 +44,15 @@ commitAuthor:
 }
 
 func TestCheck_InvalidConfig(t *testing.T) {
-	cfg := `
-bumps:
+	gittest.InitRepository(t)
+	gittest.TempFile(t, ".uplift.yml", `bumps:
   - file: text.txt
     regex:
       - pattern: ""
-`
-	configFileWith(t, cfg)
+`)
 
 	checkCmd := newCheckCmd(&globalOptions{}, os.Stdout)
 	err := checkCmd.Execute()
 
 	assert.Error(t, err)
-}
-
-func configFileWith(t *testing.T, content string) {
-	t.Helper()
-	git.MkTmpDir(t)
-
-	err := os.WriteFile(".uplift.yml", []byte(content), 0o644)
-	require.NoError(t, err)
 }

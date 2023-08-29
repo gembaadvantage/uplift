@@ -27,26 +27,32 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestTag(t *testing.T) {
-	untaggedRepo(t, "fix: bug fix", "docs: update docs", "ci: update pipeline", "feat: new feature")
+	log := `fix: bug fix
+docs: update docs
+ci: update pipeline
+feat: new feature`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	tagCmd := newTagCmd(noChangesPushed(), os.Stdout)
 
 	err := tagCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	tags := git.AllTags()
+	tags := gittest.Tags(t)
 	assert.Len(t, tags, 1)
-	assert.Equal(t, "v0.1.0", tags[0].Ref)
+	assert.Equal(t, "v0.1.0", tags[0])
 }
 
 func TestTag_CurrentFlag(t *testing.T) {
-	taggedRepo(t, "v0.1.0", "docs: updated docs", "fix: bug fix")
+	log := `(tag: v0.1.0) docs: updated docs
+fix: bug fix`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	var buf bytes.Buffer
 	tagCmd := newTagCmd(noChangesPushed(), &buf)
@@ -54,14 +60,15 @@ func TestTag_CurrentFlag(t *testing.T) {
 
 	err := tagCmd.Cmd.Execute()
 	require.NoError(t, err)
-
-	tags := git.AllTags()
-	assert.Len(t, tags, 1)
 	assert.Equal(t, "v0.1.0", buf.String())
 }
 
 func TestTag_NextFlag(t *testing.T) {
-	untaggedRepo(t, "docs: updated docs", "refactor!: breaking cli change", "ci: update pipeline", "fix: bug fix")
+	log := `docs: updated docs
+refactor!: breaking cli change
+ci: update pipeline
+fix: bug fix`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	var buf bytes.Buffer
 	tagCmd := newTagCmd(noChangesPushed(), &buf)
@@ -70,14 +77,16 @@ func TestTag_NextFlag(t *testing.T) {
 	err := tagCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	tags := git.AllTags()
+	tags := gittest.Tags(t)
 	assert.Len(t, tags, 0)
 	assert.Equal(t, "v1.0.0", buf.String())
 }
 
 func TestTag_CurrentAndNextFlag(t *testing.T) {
-	taggedRepo(t, "v0.1.0", "docs: updated docs", "fix: bug fix")
-	git.EmptyCommit(t, "fix: found another bug")
+	log := `fix: found another bug
+(tag: v0.1.0) docs: updated docs
+fix: bug fix`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	var buf bytes.Buffer
 	tagCmd := newTagCmd(noChangesPushed(), &buf)
@@ -86,13 +95,16 @@ func TestTag_CurrentAndNextFlag(t *testing.T) {
 	err := tagCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	tags := git.AllTags()
+	tags := gittest.Tags(t)
 	assert.Len(t, tags, 1)
+	assert.Equal(t, "v0.1.0", tags[0])
 	assert.Equal(t, "v0.1.0 v0.1.1", buf.String())
 }
 
 func TestTag_NoPrefix(t *testing.T) {
-	untaggedRepo(t, "docs: update docs", "fix: bug fix")
+	log := `docs: update docs
+fix: bug fix`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	tagCmd := newTagCmd(noChangesPushed(), os.Stdout)
 	tagCmd.Cmd.SetArgs([]string{"--no-prefix"})
@@ -100,14 +112,13 @@ func TestTag_NoPrefix(t *testing.T) {
 	err := tagCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	tags := git.AllTags()
+	tags := gittest.Tags(t)
 	assert.Len(t, tags, 1)
-	assert.Equal(t, "0.0.1", tags[0].Ref)
+	assert.Equal(t, "0.0.1", tags[0])
 }
 
 func TestTag_PrereleaseFlag(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommit(t, "feat: a new feature")
+	gittest.InitRepository(t, gittest.WithLog("feat: a new feature"))
 
 	tagCmd := newTagCmd(noChangesPushed(), os.Stdout)
 	tagCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
@@ -115,15 +126,15 @@ func TestTag_PrereleaseFlag(t *testing.T) {
 	err := tagCmd.Cmd.Execute()
 	require.NoError(t, err)
 
-	tags := git.AllTags()
+	tags := gittest.Tags(t)
 	assert.Len(t, tags, 1)
-	assert.Equal(t, "v0.1.0-beta.1+12345", tags[0].Ref)
+	assert.Equal(t, "v0.1.0-beta.1+12345", tags[0])
 }
 
 func TestTag_Hooks(t *testing.T) {
-	git.InitRepo(t)
+	gittest.InitRepository(t)
 	configWithHooks(t)
-	git.EmptyCommit(t, "feat: this is a new feature")
+	gittest.CommitEmpty(t, "feat: this is a new feature")
 
 	tagCmd := newTagCmd(noChangesPushed(), os.Stdout)
 	err := tagCmd.Cmd.Execute()

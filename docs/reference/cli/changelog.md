@@ -45,6 +45,12 @@ uplift changelog --include "^.*\(scope\)"
 # Generate the next changelog entry but do not stage or push any changes
 # back to the git remote
 uplift changelog --no-stage
+
+# Generate a changelog with multiline commit messages
+uplift changelog --multiline
+
+# Generate a changelog with prerelease tags being skipped
+uplift changelog --skip-prerelease
 ```
 
 ## Flags
@@ -58,6 +64,10 @@ uplift changelog --no-stage
 -h, --help              help for changelog
     --include strings   a list of regexes to cherry-pick conventional commits
                         for the changelog
+    --multiline         include multiline commit messages within changelog
+                        (skips truncation)
+    --skip-prerelease   skips the creation of a changelog entry for a
+                        prerelease
     --sort string       the sort order of commits within each changelog entry
 ```
 

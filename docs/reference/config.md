@@ -105,6 +105,15 @@ changelog:
   # commits that are to be included
   include:
     - '^.*\(scope\)'
+
+  # Include multiline commit messages within the changelog. Disables
+  # default behaviour of truncating a commit message to its first line
+  multiline: true
+
+  # Skips generating a changelog for any prerelease. All commits from
+  # a prerelease will be appended to the changelog entry for the next
+  # release
+  skipPrerelease: true
 ```
 
 ## commitAuthor

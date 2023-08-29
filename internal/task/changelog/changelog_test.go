@@ -31,8 +31,8 @@ import (
 	"time"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -58,6 +58,17 @@ func TestSkip(t *testing.T) {
 				SkipChangelog: true,
 			},
 		},
+		{
+			name: "SkipPrerelease",
+			ctx: &context.Context{
+				Changelog: context.Changelog{
+					SkipPrerelease: true,
+				},
+				NextVersion: semver.Version{
+					Prerelease: "pre.1",
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -67,8 +78,10 @@ func TestSkip(t *testing.T) {
 }
 
 func TestRun_NoNextTag(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommits(t, "first commit", "second commit", "third commit")
+	log := `third commit
+second commit
+first commit`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	err := Task{}.Run(&context.Context{})
 	require.NoError(t, err)
@@ -93,8 +106,9 @@ func changelogExists(t *testing.T) bool {
 }
 
 func TestRun_CreatedIfNotExists(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
+	log := `(tag: 1.0.0) second commit
+first commit`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -109,8 +123,9 @@ func TestRun_CreatedIfNotExists(t *testing.T) {
 }
 
 func TestRun_Staged(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
+	log := `(tag: 1.0.0) second commit
+first commit`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -121,14 +136,15 @@ func TestRun_Staged(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	stg, _ := git.Staged()
+	stg := gittest.PorcelainStatus(t)
 	assert.Len(t, stg, 1)
-	assert.Equal(t, "CHANGELOG.md", stg[0])
+	assert.Equal(t, "A  CHANGELOG.md", stg[0])
 }
 
 func TestRun_NotStaged(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
+	log := `(tag: 1.0.0) second commit
+first commit`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -140,13 +156,13 @@ func TestRun_NotStaged(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	stg, _ := git.Staged()
-	assert.Len(t, stg, 0)
+	stg := gittest.PorcelainStatus(t)
+	assert.Len(t, stg, 1)
+	assert.Equal(t, "?? CHANGELOG.md", stg[0])
 }
 
 func TestRun_AppendToUnsupportedTemplate(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommitsAndTag(t, "1.0.0", "first commit")
+	gittest.InitRepository(t, gittest.WithLog("(tag: 1.0.0) first commit"))
 
 	cl := `# Changelog
 This changelog is deliberately missing the append marker`
@@ -163,9 +179,11 @@ This changelog is deliberately missing the append marker`
 }
 
 func TestRun_AppendToExisting(t *testing.T) {
-	ih := git.InitRepo(t)
-	h1 := git.EmptyCommitsAndTag(t, "1.0.0", "first commit")
-	h2 := git.EmptyCommitsAndTag(t, "1.1.0", "second commit", "third commit")
+	log := `(tag: 1.1.0) third commit
+second commit
+(tag: 1.0.0) first commit`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
 
 	// Initial changelog
 	cl := fmt.Sprintf(`# Changelog
@@ -179,8 +197,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## 1.0.0 - 2021-09-17
 
 - %s first commit
-- %s initialise repo
-`, abbrevHash(t, h1[0]), abbrevHash(t, ih))
+- %s %s
+`, hashes["first commit"], hashes[gittest.InitialCommit], gittest.InitialCommit)
 	os.WriteFile(MarkdownFile, []byte(cl), 0o644)
 
 	ctx := &context.Context{
@@ -191,7 +209,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 			Raw: "1.1.0",
 		},
 		SCM: context.SCM{
-			Provider: git.Unrecognised,
+			Provider: context.Unrecognised,
 		},
 	}
 
@@ -215,22 +233,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - %s first commit
 - %s %s
-`, changelogDate(t), abbrevHash(t, h2[1]), abbrevHash(t, h2[0]), abbrevHash(t, h1[0]),
-		abbrevHash(t, ih), git.InitCommit)
+`, changelogDate(t), hashes["third commit"], hashes["second commit"], hashes["first commit"],
+		hashes[gittest.InitialCommit], gittest.InitialCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
 
+func hashLookup(t *testing.T, log []gittest.LogEntry) map[string]string {
+	t.Helper()
+
+	hashes := map[string]string{}
+	for _, l := range log {
+		hashes[l.Message] = fmt.Sprintf("`%s`", l.AbbrevHash)
+	}
+	return hashes
+}
+
 func TestRun_EntriesFromFirstTag(t *testing.T) {
-	ih := git.InitRepo(t)
-	h := git.EmptyCommitsAndTag(t, "1.0.0", "first commit", "second commit")
+	log := `(tag: 1.1.0) second commit
+first commit`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
-			Raw: "1.0.0",
+			Raw: "1.1.0",
 		},
 		SCM: context.SCM{
-			Provider: git.Unrecognised,
+			Provider: context.Unrecognised,
 		},
 	}
 
@@ -245,12 +275,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
-## 1.0.0 - %s
+## 1.1.0 - %s
 
 - %s second commit
 - %s first commit
 - %s %s
-`, changelogDate(t), abbrevHash(t, h[1]), abbrevHash(t, h[0]), abbrevHash(t, ih), git.InitCommit)
+`, changelogDate(t), hashes["second commit"], hashes["first commit"], hashes[gittest.InitialCommit], gittest.InitialCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
@@ -269,15 +299,13 @@ func changelogDate(t *testing.T) string {
 	return time.Now().UTC().Format(ChangeDate)
 }
 
-func abbrevHash(t *testing.T, hash string) string {
-	t.Helper()
-	return fmt.Sprintf("`%s`", hash[:7])
-}
-
 func TestRun_DiffOnly(t *testing.T) {
-	git.InitRepo(t)
-	git.Tag("1.0.0")
-	h := git.EmptyCommitsAndTag(t, "1.1.0", "first commit", "second commit", "third commit")
+	log := `(tag: 1.1.0) third commit
+second commit
+first commit
+(tag: 1.0.0) won't appear in changelog`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
@@ -292,7 +320,7 @@ func TestRun_DiffOnly(t *testing.T) {
 			Raw: "1.1.0",
 		},
 		SCM: context.SCM{
-			Provider: git.Unrecognised,
+			Provider: context.Unrecognised,
 		},
 	}
 
@@ -304,18 +332,14 @@ func TestRun_DiffOnly(t *testing.T) {
 - %s third commit
 - %s second commit
 - %s first commit
-`, changelogDate(t), abbrevHash(t, h[2]), abbrevHash(t, h[1]), abbrevHash(t, h[0]))
+`, changelogDate(t), hashes["third commit"], hashes["second commit"], hashes["first commit"])
 
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
 }
 
 func TestRun_NoLogEntries(t *testing.T) {
-	git.InitRepo(t)
-	git.EmptyCommitAndTag(t, "1.0.0", "commit")
-
-	err := git.Tag("2.0.0")
-	require.NoError(t, err)
+	gittest.InitRepository(t, gittest.WithLog("(tag: 1.0.0, tag: 2.0.0) commit"))
 
 	ctx := &context.Context{
 		CurrentVersion: semver.Version{
@@ -326,15 +350,19 @@ func TestRun_NoLogEntries(t *testing.T) {
 		},
 	}
 
-	err = Task{}.Run(ctx)
+	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 	assert.False(t, changelogExists(t))
 }
 
 func TestRun_WithExcludes(t *testing.T) {
-	git.InitRepo(t)
-	git.Tag("1.0.0")
-	h := git.EmptyCommitsAndTag(t, "1.1.0", "first commit", "exclude(scope): second commit", "third commit", "ignore: forth commit")
+	log := `(tag: 1.1.0) ignore: forth commit
+third commit
+exclude(scope): second commit
+first commit
+(tag: 1.0.0) won't appear in changelog`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
@@ -350,7 +378,7 @@ func TestRun_WithExcludes(t *testing.T) {
 			Raw: "1.1.0",
 		},
 		SCM: context.SCM{
-			Provider: git.Unrecognised,
+			Provider: context.Unrecognised,
 		},
 	}
 
@@ -361,22 +389,25 @@ func TestRun_WithExcludes(t *testing.T) {
 
 - %s third commit
 - %s first commit
-`, changelogDate(t), abbrevHash(t, h[2]), abbrevHash(t, h[0]))
+`, changelogDate(t), hashes["third commit"], hashes["first commit"])
 
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
 }
 
 func TestRun_AllTags(t *testing.T) {
-	ih := git.InitRepo(t)
-	th := git.TimeBasedTagSeries(t, []string{"0.1.0", "0.2.0", "0.3.0"})
+	log := `(tag: 0.3.0) third feature
+(tag: 0.2.0) second feature
+(tag: 0.1.0) first feature`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
 
 	ctx := &context.Context{
 		Changelog: context.Changelog{
 			All: true,
 		},
 		SCM: context.SCM{
-			Provider: git.Unrecognised,
+			Provider: context.Unrecognised,
 		},
 	}
 
@@ -393,25 +424,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 0.3.0 - %s
 
-- %s feat: 3
+- %s third feature
 
 ## 0.2.0 - %s
 
-- %s feat: 2
+- %s second feature
 
 ## 0.1.0 - %s
 
-- %s feat: 1
+- %s first feature
 - %s %s
-`, th[2].CreatorDate, abbrevHash(t, th[2].CommitHash), th[1].CreatorDate, abbrevHash(t, th[1].CommitHash), th[0].CreatorDate,
-		abbrevHash(t, th[0].CommitHash), abbrevHash(t, ih), git.InitCommit)
+`, changelogDate(t), hashes["third feature"], changelogDate(t), hashes["second feature"], changelogDate(t),
+		hashes["first feature"], hashes[gittest.InitialCommit], gittest.InitialCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
 
 func TestRun_AllTagsDiffOnly(t *testing.T) {
-	ih := git.InitRepo(t)
-	th := git.TimeBasedTagSeries(t, []string{"0.1.0", "0.2.0", "0.3.0"})
+	log := `(tag: 0.3.0) third feature
+(tag: 0.2.0) second feature
+(tag: 0.1.0) first feature`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
@@ -421,7 +455,7 @@ func TestRun_AllTagsDiffOnly(t *testing.T) {
 		},
 		Out: &buf,
 		SCM: context.SCM{
-			Provider: git.Unrecognised,
+			Provider: context.Unrecognised,
 		},
 	}
 
@@ -430,27 +464,30 @@ func TestRun_AllTagsDiffOnly(t *testing.T) {
 
 	expected := fmt.Sprintf(`## 0.3.0 - %s
 
-- %s feat: 3
+- %s third feature
 
 ## 0.2.0 - %s
 
-- %s feat: 2
+- %s second feature
 
 ## 0.1.0 - %s
 
-- %s feat: 1
+- %s first feature
 - %s %s
-`, th[2].CreatorDate, abbrevHash(t, th[2].CommitHash), th[1].CreatorDate, abbrevHash(t, th[1].CommitHash), th[0].CreatorDate,
-		abbrevHash(t, th[0].CommitHash), abbrevHash(t, ih), git.InitCommit)
+`, changelogDate(t), hashes["third feature"], changelogDate(t), hashes["second feature"], changelogDate(t),
+		hashes["first feature"], hashes[gittest.InitialCommit], gittest.InitialCommit)
 
 	assert.False(t, changelogExists(t))
 	assert.Equal(t, expected, buf.String())
 }
 
 func TestRun_ExcludeAllEntries(t *testing.T) {
-	git.InitRepo(t)
-	git.Tag("1.0.0")
-	git.EmptyCommitsAndTag(t, "1.1.0", "prefix: first commit", "prefix: second commit", "prefix: third commit", "prefix: forth commit")
+	log := `(tag: 1.1.0) prefix: forth commit
+prefix: third commit
+prefix: second commit
+prefix: first commit
+(tag: 1.0.0) commit`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
@@ -473,11 +510,11 @@ func TestRun_ExcludeAllEntries(t *testing.T) {
 }
 
 func TestRun_AllWithExcludes(t *testing.T) {
-	ih := git.InitRepo(t)
-	th := git.TimeBasedTagSeries(t, []string{"0.1.0", "0.2.0"})
-
-	// Commit that will be excluded
-	git.EmptyCommitAndTag(t, "0.3.0", "refactor: use go embed")
+	log := `(tag: 0.3.0) refactor: use go embed
+(tag: 0.2.0) feat: second feature
+(tag: 0.1.0) feat: first feature`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
 
 	ctx := &context.Context{
 		Changelog: context.Changelog{
@@ -485,7 +522,7 @@ func TestRun_AllWithExcludes(t *testing.T) {
 			Exclude: []string{"^refactor:"},
 		},
 		SCM: context.SCM{
-			Provider: git.Unrecognised,
+			Provider: context.Unrecognised,
 		},
 	}
 
@@ -504,22 +541,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 0.2.0 - %s
 
-- %s feat: 2
+- %s feat: second feature
 
 ## 0.1.0 - %s
 
-- %s feat: 1
+- %s feat: first feature
 - %s %s
-`, changelogDate(t), th[1].CreatorDate, abbrevHash(t, th[1].CommitHash), th[0].CreatorDate, abbrevHash(t, th[0].CommitHash),
-		abbrevHash(t, ih), git.InitCommit)
+`, changelogDate(t), changelogDate(t), hashes["feat: second feature"], changelogDate(t), hashes["feat: first feature"],
+		hashes[gittest.InitialCommit], gittest.InitialCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
 }
 
 func TestRun_SortCommitsAscending(t *testing.T) {
-	ih := git.InitRepo(t)
-	th := git.TimeBasedTagSeries(t, []string{"1.0.0"})
-	hs := git.EmptyCommitsAndTag(t, "2.0.0", "docs: update to docs", "fix: first bug", "feat: first feature")
+	log := `(tag: 2.0.0) feat: second feature
+fix: first bug
+docs: update to docs
+(tag: 1.0.0) feat: first feature`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
 
 	ctx := &context.Context{
 		Changelog: context.Changelog{
@@ -527,7 +567,7 @@ func TestRun_SortCommitsAscending(t *testing.T) {
 			Sort: "asc",
 		},
 		SCM: context.SCM{
-			Provider: git.Unrecognised,
+			Provider: context.Unrecognised,
 		},
 	}
 
@@ -546,21 +586,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - %s docs: update to docs
 - %s fix: first bug
-- %s feat: first feature
+- %s feat: second feature
 
 ## 1.0.0 - %s
 
 - %s %s
-- %s feat: 1
-`, changelogDate(t), abbrevHash(t, hs[0]), abbrevHash(t, hs[1]), abbrevHash(t, hs[2]), th[0].CreatorDate, abbrevHash(t, ih),
-		git.InitCommit, abbrevHash(t, th[0].CommitHash))
+- %s feat: first feature
+`, changelogDate(t), hashes["docs: update to docs"], hashes["fix: first bug"], hashes["feat: second feature"],
+		changelogDate(t), hashes[gittest.InitialCommit], gittest.InitialCommit, hashes["feat: first feature"])
 
 	assert.Equal(t, expected, readChangelog(t))
 }
 
 func TestRun_IdentifiedSCM(t *testing.T) {
-	git.InitRepo(t)
-	h := git.EmptyCommitAndTag(t, "0.1.0", "feat: first feature")
+	gittest.InitRepository(t, gittest.WithLog("(tag: 0.1.0) feat: first feature"))
+	log := gittest.Log(t)
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
@@ -572,7 +612,7 @@ func TestRun_IdentifiedSCM(t *testing.T) {
 			Raw: "0.1.0",
 		},
 		SCM: context.SCM{
-			Provider:  git.GitHub,
+			Provider:  context.GitHub,
 			TagURL:    "https://test.com/tag/{{.Ref}}",
 			CommitURL: "https://test.com/commit/{{.Hash}}",
 		},
@@ -582,7 +622,7 @@ func TestRun_IdentifiedSCM(t *testing.T) {
 	require.NoError(t, err)
 
 	tag := "[0.1.0](https://test.com/tag/0.1.0)"
-	hash := fmt.Sprintf("[`%s`](https://test.com/commit/%s)", h[:7], h)
+	hash := fmt.Sprintf("[`%s`](https://test.com/commit/%s)", log[0].AbbrevHash, log[0].Hash)
 	expected := fmt.Sprintf(`## %s - %s
 
 - %s feat: first feature`, tag, changelogDate(t), hash)
@@ -591,9 +631,12 @@ func TestRun_IdentifiedSCM(t *testing.T) {
 }
 
 func TestRun_WithMultipleIncludes(t *testing.T) {
-	git.InitRepo(t)
-	git.Tag("1.0.0")
-	git.EmptyCommitsAndTag(t, "1.1.0", "ci: tweak", "fix(scope1): a fix", "feat(scope1): a feature", "fix(common): another fix")
+	log := `(tag: 1.1.0) fix(common): another fix
+feat(scope1): a feature
+fix(scope1): a fix
+ci: tweak
+(tag: 1.0.0) not included in changelog`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
@@ -609,7 +652,7 @@ func TestRun_WithMultipleIncludes(t *testing.T) {
 			Raw: "1.1.0",
 		},
 		SCM: context.SCM{
-			Provider: git.Unrecognised,
+			Provider: context.Unrecognised,
 		},
 	}
 
@@ -624,9 +667,12 @@ func TestRun_WithMultipleIncludes(t *testing.T) {
 }
 
 func TestRun_AllWithIncludes(t *testing.T) {
-	git.InitRepo(t)
-	git.TimeBasedTagSeries(t, []string{"0.1.0", "0.2.0"})
-	git.EmptyCommitsAndTag(t, "0.3.0", "feat: another feature", "ci: tweak", "docs: update docs")
+	log := `(tag: 0.3.0) docs: update docs
+ci: tweak
+feat: another feature
+(tag: 0.2.0) feat: second feature
+(tag: 0.1.0) feat: first feature`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
@@ -637,7 +683,7 @@ func TestRun_AllWithIncludes(t *testing.T) {
 			Include:  []string{"^feat:"},
 		},
 		SCM: context.SCM{
-			Provider: git.Unrecognised,
+			Provider: context.Unrecognised,
 		},
 	}
 
@@ -646,16 +692,19 @@ func TestRun_AllWithIncludes(t *testing.T) {
 
 	actual := buf.String()
 	assert.Contains(t, actual, "feat: another feature")
-	assert.Contains(t, actual, "feat: 1")
-	assert.Contains(t, actual, "feat: 2")
+	assert.Contains(t, actual, "feat: second feature")
+	assert.Contains(t, actual, "feat: first feature")
 	assert.NotContains(t, actual, "ci: tweak")
 	assert.NotContains(t, actual, "docs: update docs")
 }
 
 func TestRun_CombinedIncludeAndExclude(t *testing.T) {
-	git.InitRepo(t)
-	git.Tag("1.0.0")
-	git.EmptyCommitsAndTag(t, "1.1.0", "ci: tweak", "fix(scope1): a fix", "feat(scope1): a feature", "feat(scope2): another feature")
+	log := `(tag: 1.1.0) feat(scope2): another feature
+feat(scope1): a feature
+fix(scope1): a fix
+ci: tweak
+(tag: 1.0.0) not included in changelog`
+	gittest.InitRepository(t, gittest.WithLog(log))
 
 	var buf bytes.Buffer
 	ctx := &context.Context{
@@ -672,7 +721,7 @@ func TestRun_CombinedIncludeAndExclude(t *testing.T) {
 			Raw: "1.1.0",
 		},
 		SCM: context.SCM{
-			Provider: git.Unrecognised,
+			Provider: context.Unrecognised,
 		},
 	}
 
@@ -684,4 +733,216 @@ func TestRun_CombinedIncludeAndExclude(t *testing.T) {
 	assert.Contains(t, actual, "feat(scope2): another feature")
 	assert.NotContains(t, actual, "ci: tweak")
 	assert.NotContains(t, actual, "fix(scope1): a fix")
+}
+
+func TestRun_MultilineMessages(t *testing.T) {
+	log := `> (tag: 1.1.0) feat: this is a multiline commmit
+
+That should be displayed across multiple lines within the changelog.
+It should be formatted as expected.
+
+With the correct indentation for rendering in markdown
+> feat: this is a single line commit that remains unchanged
+> (tag: 1.0.0) not included in changelog`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	glog := gittest.Log(t)
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		Out: &buf,
+		Changelog: context.Changelog{
+			DiffOnly:  true,
+			Multiline: true,
+		},
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextVersion: semver.Version{
+			Raw: "1.1.0",
+		},
+		SCM: context.SCM{
+			Provider: context.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`## 1.1.0 - %s
+
+- %s feat: this is a multiline commmit
+
+  That should be displayed across multiple lines within the changelog.
+  It should be formatted as expected.
+
+  With the correct indentation for rendering in markdown
+- %s feat: this is a single line commit that remains unchanged
+`, changelogDate(t), fmt.Sprintf("`%s`", glog[0].AbbrevHash), fmt.Sprintf("`%s`", glog[1].AbbrevHash))
+
+	assert.Equal(t, expected, buf.String())
+}
+
+func TestRun_SkipPrerelease(t *testing.T) {
+	log := `(tag: 0.2.0) feat: 3
+fix: 2
+(tag: 0.2.0-pre.2) feat: 2
+(tag: 0.2.0-pre.1) fix: 1
+(tag: 0.1.0) feat: 1`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
+
+	cl := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+## 1.0.0 - 2021-09-17
+
+- %s feat: 1
+- %s %s
+`, hashes["first commit"], hashes[gittest.InitialCommit], gittest.InitialCommit)
+	os.WriteFile(MarkdownFile, []byte(cl), 0o644)
+
+	ctx := &context.Context{
+		Changelog: context.Changelog{
+			SkipPrerelease: true,
+		},
+		CurrentVersion: semver.Version{
+			Prerelease: "pre.2",
+			Raw:        "0.1.0-pre.2",
+		},
+		NextVersion: semver.Version{
+			Raw: "0.2.0",
+		},
+		SCM: context.SCM{
+			Provider: context.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+## 0.2.0 - %s
+
+- %s feat: 3
+- %s fix: 2
+- %s feat: 2
+- %s fix: 1
+
+## 1.0.0 - 2021-09-17
+
+- %s feat: 1
+- %s %s
+`, changelogDate(t), hashes["feat: 3"], hashes["fix: 2"], hashes["feat: 2"], hashes["fix: 1"],
+		hashes["feat: first feature"], hashes[gittest.InitialCommit], gittest.InitialCommit)
+
+	assert.Equal(t, expected, readChangelog(t))
+}
+
+func TestRun_SkipPrereleaseToHead(t *testing.T) {
+	log := `(tag: 0.1.0) feat: 3
+fix: 1
+(tag: 0.1.0-pre.2) feat: 2
+(tag: 0.1.0-pre.1) feat: 1`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
+
+	ctx := &context.Context{
+		Changelog: context.Changelog{
+			SkipPrerelease: true,
+		},
+		CurrentVersion: semver.Version{
+			Prerelease: "pre.2",
+			Raw:        "0.1.0-pre.2",
+		},
+		NextVersion: semver.Version{
+			Raw: "0.1.0",
+		},
+		SCM: context.SCM{
+			Provider: context.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+## 0.1.0 - %s
+
+- %s feat: 3
+- %s fix: 1
+- %s feat: 2
+- %s feat: 1
+- %s %s
+`, changelogDate(t), hashes["feat: 3"], hashes["fix: 1"], hashes["feat: 2"], hashes["feat: 1"],
+		hashes[gittest.InitialCommit], gittest.InitialCommit)
+
+	assert.Equal(t, expected, readChangelog(t))
+}
+
+func TestRun_AllSkipPrerelease(t *testing.T) {
+	log := `(tag: 0.2.0) feat: 4
+(tag: 0.2.0-pre.2) feat: 3
+(tag: 0.2.0-pre.1) fix: 2
+(tag: 0.1.0) feat: 2
+(tag: 0.1.0-pre.2) fix: 1
+(tag: 0.1.0-pre.1) feat: 1`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
+
+	ctx := &context.Context{
+		Changelog: context.Changelog{
+			All:            true,
+			SkipPrerelease: true,
+		},
+		SCM: context.SCM{
+			Provider: context.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+## 0.2.0 - %s
+
+- %s feat: 4
+- %s feat: 3
+- %s fix: 2
+
+## 0.1.0 - %s
+
+- %s feat: 2
+- %s fix: 1
+- %s feat: 1
+- %s %s
+`, changelogDate(t), hashes["feat: 4"], hashes["feat: 3"], hashes["fix: 2"], changelogDate(t),
+		hashes["feat: 2"], hashes["fix: 1"], hashes["feat: 1"], hashes[gittest.InitialCommit], gittest.InitialCommit)
+
+	assert.Equal(t, expected, readChangelog(t))
 }

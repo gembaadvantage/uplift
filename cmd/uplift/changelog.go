@@ -28,7 +28,6 @@ import (
 	"strings"
 
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/task"
 	"github.com/gembaadvantage/uplift/internal/task/changelog"
 	"github.com/gembaadvantage/uplift/internal/task/gitcheck"
@@ -39,6 +38,7 @@ import (
 	"github.com/gembaadvantage/uplift/internal/task/hook/beforechangelog"
 	"github.com/gembaadvantage/uplift/internal/task/nextcommit"
 	"github.com/gembaadvantage/uplift/internal/task/scm"
+	git "github.com/purpleclay/gitz"
 	"github.com/spf13/cobra"
 )
 
@@ -46,9 +46,9 @@ const (
 	changelogLongDesc = `Scans the git log for the latest semantic release and generates a changelog
 entry. If this is a first release, all commits between the last release (or
 identifiable tag) and the repository trunk will be written to the changelog.
-Any subsequent entry within the changelog will only contain commits between 
-the latest set of tags. Basic customization is supported. Optionally commits 
-can be explicitly included or excluded from the entry and sorted in ascending 
+Any subsequent entry within the changelog will only contain commits between
+the latest set of tags. Basic customization is supported. Optionally commits
+can be explicitly included or excluded from the entry and sorted in ascending
 or descending order. Uplift automatically handles the staging and pushing of
 changes to the CHANGELOG.md file to the git remote, but this behavior can be
 disabled, to manage this action manually.
@@ -77,15 +77,23 @@ uplift changelog --include "^.*\(scope\)"
 
 # Generate the next changelog entry but do not stage or push any changes
 # back to the git remote
-uplift changelog --no-stage`
+uplift changelog --no-stage
+
+# Generate a changelog with multiline commit messages
+uplift changelog --multiline
+
+# Generate a changelog with prerelease tags being skipped
+uplift changelog --skip-prerelease`
 )
 
 type changelogOptions struct {
-	DiffOnly bool
-	Exclude  []string
-	Include  []string
-	All      bool
-	Sort     string
+	DiffOnly       bool
+	Exclude        []string
+	Include        []string
+	All            bool
+	Sort           string
+	Multiline      bool
+	SkipPrerelease bool
 	*globalOptions
 }
 
@@ -126,6 +134,8 @@ func newChangelogCmd(gopts *globalOptions, out io.Writer) *changelogCommand {
 	f.StringSliceVar(&chglogCmd.Opts.Exclude, "exclude", []string{}, "a list of regexes for excluding conventional commits from the changelog")
 	f.StringSliceVar(&chglogCmd.Opts.Include, "include", []string{}, "a list of regexes to cherry-pick conventional commits for the changelog")
 	f.StringVar(&chglogCmd.Opts.Sort, "sort", "", "the sort order of commits within each changelog entry")
+	f.BoolVar(&chglogCmd.Opts.Multiline, "multiline", false, "include multiline commit messages within changelog (skips truncation)")
+	f.BoolVar(&chglogCmd.Opts.SkipPrerelease, "skip-prerelease", false, "skips the creation of a changelog entry for a prerelease")
 
 	chglogCmd.Cmd = cmd
 	return chglogCmd
@@ -185,6 +195,14 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	ctx.NoStage = opts.NoStage
 	ctx.Changelog.DiffOnly = opts.DiffOnly
 	ctx.Changelog.All = opts.All
+	ctx.Changelog.Multiline = opts.Multiline
+	if !ctx.Changelog.Multiline && ctx.Config.Changelog != nil {
+		ctx.Changelog.Multiline = ctx.Config.Changelog.Multiline
+	}
+	ctx.Changelog.SkipPrerelease = opts.SkipPrerelease
+	if !ctx.Changelog.SkipPrerelease && ctx.Config.Changelog != nil {
+		ctx.Changelog.SkipPrerelease = ctx.Config.Changelog.SkipPrerelease
+	}
 
 	// Sort order provided as a command-line flag takes precedence
 	ctx.Changelog.Sort = opts.Sort
@@ -205,12 +223,17 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 
 	if !ctx.Changelog.All {
 		// Attempt to retrieve the latest 2 tags for generating a changelog entry
-		tags := git.AllTags()
+		tags, err := ctx.GitClient.Tags(git.WithShellGlob("*.*.*"),
+			git.WithSortBy(git.CreatorDateDesc, git.VersionDesc))
+		if err != nil {
+			return nil, err
+		}
+
 		if len(tags) == 1 {
-			ctx.NextVersion.Raw = tags[0].Ref
+			ctx.NextVersion.Raw = tags[0]
 		} else if len(tags) > 1 {
-			ctx.NextVersion.Raw = tags[0].Ref
-			ctx.CurrentVersion.Raw = tags[1].Ref
+			ctx.NextVersion.Raw = tags[0]
+			ctx.CurrentVersion.Raw = tags[1]
 		}
 	}
 

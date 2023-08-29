@@ -23,19 +23,36 @@ SOFTWARE.
 package main
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	bumpFile = `version: 0.0.0
+appVersion: 0.0.0`
+
+	bumpConfig = `bumps:
+  - file: test.txt
+    regex:
+      - pattern: "version: $VERSION"
+      - pattern: "appVersion: $VERSION"
+`
+)
+
 func TestBump(t *testing.T) {
-	taggedRepo(t, "0.1.0", "feat: this was the last feature")
-	testFileWithConfig(t, "test.txt", ".uplift.yml")
-	git.EmptyCommits(t, "ci: update workflow", "docs: update docs", "feat: a new feature", "fix: a bug fix")
+	log := `ci: update workflow"
+docs: update docs
+feat: a new feature
+fix: a bug fix
+(tag: 0.1.0) feat: this was the last feature`
+	gittest.InitRepository(t,
+		gittest.WithLog(log),
+		gittest.WithCommittedFiles("test.txt", ".uplift.yml"),
+		gittest.WithFileContent("test.txt", bumpFile, ".uplift.yml", bumpConfig))
 
 	bmpCmd := newBumpCmd(noChangesPushed(), os.Stdout)
 
@@ -48,33 +65,15 @@ func TestBump(t *testing.T) {
 appVersion: 0.2.0`, string(actual))
 }
 
-func testFileWithConfig(t *testing.T, f string, cfg string) []byte {
-	t.Helper()
-
-	c := []byte(`version: 0.0.0
-appVersion: 0.0.0`)
-	err := os.WriteFile(f, c, 0o644)
-	require.NoError(t, err)
-
-	yml := fmt.Sprintf(`
-bumps:
-  - file: %s
-    regex:
-      - pattern: "version: $VERSION"
-      - pattern: "appVersion: $VERSION"`, f)
-
-	err = os.WriteFile(cfg, []byte(yml), 0o644)
-	require.NoError(t, err)
-
-	// Ensure files are committed to prevent dirty repository
-	git.CommitFiles(t, f, cfg)
-	return c
-}
-
 func TestBump_PrereleaseFlag(t *testing.T) {
-	untaggedRepo(t, "docs: update docs", "fix: fix bug", "feat!: breaking change")
-	testFileWithConfig(t, "test.txt", ".uplift.yml")
-	git.EmptyCommit(t, "feat: this is a new feature")
+	log := `docs: update docs
+fix: fix bug
+feat!: breaking change
+feat: this is a new feature`
+	gittest.InitRepository(t,
+		gittest.WithLog(log),
+		gittest.WithCommittedFiles("test.txt", ".uplift.yml"),
+		gittest.WithFileContent("test.txt", bumpFile, ".uplift.yml", bumpConfig))
 
 	bmpCmd := newBumpCmd(&globalOptions{}, os.Stdout)
 	bmpCmd.Cmd.SetArgs([]string{"--prerelease", "-beta.1+12345"})
@@ -89,7 +88,7 @@ appVersion: v1.0.0-beta.1+12345`, string(actual))
 }
 
 func TestBump_Hooks(t *testing.T) {
-	untaggedRepo(t, "feat: this is a new feature")
+	gittest.InitRepository(t, gittest.WithLog("feat: this is a new feature"))
 	configWithHooks(t)
 
 	bmpCmd := newBumpCmd(&globalOptions{}, os.Stdout)

@@ -22,7 +22,11 @@ SOFTWARE.
 
 package semver
 
-import "regexp"
+import (
+	"strings"
+
+	git "github.com/purpleclay/gitz"
+)
 
 // Increment defines the different types of increment that can be performed
 // against a semantic version
@@ -39,28 +43,82 @@ const (
 	MajorIncrement Increment = "Major"
 )
 
-var (
-	breakingBang = regexp.MustCompile(`(?im).*(\w+)(\(.*\))?!:.*`)
-	breaking     = regexp.MustCompile("(?im).*BREAKING CHANGE:.*")
-	feature      = regexp.MustCompile(`(?im).*feat(\(.*\))?:.*`)
-	fix          = regexp.MustCompile(`(?im).*fix(\(.*\))?:.*`)
+const (
+	colonSpace     = ": "
+	featUpper      = "FEAT"
+	fixUpper       = "FIX"
+	breaking       = "BREAKING CHANGE: "
+	breakingHyphen = "BREAKING-CHANGE: "
+	breakingBang   = '!'
 )
 
 // ParseLog will identify the maximum semantic increment by parsing the commit
 // log against the conventional commit standards defined, @see:
 // https://www.conventionalcommits.org/en/v1.0.0/
-func ParseLog(log string) Increment {
-	if breakingBang.MatchString(log) || breaking.MatchString(log) {
-		return MajorIncrement
+func ParseLog(log []git.LogEntry) Increment {
+	mode := NoIncrement
+	for _, entry := range log {
+		// Check for the existence of a conventional commit type
+		idx := strings.Index(entry.Message, colonSpace)
+		if idx == -1 {
+			continue
+		}
+
+		leadingType := strings.ToUpper(entry.Message[:idx])
+		if leadingType[idx-1] == breakingBang || multilineBreaking(entry.Message) {
+			return MajorIncrement
+		}
+
+		// Only feat and fix types now make a difference. Both have the same first letter
+		if leadingType[0] != featUpper[0] {
+			continue
+		}
+
+		if mode == MinorIncrement {
+			continue
+		}
+
+		if contains(leadingType, featUpper) {
+			mode = MinorIncrement
+		} else if contains(leadingType, fixUpper) {
+			mode = PatchIncrement
+		}
 	}
 
-	if feature.MatchString(log) {
-		return MinorIncrement
+	return mode
+}
+
+func contains(str, prefix string) bool {
+	if str == prefix {
+		return true
 	}
 
-	if fix.MatchString(log) {
-		return PatchIncrement
+	if strings.HasPrefix(str, prefix) {
+		if len(str) > len(prefix) &&
+			(str[len(prefix)] == '(' && str[len(str)-1] == ')') {
+			return true
+		}
 	}
 
-	return NoIncrement
+	return false
+}
+
+func multilineBreaking(msg string) bool {
+	n := strings.Count(msg, "\n")
+	if n == 0 {
+		return false
+	}
+
+	idx := strings.LastIndex(msg, "\n")
+
+	if idx == len(msg) {
+		// There is a newline at the end of the string, so jump back one
+		if idx = strings.LastIndex(msg[:len(msg)-1], "\n"); idx == -1 {
+			return false
+		}
+	}
+
+	footer := msg[idx+1:]
+	return strings.HasPrefix(footer, "BREAKING CHANGE: ") ||
+		strings.HasPrefix(footer, "BREAKING-CHANGE: ")
 }

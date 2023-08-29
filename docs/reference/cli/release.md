@@ -43,20 +43,25 @@ uplift release --no-prefix
 ## Flags
 
 ```text
-    --check               check if a release will be triggered
-    --exclude strings     a list of regexes for excluding conventional commits
-                          from the changelog
-    --fetch-all           fetch all tags from the remote repository
--h, --help                help for release
-    --include strings     a list of regexes to cherry-pick conventional commits
-                          for the changelog
-    --no-prefix           strip the default 'v' prefix from the next calculated
-                          semantic version
-    --prerelease string   append a prerelease suffix to next calculated semantic
-                          version
-    --skip-bumps          skips the bumping of any files
-    --skip-changelog      skips the creation or amendment of a changelog
-    --sort string         the sort order of commits within each changelog entry
+    --check                       check if a release will be triggered
+    --exclude strings             a list of regexes for excluding conventional
+                                  commits from the changelog
+    --fetch-all                   fetch all tags from the remote repository
+-h, --help                        help for release
+    --include strings             a list of regexes to cherry-pick conventional
+                                  commits for the changelog
+    --multiline                   include multiline commit messages within
+                                  changelog (skips truncation)
+    --no-prefix                   strip the default 'v' prefix from the next
+                                  calculated semantic version
+    --prerelease string           append a prerelease suffix to next calculated
+                                  semantic version
+    --skip-bumps                  skips the bumping of any files
+    --skip-changelog              skips the creation or amendment of a changelog
+    --skip-changelog-prerelease   skips the creation of a changelog entry for a
+                                  prerelease
+    --sort string                 the sort order of commits within each
+                                  changelog entry
 ```
 
 ## Global Flags

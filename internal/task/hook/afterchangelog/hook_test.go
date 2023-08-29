@@ -27,7 +27,7 @@ import (
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -68,7 +68,8 @@ func TestSkip_SkipChangelog(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-	git.MkTmpDir(t)
+	// git.MkTmpDir(t)
+	gittest.InitRepository(t)
 
 	err := Task{}.Run(&context.Context{
 		Config: config.Uplift{

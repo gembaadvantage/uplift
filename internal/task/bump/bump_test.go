@@ -23,14 +23,12 @@ SOFTWARE.
 package bump
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
-	"github.com/gembaadvantage/uplift/internal/git"
 	"github.com/gembaadvantage/uplift/internal/semver"
+	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -44,35 +42,9 @@ func TestRun_NoBumpConfig(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestRun_NotGitRepository(t *testing.T) {
-	git.MkTmpDir(t)
-	file := WriteTempFile(t, "version: 0.1.0")
-
-	ctx := &context.Context{
-		NextVersion: semver.Version{
-			Raw: "0.1.1",
-		},
-		Config: config.Uplift{
-			Bumps: []config.Bump{
-				{
-					File: file,
-					Regex: []config.RegexBump{
-						{
-							Pattern: "version: $VERSION",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	err := Task{}.Run(ctx)
-	assert.EqualError(t, err, "fatal: not a git repository (or any of the parent directories): .git")
-}
-
 func TestRun_NoStage(t *testing.T) {
-	git.InitRepo(t)
-	file := WriteTempFile(t, "version: 0.1.0")
+	gittest.InitRepository(t)
+	gittest.TempFile(t, "test.txt", "version: 0.1.0")
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -81,7 +53,7 @@ func TestRun_NoStage(t *testing.T) {
 		Config: config.Uplift{
 			Bumps: []config.Bump{
 				{
-					File: file,
+					File: "test.txt",
 					Regex: []config.RegexBump{
 						{
 							Pattern: "version: $VERSION",
@@ -96,18 +68,17 @@ func TestRun_NoStage(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	actual := ReadFile(t, file)
+	actual := ReadFile(t, "test.txt")
 	assert.Equal(t, "version: 0.1.1", actual)
 
-	staged, _ := git.Staged()
-	assert.Empty(t, staged)
+	status := gittest.PorcelainStatus(t)
+	assert.ElementsMatch(t, []string{"?? test.txt"}, status)
 }
 
 func TestRun_GlobSupport(t *testing.T) {
-	git.InitRepo(t)
-
-	file1 := WriteFile(t, "a/1.json", `{"version": "0.1.0"}`)
-	file2 := WriteFile(t, "b/2.json", `{"version": "0.1.0"}`)
+	gittest.InitRepository(t)
+	gittest.TempFile(t, "a/1.json", `{"version": "0.1.0"}`)
+	gittest.TempFile(t, "b/2.json", `{"version": "0.1.0"}`)
 
 	ctx := &context.Context{
 		NextVersion: semver.Version{
@@ -130,35 +101,9 @@ func TestRun_GlobSupport(t *testing.T) {
 	err := Task{}.Run(ctx)
 	require.NoError(t, err)
 
-	actual1 := ReadFile(t, file1)
+	actual1 := ReadFile(t, "a/1.json")
 	assert.Equal(t, `{"version": "0.1.1"}`, actual1)
 
-	actual2 := ReadFile(t, file2)
+	actual2 := ReadFile(t, "b/2.json")
 	assert.Equal(t, `{"version": "0.1.1"}`, actual2)
-}
-
-func WriteFile(t *testing.T, name, content string) string {
-	t.Helper()
-
-	current, err := os.Getwd()
-	require.NoError(t, err)
-
-	// Absolute path of file
-	absPath := filepath.Join(current, name)
-
-	err = os.MkdirAll(filepath.Dir(absPath), 0o755)
-	require.NoError(t, err)
-
-	file, err := os.Create(absPath)
-	require.NoError(t, err)
-
-	_, err = file.WriteString(content)
-	require.NoError(t, err)
-	require.NoError(t, file.Close())
-
-	t.Cleanup(func() {
-		require.NoError(t, os.Remove(file.Name()))
-	})
-
-	return file.Name()
 }

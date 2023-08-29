@@ -63,7 +63,6 @@ archives:
       {{- else }}{{ .Arch }}{{ end }}
     builds:
       - uplift
-    rlcp: true
     format_overrides:
       - goos: windows
         format: zip
@@ -103,11 +102,8 @@ changelog:
 sboms:
   - artifacts: archive
 
-# Use Keyless experimental signing with cosign, see: https://github.com/sigstore/cosign/blob/main/KEYLESS.md
 signs:
   - cmd: cosign
-    env:
-      - COSIGN_EXPERIMENTAL=1
     certificate: "${artifact}.pem"
     output: true
     artifacts: checksum
@@ -116,16 +112,16 @@ signs:
       - "--output-certificate=${certificate}"
       - "--output-signature=${signature}"
       - "${artifact}"
+      - --yes
 
 docker_signs:
   - cmd: cosign
-    env:
-      - COSIGN_EXPERIMENTAL=1
     artifacts: manifests
     output: true
     args:
-      - "sign"
-      - "${artifact}"
+    - 'sign'
+    - '${artifact}@${digest}'
+    - --yes
 
 dockers:
   - image_templates:
@@ -183,7 +179,7 @@ docker_manifests:
 
 brews:
   - name: uplift
-    tap:
+    repository:
       owner: gembaadvantage
       name: homebrew-tap
     folder: Formula
@@ -209,13 +205,13 @@ brews:
     dependencies:
       - name: git
 
-scoop:
-  bucket:
-    owner: gembaadvantage
-    name: scoops
-  homepage: "https://upliftci.dev"
-  description: "Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
-  license: MIT
+scoops:
+  - repository:
+      owner: gembaadvantage
+      name: scoops
+    homepage: "https://upliftci.dev"
+    description: "Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
+    license: MIT
 
 nfpms:
   - file_name_template: "{{ .ConventionalFileName }}"

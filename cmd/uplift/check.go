@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newCheckCmd(gopts *globalOptions, out io.Writer) *cobra.Command {
+func newCheckCmd(gopts *globalOptions, _ io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "check",
 		Short: "Check if a configuration file is valid",
