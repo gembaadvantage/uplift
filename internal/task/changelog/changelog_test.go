@@ -58,6 +58,17 @@ func TestSkip(t *testing.T) {
 				SkipChangelog: true,
 			},
 		},
+		{
+			name: "SkipPrerelease",
+			ctx: &context.Context{
+				Changelog: context.Changelog{
+					SkipPrerelease: true,
+				},
+				NextVersion: semver.Version{
+					Prerelease: "pre.1",
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -769,4 +780,169 @@ With the correct indentation for rendering in markdown
 `, changelogDate(t), fmt.Sprintf("`%s`", glog[0].AbbrevHash), fmt.Sprintf("`%s`", glog[1].AbbrevHash))
 
 	assert.Equal(t, expected, buf.String())
+}
+
+func TestRun_SkipPrerelease(t *testing.T) {
+	log := `(tag: 0.2.0) feat: 3
+fix: 2
+(tag: 0.2.0-pre.2) feat: 2
+(tag: 0.2.0-pre.1) fix: 1
+(tag: 0.1.0) feat: 1`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
+
+	cl := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+## 1.0.0 - 2021-09-17
+
+- %s feat: 1
+- %s %s
+`, hashes["first commit"], hashes[gittest.InitialCommit], gittest.InitialCommit)
+	os.WriteFile(MarkdownFile, []byte(cl), 0o644)
+
+	ctx := &context.Context{
+		Changelog: context.Changelog{
+			SkipPrerelease: true,
+		},
+		CurrentVersion: semver.Version{
+			Prerelease: "pre.2",
+			Raw:        "0.1.0-pre.2",
+		},
+		NextVersion: semver.Version{
+			Raw: "0.2.0",
+		},
+		SCM: context.SCM{
+			Provider: context.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+## 0.2.0 - %s
+
+- %s feat: 3
+- %s fix: 2
+- %s feat: 2
+- %s fix: 1
+
+## 1.0.0 - 2021-09-17
+
+- %s feat: 1
+- %s %s
+`, changelogDate(t), hashes["feat: 3"], hashes["fix: 2"], hashes["feat: 2"], hashes["fix: 1"],
+		hashes["feat: first feature"], hashes[gittest.InitialCommit], gittest.InitialCommit)
+
+	assert.Equal(t, expected, readChangelog(t))
+}
+
+func TestRun_SkipPrereleaseToHead(t *testing.T) {
+	log := `(tag: 0.1.0) feat: 3
+fix: 1
+(tag: 0.1.0-pre.2) feat: 2
+(tag: 0.1.0-pre.1) feat: 1`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
+
+	ctx := &context.Context{
+		Changelog: context.Changelog{
+			SkipPrerelease: true,
+		},
+		CurrentVersion: semver.Version{
+			Prerelease: "pre.2",
+			Raw:        "0.1.0-pre.2",
+		},
+		NextVersion: semver.Version{
+			Raw: "0.1.0",
+		},
+		SCM: context.SCM{
+			Provider: context.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+## 0.1.0 - %s
+
+- %s feat: 3
+- %s fix: 1
+- %s feat: 2
+- %s feat: 1
+- %s %s
+`, changelogDate(t), hashes["feat: 3"], hashes["fix: 1"], hashes["feat: 2"], hashes["feat: 1"],
+		hashes[gittest.InitialCommit], gittest.InitialCommit)
+
+	assert.Equal(t, expected, readChangelog(t))
+}
+
+func TestRun_AllSkipPrerelease(t *testing.T) {
+	log := `(tag: 0.2.0) feat: 4
+(tag: 0.2.0-pre.2) feat: 3
+(tag: 0.2.0-pre.1) fix: 2
+(tag: 0.1.0) feat: 2
+(tag: 0.1.0-pre.2) fix: 1
+(tag: 0.1.0-pre.1) feat: 1`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	hashes := hashLookup(t, gittest.Log(t))
+
+	ctx := &context.Context{
+		Changelog: context.Changelog{
+			All:            true,
+			SkipPrerelease: true,
+		},
+		SCM: context.SCM{
+			Provider: context.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+## 0.2.0 - %s
+
+- %s feat: 4
+- %s feat: 3
+- %s fix: 2
+
+## 0.1.0 - %s
+
+- %s feat: 2
+- %s fix: 1
+- %s feat: 1
+- %s %s
+`, changelogDate(t), hashes["feat: 4"], hashes["feat: 3"], hashes["fix: 2"], changelogDate(t),
+		hashes["feat: 2"], hashes["fix: 1"], hashes["feat: 1"], hashes[gittest.InitialCommit], gittest.InitialCommit)
+
+	assert.Equal(t, expected, readChangelog(t))
 }

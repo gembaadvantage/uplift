@@ -48,6 +48,9 @@ uplift changelog --no-stage
 
 # Generate a changelog with multiline commit messages
 uplift changelog --multiline
+
+# Generate a changelog with prerelease tags being skipped
+uplift changelog --skip-prerelease
 ```
 
 ## Flags
@@ -63,6 +66,8 @@ uplift changelog --multiline
                         for the changelog
     --multiline         include multiline commit messages within changelog
                         (skips truncation)
+    --skip-prerelease   skips the creation of a changelog entry for a
+                        prerelease
     --sort string       the sort order of commits within each changelog entry
 ```
 

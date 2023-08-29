@@ -83,16 +83,17 @@ uplift release --no-prefix`
 )
 
 type releaseOptions struct {
-	FetchTags     bool
-	Check         bool
-	Prerelease    string
-	SkipChangelog bool
-	SkipBumps     bool
-	NoPrefix      bool
-	Exclude       []string
-	Include       []string
-	Sort          string
-	Multiline     bool
+	FetchTags      bool
+	Check          bool
+	Prerelease     string
+	SkipChangelog  bool
+	SkipBumps      bool
+	NoPrefix       bool
+	Exclude        []string
+	Include        []string
+	Sort           string
+	Multiline      bool
+	SkipPrerelease bool
 	*globalOptions
 }
 
@@ -135,6 +136,7 @@ func newReleaseCmd(gopts *globalOptions, out io.Writer) *releaseCommand {
 	f.StringSliceVar(&relCmd.Opts.Include, "include", []string{}, "a list of regexes to cherry-pick conventional commits for the changelog")
 	f.StringVar(&relCmd.Opts.Sort, "sort", "", "the sort order of commits within each changelog entry")
 	f.BoolVar(&relCmd.Opts.Multiline, "multiline", false, "include multiline commit messages within changelog (skips truncation)")
+	f.BoolVar(&relCmd.Opts.SkipPrerelease, "skip-changelog-prerelease", false, "skips the creation of a changelog entry for a prerelease")
 
 	relCmd.Cmd = cmd
 	return relCmd
@@ -202,6 +204,10 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	if ctx.Config.Changelog != nil {
 		ctx.Changelog.Include = append(ctx.Changelog.Include, ctx.Config.Changelog.Include...)
 		ctx.Changelog.Exclude = append(ctx.Changelog.Exclude, ctx.Config.Changelog.Exclude...)
+	}
+	ctx.Changelog.SkipPrerelease = opts.SkipPrerelease
+	if !ctx.Changelog.SkipPrerelease && ctx.Config.Changelog != nil {
+		ctx.Changelog.SkipPrerelease = ctx.Config.Changelog.SkipPrerelease
 	}
 
 	// By default ensure the ci(uplift): commits are excluded also

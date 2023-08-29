@@ -160,6 +160,11 @@
           "$comment": "https://upliftci.dev/reference/config#changelog",
           "description": "Include multiline commit messages within the changelog. Disables default behaviour of truncating a commit message to its first line",
           "type": "boolean"
+        },
+        "skipPrerelease": {
+          "$comment": "https://upliftci.dev/reference/config#changelog",
+          "description": "Skips generating a changelog for any prerelease. All commits from a prerelease will be appended to the changelog entry for the next release",
+          "type": "boolean"
         }
       },
       "type": "object",
@@ -182,6 +187,11 @@
         },
         {
           "required": [
+            "multiline"
+          ]
+        },
+        {
+          "skipPrerelease": [
             "multiline"
           ]
         }

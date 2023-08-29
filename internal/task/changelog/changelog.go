@@ -35,6 +35,7 @@ import (
 
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
+	"github.com/gembaadvantage/uplift/internal/semver"
 	git "github.com/purpleclay/gitz"
 )
 
@@ -91,7 +92,15 @@ func (t Task) String() string {
 
 // Skip running the task if no changelog is needed
 func (t Task) Skip(ctx *context.Context) bool {
-	return ctx.NoVersionChanged || ctx.SkipChangelog
+	if ctx.NoVersionChanged || ctx.SkipChangelog {
+		return true
+	}
+
+	if ctx.Changelog.SkipPrerelease && ctx.NextVersion.Prerelease != "" {
+		return true
+	}
+
+	return false
 }
 
 // Run the task
@@ -193,8 +202,32 @@ func (t Task) Run(ctx *context.Context) error {
 }
 
 func changelogRelease(ctx *context.Context) ([]release, error) {
-	log.WithField("tag", ctx.NextVersion.Raw).Info("determine changes for release")
-	glog, err := ctx.GitClient.Log(git.WithRefRange(ctx.NextVersion.Raw, ctx.CurrentVersion.Raw))
+	next := ctx.NextVersion.Raw
+	prev := ctx.CurrentVersion.Raw
+
+	log.WithField("tag", next).Info("determine changes for release")
+	if ctx.Changelog.SkipPrerelease {
+		// Retrieve all tags and filter out any that are prerelease versions
+		tags, _ := ctx.GitClient.Tags(git.WithShellGlob("*.*.*"),
+			git.WithSortBy(git.CreatorDateDesc, git.VersionDesc),
+			git.WithFilters(func(tag string) bool {
+				ver, err := semver.Parse(tag)
+				if err != nil {
+					return false
+				}
+
+				return ver.Prerelease == ""
+			}),
+			git.WithCount(2))
+
+		if len(tags) == 1 {
+			prev = ""
+		} else {
+			prev = tags[1]
+		}
+	}
+
+	glog, err := ctx.GitClient.Log(git.WithRefRange(next, prev))
 	if err != nil {
 		return []release{}, err
 	}
@@ -218,14 +251,14 @@ func changelogRelease(ctx *context.Context) ([]release, error) {
 
 	if len(ents) == 0 {
 		log.WithFields(log.Fields{
-			"tag":  ctx.NextVersion.Raw,
-			"prev": ctx.CurrentVersion.Raw,
+			"tag":  next,
+			"prev": prev,
 		}).Info("no log entries between tags")
 		return []release{}, nil
 	}
 
 	log.WithFields(log.Fields{
-		"tag":     ctx.NextVersion.Raw,
+		"tag":     next,
 		"date":    time.Now().UTC().Format(ChangeDate),
 		"commits": len(ents),
 	}).Info("changeset identified")
@@ -267,7 +300,19 @@ func extractTagEntry(dets git.TagDetails) tagEntry {
 
 func changelogReleases(ctx *context.Context) ([]release, error) {
 	tags, err := ctx.GitClient.Tags(git.WithShellGlob("*.*.*"),
-		git.WithSortBy(git.CreatorDateDesc, git.VersionDesc))
+		git.WithSortBy(git.CreatorDateDesc, git.VersionDesc),
+		git.WithFilters(func(tag string) bool {
+			if !ctx.Changelog.SkipPrerelease {
+				return true
+			}
+
+			ver, err := semver.Parse(tag)
+			if err != nil {
+				return false
+			}
+
+			return ver.Prerelease == ""
+		}))
 	if err != nil {
 		return []release{}, nil
 	}

@@ -40,7 +40,7 @@ uplift changelog --diff-only
 
 ## Migrate an Existing Repository
 
-If your repository does not contain a `CHANGELOG.md` file, you can generate one that spans its entire history. A word of warning, this does require a tagging structure to be in place.
+If your repository does not contain a `CHANGELOG.md` file, you can generate one that spans its entire history. A tagging structure must be in place.
 
 ```sh
 uplift changelog --all
@@ -52,4 +52,12 @@ You can configure `uplift` to include multiline commit messages within your chan
 
 ```sh
 uplift changelog --multiline
+```
+
+## Skip Prereleases
+
+Prevent any prerelease from being included in your changelog. Upon your next release, `uplift` will include any previous prerelease commits.
+
+```sh
+uplift changelog --skip-prerelease
 ```

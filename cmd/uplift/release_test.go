@@ -289,3 +289,24 @@ this now includes code examples`
 	assert.Contains(t, cl, `docs: update documentation
   this now includes code examples`)
 }
+
+func TestRelease_SkipChangelogPrerelease(t *testing.T) {
+	log := `feat: exciting new feature
+(tag: 0.1.0-pre.2) fix: fix another bug
+(tag: 0.1.0-pre.1) fix: fix bug in existing feature
+(tag: 0.1.0) feat: this is a new feature`
+	gittest.InitRepository(t, gittest.WithLog(log))
+
+	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
+	relCmd.Cmd.SetArgs([]string{"--skip-changelog-prerelease"})
+
+	err := relCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+
+	cl := readChangelog(t)
+	assert.Contains(t, cl, "## 0.2.0")
+	assert.NotContains(t, cl, "## 0.1.0-pre.2")
+	assert.NotContains(t, cl, "## 0.1.0-pre.1")
+}
