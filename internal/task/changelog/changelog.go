@@ -313,7 +313,6 @@ func changelogReleases(ctx *context.Context) ([]release, error) {
 
 			return ver.Prerelease == ""
 		}))
-
 	if err != nil {
 		return []release{}, nil
 	}
