@@ -52,6 +52,7 @@ func (t Task) Run(ctx *context.Context) error {
 
 	log.Debug("checking if repository is dirty")
 	status, err := ctx.GitClient.PorcelainStatus()
+
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,23 @@ func (t Task) Run(ctx *context.Context) error {
 			out = append(out, s.String())
 		}
 
-		return ErrDirty{status: strings.Join(out, "\n")}
+		allowedFiles := ctx.Config.Git.DirtyFiles
+		if allowedFiles == nil {
+			return ErrDirty{status: strings.Join(out, "\n")}
+		}
+
+		if len(allowedFiles) == 0 {
+			return ErrDirty{status: strings.Join(out, "\n")}
+		}
+
+		for i := 0; i < len(status); i++ {
+			dirtyFilepath := status[i].Path
+			isFileInConfig := stringInSlice(dirtyFilepath, allowedFiles)
+
+			if !isFileInConfig {
+				return ErrDirty{status: strings.Join(out, "\n")}
+			}
+		}
 	}
 
 	log.Debug("checking for detached head")
@@ -85,4 +102,13 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	return nil
+}
+
+func stringInSlice(stringToFind string, listOfStrings []string) bool {
+	for _, value := range listOfStrings {
+		if value == stringToFind {
+			return true
+		}
+	}
+	return false
 }
