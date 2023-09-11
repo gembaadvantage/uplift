@@ -253,6 +253,14 @@ git:
     - option: ci.variable="MAX_RETRIES=10"
       skipTag: true
       skipBranch: false
+
+  # Defines a list of files that uplift will ignore when checking the 
+  # status of the current repository. If a change is detected that is 
+  # not defined in this list, uplift will assume its default behaviour 
+  # and fail due to the repository being in a dirty state
+  dirtyFiles:
+    - file.txt
+    - path/to/file.txt
 ```
 
 ## gitea

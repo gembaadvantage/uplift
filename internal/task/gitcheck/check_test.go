@@ -26,7 +26,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gembaadvantage/uplift/internal/config"
 	"github.com/gembaadvantage/uplift/internal/context"
 	"github.com/purpleclay/gitz/gittest"
 	"github.com/stretchr/testify/assert"
@@ -125,7 +124,7 @@ func TestRun_Dirty(t *testing.T) {
 
 	err := Task{}.Run(&context.Context{})
 	assert.EqualError(t, err, `uplift cannot reliably run if the repository is in a dirty state. Changes detected:
-?? testing.go
+[?? testing.go]
 
 Please check and resolve the status of these files before retrying. For further
 details visit: https://upliftci.dev/faq/gitdirty
@@ -136,11 +135,7 @@ func TestRun_DirtyWithConfiguredFiles(t *testing.T) {
 	gittest.InitRepository(t, gittest.WithFiles("testing.go"))
 
 	err := Task{}.Run(&context.Context{
-		Config: config.Uplift{
-			Git: &config.Git{
-				DirtyFiles: []string{"testing.go"},
-			},
-		},
+		DirtyFiles: []string{"testing.go"},
 	})
 	assert.NoError(t, err)
 }
