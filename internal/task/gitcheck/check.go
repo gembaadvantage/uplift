@@ -23,8 +23,6 @@ SOFTWARE.
 package gitcheck
 
 import (
-	"strings"
-
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 )
@@ -58,27 +56,14 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	if len(status) > 0 {
-		// Convert status into string friendly output
-		out := make([]string, 0, len(status))
-		for _, s := range status {
-			out = append(out, s.String())
+
+		if len(ctx.DirtyFiles) == 0 {
+			return ErrDirty{status}
 		}
 
-		allowedFiles := ctx.Config.Git.DirtyFiles
-		if allowedFiles == nil {
-			return ErrDirty{status: strings.Join(out, "\n")}
-		}
-
-		if len(allowedFiles) == 0 {
-			return ErrDirty{status: strings.Join(out, "\n")}
-		}
-
-		for i := 0; i < len(status); i++ {
-			dirtyFilepath := status[i].Path
-			isFileInConfig := stringInSlice(dirtyFilepath, allowedFiles)
-
-			if !isFileInConfig {
-				return ErrDirty{status: strings.Join(out, "\n")}
+		for _, sts := range status {
+			if !stringInSlice(sts.Path, ctx.DirtyFiles) {
+				return ErrDirty{status}
 			}
 		}
 	}
