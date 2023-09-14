@@ -57,12 +57,12 @@ func (t Task) Run(ctx *context.Context) error {
 
 	if len(status) > 0 {
 
-		if len(ctx.DirtyFiles) == 0 {
+		if len(ctx.IncludeArtifacts) == 0 {
 			return ErrDirty{status}
 		}
 
 		for _, sts := range status {
-			if !stringInSlice(sts.Path, ctx.DirtyFiles) {
+			if !stringInSlice(sts.Path, ctx.IncludeArtifacts) {
 				return ErrDirty{status}
 			}
 		}

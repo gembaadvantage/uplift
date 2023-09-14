@@ -38,7 +38,7 @@ type Context struct {
 	CommitDetails            git.CommitDetails
 	Config                   config.Uplift
 	CurrentVersion           semver.Version
-	DirtyFiles               []string
+	IncludeArtifacts         []string
 	DryRun                   bool
 	Debug                    bool
 	FetchTags                bool
@@ -108,15 +108,15 @@ func New(cfg config.Uplift, out io.Writer) *Context {
 		SCM: SCM{
 			Provider: Unrecognised,
 		},
-		DirtyFiles: DirtyFiles(cfg),
+		IncludeArtifacts: IncludeArtifacts(cfg),
 	}
 }
 
 // For nil safe object getting
-func DirtyFiles(c config.Uplift) []string {
+func IncludeArtifacts(c config.Uplift) []string {
 	if c.Git == nil {
 		return nil
 	}
 
-	return c.Git.DirtyFiles
+	return c.Git.IncludeArtifacts
 }

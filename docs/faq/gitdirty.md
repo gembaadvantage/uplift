@@ -22,3 +22,16 @@ Add or modify an existing `.gitignore` file to ignore the offending files listed
 
 - Ensure no tracked files are unexpectedly modified
 - Prevent the creation of temporary files. If this isn't possible, you can fall back to using a `.gitignore` file.
+
+### use includeArtifacts
+
+Defines a list of files that uplift will ignore when checking the status of the current repository. If a change is detected that is not defined in this list, uplift will assume its default behaviour and fail due to the repository being in a dirty state.
+
+An example usecase is if a file has been generated as part of your release e.g. software bill of materials which you wish to include in your versioning.
+
+```yaml
+Git:
+  includeArtifacts:
+    - file.txt
+    - path/to/file.txt
+```

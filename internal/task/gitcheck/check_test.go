@@ -131,11 +131,11 @@ details visit: https://upliftci.dev/faq/gitdirty
 `)
 }
 
-func TestRun_DirtyWithConfiguredFiles(t *testing.T) {
+func TestRun_IncludeArtifactsWithConfiguredFiles(t *testing.T) {
 	gittest.InitRepository(t, gittest.WithFiles("testing.go"))
 
 	err := Task{}.Run(&context.Context{
-		DirtyFiles: []string{"testing.go"},
+		IncludeArtifacts: []string{"testing.go"},
 	})
 	assert.NoError(t, err)
 }

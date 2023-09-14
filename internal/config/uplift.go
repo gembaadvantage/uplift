@@ -91,10 +91,10 @@ type Changelog struct {
 
 // Git defines configuration for how uplift interacts with git
 type Git struct {
-	IgnoreDetached bool            `yaml:"ignoreDetached"`
-	IgnoreShallow  bool            `yaml:"ignoreShallow"`
-	PushOptions    []GitPushOption `yaml:"pushOptions" validate:"dive"`
-	DirtyFiles     []string        `yaml:"dirtyFiles" validate:"omitempty,dive,min=1,file"`
+	IgnoreDetached   bool            `yaml:"ignoreDetached"`
+	IgnoreShallow    bool            `yaml:"ignoreShallow"`
+	PushOptions      []GitPushOption `yaml:"pushOptions" validate:"dive"`
+	IncludeArtifacts []string        `yaml:"includeArtifacts" validate:"omitempty,dive,min=1,file"`
 }
 
 // GitPushOption provides a way of supplying additional options to
