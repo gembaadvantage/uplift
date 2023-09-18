@@ -50,7 +50,6 @@ func (t Task) Run(ctx *context.Context) error {
 
 	log.Debug("checking if repository is dirty")
 	status, err := ctx.GitClient.PorcelainStatus()
-
 	if err != nil {
 		return err
 	}
