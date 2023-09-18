@@ -53,7 +53,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: GoReleaser Build APK
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v5
         with:
           version: latest
           args: release --rm-dist --snapshot --skip-docker --skip-sign --skip-sbom -p 5
