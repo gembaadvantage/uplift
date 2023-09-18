@@ -38,6 +38,7 @@ type Context struct {
 	CommitDetails            git.CommitDetails
 	Config                   config.Uplift
 	CurrentVersion           semver.Version
+	IncludeArtifacts         []string
 	DryRun                   bool
 	Debug                    bool
 	FetchTags                bool
@@ -107,5 +108,15 @@ func New(cfg config.Uplift, out io.Writer) *Context {
 		SCM: SCM{
 			Provider: Unrecognised,
 		},
+		IncludeArtifacts: IncludeArtifacts(cfg),
 	}
+}
+
+// For nil safe object getting
+func IncludeArtifacts(c config.Uplift) []string {
+	if c.Git == nil {
+		return nil
+	}
+
+	return c.Git.IncludeArtifacts
 }

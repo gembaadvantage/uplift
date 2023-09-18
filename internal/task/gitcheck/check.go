@@ -23,8 +23,6 @@ SOFTWARE.
 package gitcheck
 
 import (
-	"strings"
-
 	"github.com/apex/log"
 	"github.com/gembaadvantage/uplift/internal/context"
 )
@@ -57,13 +55,16 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	if len(status) > 0 {
-		// Convert status into string friendly output
-		out := make([]string, 0, len(status))
-		for _, s := range status {
-			out = append(out, s.String())
+
+		if len(ctx.IncludeArtifacts) == 0 {
+			return ErrDirty{status}
 		}
 
-		return ErrDirty{status: strings.Join(out, "\n")}
+		for _, sts := range status {
+			if !stringInSlice(sts.Path, ctx.IncludeArtifacts) {
+				return ErrDirty{status}
+			}
+		}
 	}
 
 	log.Debug("checking for detached head")
@@ -85,4 +86,13 @@ func (t Task) Run(ctx *context.Context) error {
 	}
 
 	return nil
+}
+
+func stringInSlice(stringToFind string, listOfStrings []string) bool {
+	for _, value := range listOfStrings {
+		if value == stringToFind {
+			return true
+		}
+	}
+	return false
 }

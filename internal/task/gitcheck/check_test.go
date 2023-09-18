@@ -124,9 +124,18 @@ func TestRun_Dirty(t *testing.T) {
 
 	err := Task{}.Run(&context.Context{})
 	assert.EqualError(t, err, `uplift cannot reliably run if the repository is in a dirty state. Changes detected:
-?? testing.go
+[?? testing.go]
 
 Please check and resolve the status of these files before retrying. For further
 details visit: https://upliftci.dev/faq/gitdirty
 `)
+}
+
+func TestRun_IncludeArtifactsWithConfiguredFiles(t *testing.T) {
+	gittest.InitRepository(t, gittest.WithFiles("testing.go"))
+
+	err := Task{}.Run(&context.Context{
+		IncludeArtifacts: []string{"testing.go"},
+	})
+	assert.NoError(t, err)
 }

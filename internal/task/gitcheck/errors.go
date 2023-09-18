@@ -25,11 +25,13 @@ package gitcheck
 import (
 	"errors"
 	"fmt"
+
+	git "github.com/purpleclay/gitz"
 )
 
 // ErrDirty is raised when a git repository has un-committed and/or un-staged changes
 type ErrDirty struct {
-	status string
+	status []git.FileStatus
 }
 
 // Error returns a formatted message of the current error
