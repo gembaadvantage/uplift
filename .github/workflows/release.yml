@@ -83,7 +83,7 @@ jobs:
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.GH_TWITTER_ACCESS_TOKEN_SECRET }}
 
       - name: Trivy Vulnerability Scan
-        uses: aquasecurity/trivy-action@0.11.2
+        uses: aquasecurity/trivy-action@0.12.0
         with:
           image-ref: ghcr.io/gembaadvantage/uplift:latest
           format: template
