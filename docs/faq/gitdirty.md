@@ -30,8 +30,7 @@ Defines a list of files that uplift will ignore when checking the status of the 
 An example usecase is if a file has been generated as part of your release e.g. software bill of materials which you wish to include in your versioning.
 
 ```yaml
-Git:
-  includeArtifacts:
-    - file.txt
-    - path/to/file.txt
+includeArtifacts:
+  - file.txt
+  - path/to/file.txt
 ```
