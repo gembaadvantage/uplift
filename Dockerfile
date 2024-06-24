@@ -1,10 +1,7 @@
 FROM alpine:3.20.1
 
-# Install tini to ensure docker waits for uplift to finish before terminating
-RUN apk add --no-cache \
-    git=2.40.1-r0 \
-    tini=0.19.0-r1 \
-    gnupg=2.4.3-r0
+# hadolint ignore=DL3018
+RUN apk add --no-cache git tini gnupg
 
 COPY uplift_*.apk /tmp/
 RUN apk add --no-cache --allow-untrusted /tmp/uplift_*.apk && \
