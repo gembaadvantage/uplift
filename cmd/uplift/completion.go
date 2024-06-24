@@ -87,7 +87,7 @@ func newCompletionCmd(out io.Writer) *cobra.Command {
 		Long:                  bashDesc,
 		Args:                  cobra.NoArgs,
 		DisableFlagsInUseLine: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			opts.shell = "bash"
 			return opts.Run(out, cmd)
 		},
@@ -98,7 +98,7 @@ func newCompletionCmd(out io.Writer) *cobra.Command {
 		Short: "generate a zsh shell completion script",
 		Long:  zshDesc,
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			opts.shell = "zsh"
 			return opts.Run(out, cmd)
 		},
@@ -110,7 +110,7 @@ func newCompletionCmd(out io.Writer) *cobra.Command {
 		Short: "generate a fish shell completion script",
 		Long:  fishDesc,
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			opts.shell = "fish"
 			return opts.Run(out, cmd)
 		},

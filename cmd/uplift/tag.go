@@ -136,7 +136,7 @@ func newTagCmd(gopts *globalOptions, out io.Writer) *tagCommand {
 		Long:    tagLongDesc,
 		Example: tagExamples,
 		Args:    cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			// If only the current tag is to be printed, skip running a pipeline
 			// and just retrieve and print the latest tag
 			if tagCmd.Opts.PrintCurrentTag && !tagCmd.Opts.PrintNextTag {

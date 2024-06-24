@@ -32,7 +32,7 @@ func newCheckCmd(gopts *globalOptions, _ io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "check",
 		Short: "Check if a configuration file is valid",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			cfg, err := loadConfig(gopts.ConfigDir)
 			if err != nil {
 				return err

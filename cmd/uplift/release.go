@@ -115,7 +115,7 @@ func newReleaseCmd(gopts *globalOptions, out io.Writer) *releaseCommand {
 		Long:    releaseLongDesc,
 		Example: releaseExamples,
 		Args:    cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			// Just check if uplift would trigger a release
 			if relCmd.Opts.Check {
 				return checkRelease(relCmd.Opts, out)
