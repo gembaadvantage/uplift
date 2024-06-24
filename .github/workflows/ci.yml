@@ -77,4 +77,4 @@ jobs:
 
       - name: Code Coverage
         if: matrix.os == 'ubuntu-latest'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
