@@ -40,7 +40,7 @@ func newVersionCmd(out io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "Prints the build time version information",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return opts.run(out)
 		},
 	}

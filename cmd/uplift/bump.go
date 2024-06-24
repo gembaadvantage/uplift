@@ -90,7 +90,7 @@ func newBumpCmd(gopts *globalOptions, out io.Writer) *bumpCommand {
 		Long:    bumpLongDesc,
 		Example: bumpExamples,
 		Args:    cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return bumpFiles(bmpCmd.Opts, out)
 		},
 	}

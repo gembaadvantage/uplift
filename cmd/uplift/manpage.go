@@ -44,7 +44,7 @@ func newManPageCmd(out io.Writer) *manPageCommand {
 		DisableFlagsInUseLine: true,
 		Hidden:                true,
 		Args:                  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			mp, err := mcobra.NewManPage(1, manCmd.Cmd.Root())
 			if err != nil {
 				return err

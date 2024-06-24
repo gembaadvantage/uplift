@@ -115,7 +115,7 @@ func newChangelogCmd(gopts *globalOptions, out io.Writer) *changelogCommand {
 		Long:    changelogLongDesc,
 		Example: changelogExamples,
 		Args:    cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			// Always lowercase sort
 			chglogCmd.Opts.Sort = strings.ToLower(chglogCmd.Opts.Sort)
 

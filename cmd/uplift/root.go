@@ -60,7 +60,7 @@ func newRootCmd(out io.Writer) *rootCommand {
 		Short:         "Semantic versioning the easy way",
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		PersistentPreRun: func(_ *cobra.Command, _ []string) {
 			if rootCmd.Opts.Debug {
 				log.SetLevel(log.InvalidLevel)
 			}
