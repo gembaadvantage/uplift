@@ -119,9 +119,9 @@ docker_signs:
     artifacts: manifests
     output: true
     args:
-    - 'sign'
-    - '${artifact}@${digest}'
-    - --yes
+      - "sign"
+      - "${artifact}@${digest}"
+      - --yes
 
 dockers:
   - image_templates:
@@ -182,7 +182,7 @@ brews:
     repository:
       owner: gembaadvantage
       name: homebrew-tap
-    folder: Formula
+    directory: Formula
     homepage: "https://upliftci.dev"
     description: "Semantic versioning the easy way. Powered by Conventional Commits. Built for use with CI"
     license: MIT
