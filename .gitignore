@@ -29,3 +29,6 @@ site/
 
 # VSCode
 .vscode/
+
+# Nix
+.direnv
