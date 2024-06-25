@@ -119,19 +119,6 @@ func ImportKey(key, passphrase, fingerprint string) (KeyDetails, error) {
 	return details, nil
 }
 
-// DeleteKey will attempt to deleted an imported GPG key
-func DeleteKey(fingerprint string) error {
-	if _, err := Run("--batch", "--yes", "--delete-secret-keys", fingerprint); err != nil {
-		return err
-	}
-
-	if _, err := Run("--batch", "--yes", "--delete-keys", fingerprint); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // Run executes a gpg command and returns its output or errors
 func Run(args ...string) (string, error) {
 	cmd := exec.Command("gpg", args...)

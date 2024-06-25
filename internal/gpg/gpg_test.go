@@ -23,7 +23,6 @@ SOFTWARE.
 package gpg
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -66,28 +65,4 @@ func TestImportKeyBase64(t *testing.T) {
 	assert.Equal(t, TestKeyID, details.ID)
 	assert.Equal(t, TestKeyUserName, details.UserName)
 	assert.Equal(t, TestKeyUserEmail, details.UserEmail)
-}
-
-func TestDeleteKey(t *testing.T) {
-	importKey(t)
-
-	err := DeleteKey(TestFingerprint)
-	require.NoError(t, err)
-
-	_, err = Clean(Run("--batch", "--list-secret-keys", TestFingerprint))
-	assert.EqualError(t, err, "gpg: error reading key: No secret key")
-}
-
-func importKey(t *testing.T) {
-	t.Helper()
-
-	dir := t.TempDir()
-	fi, err := os.CreateTemp(dir, "key.asc")
-	require.NoError(t, err)
-
-	err = os.WriteFile(fi.Name(), []byte(TestKey), 0o600)
-	require.NoError(t, err)
-
-	_, err = Run("--batch", "--import", "--yes", fi.Name())
-	require.NoError(t, err)
 }
