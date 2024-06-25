@@ -52,6 +52,8 @@ uplift release --no-prefix
                                   commits for the changelog
     --multiline                   include multiline commit messages within
                                   changelog (skips truncation)
+    --trim-header                 trims any lines preceding the conventional commit type
+                                  in the commit message
     --no-prefix                   strip the default 'v' prefix from the next
                                   calculated semantic version
     --prerelease string           append a prerelease suffix to next calculated

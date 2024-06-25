@@ -138,3 +138,16 @@ refactor: tidy up some bits of the code`,
 	inc := ParseLog(log)
 	assert.Equal(t, PatchIncrement, inc)
 }
+
+func TestParseLog_TrimHeader(t *testing.T) {
+	log := []git.LogEntry{
+		{
+			Message: `this line that should be ignored
+this line that should also be ignored
+feat: shiny new feature has been added`,
+		},
+	}
+
+	inc := ParseLogWithOptions(log, ParseOptions{TrimHeader: true})
+	assert.Equal(t, MinorIncrement, inc)
+}

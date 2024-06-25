@@ -92,6 +92,7 @@ type Changelog struct {
 	PreTag         bool
 	Multiline      bool
 	SkipPrerelease bool
+	TrimHeader     bool
 }
 
 // New constructs a context that captures both runtime configuration and

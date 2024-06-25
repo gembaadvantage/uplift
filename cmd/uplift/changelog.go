@@ -82,6 +82,9 @@ uplift changelog --no-stage
 # Generate a changelog with multiline commit messages
 uplift changelog --multiline
 
+# Generate a changelog trimming any lines preceding the conventional commit type
+uplift changelog --trim-header
+
 # Generate a changelog with prerelease tags being skipped
 uplift changelog --skip-prerelease`
 )
@@ -94,6 +97,7 @@ type changelogOptions struct {
 	Sort           string
 	Multiline      bool
 	SkipPrerelease bool
+	TrimHeader     bool
 	*globalOptions
 }
 
@@ -136,6 +140,7 @@ func newChangelogCmd(gopts *globalOptions, out io.Writer) *changelogCommand {
 	f.StringVar(&chglogCmd.Opts.Sort, "sort", "", "the sort order of commits within each changelog entry")
 	f.BoolVar(&chglogCmd.Opts.Multiline, "multiline", false, "include multiline commit messages within changelog (skips truncation)")
 	f.BoolVar(&chglogCmd.Opts.SkipPrerelease, "skip-prerelease", false, "skips the creation of a changelog entry for a prerelease")
+	f.BoolVar(&chglogCmd.Opts.TrimHeader, "trim-header", false, "strip any lines preceding the conventional commit type in the commit message")
 
 	chglogCmd.Cmd = cmd
 	return chglogCmd
@@ -202,6 +207,11 @@ func setupChangelogContext(opts changelogOptions, out io.Writer) (*context.Conte
 	ctx.Changelog.SkipPrerelease = opts.SkipPrerelease
 	if !ctx.Changelog.SkipPrerelease && ctx.Config.Changelog != nil {
 		ctx.Changelog.SkipPrerelease = ctx.Config.Changelog.SkipPrerelease
+	}
+
+	ctx.Changelog.TrimHeader = opts.TrimHeader
+	if !ctx.Changelog.TrimHeader && ctx.Config.Changelog != nil {
+		ctx.Changelog.TrimHeader = ctx.Config.Changelog.TrimHeader
 	}
 
 	// Sort order provided as a command-line flag takes precedence

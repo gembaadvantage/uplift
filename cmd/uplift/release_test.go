@@ -310,3 +310,25 @@ func TestRelease_SkipChangelogPrerelease(t *testing.T) {
 	assert.NotContains(t, cl, "## 0.1.0-pre.2")
 	assert.NotContains(t, cl, "## 0.1.0-pre.1")
 }
+
+func TestRelease_TrimHeader(t *testing.T) {
+	log := `> feat: this is a commit
+>this line that should be ignored
+this line that should also be ignored
+feat: second commit`
+	gittest.InitRepository(t, gittest.WithLog(log))
+
+	relCmd := newReleaseCmd(noChangesPushed(), os.Stdout)
+	relCmd.Cmd.SetArgs([]string{"--trim-header"})
+
+	err := relCmd.Cmd.Execute()
+	require.NoError(t, err)
+
+	assert.True(t, changelogExists(t))
+
+	cl := readChangelog(t)
+	assert.Contains(t, cl, `feat: this is a commit`)
+	assert.Contains(t, cl, "feat: second commit")
+	assert.NotContains(t, cl, "this line that should be ignored")
+	assert.NotContains(t, cl, "this line that should also be ignored")
+}

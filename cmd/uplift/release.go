@@ -94,6 +94,7 @@ type releaseOptions struct {
 	Sort           string
 	Multiline      bool
 	SkipPrerelease bool
+	TrimHeader     bool
 	*globalOptions
 }
 
@@ -137,6 +138,7 @@ func newReleaseCmd(gopts *globalOptions, out io.Writer) *releaseCommand {
 	f.StringVar(&relCmd.Opts.Sort, "sort", "", "the sort order of commits within each changelog entry")
 	f.BoolVar(&relCmd.Opts.Multiline, "multiline", false, "include multiline commit messages within changelog (skips truncation)")
 	f.BoolVar(&relCmd.Opts.SkipPrerelease, "skip-changelog-prerelease", false, "skips the creation of a changelog entry for a prerelease")
+	f.BoolVar(&relCmd.Opts.TrimHeader, "trim-header", false, "strip any lines preceding the conventional commit type in the commit message")
 
 	relCmd.Cmd = cmd
 	return relCmd
@@ -208,6 +210,10 @@ func setupReleaseContext(opts releaseOptions, out io.Writer) (*context.Context, 
 	ctx.Changelog.SkipPrerelease = opts.SkipPrerelease
 	if !ctx.Changelog.SkipPrerelease && ctx.Config.Changelog != nil {
 		ctx.Changelog.SkipPrerelease = ctx.Config.Changelog.SkipPrerelease
+	}
+	ctx.Changelog.TrimHeader = opts.TrimHeader
+	if !ctx.Changelog.TrimHeader && ctx.Config.Changelog != nil {
+		ctx.Changelog.TrimHeader = ctx.Config.Changelog.TrimHeader
 	}
 
 	// By default ensure the ci(uplift): commits are excluded also
