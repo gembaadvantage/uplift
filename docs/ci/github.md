@@ -19,10 +19,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # (1)
+
       # Additional steps specified here
+
       - name: Release
         if: github.ref == 'refs/heads/main'
-        uses: gembaadvantage/uplift-action@v2.0.1
+        uses: gembaadvantage/uplift-action@v2
         with:
           args: release
         env:
@@ -53,10 +55,13 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          token: ${{ secrets.GH_UPLIFT }}
+
       # Additional steps specified here
+
       - name: Release
         if: github.ref == 'refs/heads/main'
-        uses: gembaadvantage/uplift-action@v2.0.1
+        uses: gembaadvantage/uplift-action@v2
         with:
           args: release
         env:

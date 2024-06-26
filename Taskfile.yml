@@ -54,3 +54,8 @@ tasks:
     desc: Delete all artefacts from recent build
     cmds:
       - rm -f ./{{.BINNAME}}
+
+  docs:
+    desc: Builds and hosts the MkDocs documentation
+    cmds:
+      - docker run --rm -it -p 8000:8000 -v $PWD:/docs squidfunk/mkdocs-material

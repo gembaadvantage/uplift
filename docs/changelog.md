@@ -67,5 +67,5 @@ uplift changelog --skip-prerelease
 Trims any lines preceding the conventional commit type in the commit message
 
 ```sh
-uplift changelog --skip-prerelease
+uplift changelog --trim-header
 ```
