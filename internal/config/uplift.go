@@ -87,6 +87,7 @@ type Changelog struct {
 	Include        []string `yaml:"include" validate:"required_without_all=Sort Exclude,dive,min=1"`
 	Multiline      bool     `yaml:"multiline"`
 	SkipPrerelease bool     `yaml:"skipPrerelease"`
+	TrimHeader     bool     `yaml:"trimHeader"`
 }
 
 // Git defines configuration for how uplift interacts with git

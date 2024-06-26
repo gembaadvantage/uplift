@@ -61,3 +61,11 @@ Prevent any prerelease from being included in your changelog. Upon your next rel
 ```sh
 uplift changelog --skip-prerelease
 ```
+
+## Trim Header
+
+Trims any lines preceding the conventional commit type in the commit message
+
+```sh
+uplift changelog --skip-prerelease
+```

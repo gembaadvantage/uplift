@@ -154,6 +154,10 @@ func (t Task) Run(ctx *context.Context) error {
 		for i := range rels {
 			for j := range rels[i].Changes {
 				msg := rels[i].Changes[j].Message
+				if ctx.Changelog.TrimHeader {
+					startIdx := semver.FindStartIdx(msg)
+					msg = msg[startIdx:]
+				}
 				msg = strings.ReplaceAll(msg, "\n", "\n  ")
 				msg = strings.ReplaceAll(msg, "\n  \n", "\n\n")
 
@@ -165,8 +169,13 @@ func (t Task) Run(ctx *context.Context) error {
 		for i := range rels {
 			for j := range rels[i].Changes {
 				msg := rels[i].Changes[j].Message
+				if ctx.Changelog.TrimHeader {
+					startIdx := semver.FindStartIdx(msg)
+					msg = msg[startIdx:]
+					rels[i].Changes[j].Message = msg
+				}
 				if idx := strings.Index(msg, "\n"); idx > -1 {
-					rels[i].Changes[j].Message = strings.TrimSpace(msg[:idx])
+					rels[i].Changes[j].Message = strings.TrimSpace(msg)
 				}
 			}
 		}

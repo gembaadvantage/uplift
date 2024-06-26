@@ -736,7 +736,7 @@ ci: tweak
 }
 
 func TestRun_MultilineMessages(t *testing.T) {
-	log := `> (tag: 1.1.0) feat: this is a multiline commmit
+	log := `> (tag: 1.1.0) feat: this is a multiline commit
 
 That should be displayed across multiple lines within the changelog.
 It should be formatted as expected.
@@ -770,7 +770,7 @@ With the correct indentation for rendering in markdown
 
 	expected := fmt.Sprintf(`## 1.1.0 - %s
 
-- %s feat: this is a multiline commmit
+- %s feat: this is a multiline commit
 
   That should be displayed across multiple lines within the changelog.
   It should be formatted as expected.
@@ -945,4 +945,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 		hashes["feat: 2"], hashes["fix: 1"], hashes["feat: 1"], hashes[gittest.InitialCommit], gittest.InitialCommit)
 
 	assert.Equal(t, expected, readChangelog(t))
+}
+
+func TestRun_TrimHeader(t *testing.T) {
+	log := `> (tag: 1.1.0) feat: this is a commit
+>this line that should be ignored
+this line that should also be ignored
+feat: second commit
+> (tag: 1.0.0) not included in changelog`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	glog := gittest.Log(t)
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		Out: &buf,
+		Changelog: context.Changelog{
+			TrimHeader: true,
+			DiffOnly:   true,
+		},
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextVersion: semver.Version{
+			Raw: "1.1.0",
+		},
+		SCM: context.SCM{
+			Provider: context.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`## 1.1.0 - %s
+
+- %s feat: this is a commit
+- %s feat: second commit
+`, changelogDate(t), fmt.Sprintf("`%s`", glog[0].AbbrevHash), fmt.Sprintf("`%s`", glog[1].AbbrevHash))
+
+	assert.Equal(t, expected, buf.String())
 }

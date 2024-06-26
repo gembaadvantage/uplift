@@ -32,6 +32,10 @@ import (
 // against a semantic version
 type Increment string
 
+type ParseOptions struct {
+	TrimHeader bool
+}
+
 const (
 	// NoIncrement represents no increment change to a semantic version
 	NoIncrement Increment = "None"
@@ -56,16 +60,26 @@ const (
 // log against the conventional commit standards defined, @see:
 // https://www.conventionalcommits.org/en/v1.0.0/
 func ParseLog(log []git.LogEntry) Increment {
+	return ParseLogWithOptions(log, ParseOptions{TrimHeader: false})
+}
+
+func ParseLogWithOptions(log []git.LogEntry, options ParseOptions) Increment {
 	mode := NoIncrement
 	for _, entry := range log {
 		// Check for the existence of a conventional commit type
-		idx := strings.Index(entry.Message, colonSpace)
-		if idx == -1 {
+		colonSpaceIdx := strings.Index(entry.Message, colonSpace)
+		if colonSpaceIdx == -1 {
 			continue
 		}
 
-		leadingType := strings.ToUpper(entry.Message[:idx])
-		if leadingType[idx-1] == breakingBang || multilineBreaking(entry.Message) {
+		startIdx := 0
+		// Commit messages may have leading lines before the conventional commit type
+		if options.TrimHeader {
+			startIdx = FindStartIdx(entry.Message)
+		}
+
+		leadingType := strings.ToUpper(entry.Message[startIdx:colonSpaceIdx])
+		if leadingType[len(leadingType)-1] == breakingBang || multilineBreaking(entry.Message) {
 			return MajorIncrement
 		}
 
@@ -121,4 +135,19 @@ func multilineBreaking(msg string) bool {
 	footer := msg[idx+1:]
 	return strings.HasPrefix(footer, "BREAKING CHANGE: ") ||
 		strings.HasPrefix(footer, "BREAKING-CHANGE: ")
+}
+
+func FindStartIdx(msg string) int {
+	colonIdx := strings.Index(msg, colonSpace)
+	if colonIdx == -1 {
+		return 0
+	}
+
+	trimmedMsg := msg[:colonIdx]
+	leadingLineBreakIdx := strings.LastIndex(trimmedMsg, "\n")
+	if leadingLineBreakIdx == -1 {
+		return 0
+	}
+
+	return leadingLineBreakIdx + 1
 }
