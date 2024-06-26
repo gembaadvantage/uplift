@@ -6,7 +6,7 @@ Please note we operate by a strict [code of conduct](https://github.com/gembaadv
 
 ## Getting Started
 
-`uplift` is written using [Go 1.19+](https://go.dev/doc/install) and should be installed along with [go-task](https://taskfile.dev/#/installation), as it is preferred over using make.
+`uplift` is written using [Go 1.21+](https://go.dev/doc/install) and should be installed along with [go-task](https://taskfile.dev/#/installation), as it is preferred over using make.
 
 Then clone `uplift`:
 
