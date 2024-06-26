@@ -201,7 +201,7 @@
           ]
         },
         {
-          "skipPrerelease": [
+          "required": [
             "skipPrerelease"
           ]
         }
