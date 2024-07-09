@@ -153,7 +153,7 @@ func (t Task) Run(ctx *context.Context) error {
 					rels[i].Changes[j].Message = msg
 				}
 				if idx := strings.Index(msg, "\n"); idx > -1 {
-					rels[i].Changes[j].Message = strings.TrimSpace(msg)
+					rels[i].Changes[j].Message = strings.TrimSpace(msg[:idx])
 				}
 			}
 		}
