@@ -713,6 +713,48 @@ ci: tweak
 	assert.NotContains(t, actual, "fix(scope1): a fix")
 }
 
+func TestRun_SinglelineMessages(t *testing.T) {
+	log := `> (tag: 1.1.0) feat: this is a multiline commit
+
+Where these lines should be trimmed
+and not be present
+
+in the changelog.
+
+> feat: this is a single line commit that remains unchanged
+> (tag: 1.0.0) not included in changelog`
+	gittest.InitRepository(t, gittest.WithLog(log))
+	glog := gittest.Log(t)
+
+	var buf bytes.Buffer
+	ctx := &context.Context{
+		Out: &buf,
+		Changelog: context.Changelog{
+			DiffOnly: true,
+		},
+		CurrentVersion: semver.Version{
+			Raw: "1.0.0",
+		},
+		NextVersion: semver.Version{
+			Raw: "1.1.0",
+		},
+		SCM: context.SCM{
+			Provider: context.Unrecognised,
+		},
+	}
+
+	err := Task{}.Run(ctx)
+	require.NoError(t, err)
+
+	expected := fmt.Sprintf(`## 1.1.0 - %s
+
+- %s feat: this is a multiline commit
+- %s feat: this is a single line commit that remains unchanged
+`, changelogDate(t), fmt.Sprintf("`%s`", glog[0].AbbrevHash), fmt.Sprintf("`%s`", glog[1].AbbrevHash))
+
+	assert.Equal(t, expected, buf.String())
+}
+
 func TestRun_MultilineMessages(t *testing.T) {
 	log := `> (tag: 1.1.0) feat: this is a multiline commit
 
