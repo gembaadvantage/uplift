@@ -1,6 +1,6 @@
 module github.com/gembaadvantage/uplift
 
-go 1.22.3
+go 1.22.5
 
 require (
 	github.com/Masterminds/semver v1.5.0

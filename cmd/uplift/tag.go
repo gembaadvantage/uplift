@@ -127,7 +127,7 @@ func newTagCmd(gopts *globalOptions, out io.Writer) *tagCommand {
 					git.WithSortBy(git.CreatorDateDesc, git.VersionDesc),
 					git.WithCount(1))
 				if len(tags) == 1 {
-					fmt.Fprintf(out, tags[0])
+					fmt.Fprint(out, tags[0])
 				}
 				return nil
 			}
