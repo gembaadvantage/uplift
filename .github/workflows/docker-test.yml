@@ -61,7 +61,7 @@ jobs:
       - run: docker run ${{ env.BUILD_TAG }}
 
       - name: Trivy Vulnerability Scan
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.25.0
         with:
           image-ref: ${{ env.BUILD_TAG }}
           format: table
