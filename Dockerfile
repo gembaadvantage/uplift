@@ -1,4 +1,4 @@
-FROM alpine:3.20.2
+FROM alpine:3.21.0
 
 # hadolint ignore=DL3018
 RUN apk add --no-cache git tini gnupg
