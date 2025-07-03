@@ -120,7 +120,7 @@ func RunAgent(args ...string) (string, error) {
 // Clean the output
 func Clean(output string, err error) (string, error) {
 	// Preserve multi-line output, but trim the trailing newline
-	output = strings.TrimSuffix(strings.Replace(output, "'", "", -1), "\n")
+	output = strings.TrimSuffix(strings.ReplaceAll(output, "'", ""), "\n")
 	if err != nil {
 		err = errors.New(strings.TrimSuffix(err.Error(), "\n"))
 	}

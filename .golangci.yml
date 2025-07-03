@@ -1,13 +1,17 @@
+version: "2"
+
 run:
   timeout: 2m
 
-linters:
-  disable-all: true
+formatters:
   enable:
-    - dupl
     - gofumpt
     - goimports
-    - gosimple
+
+linters:
+  default: none
+  enable:
+    - dupl
     - govet
     - ineffassign
     - misspell
@@ -16,6 +20,10 @@ linters:
     - staticcheck
     - unused
 
-linters-settings:
-  dupl:
-    threshold: 400
+  settings:
+    dupl:
+      threshold: 400
+    revive:
+      rules:
+        - name: package-comments
+          disabled: true
