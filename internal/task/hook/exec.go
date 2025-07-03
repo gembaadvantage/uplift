@@ -103,7 +103,7 @@ func resolveEnv(env []string) ([]string, error) {
 				// that parsing an env file without a key e.g. '=VALUE' no longer returns
 				// an error. Ensure this behaviour persists within uplift
 				if k == "" {
-					return []string{}, errors.New("Can't separate key from value")
+					return []string{}, errors.New("can't separate key from value")
 				}
 
 				denv := fmt.Sprintf("%s=%s", k, v)
