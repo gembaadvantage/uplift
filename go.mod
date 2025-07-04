@@ -13,7 +13,7 @@ require (
 	github.com/muesli/roff v0.1.0
 	github.com/purpleclay/gitz v0.9.0
 	github.com/spf13/cobra v1.8.1
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.17.3
 	github.com/tidwall/sjson v1.2.5
 	gopkg.in/yaml.v3 v3.0.1
