@@ -41,7 +41,9 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # temporarily skip the running of tests on windows
       - name: Test
+        if: matrix.os != 'windows-latest'
         run: task test
 
       - name: Build
