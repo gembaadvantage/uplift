@@ -106,6 +106,8 @@ github.com/purpleclay/gitz v0.11.1 h1:VHxl1D2Ea2PqRUclUmCcCx4+T8T19F6JnoD/J91QlP
 github.com/purpleclay/gitz v0.11.1/go.mod h1:oS5VLpAgktOGhg21oey6VXR4WJNqF4kt4e65yduSB+k=
 github.com/purpleclay/gitz v0.11.2-0.20250711052622-f4019735e0d5 h1:/tQXqPv/VnLH47KxCENd5L2UXBRlUvMukpdwih99Jr8=
 github.com/purpleclay/gitz v0.11.2-0.20250711052622-f4019735e0d5/go.mod h1:oS5VLpAgktOGhg21oey6VXR4WJNqF4kt4e65yduSB+k=
+github.com/purpleclay/gitz v0.11.2-0.20250712052602-7b040dde8feb h1:xXrj6Hi2jShchNtbVc3gYBvFlBF3gW+uMKC/sFGPHYQ=
+github.com/purpleclay/gitz v0.11.2-0.20250712052602-7b040dde8feb/go.mod h1:oS5VLpAgktOGhg21oey6VXR4WJNqF4kt4e65yduSB+k=
 github.com/rogpeppe/fastuuid v1.1.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
