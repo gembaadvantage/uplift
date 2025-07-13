@@ -1,6 +1,6 @@
 # Configure GitLab pipelines with Push Options
 
-Since Git version `2.10`, a client could send arbitrary strings to a server (_remote_) using [push options](https://git-scm.com/docs/git-push#Documentation/git-push.txt--oltoptiongt) (`--push-option`). GitLab has utilized [push options](https://docs.gitlab.com/ee/user/project/push_options.html) to configure pipeline behavior since version `11.7`. This type of configuration opens up many possibilities for configuring your CI/CD workflow through uplift.
+Since Git version `2.10`, a client could send arbitrary strings to a server (_remote_) using [push options](https://git-scm.com/docs/git-push#Documentation/git-push.txt---push-optionoption) (`--push-option`). GitLab has utilized [push options](https://docs.gitlab.com/ee/user/project/push_options.html) to configure pipeline behavior since version `11.7`. This type of configuration opens up many possibilities for configuring your CI/CD workflow through uplift.
 
 ## Skip Rebuilding Main Branch
 

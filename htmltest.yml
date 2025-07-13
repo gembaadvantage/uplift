@@ -2,6 +2,7 @@ IgnoreURLs:
   - fonts.gstatic.com
   - https://twitter.com/GA_Uplift
   - https://docs.github.com
+  - https://git-scm.com/docs
 IgnoreDirectoryMissingTrailingSlash: true
 IgnoreAltMissing: true
 IgnoreInternalEmptyHash: true
